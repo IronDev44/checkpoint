@@ -17137,6 +17137,427 @@ body[data-theme="theme-steamdeck"] {
   }
 }
 
+/* Premium splash pass: cleaner console-boot mood, fewer noisy layers. */
+.checkpoint-splash {
+  isolation: isolate !important;
+  overflow: hidden !important;
+  background:
+    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--checkpoint-splash-primary), transparent 82%), transparent 28%),
+    radial-gradient(circle at 18% 64%, color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 88%), transparent 24%),
+    radial-gradient(circle at 82% 64%, color-mix(in srgb, var(--checkpoint-splash-primary), transparent 88%), transparent 26%),
+    linear-gradient(180deg, #03040c 0%, #101733 48%, #050714 100%) !important;
+}
+
+.checkpoint-splash * {
+  letter-spacing: 0 !important;
+}
+
+.checkpoint-splash .splash-bg {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 34%),
+    radial-gradient(ellipse at 50% 68%, color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 86%), transparent 38%),
+    linear-gradient(90deg, color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 92%), transparent 42%, transparent 58%, color-mix(in srgb, var(--checkpoint-splash-primary), transparent 92%)) !important;
+  opacity: 1 !important;
+}
+
+.checkpoint-splash::before {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 58%), transparent 36%, transparent 64%, color-mix(in srgb, var(--checkpoint-splash-primary), transparent 58%)),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 74px) !important;
+  opacity: 0.22 !important;
+  transform: perspective(900px) rotateX(68deg) translateY(22vh) scaleX(1.25) !important;
+  transform-origin: 50% 100% !important;
+}
+
+.checkpoint-splash::after,
+.checkpoint-splash .splash-orb,
+.checkpoint-splash .splash-scanline,
+.checkpoint-splash .splash-title-reflect {
+  display: none !important;
+}
+
+.checkpoint-splash .splash-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px) !important;
+  background-size: 74px 74px !important;
+  opacity: 0.16 !important;
+  transform: perspective(840px) rotateX(66deg) translateY(25vh) scale(1.18) !important;
+  animation: checkpointGridBreathe 7s ease-in-out infinite !important;
+}
+
+.checkpoint-splash .splash-neon-horizon {
+  height: 2px !important;
+  bottom: 27vh !important;
+  background: linear-gradient(90deg, transparent, var(--checkpoint-splash-secondary), rgba(255, 255, 255, 0.9), var(--checkpoint-splash-primary), transparent) !important;
+  box-shadow:
+    0 0 28px color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 36%),
+    0 0 54px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 38%) !important;
+  opacity: 0.78 !important;
+}
+
+.checkpoint-splash .splash-neon-horizon::before,
+.checkpoint-splash .splash-neon-horizon::after {
+  opacity: 0.5 !important;
+}
+
+.checkpoint-splash .splash-floor-reflection {
+  bottom: -14vh !important;
+  height: 42vh !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(255, 255, 255, 0.18), transparent 32%),
+    linear-gradient(90deg, color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 76%), transparent 46%, color-mix(in srgb, var(--checkpoint-splash-primary), transparent 76%)),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.04) 0 1px, transparent 1px 18px) !important;
+  filter: blur(0.5px) !important;
+  opacity: 0.34 !important;
+}
+
+.checkpoint-splash .splash-vignette {
+  background:
+    radial-gradient(circle at 50% 48%, transparent 0 42%, rgba(2, 4, 12, 0.42) 68%, rgba(0, 0, 0, 0.78) 100%) !important;
+  opacity: 1 !important;
+}
+
+.checkpoint-splash .splash-particles-premium span {
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.84) !important;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 24%) !important;
+  animation: checkpointDustFloat 6s ease-in-out infinite !important;
+}
+
+.checkpoint-splash .splash-pixel-wall span {
+  border-radius: 2px !important;
+  transform: rotate(45deg) !important;
+  animation: checkpointPixelDrift 6.2s cubic-bezier(0.2, 0.72, 0.18, 1) infinite alternate !important;
+}
+
+.checkpoint-splash .splash-pixel-wall-left span {
+  background: color-mix(in srgb, var(--checkpoint-splash-secondary), white 8%) !important;
+  box-shadow:
+    0 0 10px color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 26%),
+    0 0 22px color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 56%) !important;
+}
+
+.checkpoint-splash .splash-pixel-wall-right span {
+  background: color-mix(in srgb, var(--checkpoint-splash-primary), white 8%) !important;
+  box-shadow:
+    0 0 10px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 26%),
+    0 0 22px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 56%) !important;
+}
+
+.checkpoint-splash .splash-stage {
+  gap: 14px !important;
+  animation: checkpointStageReveal 950ms cubic-bezier(0.19, 1, 0.22, 1) both !important;
+}
+
+.checkpoint-splash .splash-cube-wrap {
+  width: clamp(106px, 15vw, 150px) !important;
+  height: clamp(106px, 15vw, 150px) !important;
+  perspective: none !important;
+  animation: checkpointLogoBreath 4.2s ease-in-out infinite !important;
+}
+
+.checkpoint-splash .splash-cube {
+  width: 100% !important;
+  height: 100% !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.checkpoint-splash .splash-cube::before {
+  inset: 6% !important;
+  border-radius: 34% !important;
+  background:
+    radial-gradient(circle at 50% 45%, color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 54%), transparent 56%),
+    radial-gradient(circle, color-mix(in srgb, var(--checkpoint-splash-primary), transparent 70%), transparent 72%) !important;
+  filter: blur(14px) !important;
+  opacity: 0.62 !important;
+}
+
+.checkpoint-splash .splash-cube::after {
+  inset: auto 19% 16% 19% !important;
+  height: 1px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.72), transparent) !important;
+  opacity: 0.54 !important;
+  animation: checkpointLogoLine 2.8s ease-in-out infinite !important;
+}
+
+.checkpoint-splash .splash-logo-mark {
+  width: 100% !important;
+  height: 100% !important;
+  gap: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  transform: none !important;
+  filter:
+    drop-shadow(0 18px 24px rgba(0, 0, 0, 0.44))
+    drop-shadow(0 0 22px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 42%)) !important;
+}
+
+.checkpoint-splash .splash-logo-text {
+  display: none !important;
+}
+
+.checkpoint-splash .splash-logo-letter,
+.checkpoint-splash .splash-logo-divider {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-family: var(--checkpoint-brand-font) !important;
+  font-size: clamp(4.7rem, 8vw, 7.3rem) !important;
+  font-weight: 950 !important;
+  line-height: 0.78 !important;
+  background: var(--checkpoint-title-gradient) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+}
+
+.checkpoint-splash .splash-logo-letter:first-child {
+  transform: translateX(0.08em) !important;
+  animation: checkpointLetterC 3.4s ease-in-out infinite !important;
+}
+
+.checkpoint-splash .splash-logo-letter:last-child {
+  transform: translateX(-0.08em) !important;
+}
+
+.checkpoint-splash .splash-logo-divider {
+  width: 1px !important;
+  height: clamp(42px, 5vw, 62px) !important;
+  margin: 0 0.11em !important;
+  transform: translateY(0) !important;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.82), transparent) !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+  opacity: 0.58 !important;
+}
+
+.checkpoint-splash .splash-title-wrap {
+  margin-top: 4px !important;
+}
+
+.checkpoint-splash .splash-title {
+  font-family: var(--checkpoint-brand-font) !important;
+  font-size: clamp(3rem, 8vw, 6.9rem) !important;
+  font-weight: 950 !important;
+  line-height: 0.9 !important;
+  background: var(--checkpoint-title-gradient) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  text-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.42),
+    0 0 22px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 54%) !important;
+  animation: checkpointTitleSettle 3.8s ease-in-out infinite !important;
+}
+
+.checkpoint-splash .splash-subtitle {
+  margin-top: 4px !important;
+  color: rgba(255, 255, 255, 0.78) !important;
+  font-size: clamp(0.92rem, 2vw, 1.12rem) !important;
+  font-weight: 800 !important;
+  text-transform: none !important;
+  text-shadow: 0 0 16px color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 48%) !important;
+}
+
+.checkpoint-splash .splash-loader {
+  width: min(440px, calc(100vw - 54px)) !important;
+  margin-top: clamp(28px, 6vh, 56px) !important;
+  gap: 9px !important;
+}
+
+.checkpoint-splash .splash-loading-label,
+.checkpoint-splash .splash-loader-top strong {
+  display: block !important;
+  width: 100% !important;
+  text-align: center !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  font-size: 0.92rem !important;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 52%) !important;
+}
+
+.checkpoint-splash .splash-loader-top {
+  justify-content: center !important;
+  order: 3 !important;
+}
+
+.checkpoint-splash .loader-bar {
+  height: 8px !important;
+  border: 1px solid color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 54%) !important;
+  background: rgba(4, 8, 22, 0.62) !important;
+  box-shadow:
+    inset 0 0 10px rgba(0, 0, 0, 0.58),
+    0 0 24px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 66%) !important;
+  overflow: hidden !important;
+}
+
+.checkpoint-splash .loader-fill {
+  background: var(--checkpoint-splash-fill) !important;
+  box-shadow:
+    0 0 16px color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 34%),
+    0 0 22px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 42%) !important;
+}
+
+.checkpoint-splash .loader-fill::after {
+  width: 80px !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.88), transparent) !important;
+  box-shadow: none !important;
+  animation: checkpointLoaderGlint 2.2s ease-in-out infinite !important;
+}
+
+.checkpoint-splash.complete {
+  opacity: 0 !important;
+  transform: scale(1.012) !important;
+  filter: blur(7px) !important;
+  transition:
+    opacity 620ms ease,
+    transform 620ms ease,
+    filter 620ms ease !important;
+}
+
+@media (max-width: 640px) {
+  .checkpoint-splash .splash-stage {
+    gap: 12px !important;
+    padding: 0 24px !important;
+  }
+
+  .checkpoint-splash .splash-cube-wrap {
+    width: 108px !important;
+    height: 108px !important;
+  }
+
+  .checkpoint-splash .splash-logo-letter {
+    font-size: 4.6rem !important;
+  }
+
+  .checkpoint-splash .splash-title {
+    font-size: clamp(2.55rem, 14vw, 4.5rem) !important;
+  }
+
+  .checkpoint-splash .splash-loader {
+    width: min(330px, calc(100vw - 42px)) !important;
+    margin-top: 34px !important;
+  }
+}
+
+@keyframes checkpointGridBreathe {
+  0%, 100% {
+    opacity: 0.12;
+    background-position: 0 0;
+  }
+
+  50% {
+    opacity: 0.2;
+    background-position: 0 18px;
+  }
+}
+
+@keyframes checkpointDustFloat {
+  0%, 100% {
+    opacity: 0.18;
+    transform: translate3d(0, 0, 0) scale(0.8);
+  }
+
+  50% {
+    opacity: 0.58;
+    transform: translate3d(0, -18px, 0) scale(1);
+  }
+}
+
+@keyframes checkpointPixelDrift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(45deg) scale(0.78);
+    opacity: 0.1;
+  }
+
+  45% {
+    opacity: 0.58;
+  }
+
+  100% {
+    transform: translate3d(calc(var(--end-x) * 0.72), calc(var(--end-y) * 0.52), 0) rotate(45deg) scale(1);
+    opacity: 0.2;
+  }
+}
+
+@keyframes checkpointStageReveal {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+    filter: blur(10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes checkpointLogoBreath {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+
+  50% {
+    transform: translateY(-5px) scale(1.012);
+  }
+}
+
+@keyframes checkpointLetterC {
+  0%, 100% {
+    transform: translateX(0.08em) translateY(0);
+  }
+
+  50% {
+    transform: translateX(0.08em) translateY(-3px);
+  }
+}
+
+@keyframes checkpointLogoLine {
+  0%, 100% {
+    opacity: 0.18;
+    transform: scaleX(0.54);
+  }
+
+  50% {
+    opacity: 0.62;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes checkpointTitleSettle {
+  0%, 100% {
+    filter: drop-shadow(0 0 12px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 72%));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 22px color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 64%));
+  }
+}
+
+@keyframes checkpointLoaderGlint {
+  0% {
+    transform: translateX(-90px);
+    opacity: 0;
+  }
+
+  35%, 65% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(460px);
+    opacity: 0;
+  }
+}
+
 .deals-page {
   width: min(100%, 980px);
   margin: 0 auto;

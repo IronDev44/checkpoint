@@ -3,38 +3,38 @@ import { useEffect, useMemo } from "react";
 export default function SplashScreen({ showSplash, progress = 0 }) {
   const particles = useMemo(
     () =>
-      Array.from({ length: 96 }).map((_, index) => ({
+      Array.from({ length: 44 }).map((_, index) => ({
         id: index,
         x: Math.random() * 100,
         y: Math.random() * 100,
-        delay: Math.random() * 2.5,
-        duration: 2.8 + Math.random() * 2.4,
-        size: 2 + Math.random() * 4,
+        delay: Math.random() * 3,
+        duration: 4 + Math.random() * 3,
+        size: 1 + Math.random() * 2.2,
       })),
     []
   );
 
   const pixelWalls = useMemo(
     () => ({
-      left: Array.from({ length: 82 }).map((_, index) => ({
+      left: Array.from({ length: 52 }).map((_, index) => ({
         id: `left-${index}`,
-        x: 3 + Math.pow(index / 82, 1.35) * 38 + (Math.random() - 0.5) * 12,
-        y: 6 + Math.random() * 72,
-        endX: 43 + Math.random() * 8,
-        endY: 58 + Math.random() * 13,
-        size: 3 + Math.random() * 18,
-        delay: Math.random() * 3,
-        opacity: 0.28 + Math.random() * 0.72,
+        x: 4 + Math.pow(index / 52, 1.2) * 34 + (Math.random() - 0.5) * 7,
+        y: 13 + Math.random() * 58,
+        endX: 42 + Math.random() * 7,
+        endY: 55 + Math.random() * 9,
+        size: 2 + Math.random() * 7,
+        delay: Math.random() * 2.4,
+        opacity: 0.2 + Math.random() * 0.34,
       })),
-      right: Array.from({ length: 82 }).map((_, index) => ({
+      right: Array.from({ length: 52 }).map((_, index) => ({
         id: `right-${index}`,
-        x: 97 - Math.pow(index / 82, 1.35) * 38 + (Math.random() - 0.5) * 12,
-        y: 6 + Math.random() * 72,
-        endX: 49 + Math.random() * 8,
-        endY: 58 + Math.random() * 13,
-        size: 3 + Math.random() * 18,
-        delay: Math.random() * 3,
-        opacity: 0.28 + Math.random() * 0.72,
+        x: 96 - Math.pow(index / 52, 1.2) * 34 + (Math.random() - 0.5) * 7,
+        y: 13 + Math.random() * 58,
+        endX: 51 + Math.random() * 7,
+        endY: 55 + Math.random() * 9,
+        size: 2 + Math.random() * 7,
+        delay: Math.random() * 2.4,
+        opacity: 0.2 + Math.random() * 0.34,
       })),
     }),
     []
@@ -95,10 +95,6 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
       <div className="splash-floor-reflection" />
       <div className="splash-vignette" />
 
-      <div className="splash-orb orb-one" />
-      <div className="splash-orb orb-two" />
-      <div className="splash-orb orb-three" />
-
       <div className="splash-particles-premium">
         {particles.map((particle) => (
           <span
@@ -155,7 +151,9 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
         <div className="splash-cube-wrap">
           <div className="splash-cube">
             <div className="splash-logo-mark" aria-label="Checkpoint">
-              <span className="splash-logo-text">CP</span>
+              <span className="splash-logo-letter">C</span>
+              <span className="splash-logo-divider" />
+              <span className="splash-logo-letter">P</span>
             </div>
           </div>
         </div>
