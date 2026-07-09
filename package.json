@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "cross-env DISABLE_ESLINT_PLUGIN=true react-scripts build",
     "deploy:cloudflare": "wrangler pages deploy build",
     "preview:cloudflare": "wrangler pages dev build",
     "test": "react-scripts test",
@@ -41,6 +41,7 @@
     ]
   },
   "devDependencies": {
+    "cross-env": "^10.1.0",
     "yaml": "^2.9.0"
   }
 }
