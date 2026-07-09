@@ -17137,6 +17137,49 @@ body[data-theme="theme-steamdeck"] {
   }
 }
 
+/* Final splash polish: remove the blocky logo pedestal and fit the title on iPhone. */
+.checkpoint-splash .splash-cube::after {
+  display: none !important;
+  content: none !important;
+}
+
+.checkpoint-splash .splash-cube::before {
+  border-radius: 999px !important;
+  transform: scaleX(0.82) scaleY(0.46) translateY(22%) !important;
+  opacity: 0.34 !important;
+  filter: blur(28px) !important;
+}
+
+.checkpoint-splash .splash-title {
+  max-width: min(86vw, 720px) !important;
+  margin-inline: auto !important;
+  white-space: nowrap !important;
+  font-size: clamp(2.55rem, 7.2vw, 6.1rem) !important;
+  transform: scaleX(0.94) !important;
+  transform-origin: center !important;
+}
+
+@media (max-width: 640px) {
+  .checkpoint-splash .splash-title {
+    max-width: 88vw !important;
+    font-size: clamp(2.05rem, 11.4vw, 3.45rem) !important;
+    transform: scaleX(0.86) !important;
+  }
+
+  .checkpoint-splash .splash-title-wrap {
+    width: 100% !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .checkpoint-splash .splash-title {
+    font-size: clamp(1.85rem, 10.6vw, 3.05rem) !important;
+    transform: scaleX(0.82) !important;
+  }
+}
+
 /* Premium splash pass: cleaner console-boot mood, fewer noisy layers. */
 .checkpoint-splash {
   isolation: isolate !important;
