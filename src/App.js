@@ -8745,6 +8745,27 @@ function DealsTab() {
       }
     };
 
+    try {
+      const apiResponse = await fetchWithTimeout("/api/deals");
+      const contentType = apiResponse.headers.get("content-type") || "";
+
+      if (apiResponse.ok && contentType.includes("application/json")) {
+        const payload = await apiResponse.json();
+        setDeals(payload.deals || []);
+        setSourceStatus(
+          payload.status || {
+            steam: "Source indisponible pour le moment.",
+            epic: "Source indisponible pour le moment.",
+            psn: "PSN demande une source serveur fiable avant affichage automatique.",
+          }
+        );
+        setIsLoading(false);
+        return;
+      }
+    } catch (error) {
+      console.warn("Proxy promos indisponible, tentative directe :", error);
+    }
+
     const requests = [
       {
         id: "steam",
