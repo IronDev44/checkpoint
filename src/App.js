@@ -2004,6 +2004,7 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
   const [swipeState, setSwipeState] = useState("");
 
   const buildGamePayload = (status) => ({
+    rawgId: game.id,
     name: game.name,
     rating: 0,
     favorite: false,
@@ -6386,6 +6387,86 @@ function getRawgSlugCandidates(query = "") {
   return Array.from(new Set([base, withoutArticles].filter(Boolean)));
 }
 
+const KNOWN_SEARCH_FALLBACKS = [
+  {
+    id: 989329,
+    slug: "ghost-of-yotei",
+    name: "Ghost of Yotei",
+    playtime: 0,
+    released: "2025-10-02",
+    tba: false,
+    background_image:
+      "https://media.rawg.io/media/games/30b/30b195c2321d763f807366967ffad793.jpg",
+    rating: 4.18,
+    ratings_count: 41,
+    platforms: [
+      {
+        platform: {
+          id: 187,
+          name: "PlayStation 5",
+          slug: "playstation5",
+        },
+      },
+    ],
+    parent_platforms: [
+      {
+        platform: {
+          id: 2,
+          name: "PlayStation",
+          slug: "playstation",
+        },
+      },
+    ],
+    genres: [
+      { id: 4, name: "Action", slug: "action" },
+      { id: 5, name: "RPG", slug: "role-playing-games-rpg" },
+    ],
+  },
+];
+
+function getKnownSearchFallbacks(query = "") {
+  const normalizedQuery = normalizeSearchText(query);
+  if (!normalizedQuery) return [];
+
+  return KNOWN_SEARCH_FALLBACKS.filter((game) => {
+    const normalizedName = normalizeSearchText(game.name);
+    const queryWords = normalizedQuery.split(" ").filter(Boolean);
+
+    return (
+      normalizedName.includes(normalizedQuery) ||
+      queryWords.every((word) => normalizedName.includes(word))
+    );
+  });
+}
+
+function gameMatchesSearchFilters(game, filters = {}) {
+  const { yearFilter, platformFilter, genreFilter } = filters;
+
+  if (yearFilter && !String(game.released || "").startsWith(String(yearFilter))) {
+    return false;
+  }
+
+  if (platformFilter) {
+    const platformIds = (game.platforms || []).map((entry) =>
+      String(entry?.platform?.id || "")
+    );
+
+    if (!platformIds.includes(String(platformFilter))) {
+      return false;
+    }
+  }
+
+  if (genreFilter) {
+    const genreIds = (game.genres || []).map((genre) => String(genre?.id || ""));
+
+    if (!genreIds.includes(String(genreFilter))) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 function detectSeriesName(gameName) {
   const name = normalizeGameName(gameName);
 
@@ -10114,6 +10195,7 @@ useEffect(() => {
       }
 
       await addDoc(collection(db, "games"), {
+        rawgId: game.rawgId || game.id || null,
         name: game.name,
         completed: game.completed || game.status === "terminé" || false,
         rating: getGameRating(game),
@@ -10296,6 +10378,23 @@ useEffect(() => {
             console.warn("Recherche directe RAWG ignorée :", error);
           }
         }
+      }
+
+      const fallbackResults = getKnownSearchFallbacks(cleanSearch).filter((game) =>
+        gameMatchesSearchFilters(game, {
+          yearFilter,
+          platformFilter,
+          genreFilter,
+        })
+      );
+
+      if (fallbackResults.length > 0) {
+        resultsList = [
+          ...fallbackResults,
+          ...resultsList.filter(
+            (game) => !fallbackResults.some((fallback) => fallback.id === game.id)
+          ),
+        ];
       }
     }
 
