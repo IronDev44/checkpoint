@@ -6320,6 +6320,58 @@ function normalizeGameName(name) {
     .trim();
 }
 
+function normalizeSearchText(value = "") {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getSearchRelevanceScore(game, query) {
+  const normalizedQuery = normalizeSearchText(query);
+  const normalizedName = normalizeSearchText(game?.name || "");
+
+  if (!normalizedQuery || !normalizedName) return 0;
+
+  const queryWords = normalizedQuery.split(" ").filter(Boolean);
+  const nameWords = normalizedName.split(" ").filter(Boolean);
+  let score = 0;
+
+  if (normalizedName === normalizedQuery) score += 10000;
+  if (normalizedName.startsWith(normalizedQuery)) score += 5000;
+  if (normalizedName.includes(normalizedQuery)) score += 2500;
+
+  queryWords.forEach((word, index) => {
+    if (nameWords[index] === word) score += 450;
+    if (nameWords.includes(word)) score += 260;
+    if (normalizedName.includes(word)) score += 120;
+  });
+
+  const missingWords = queryWords.filter((word) => !normalizedName.includes(word)).length;
+  score -= missingWords * 900;
+  score -= Math.abs(nameWords.length - queryWords.length) * 35;
+  score += Math.min(Number(game?.ratings_count) || 0, 12000) / 40;
+  score += (Number(game?.rating) || 0) * 35;
+
+  return score;
+}
+
+function sortSearchResultsByRelevance(results, query) {
+  if (!query?.trim()) return results;
+
+  return [...results].sort((a, b) => {
+    const relevanceDiff =
+      getSearchRelevanceScore(b, query) - getSearchRelevanceScore(a, query);
+
+    if (relevanceDiff !== 0) return relevanceDiff;
+
+    return (Number(b.ratings_count) || 0) - (Number(a.ratings_count) || 0);
+  });
+}
+
 function detectSeriesName(gameName) {
   const name = normalizeGameName(gameName);
 
@@ -10026,10 +10078,11 @@ useEffect(() => {
       setResults((prev) => {
         const merged = [...prev, ...validResults];
 
-        return merged.filter(
-          (game, index, self) =>
-            index === self.findIndex((g) => g.id === game.id)
+        const uniqueResults = merged.filter(
+          (game, index, self) => index === self.findIndex((g) => g.id === game.id)
         );
+
+        return sortSearchResultsByRelevance(uniqueResults, search);
       });
 
       setNextPage(nextUrl);
@@ -10175,7 +10228,7 @@ useEffect(() => {
 };
 
   const searchGames = async (forcedSearch = null) => {
-  const cleanSearch = (forcedSearch ?? debouncedSearch).trim();
+  const cleanSearch = (forcedSearch ?? search ?? debouncedSearch).trim();
 
   if (!cleanSearch && !yearFilter && !platformFilter && !genreFilter) {
     alert("Tape un jeu ou choisis au moins un filtre.");
@@ -10195,13 +10248,20 @@ useEffect(() => {
     if (platformFilter) params.append("platforms", platformFilter);
     if (genreFilter) params.append("genres", genreFilter);
 
-    params.append("ordering", sortBy);
+    if (cleanSearch) {
+      params.append("search_precise", "true");
+    } else {
+      params.append("ordering", sortBy);
+    }
 
     const url = `https://api.rawg.io/api/games?${params.toString()}`;
     const response = await fetch(url);
     const data = await response.json();
 
-    const resultsList = (data.results || []).filter(isMainGameResult);
+    const resultsList = sortSearchResultsByRelevance(
+      (data.results || []).filter(isMainGameResult),
+      cleanSearch
+    );
 
     const nextParams = new URLSearchParams(params);
     nextParams.set("page", "2");
@@ -10708,7 +10768,7 @@ const setPlayedPlatforms = async (id, platforms) => {
                   <button
                     onClick={() => {
                       playClick(soundStyle);
-                      searchGames();
+                      searchGames(search);
                     }}
                     type="button"
                   >
