@@ -6372,6 +6372,20 @@ function sortSearchResultsByRelevance(results, query) {
   });
 }
 
+function getRawgSlugCandidates(query = "") {
+  const base = normalizeSearchText(query)
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  const withoutArticles = normalizeSearchText(query)
+    .replace(/\b(the|a|an)\b/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  return Array.from(new Set([base, withoutArticles].filter(Boolean)));
+}
+
 function detectSeriesName(gameName) {
   const name = normalizeGameName(gameName);
 
@@ -10258,10 +10272,34 @@ useEffect(() => {
     const response = await fetch(url);
     const data = await response.json();
 
-    const resultsList = sortSearchResultsByRelevance(
-      (data.results || []).filter(isMainGameResult),
-      cleanSearch
-    );
+    let resultsList = (data.results || []).filter(isMainGameResult);
+
+    if (cleanSearch) {
+      for (const slug of getRawgSlugCandidates(cleanSearch)) {
+        try {
+          const detailResponse = await fetch(
+            `https://api.rawg.io/api/games/${slug}?key=${API_KEY}`
+          );
+
+          if (detailResponse.ok) {
+            const exactGame = await detailResponse.json();
+            if (exactGame?.id && isMainGameResult(exactGame)) {
+              resultsList = [
+                exactGame,
+                ...resultsList.filter((game) => game.id !== exactGame.id),
+              ];
+              break;
+            }
+          }
+        } catch (error) {
+          if (!isAbortError(error)) {
+            console.warn("Recherche directe RAWG ignorée :", error);
+          }
+        }
+      }
+    }
+
+    resultsList = sortSearchResultsByRelevance(resultsList, cleanSearch);
 
     const nextParams = new URLSearchParams(params);
     nextParams.set("page", "2");
