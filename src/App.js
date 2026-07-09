@@ -1895,6 +1895,7 @@ function BottomTabs({ activeTab, setActiveTab, soundStyle }) {
   { id: "news", Icon: Newspaper, label: "Actu" },
   { id: "search", Icon: Search, label: "Recherche" },
   { id: "upcoming", Icon: CalendarDays, label: "Sorties" },
+  { id: "deals", Icon: Sparkles, label: "Promos" },
   { id: "live", Icon: Radio, label: "Live" },
   { id: "social", Icon: Users, label: "Social" },
   { id: "library", Icon: Library, label: "Bibliothèque" },
@@ -8636,6 +8637,253 @@ function NewsTab({ newsItems }) {
   );
 }
 
+const DEAL_SOURCES = [
+  { id: "all", label: "Tout" },
+  { id: "steam", label: "Steam" },
+  { id: "epic", label: "Epic" },
+  { id: "psn", label: "PSN" },
+];
+
+const PSN_DEALS_URL = "https://store.playstation.com/fr-fr/pages/deals";
+
+function formatSteamPrice(value, currency = "EUR") {
+  if (typeof value !== "number") return "";
+
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency,
+  }).format(value / 100);
+}
+
+function getEpicImage(images = []) {
+  const preferred =
+    images.find((image) => image.type === "OfferImageWide") ||
+    images.find((image) => image.type === "featuredMedia") ||
+    images.find((image) => image.type === "Thumbnail") ||
+    images[0];
+
+  return preferred?.url || "";
+}
+
+function getEpicDealUrl(item) {
+  const mappingSlug = item.offerMappings?.[0]?.pageSlug;
+  const productSlug = item.productSlug?.split("/")[0];
+  const slug = productSlug || mappingSlug || item.urlSlug;
+
+  return slug ? `https://store.epicgames.com/fr/p/${slug}` : "https://store.epicgames.com/fr/free-games";
+}
+
+function normalizeSteamDeals(data) {
+  return (data?.specials?.items || [])
+    .filter((item) => item.discounted && item.discount_percent > 0)
+    .slice(0, 24)
+    .map((item) => ({
+      id: `steam-${item.id}`,
+      store: "steam",
+      storeLabel: "Steam",
+      title: item.name,
+      image: item.large_capsule_image || item.header_image || item.small_capsule_image,
+      discount: item.discount_percent,
+      normalPrice: formatSteamPrice(item.original_price, item.currency),
+      salePrice: formatSteamPrice(item.final_price, item.currency),
+      url: `https://store.steampowered.com/app/${item.id}`,
+      endsAt: item.discount_expiration ? new Date(item.discount_expiration * 1000).toISOString() : "",
+    }));
+}
+
+function normalizeEpicDeals(data) {
+  return (data?.data?.Catalog?.searchStore?.elements || [])
+    .filter((item) => {
+      const currentPromos = item.promotions?.promotionalOffers || [];
+      const hasFreePromo = currentPromos.some((promoGroup) =>
+        (promoGroup.promotionalOffers || []).some(
+          (promo) => promo.discountSetting?.discountPercentage === 0
+        )
+      );
+      const price = item.price?.totalPrice;
+      return hasFreePromo || (price && price.discount > 0);
+    })
+    .slice(0, 24)
+    .map((item) => {
+      const price = item.price?.totalPrice;
+      const promo = item.promotions?.promotionalOffers?.[0]?.promotionalOffers?.[0];
+      const isFree = promo?.discountSetting?.discountPercentage === 0;
+
+      return {
+        id: `epic-${item.id}`,
+        store: "epic",
+        storeLabel: "Epic",
+        title: item.title,
+        image: getEpicImage(item.keyImages),
+        discount: isFree ? 100 : Math.round(((price?.discount || 0) / Math.max(price?.originalPrice || 1, 1)) * 100),
+        normalPrice: price?.fmtPrice?.originalPrice || "",
+        salePrice: isFree ? "Gratuit" : price?.fmtPrice?.discountPrice || "",
+        url: getEpicDealUrl(item),
+        endsAt: promo?.endDate || "",
+      };
+    });
+}
+
+function DealsTab() {
+  const [activeSource, setActiveSource] = useState("all");
+  const [deals, setDeals] = useState([]);
+  const [sourceStatus, setSourceStatus] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  const loadDeals = async () => {
+    setIsLoading(true);
+    setSourceStatus({});
+
+    const fetchWithTimeout = async (url, timeout = 9000) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      try {
+        return await fetch(url, { signal: controller.signal });
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    };
+
+    const requests = [
+      {
+        id: "steam",
+        label: "Steam",
+        url: "https://store.steampowered.com/api/featuredcategories?cc=FR&l=french",
+        normalize: normalizeSteamDeals,
+      },
+      {
+        id: "epic",
+        label: "Epic",
+        url: "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=fr-FR&country=FR&allowCountries=FR",
+        normalize: normalizeEpicDeals,
+      },
+    ];
+
+    const results = await Promise.allSettled(
+      requests.map(async (source) => {
+        const response = await fetchWithTimeout(source.url);
+        if (!response.ok) throw new Error(`${source.label}: ${response.status}`);
+        const data = await response.json();
+        return { source, items: source.normalize(data) };
+      })
+    );
+
+    const nextDeals = [];
+    const nextStatus = {
+      psn: "PSN demande une source serveur fiable avant affichage automatique.",
+    };
+
+    results.forEach((result, index) => {
+      const source = requests[index];
+      if (result.status === "fulfilled") {
+        nextDeals.push(...result.value.items);
+        nextStatus[source.id] =
+          result.value.items.length > 0 ? "OK" : "Aucune promo trouvee.";
+      } else {
+        nextStatus[source.id] = "Source indisponible pour le moment.";
+      }
+    });
+
+    setDeals(nextDeals);
+    setSourceStatus(nextStatus);
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadDeals();
+  }, []);
+
+  const visibleDeals =
+    activeSource === "all"
+      ? deals
+      : deals.filter((deal) => deal.store === activeSource);
+
+  return (
+    <div className="deals-page">
+      <div className="section-header deals-header">
+        <div>
+          <h2>Promos du moment</h2>
+          <p>Les offres PC sont chargees en direct, en euros quand la boutique le permet.</p>
+        </div>
+        <button type="button" className="deals-refresh-btn" onClick={loadDeals} disabled={isLoading}>
+          {isLoading ? "Actualisation..." : "Actualiser"}
+        </button>
+      </div>
+
+      <div className="deals-source-tabs">
+        {DEAL_SOURCES.map((source) => (
+          <button
+            key={source.id}
+            type="button"
+            className={activeSource === source.id ? "active" : ""}
+            onClick={() => setActiveSource(source.id)}
+          >
+            {source.label}
+          </button>
+        ))}
+      </div>
+
+      {activeSource === "psn" && (
+        <div className="deals-source-note">
+          <strong>PSN</strong>
+          <span>
+            Sony n'expose pas un flux public stable comme Steam. Pour une vraie synchro propre, on passera
+            par une petite fonction serveur qui cache les offres.
+          </span>
+          <a href={PSN_DEALS_URL} target="_blank" rel="noreferrer">
+            Voir les promos PlayStation
+          </a>
+        </div>
+      )}
+
+      <div className="deals-status-row">
+        {["steam", "epic", "psn"].map((source) => (
+          <span key={source} className={`deals-status-pill ${sourceStatus[source] === "OK" ? "ok" : ""}`}>
+            {source.toUpperCase()} - {sourceStatus[source] || "Chargement"}
+          </span>
+        ))}
+      </div>
+
+      {isLoading && visibleDeals.length === 0 ? (
+        <EmptyState title="Chargement des promos" subtitle="Je contacte les boutiques disponibles." />
+      ) : visibleDeals.length === 0 ? (
+        <EmptyState
+          title="Aucune promo a afficher"
+          subtitle="Essaie une autre boutique ou relance l'actualisation."
+        />
+      ) : (
+        <div className="deals-grid">
+          {visibleDeals.map((deal) => (
+            <a key={deal.id} className="deal-card" href={deal.url} target="_blank" rel="noreferrer">
+              <div className="deal-image-wrap">
+                {deal.image ? (
+                  <img src={deal.image} alt={deal.title} />
+                ) : (
+                  <div className="deal-image-placeholder">{deal.storeLabel}</div>
+                )}
+                {deal.discount > 0 && <span className="deal-discount">-{deal.discount}%</span>}
+              </div>
+
+              <div className="deal-content">
+                <span className={`deal-store deal-store-${deal.store}`}>{deal.storeLabel}</span>
+                <h3>{deal.title}</h3>
+                <div className="deal-prices">
+                  {deal.normalPrice && <span className="deal-normal-price">{deal.normalPrice}</span>}
+                  <strong>{deal.salePrice}</strong>
+                </div>
+                {deal.endsAt && (
+                  <span className="deal-end-date">Jusqu'au {formatFullDate(deal.endsAt)}</span>
+                )}
+              </div>
+            </a>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* -------------------- MAIN APP -------------------- */
 
 /* ==================== APP PRINCIPALE ==================== */
@@ -8730,6 +8978,7 @@ const tabOrder = [
   "news",
   "search",
   "upcoming",
+  "deals",
   "live",
   "social",
   "library",
@@ -10420,6 +10669,10 @@ const setPlayedPlatforms = async (id, platforms) => {
 
 {activeTab === "news" && (
   <NewsTab newsItems={newsItems} />
+)}
+
+{activeTab === "deals" && (
+  <DealsTab />
 )}
 
           {activeTab === "search" && (
