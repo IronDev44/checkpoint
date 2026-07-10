@@ -159,8 +159,8 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
         </div>
 
         <div className="splash-title-wrap">
-          <h1 className="splash-title">CHECKPOINT</h1>
-          <div className="splash-title-reflect">CHECKPOINT</div>
+          <h1 className="splash-title">Checkpoint</h1>
+          <div className="splash-title-reflect">Checkpoint</div>
         </div>
 
         <p className="splash-subtitle">Votre univers gaming</p>

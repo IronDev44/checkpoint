@@ -17137,6 +17137,106 @@ body[data-theme="theme-steamdeck"] {
   }
 }
 
+/* True final splash cleanup: this must stay after every legacy splash rule. */
+.checkpoint-splash .splash-floor-reflection,
+.checkpoint-splash .splash-neon-horizon,
+.checkpoint-splash .splash-grid,
+.checkpoint-splash .splash-scanline,
+.checkpoint-splash .splash-title-reflect {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.checkpoint-splash .splash-stage {
+  max-width: 100vw !important;
+  padding-inline: 22px !important;
+  overflow: visible !important;
+}
+
+.checkpoint-splash .splash-cube::before,
+.checkpoint-splash .splash-cube::after {
+  display: none !important;
+  content: none !important;
+  opacity: 0 !important;
+}
+
+.checkpoint-splash .splash-logo-mark {
+  transform: none !important;
+  background: transparent !important;
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 54%)) !important;
+}
+
+.checkpoint-splash .splash-logo-letter,
+.checkpoint-splash .splash-logo-divider {
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+}
+
+.checkpoint-splash .splash-title {
+  display: block !important;
+  width: 100% !important;
+  max-width: 82vw !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  font-family: var(--checkpoint-brand-font) !important;
+  font-size: clamp(2.25rem, 6vw, 4.9rem) !important;
+  line-height: 0.94 !important;
+  text-transform: none !important;
+  transform: none !important;
+  color: transparent !important;
+  background:
+    linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, var(--checkpoint-splash-secondary), var(--checkpoint-splash-primary) 16%) 52%, var(--checkpoint-splash-primary) 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 72%) !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+@media (max-width: 640px) {
+  .checkpoint-splash .splash-stage {
+    padding-inline: 18px !important;
+    transform: translateY(-2vh) !important;
+  }
+
+  .checkpoint-splash .splash-pixel-wall {
+    display: none !important;
+  }
+
+  .checkpoint-splash .splash-cube-wrap {
+    width: 86px !important;
+    height: 86px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .checkpoint-splash .splash-logo-letter {
+    font-size: 3.15rem !important;
+  }
+
+  .checkpoint-splash .splash-logo-divider {
+    height: 30px !important;
+  }
+
+  .checkpoint-splash .splash-title {
+    max-width: 84vw !important;
+    font-size: clamp(2.15rem, 10.4vw, 2.75rem) !important;
+  }
+
+  .checkpoint-splash .splash-subtitle {
+    font-size: 0.82rem !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .checkpoint-splash .splash-title {
+    font-size: clamp(1.95rem, 9.8vw, 2.35rem) !important;
+  }
+}
+
 /* Absolute final splash override. Keep it clean on phones. */
 .checkpoint-splash .splash-floor-reflection,
 .checkpoint-splash .splash-neon-horizon,
@@ -18868,5 +18968,79 @@ body[data-theme="theme-steamdeck"] {
   100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+/* EOF splash override: after every legacy splash rule. */
+.checkpoint-splash .splash-floor-reflection,
+.checkpoint-splash .splash-neon-horizon,
+.checkpoint-splash .splash-grid,
+.checkpoint-splash .splash-scanline,
+.checkpoint-splash .splash-title-reflect {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+.checkpoint-splash .splash-cube::before,
+.checkpoint-splash .splash-cube::after {
+  display: none !important;
+  content: none !important;
+  opacity: 0 !important;
+}
+
+.checkpoint-splash .splash-title {
+  display: block !important;
+  width: 100% !important;
+  max-width: 82vw !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  font-family: var(--checkpoint-brand-font) !important;
+  font-size: clamp(2.25rem, 6vw, 4.9rem) !important;
+  line-height: 0.94 !important;
+  text-transform: none !important;
+  transform: none !important;
+  color: transparent !important;
+  background:
+    linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, var(--checkpoint-splash-secondary), var(--checkpoint-splash-primary) 16%) 52%, var(--checkpoint-splash-primary) 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: 0 0 14px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 72%) !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+@media (max-width: 640px) {
+  .checkpoint-splash .splash-pixel-wall {
+    display: none !important;
+  }
+
+  .checkpoint-splash .splash-cube-wrap {
+    width: 86px !important;
+    height: 86px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .checkpoint-splash .splash-logo-letter {
+    font-size: 3.15rem !important;
+    -webkit-text-stroke: 0 !important;
+    text-shadow: none !important;
+  }
+
+  .checkpoint-splash .splash-logo-divider {
+    height: 30px !important;
+  }
+
+  .checkpoint-splash .splash-title {
+    max-width: 84vw !important;
+    font-size: clamp(2.15rem, 10.4vw, 2.75rem) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .checkpoint-splash .splash-title {
+    font-size: clamp(1.95rem, 9.8vw, 2.35rem) !important;
   }
 }
