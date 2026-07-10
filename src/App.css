@@ -17137,6 +17137,291 @@ body[data-theme="theme-steamdeck"] {
   }
 }
 
+/* Absolute final splash override. Keep it clean on phones. */
+.checkpoint-splash .splash-floor-reflection,
+.checkpoint-splash .splash-neon-horizon,
+.checkpoint-splash .splash-grid,
+.checkpoint-splash .splash-scanline,
+.checkpoint-splash .splash-title-reflect {
+  display: none !important;
+}
+
+.checkpoint-splash .splash-cube::before,
+.checkpoint-splash .splash-cube::after {
+  display: none !important;
+  content: none !important;
+}
+
+.checkpoint-splash .splash-logo-mark {
+  transform: none !important;
+  background: transparent !important;
+  filter: drop-shadow(0 0 18px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 48%)) !important;
+}
+
+.checkpoint-splash .splash-logo-letter {
+  font-size: clamp(4rem, 7.5vw, 5.9rem) !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+}
+
+.checkpoint-splash .splash-title {
+  width: 100% !important;
+  max-width: 84vw !important;
+  margin-inline: auto !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-align: center !important;
+  font-size: clamp(2.25rem, 6.2vw, 5rem) !important;
+  transform: none !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: 0 0 16px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 68%) !important;
+}
+
+@media (max-width: 640px) {
+  .checkpoint-splash .splash-stage {
+    padding-inline: 18px !important;
+  }
+
+  .checkpoint-splash .splash-pixel-wall {
+    display: none !important;
+  }
+
+  .checkpoint-splash .splash-logo-letter {
+    font-size: 3.35rem !important;
+  }
+
+  .checkpoint-splash .splash-title {
+    max-width: 86vw !important;
+    font-size: clamp(1.62rem, 8vw, 2.1rem) !important;
+  }
+
+  .checkpoint-splash .splash-subtitle {
+    font-size: 0.82rem !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .checkpoint-splash .splash-title {
+    font-size: clamp(1.48rem, 7.5vw, 1.88rem) !important;
+  }
+}
+
+/* Splash v2: simpler, cleaner, less early-2000s metallic. */
+.checkpoint-splash {
+  background:
+    radial-gradient(circle at 50% 34%, color-mix(in srgb, var(--checkpoint-splash-primary), transparent 82%), transparent 28%),
+    radial-gradient(circle at 18% 55%, color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 90%), transparent 24%),
+    radial-gradient(circle at 82% 55%, color-mix(in srgb, var(--checkpoint-splash-primary), transparent 90%), transparent 24%),
+    linear-gradient(180deg, #020612 0%, #081126 50%, #030712 100%) !important;
+}
+
+.checkpoint-splash .splash-bg {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 34%),
+    radial-gradient(ellipse at 50% 48%, color-mix(in srgb, var(--checkpoint-splash-primary), transparent 88%), transparent 44%) !important;
+}
+
+.checkpoint-splash .splash-floor-reflection,
+.checkpoint-splash .splash-neon-horizon,
+.checkpoint-splash .splash-grid,
+.checkpoint-splash .splash-scanline,
+.checkpoint-splash .splash-title-reflect {
+  display: none !important;
+}
+
+.checkpoint-splash::before {
+  background:
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 82%) 18%, transparent 38%, transparent 62%, color-mix(in srgb, var(--checkpoint-splash-primary), transparent 82%) 82%, transparent) !important;
+  opacity: 0.24 !important;
+  transform: none !important;
+}
+
+.checkpoint-splash .splash-stage {
+  width: 100% !important;
+  max-width: min(760px, 100vw) !important;
+  padding: 0 22px !important;
+  gap: 12px !important;
+  overflow: visible !important;
+}
+
+.checkpoint-splash .splash-cube-wrap {
+  width: clamp(88px, 14vw, 128px) !important;
+  height: clamp(88px, 14vw, 128px) !important;
+  margin-bottom: 8px !important;
+  perspective: none !important;
+}
+
+.checkpoint-splash .splash-cube,
+.checkpoint-splash .splash-logo-mark {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.checkpoint-splash .splash-cube::before,
+.checkpoint-splash .splash-cube::after {
+  display: none !important;
+  content: none !important;
+}
+
+.checkpoint-splash .splash-logo-mark {
+  filter: drop-shadow(0 0 22px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 44%)) !important;
+  animation: checkpointLogoBreath 4.6s ease-in-out infinite !important;
+}
+
+.checkpoint-splash .splash-logo-letter,
+.checkpoint-splash .splash-logo-divider {
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+}
+
+.checkpoint-splash .splash-logo-letter {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: clamp(4.2rem, 8vw, 6.3rem) !important;
+  font-weight: 950 !important;
+  line-height: 0.8 !important;
+  color: transparent !important;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), color-mix(in srgb, var(--checkpoint-splash-secondary), var(--checkpoint-splash-primary) 24%) 42%, var(--checkpoint-splash-primary)) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+.checkpoint-splash .splash-logo-divider {
+  display: inline-block !important;
+  width: 1px !important;
+  height: clamp(36px, 5vw, 54px) !important;
+  margin: 0 0.1em !important;
+  transform: none !important;
+  opacity: 0.42 !important;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.72), transparent) !important;
+}
+
+.checkpoint-splash .splash-title-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  overflow: visible !important;
+}
+
+.checkpoint-splash .splash-title {
+  width: 100% !important;
+  max-width: min(86vw, 620px) !important;
+  margin: 0 auto !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  font-family: var(--checkpoint-brand-font) !important;
+  font-size: clamp(2.45rem, 6.8vw, 5.45rem) !important;
+  line-height: 0.92 !important;
+  transform: none !important;
+  color: transparent !important;
+  background:
+    linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, var(--checkpoint-splash-secondary), var(--checkpoint-splash-primary) 18%) 48%, var(--checkpoint-splash-primary) 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-stroke: 0 !important;
+  text-shadow: 0 0 20px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 62%) !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+.checkpoint-splash .splash-subtitle,
+.checkpoint-splash .splash-loading-label,
+.checkpoint-splash .splash-loader-top strong {
+  font-family: var(--checkpoint-brand-font) !important;
+  text-transform: none !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  text-shadow: 0 0 12px color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 62%) !important;
+}
+
+.checkpoint-splash .splash-subtitle {
+  font-size: clamp(0.9rem, 2vw, 1.05rem) !important;
+  font-weight: 760 !important;
+}
+
+.checkpoint-splash .splash-loader {
+  width: min(420px, calc(100vw - 58px)) !important;
+  margin-top: clamp(44px, 8vh, 82px) !important;
+}
+
+.checkpoint-splash .loader-bar {
+  height: 7px !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.34) !important;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 72%) !important;
+}
+
+.checkpoint-splash .loader-fill {
+  background: var(--checkpoint-splash-fill) !important;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--checkpoint-splash-primary), transparent 42%) !important;
+}
+
+.checkpoint-splash .splash-particles-premium span {
+  width: 2px !important;
+  height: 2px !important;
+  border-radius: 999px !important;
+  opacity: 0.28 !important;
+  background: rgba(255, 255, 255, 0.76) !important;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--checkpoint-splash-secondary), transparent 42%) !important;
+}
+
+.checkpoint-splash .splash-pixel-wall span {
+  width: min(var(--pixel-size, 4px), 5px) !important;
+  height: min(var(--pixel-size, 4px), 5px) !important;
+  border-radius: 1px !important;
+  opacity: 0.24 !important;
+}
+
+@media (max-width: 640px) {
+  .checkpoint-splash .splash-stage {
+    padding: 0 18px !important;
+    transform: translateY(-3vh) !important;
+  }
+
+  .checkpoint-splash .splash-pixel-wall {
+    display: none !important;
+  }
+
+  .checkpoint-splash .splash-cube-wrap {
+    width: 92px !important;
+    height: 92px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .checkpoint-splash .splash-logo-letter {
+    font-size: 3.55rem !important;
+  }
+
+  .checkpoint-splash .splash-logo-divider {
+    height: 34px !important;
+  }
+
+  .checkpoint-splash .splash-title {
+    max-width: 88vw !important;
+    font-size: clamp(1.95rem, 9.1vw, 2.58rem) !important;
+  }
+
+  .checkpoint-splash .splash-subtitle {
+    font-size: 0.88rem !important;
+  }
+
+  .checkpoint-splash .splash-loader {
+    width: min(330px, calc(100vw - 52px)) !important;
+    margin-top: 76px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .checkpoint-splash .splash-title {
+    font-size: clamp(1.72rem, 8.7vw, 2.18rem) !important;
+  }
+}
+
 /* Final splash polish: remove the blocky logo pedestal and fit the title on iPhone. */
 .checkpoint-splash .splash-cube::after {
   display: none !important;
