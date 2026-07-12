@@ -8382,8 +8382,6 @@ function OptionsTab({
   setTheme,
   uiMode,
   setUiMode,
-  uiScale,
-  setUiScale,
   soundEnabled,
   setSoundEnabled,
 }) {
@@ -8420,36 +8418,6 @@ function OptionsTab({
                 {item.label}
               </button>
             ))}
-          </div>
-        </div>
-
-        <div className="option-section">
-          <h3>Densite</h3>
-
-          <div className="option-pill-grid three">
-            <button
-              type="button"
-              className={`option-pill ${uiScale === "compact" ? "active" : ""}`}
-              onClick={() => setUiScale("compact")}
-            >
-              Compact
-            </button>
-
-            <button
-              type="button"
-              className={`option-pill ${uiScale === "normal" ? "active" : ""}`}
-              onClick={() => setUiScale("normal")}
-            >
-              Standard
-            </button>
-
-            <button
-              type="button"
-              className={`option-pill ${uiScale === "comfortable" ? "active" : ""}`}
-              onClick={() => setUiScale("comfortable")}
-            >
-              Large
-            </button>
           </div>
         </div>
 
@@ -9034,9 +9002,6 @@ export default function App() {
       ? "reduced"
       : localStorage.getItem("checkpoint-ui-mode") || "modern"
   );
-  const [uiScale, setUiScale] = useState(
-    localStorage.getItem("checkpoint-ui-scale") || "normal"
-  );
   const [showSplash, setShowSplash] = useState(() => {
     return sessionStorage.getItem("checkpoint-splash-seen") !== "true";
   });
@@ -9094,13 +9059,10 @@ export default function App() {
   const [upcomingGames, setUpcomingGames] = useState([]);
   const [isUpcomingLoading, setIsUpcomingLoading] = useState(false);
   const [upcomingMonthFilter, setUpcomingMonthFilter] = useState("");
-  const [tabTransition, setTabTransition] = useState("");
-  const [transitionDirection, setTransitionDirection] = useState("forward");
   const [libraryView, setLibraryView] = useState("collection");
   const [nextPage, setNextPage] = useState(null);
   const [gamingEvents, setGamingEvents] = useState(FALLBACK_GAMING_EVENTS);
   const [pixelTransition, setPixelTransition] = useState(null);
-  const previousTabIndexRef = useRef(0);
   const [soundStyle, setSoundStyle] = useState("balanced");
 
 const tabOrder = [
@@ -9736,11 +9698,6 @@ useEffect(() => {
     document.body.setAttribute("data-ui", uiMode);
     localStorage.setItem("checkpoint-ui-mode", uiMode);
   }, [uiMode]);
-
-  useEffect(() => {
-    document.body.setAttribute("data-scale", uiScale);
-    localStorage.setItem("checkpoint-ui-scale", uiScale);
-  }, [uiScale]);
 
   useEffect(() => {
     if (!showSplash) return;
@@ -10719,30 +10676,24 @@ const setPlayedPlatforms = async (id, platforms) => {
 
     const currentIndex = tabOrder.indexOf(activeTab);
     const nextIndex = tabOrder.indexOf(nextTab);
-    const direction = nextIndex > currentIndex ? "forward" : "backward";
-
-    setTransitionDirection(direction);
 
     // Changement immédiat de l’onglet
     setActiveTab(nextTab);
 
     // Transition visuelle très courte, par-dessus
     if (uiMode === "reduced") {
-      setTabTransition("");
       setPixelTransition(null);
       return;
     }
 
-    setTabTransition("");
     setPixelTransition(null);
 
     window.setTimeout(() => {
-      setTransitionDirection(direction);
-      setTabTransition("modern");
+      setPixelTransition(nextIndex > currentIndex ? "right" : "left");
 
       window.setTimeout(() => {
-        setTabTransition("");
-      }, 260);
+        setPixelTransition(null);
+      }, 620);
     }, 16);
   };
 
@@ -10796,9 +10747,6 @@ const setPlayedPlatforms = async (id, platforms) => {
 
           <Toast message={toast} />
           <BadgeUnlockToast badge={newUnlockedBadge} />
-          {tabTransition && (
-      <div className={`tab-transition-overlay ${tabTransition} ${transitionDirection}`} />
-    )}
 { <SplashScreen showSplash={showSplash} progress={splashProgress} /> }
       <div className={`app-shell ${showSplash ? "app-hidden" : "app-visible"}`}>
         <div className="container">
@@ -11332,8 +11280,6 @@ const setPlayedPlatforms = async (id, platforms) => {
                 setTheme={setTheme}
                 uiMode={uiMode}
                 setUiMode={setUiMode}
-                uiScale={uiScale}
-                setUiScale={setUiScale}
                 soundEnabled={soundEnabled}
                 setSoundEnabled={setSoundEnabled}
               />
