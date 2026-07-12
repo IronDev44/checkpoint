@@ -10038,6 +10038,10 @@ html body[data-theme="theme-indigo"] {
   grid-template-columns: repeat(2, 1fr);
 }
 
+.option-pill-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .option-pill {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
@@ -10047,6 +10051,14 @@ html body[data-theme="theme-indigo"] {
   font-weight: 900;
   cursor: pointer;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.options-tab .option-pill {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .option-pill.active {
@@ -10063,6 +10075,22 @@ html body[data-theme="theme-indigo"] {
 .option-pill.theme-xbox.active {
   background: linear-gradient(135deg, #107c10, #6aff7a);
   color: white;
+}
+
+body[data-ui="reduced"] *,
+body[data-ui="reduced"] *::before,
+body[data-ui="reduced"] *::after {
+  scroll-behavior: auto !important;
+  transition-duration: 0.08s !important;
+  animation-duration: 0.08s !important;
+}
+
+@media (max-width: 560px) {
+  .options-tab .option-pill-grid,
+  .options-tab .option-pill-grid.two,
+  .options-tab .option-pill-grid.three {
+    grid-template-columns: 1fr;
+  }
 }
 
 .option-pill.theme-steam.active {

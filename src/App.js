@@ -814,41 +814,46 @@ const soundEnabledGlobal = () => {
   return localStorage.getItem("checkpoint-sound-enabled") !== "false";
 };
 
-const playSound = (type, soundStyle) => {
-  if (!soundEnabledGlobal()) return;
+let checkpointAudioContext = null;
+
+const getCheckpointAudioContext = () => {
+  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextClass) return null;
+
+  if (!checkpointAudioContext || checkpointAudioContext.state === "closed") {
+    checkpointAudioContext = new AudioContextClass();
+  }
+
+  if (checkpointAudioContext.state === "suspended") {
+    checkpointAudioContext.resume().catch(() => {});
+  }
+
+  return checkpointAudioContext;
+};
+
+const playSound = (type, options = {}) => {
+  const force = typeof options === "object" && options?.force === true;
+  if (!force && !soundEnabledGlobal()) return;
 
   try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const ctx = getCheckpointAudioContext();
+    if (!ctx) return;
+
     const now = ctx.currentTime;
 
     const master = ctx.createGain();
-    master.gain.value = 0.08;
+    master.gain.value = 0.06;
     master.connect(ctx.destination);
 
-    const note = (freq, start, dur, vol = 0.15) => {
+    const note = (freq, start, dur, vol = 0.13, waveform = "sine") => {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
-      switch (soundStyle) {
-        case "nes":
-          osc.type = "square";
-          break;
-        case "gameboy":
-          osc.type = "triangle";
-          break;
-        case "arcade":
-          osc.type = "sawtooth";
-          break;
-        case "modern":
-          osc.type = "sine";
-          break;
-        default:
-          osc.type = "square";
-      }
+      osc.type = waveform;
       osc.frequency.setValueAtTime(freq, now + start);
 
       gain.gain.setValueAtTime(0.0001, now + start);
-      gain.gain.exponentialRampToValueAtTime(vol, now + start + 0.005);
+      gain.gain.exponentialRampToValueAtTime(vol, now + start + 0.012);
       gain.gain.exponentialRampToValueAtTime(
         0.0001,
         now + start + dur
@@ -864,39 +869,38 @@ const playSound = (type, soundStyle) => {
     // 🎮 SWITCH PAR ACTION
     switch (type) {
       case "click":
-        note(1200, 0, 0.03);
-        note(900, 0.02, 0.04);
+        note(880, 0, 0.045, 0.08, "triangle");
         break;
 
       case "success":
-        note(900, 0, 0.05);
-        note(1200, 0.05, 0.05);
-        note(1500, 0.1, 0.08);
+        note(740, 0, 0.06, 0.09, "triangle");
+        note(980, 0.06, 0.07, 0.1, "sine");
+        note(1280, 0.13, 0.1, 0.11, "sine");
         break;
 
       case "delete":
-        note(800, 0, 0.05);
-        note(600, 0.04, 0.06);
+        note(520, 0, 0.08, 0.1, "triangle");
+        note(360, 0.06, 0.1, 0.08, "sine");
         break;
 
       case "badge":
-        note(1000, 0, 0.05);
-        note(1400, 0.05, 0.05);
-        note(1800, 0.1, 0.1);
+        note(860, 0, 0.055, 0.1, "triangle");
+        note(1180, 0.055, 0.07, 0.11, "sine");
+        note(1580, 0.13, 0.12, 0.12, "sine");
         break;
 
       case "levelup":
-        note(800, 0, 0.06);
-        note(1100, 0.06, 0.06);
-        note(1500, 0.12, 0.08);
-        note(2000, 0.2, 0.12);
+        note(660, 0, 0.07, 0.1, "triangle");
+        note(880, 0.07, 0.08, 0.1, "triangle");
+        note(1180, 0.15, 0.09, 0.11, "sine");
+        note(1560, 0.25, 0.14, 0.12, "sine");
         break;
 
       default:
-        note(1000, 0, 0.05);
+        note(880, 0, 0.06, 0.09, "triangle");
     }
 
-    setTimeout(() => ctx.close(), 400);
+    setTimeout(() => master.disconnect(), 800);
   } catch (e) {
     console.error("Erreur son :", e);
   }
@@ -1827,66 +1831,8 @@ function EmptyState({ title, subtitle }) {
   );
 }
 
-const playClick = (soundStyle) => {
-  if (document.body.dataset.ui !== "pixel") return;
-
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const now = ctx.currentTime;
-
-    const master = ctx.createGain();
-    master.gain.value = 0.08;
-    master.connect(ctx.destination);
-
-    const note = (freq, time, dur, type = "square", duty = 0.5) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      // simulate duty cycle (important for NES feel)
-      const real = new Float32Array([0, duty, -duty, 0]);
-      const imag = new Float32Array(real.length);
-      const wave = ctx.createPeriodicWave(real, imag);
-      osc.setPeriodicWave(wave);
-
-      osc.frequency.setValueAtTime(freq, time);
-
-      gain.gain.setValueAtTime(0.0001, time);
-      gain.gain.exponentialRampToValueAtTime(0.2, time + 0.005);
-      gain.gain.exponentialRampToValueAtTime(0.0001, time + dur);
-
-      osc.connect(gain);
-      gain.connect(master);
-
-      osc.start(time);
-      osc.stop(time + dur);
-    };
-
-    switch (soundStyle) {
-      case "nes":
-        note(1200, now, 0.04, "square", 0.25);
-        note(900, now + 0.03, 0.05, "square", 0.125);
-        break;
-
-      case "gameboy":
-        note(800, now, 0.02, "square", 0.5);
-        note(600, now + 0.02, 0.03, "square", 0.5);
-        break;
-
-      case "arcade":
-        note(1500, now, 0.02);
-        note(1100, now + 0.015, 0.03);
-        note(800, now + 0.04, 0.04);
-        break;
-
-      case "modern":
-        note(900, now, 0.08, "triangle");
-        break;
-    }
-
-    setTimeout(() => ctx.close(), 200);
-  } catch (e) {
-    console.error(e);
-  }
+const playClick = () => {
+  playSound("click");
 };
 
 function BottomTabs({ activeTab, setActiveTab, soundStyle }) {
@@ -8436,10 +8382,10 @@ function OptionsTab({
   setTheme,
   uiMode,
   setUiMode,
+  uiScale,
+  setUiScale,
   soundEnabled,
   setSoundEnabled,
-  soundStyle,
-  setSoundStyle,
 }) {
   const themes = [
   { id: "theme-indigo", label: "Aurora Neon" },
@@ -8453,16 +8399,9 @@ function OptionsTab({
   { id: "theme-cyberpunk", label: "Neon Tokyo" },
 ];
 
-  const soundStyles = [
-    { id: "nes", label: "NES" },
-    { id: "gameboy", label: "Game Boy" },
-    { id: "arcade", label: "Arcade" },
-    { id: "modern", label: "Moderne" },
-  ];
-
   return (
-    <div className="progression-stack">
-      <div className="search-panel">
+    <div className="progression-stack options-tab">
+      <div className="search-panel options-panel">
         <h2 className="panel-title">Options</h2>
 
         <div className="option-section">
@@ -8485,7 +8424,37 @@ function OptionsTab({
         </div>
 
         <div className="option-section">
-          <h3>Interface</h3>
+          <h3>Densite</h3>
+
+          <div className="option-pill-grid three">
+            <button
+              type="button"
+              className={`option-pill ${uiScale === "compact" ? "active" : ""}`}
+              onClick={() => setUiScale("compact")}
+            >
+              Compact
+            </button>
+
+            <button
+              type="button"
+              className={`option-pill ${uiScale === "normal" ? "active" : ""}`}
+              onClick={() => setUiScale("normal")}
+            >
+              Standard
+            </button>
+
+            <button
+              type="button"
+              className={`option-pill ${uiScale === "comfortable" ? "active" : ""}`}
+              onClick={() => setUiScale("comfortable")}
+            >
+              Large
+            </button>
+          </div>
+        </div>
+
+        <div className="option-section">
+          <h3>Animations</h3>
 
           <div className="option-pill-grid two">
             <button
@@ -8493,15 +8462,15 @@ function OptionsTab({
               className={`option-pill ${uiMode === "modern" ? "active" : ""}`}
               onClick={() => setUiMode("modern")}
             >
-              Moderne
+              Fluides
             </button>
 
             <button
               type="button"
-              className={`option-pill ${uiMode === "pixel" ? "active" : ""}`}
-              onClick={() => setUiMode("pixel")}
+              className={`option-pill ${uiMode === "reduced" ? "active" : ""}`}
+              onClick={() => setUiMode("reduced")}
             >
-              Pixel
+              Reduites
             </button>
           </div>
         </div>
@@ -8509,11 +8478,15 @@ function OptionsTab({
         <div className="option-section">
           <h3>Son</h3>
 
-          <div className="option-pill-grid two">
+          <div className="option-pill-grid three">
             <button
               type="button"
               className={`option-pill ${soundEnabled ? "active" : ""}`}
-              onClick={() => setSoundEnabled(true)}
+              onClick={() => {
+                setSoundEnabled(true);
+                localStorage.setItem("checkpoint-sound-enabled", "true");
+                playSound("success", { force: true });
+              }}
             >
               Activé
             </button>
@@ -8525,27 +8498,16 @@ function OptionsTab({
             >
               Désactivé
             </button>
+            <button
+              type="button"
+              className="option-pill"
+              onClick={() => playSound("success", { force: true })}
+            >
+              Test
+            </button>
           </div>
         </div>
 
-        <div className="option-section">
-          <h3>Style sonore</h3>
-
-          <div className="option-pill-grid">
-            {soundStyles.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`option-pill ${
-                  soundStyle === item.id ? "active" : ""
-                }`}
-                onClick={() => setSoundStyle(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -9068,7 +9030,9 @@ export default function App() {
     localStorage.getItem("checkpoint-theme") || "theme-indigo"
   );
   const [uiMode, setUiMode] = useState(
-    localStorage.getItem("checkpoint-ui-mode") || "modern"
+    localStorage.getItem("checkpoint-ui-mode") === "pixel"
+      ? "reduced"
+      : localStorage.getItem("checkpoint-ui-mode") || "modern"
   );
   const [uiScale, setUiScale] = useState(
     localStorage.getItem("checkpoint-ui-scale") || "normal"
@@ -9137,9 +9101,7 @@ export default function App() {
   const [gamingEvents, setGamingEvents] = useState(FALLBACK_GAMING_EVENTS);
   const [pixelTransition, setPixelTransition] = useState(null);
   const previousTabIndexRef = useRef(0);
-  const [soundStyle, setSoundStyle] = useState(
-  localStorage.getItem("checkpoint-sound") || "nes"
-);
+  const [soundStyle, setSoundStyle] = useState("balanced");
 
 const tabOrder = [
   "home",
@@ -10765,14 +10727,19 @@ const setPlayedPlatforms = async (id, platforms) => {
     setActiveTab(nextTab);
 
     // Transition visuelle très courte, par-dessus
-    const transition = uiMode === "pixel" ? "pixel" : "modern";
-    setTabTransition(transition);
+    if (uiMode === "reduced") {
+      setTabTransition("");
+      setPixelTransition(null);
+      return;
+    }
+
+    setTabTransition("modern");
     setPixelTransition(nextIndex > currentIndex ? "right" : "left");
 
     setTimeout(() => {
       setTabTransition("");
       setPixelTransition(null);
-    }, uiMode === "pixel" ? 320 : 260);
+    }, 240);
   };
 
   function getBadgeProgress(badge, stats) {
@@ -11361,10 +11328,10 @@ const setPlayedPlatforms = async (id, platforms) => {
                 setTheme={setTheme}
                 uiMode={uiMode}
                 setUiMode={setUiMode}
+                uiScale={uiScale}
+                setUiScale={setUiScale}
                 soundEnabled={soundEnabled}
                 setSoundEnabled={setSoundEnabled}
-                soundStyle={soundStyle}
-                setSoundStyle={setSoundStyle}
               />
 
               <AdminPanel events={gamingEvents} onImportNews={importNewsFromRSS} />
