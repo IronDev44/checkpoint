@@ -10733,13 +10733,17 @@ const setPlayedPlatforms = async (id, platforms) => {
       return;
     }
 
-    setTabTransition("modern");
-    setPixelTransition(nextIndex > currentIndex ? "right" : "left");
+    setTabTransition("");
+    setPixelTransition(null);
 
-    setTimeout(() => {
-      setTabTransition("");
-      setPixelTransition(null);
-    }, 240);
+    window.setTimeout(() => {
+      setTransitionDirection(direction);
+      setTabTransition("modern");
+
+      window.setTimeout(() => {
+        setTabTransition("");
+      }, 260);
+    }, 16);
   };
 
   function getBadgeProgress(badge, stats) {
