@@ -90,9 +90,6 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
   return (
       <div className={`checkpoint-splash ${progress >= 100 ? "complete" : ""}`}>
       <div className="splash-bg" />
-      <div className="splash-grid" />
-      <div className="splash-neon-horizon" />
-      <div className="splash-floor-reflection" />
       <div className="splash-vignette" />
 
       <div className="splash-particles-premium">
@@ -176,8 +173,6 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
           </div>
         </div>
       </div>
-
-      <div className="splash-scanline" />
     </div>
   );
 }
