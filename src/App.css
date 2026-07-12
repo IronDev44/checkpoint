@@ -17237,6 +17237,193 @@ body[data-theme="theme-steamdeck"] {
   }
 }
 
+/* Refined non-console themes. Console themes are intentionally left untouched. */
+body[data-theme="theme-indigo"] {
+  --bg-main:
+    radial-gradient(circle at 18% 7%, rgba(20, 184, 166, 0.26), transparent 28%),
+    radial-gradient(circle at 82% 4%, rgba(99, 102, 241, 0.34), transparent 24%),
+    radial-gradient(circle at 48% 88%, rgba(236, 72, 153, 0.14), transparent 30%),
+    linear-gradient(180deg, #07091f 0%, #101736 48%, #050714 100%);
+  --panel-bg: rgba(20, 26, 58, 0.76);
+  --panel-border: rgba(125, 211, 252, 0.16);
+  --surface-bg: rgba(27, 35, 73, 0.6);
+  --surface-border: rgba(167, 139, 250, 0.15);
+  --input-bg: rgba(7, 11, 30, 0.92);
+  --muted-bg: rgba(125, 211, 252, 0.1);
+  --accent: linear-gradient(135deg, #22d3ee, #6366f1 58%, #ec4899);
+  --accent-shadow: 0 0 28px rgba(34, 211, 238, 0.2);
+  --text-main: #f8fbff;
+  --text-soft: #cbd7ff;
+  --text-muted: #95a3c7;
+  --genre-color: #67e8f9;
+  --checkpoint-title-gradient: linear-gradient(180deg, #ffffff 0%, #cffafe 34%, #818cf8 58%, #f0abfc 100%);
+  --checkpoint-title-glow: rgba(34, 211, 238, 0.32);
+  --checkpoint-splash-primary: rgba(99, 102, 241, 0.92);
+  --checkpoint-splash-secondary: rgba(103, 232, 249, 0.88);
+  --checkpoint-splash-glow: rgba(34, 211, 238, 0.42);
+  --checkpoint-splash-fill: linear-gradient(90deg, #67e8f9 0%, #818cf8 54%, #f0abfc 100%);
+}
+
+body[data-theme="theme-emerald"] {
+  --bg-main:
+    radial-gradient(circle at 16% 8%, rgba(45, 212, 191, 0.28), transparent 28%),
+    radial-gradient(circle at 84% 6%, rgba(250, 204, 21, 0.12), transparent 24%),
+    radial-gradient(circle at 52% 90%, rgba(14, 165, 233, 0.12), transparent 30%),
+    linear-gradient(180deg, #031712 0%, #08251e 50%, #020a08 100%);
+  --panel-bg: rgba(9, 40, 34, 0.74);
+  --panel-border: rgba(94, 234, 212, 0.18);
+  --surface-bg: rgba(13, 54, 45, 0.58);
+  --surface-border: rgba(190, 242, 100, 0.12);
+  --input-bg: rgba(3, 24, 20, 0.94);
+  --muted-bg: rgba(45, 212, 191, 0.12);
+  --accent: linear-gradient(135deg, #14b8a6, #22c55e 58%, #facc15);
+  --accent-shadow: 0 0 26px rgba(20, 184, 166, 0.26);
+  --text-main: #f2fffb;
+  --text-soft: #baf7e7;
+  --text-muted: #86c9bc;
+  --genre-color: #bef264;
+  --checkpoint-title-gradient: linear-gradient(180deg, #ffffff 0%, #ccfbf1 34%, #2dd4bf 58%, #bef264 100%);
+  --checkpoint-title-glow: rgba(45, 212, 191, 0.36);
+  --checkpoint-splash-primary: rgba(20, 184, 166, 0.92);
+  --checkpoint-splash-secondary: rgba(190, 242, 100, 0.82);
+  --checkpoint-splash-glow: rgba(45, 212, 191, 0.42);
+  --checkpoint-splash-fill: linear-gradient(90deg, #ccfbf1 0%, #14b8a6 54%, #bef264 100%);
+}
+
+body[data-theme="theme-crimson"] {
+  --bg-main:
+    radial-gradient(circle at 18% 7%, rgba(248, 113, 113, 0.28), transparent 28%),
+    radial-gradient(circle at 84% 5%, rgba(56, 189, 248, 0.14), transparent 24%),
+    radial-gradient(circle at 50% 92%, rgba(251, 146, 60, 0.12), transparent 30%),
+    linear-gradient(180deg, #16060b 0%, #260911 48%, #080205 100%);
+  --panel-bg: rgba(55, 12, 22, 0.74);
+  --panel-border: rgba(251, 113, 133, 0.2);
+  --surface-bg: rgba(73, 17, 30, 0.58);
+  --surface-border: rgba(56, 189, 248, 0.13);
+  --input-bg: rgba(31, 7, 13, 0.94);
+  --muted-bg: rgba(251, 113, 133, 0.13);
+  --accent: linear-gradient(135deg, #fb7185, #ef4444 56%, #38bdf8);
+  --accent-shadow: 0 0 28px rgba(251, 113, 133, 0.24);
+  --text-main: #fff7f8;
+  --text-soft: #ffd1d8;
+  --text-muted: #c99ba5;
+  --genre-color: #7dd3fc;
+  --checkpoint-title-gradient: linear-gradient(180deg, #ffffff 0%, #ffe4e6 34%, #fb7185 58%, #7dd3fc 100%);
+  --checkpoint-title-glow: rgba(251, 113, 133, 0.36);
+  --checkpoint-splash-primary: rgba(239, 68, 68, 0.92);
+  --checkpoint-splash-secondary: rgba(125, 211, 252, 0.82);
+  --checkpoint-splash-glow: rgba(251, 113, 133, 0.42);
+  --checkpoint-splash-fill: linear-gradient(90deg, #ffe4e6 0%, #ef4444 56%, #38bdf8 100%);
+}
+
+body[data-theme="theme-graphite"] {
+  --bg-main:
+    radial-gradient(circle at 20% 6%, rgba(148, 163, 184, 0.2), transparent 28%),
+    radial-gradient(circle at 82% 8%, rgba(56, 189, 248, 0.14), transparent 24%),
+    radial-gradient(circle at 50% 90%, rgba(251, 191, 36, 0.08), transparent 28%),
+    linear-gradient(180deg, #090d12 0%, #111827 48%, #05070a 100%);
+  --panel-bg: rgba(24, 31, 42, 0.78);
+  --panel-border: rgba(226, 232, 240, 0.12);
+  --surface-bg: rgba(36, 45, 59, 0.58);
+  --surface-border: rgba(125, 211, 252, 0.11);
+  --input-bg: rgba(12, 17, 24, 0.94);
+  --muted-bg: rgba(226, 232, 240, 0.08);
+  --accent: linear-gradient(135deg, #e2e8f0, #38bdf8 58%, #fbbf24);
+  --accent-shadow: 0 0 24px rgba(56, 189, 248, 0.18);
+  --text-main: #f8fafc;
+  --text-soft: #cbd5e1;
+  --text-muted: #94a3b8;
+  --genre-color: #fbbf24;
+  --checkpoint-title-gradient: linear-gradient(180deg, #ffffff 0%, #e2e8f0 34%, #38bdf8 62%, #fbbf24 100%);
+  --checkpoint-title-glow: rgba(56, 189, 248, 0.24);
+  --checkpoint-splash-primary: rgba(56, 189, 248, 0.78);
+  --checkpoint-splash-secondary: rgba(226, 232, 240, 0.86);
+  --checkpoint-splash-glow: rgba(56, 189, 248, 0.3);
+  --checkpoint-splash-fill: linear-gradient(90deg, #f8fafc 0%, #38bdf8 58%, #fbbf24 100%);
+}
+
+body[data-theme="theme-retro"] {
+  --bg-main:
+    radial-gradient(circle at 18% 8%, rgba(251, 146, 60, 0.24), transparent 28%),
+    radial-gradient(circle at 82% 6%, rgba(45, 212, 191, 0.18), transparent 24%),
+    radial-gradient(circle at 50% 90%, rgba(244, 114, 182, 0.12), transparent 30%),
+    linear-gradient(180deg, #111025 0%, #201637 48%, #080812 100%);
+  --panel-bg: rgba(34, 28, 58, 0.76);
+  --panel-border: rgba(251, 146, 60, 0.18);
+  --surface-bg: rgba(47, 38, 76, 0.58);
+  --surface-border: rgba(45, 212, 191, 0.13);
+  --input-bg: rgba(18, 16, 38, 0.94);
+  --muted-bg: rgba(251, 146, 60, 0.12);
+  --accent: linear-gradient(135deg, #fb923c, #f472b6 54%, #2dd4bf);
+  --accent-shadow: 0 0 26px rgba(251, 146, 60, 0.22);
+  --text-main: #fff8ed;
+  --text-soft: #ffd7ad;
+  --text-muted: #b9a9c9;
+  --genre-color: #2dd4bf;
+  --checkpoint-title-gradient: linear-gradient(180deg, #ffffff 0%, #fed7aa 34%, #fb923c 56%, #2dd4bf 100%);
+  --checkpoint-title-glow: rgba(251, 146, 60, 0.3);
+  --checkpoint-splash-primary: rgba(251, 146, 60, 0.88);
+  --checkpoint-splash-secondary: rgba(45, 212, 191, 0.82);
+  --checkpoint-splash-glow: rgba(251, 146, 60, 0.36);
+  --checkpoint-splash-fill: linear-gradient(90deg, #fed7aa 0%, #fb923c 52%, #2dd4bf 100%);
+}
+
+body[data-theme="theme-cyberpunk"] {
+  --bg-main:
+    radial-gradient(circle at 16% 6%, rgba(236, 72, 153, 0.28), transparent 28%),
+    radial-gradient(circle at 86% 8%, rgba(34, 211, 238, 0.22), transparent 24%),
+    radial-gradient(circle at 50% 92%, rgba(250, 204, 21, 0.1), transparent 28%),
+    linear-gradient(180deg, #080716 0%, #16112e 48%, #04030b 100%);
+  --panel-bg: rgba(28, 20, 57, 0.76);
+  --panel-border: rgba(236, 72, 153, 0.2);
+  --surface-bg: rgba(36, 25, 72, 0.58);
+  --surface-border: rgba(34, 211, 238, 0.17);
+  --input-bg: rgba(12, 9, 30, 0.94);
+  --muted-bg: rgba(236, 72, 153, 0.12);
+  --accent: linear-gradient(135deg, #ec4899, #22d3ee 58%, #facc15);
+  --accent-shadow: 0 0 28px rgba(236, 72, 153, 0.24);
+  --text-main: #fff7ff;
+  --text-soft: #f5c7ff;
+  --text-muted: #a7c7d9;
+  --genre-color: #facc15;
+  --checkpoint-title-gradient: linear-gradient(180deg, #ffffff 0%, #f0abfc 32%, #ec4899 52%, #22d3ee 78%, #facc15 100%);
+  --checkpoint-title-glow: rgba(34, 211, 238, 0.34);
+  --checkpoint-splash-primary: rgba(236, 72, 153, 0.9);
+  --checkpoint-splash-secondary: rgba(34, 211, 238, 0.9);
+  --checkpoint-splash-glow: rgba(34, 211, 238, 0.38);
+  --checkpoint-splash-fill: linear-gradient(90deg, #f0abfc 0%, #ec4899 42%, #22d3ee 78%, #facc15 100%);
+}
+
+.option-pill.theme-theme-indigo.active {
+  background: linear-gradient(135deg, #22d3ee, #6366f1 58%, #ec4899);
+  color: #ffffff;
+}
+
+.option-pill.theme-theme-emerald.active {
+  background: linear-gradient(135deg, #14b8a6, #22c55e 58%, #facc15);
+  color: #042018;
+}
+
+.option-pill.theme-theme-crimson.active {
+  background: linear-gradient(135deg, #fb7185, #ef4444 58%, #38bdf8);
+  color: #ffffff;
+}
+
+.option-pill.theme-theme-graphite.active {
+  background: linear-gradient(135deg, #e2e8f0, #38bdf8 58%, #fbbf24);
+  color: #07111a;
+}
+
+.option-pill.theme-theme-retro.active {
+  background: linear-gradient(135deg, #fb923c, #f472b6 54%, #2dd4bf);
+  color: #12091b;
+}
+
+.option-pill.theme-theme-cyberpunk.active {
+  background: linear-gradient(135deg, #ec4899, #22d3ee 58%, #facc15);
+  color: #080716;
+}
+
 /* Absolute final splash override. Keep it clean on phones. */
 .checkpoint-splash .splash-floor-reflection,
 .checkpoint-splash .splash-neon-horizon,

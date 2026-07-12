@@ -8442,15 +8442,15 @@ function OptionsTab({
   setSoundStyle,
 }) {
   const themes = [
-  { id: "theme-indigo", label: "Neon Indigo" },
+  { id: "theme-indigo", label: "Aurora Neon" },
   { id: "theme-playstation", label: "PS5 Premium" },
   { id: "theme-xbox", label: "Xbox Dashboard" },
   { id: "theme-steamdeck", label: "Steam Deck" },
-  { id: "theme-emerald", label: "Cyber Emerald" },
-  { id: "theme-crimson", label: "Crimson Pulse" },
-  { id: "theme-graphite", label: "Graphite Ice" },
-  { id: "theme-retro", label: "Retro Pixel" },
-  { id: "theme-cyberpunk", label: "Cyberpunk Neon" },
+  { id: "theme-emerald", label: "Circuit Mint" },
+  { id: "theme-crimson", label: "Redline" },
+  { id: "theme-graphite", label: "Carbon Ice" },
+  { id: "theme-retro", label: "Arcade Sunset" },
+  { id: "theme-cyberpunk", label: "Neon Tokyo" },
 ];
 
   const soundStyles = [
@@ -9754,12 +9754,12 @@ useEffect(() => {
 
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     const colors = {
-      "theme-indigo": "#060611",
-      "theme-emerald": "#02100c",
-      "theme-crimson": "#120407",
-      "theme-graphite": "#0b0d12",
-      "theme-retro": "#120f07",
-      "theme-cyberpunk": "#090312",
+      "theme-indigo": "#07091f",
+      "theme-emerald": "#031712",
+      "theme-crimson": "#16060b",
+      "theme-graphite": "#090d12",
+      "theme-retro": "#111025",
+      "theme-cyberpunk": "#080716",
       "theme-playstation": "#101827",
       "theme-xbox": "#07120b",
       "theme-steamdeck": "#171717",
