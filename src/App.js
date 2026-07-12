@@ -9064,6 +9064,25 @@ export default function App() {
   const [gamingEvents, setGamingEvents] = useState(FALLBACK_GAMING_EVENTS);
   const [pixelTransition, setPixelTransition] = useState(null);
   const [soundStyle, setSoundStyle] = useState("balanced");
+  const tabSwitchTimerRef = useRef(null);
+  const tabTransitionTimerRef = useRef(null);
+  const pixelTransitionParticles = useMemo(
+    () =>
+      Array.from({ length: 96 }).map((_, i) => {
+        const x = (i * 37) % 100;
+        const wave = Math.sin(i * 0.24) * 24;
+        const y = (i / 124) * 100 + wave;
+
+        return {
+          id: i,
+          x: `${x}vw`,
+          y: `${y}vh`,
+          delay: `${(i % 18) * 0.01}s`,
+          size: `${4 + (i % 6)}px`,
+        };
+      }),
+    []
+  );
 
 const tabOrder = [
   "home",
@@ -9698,6 +9717,13 @@ useEffect(() => {
     document.body.setAttribute("data-ui", uiMode);
     localStorage.setItem("checkpoint-ui-mode", uiMode);
   }, [uiMode]);
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(tabSwitchTimerRef.current);
+      window.clearTimeout(tabTransitionTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!showSplash) return;
@@ -10676,24 +10702,30 @@ const setPlayedPlatforms = async (id, platforms) => {
 
     const currentIndex = tabOrder.indexOf(activeTab);
     const nextIndex = tabOrder.indexOf(nextTab);
+    const nextDirection = nextIndex > currentIndex ? "right" : "left";
 
-    // Changement immédiat de l’onglet
-    setActiveTab(nextTab);
+    window.clearTimeout(tabSwitchTimerRef.current);
+    window.clearTimeout(tabTransitionTimerRef.current);
 
     // Transition visuelle très courte, par-dessus
     if (uiMode === "reduced") {
       setPixelTransition(null);
+      setActiveTab(nextTab);
       return;
     }
 
     setPixelTransition(null);
 
     window.setTimeout(() => {
-      setPixelTransition(nextIndex > currentIndex ? "right" : "left");
+      setPixelTransition(nextDirection);
 
-      window.setTimeout(() => {
+      tabSwitchTimerRef.current = window.setTimeout(() => {
+        setActiveTab(nextTab);
+      }, 90);
+
+      tabTransitionTimerRef.current = window.setTimeout(() => {
         setPixelTransition(null);
-      }, 620);
+      }, 540);
     }, 16);
   };
 
@@ -11307,23 +11339,17 @@ const setPlayedPlatforms = async (id, platforms) => {
 
         {pixelTransition && (
           <div className={`pixel-transition ${pixelTransition}`}>
-            {Array.from({ length: 140 }).map((_, i) => {
-              const x = Math.random() * 100;
-              const wave = Math.sin(i * 0.22) * 24;
-              const y = (i / 180) * 100 + wave;
-
-              return (
-                <span
-                  key={i}
-                  style={{
-                    "--x": `${x}vw`,
-                    "--y": `${y}vh`,
-                    "--delay": `${Math.random() * 0.18}s`,
-                    "--size": `${4 + Math.random() * 7}px`,
-                  }}
-                />
-              );
-            })}
+            {pixelTransitionParticles.map((particle) => (
+              <span
+                key={particle.id}
+                style={{
+                  "--x": particle.x,
+                  "--y": particle.y,
+                  "--delay": particle.delay,
+                  "--size": particle.size,
+                }}
+              />
+            ))}
           </div>
         )}
 
