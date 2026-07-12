@@ -76,6 +76,45 @@ function isAbortError(error) {
 /* ==================== STATS AVANCÉES & PROFIL JOUEUR ==================== */
 
 const APP_RATING_MAX = 10;
+const APP_TAB_IDS = [
+  "home",
+  "news",
+  "search",
+  "upcoming",
+  "deals",
+  "live",
+  "social",
+  "library",
+  "series",
+  "hardware",
+  "favorites",
+  "top5",
+  "profile",
+  "options",
+];
+
+const DEFAULT_PUBLIC_SECTIONS = {
+  photos: true,
+  essential: true,
+  identityGames: true,
+  hardware: true,
+  activity: true,
+};
+
+const DEFAULT_APP_OPTIONS = {
+  startTab: "home",
+  visualEffects: "balanced",
+  animatedBackground: true,
+  appIcon: "theme",
+  ratingDisplay: "number",
+  dealRegion: "FR",
+  dealSources: {
+    steam: true,
+    epic: true,
+    psn: true,
+  },
+};
+
 const GAME_RATING_KEYS = [
   "rating",
   "ratingGraphics",
@@ -91,9 +130,45 @@ function clampRating(value, max = APP_RATING_MAX) {
   return Math.max(0, Math.min(max, Math.round(rating * 10) / 10));
 }
 
+function getRatingDisplayMode() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("checkpoint-app-options") || "{}");
+    return saved.ratingDisplay || DEFAULT_APP_OPTIONS.ratingDisplay;
+  } catch (error) {
+    return DEFAULT_APP_OPTIONS.ratingDisplay;
+  }
+}
+
+function getStoredAppOptions() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("checkpoint-app-options") || "{}");
+    return {
+      ...DEFAULT_APP_OPTIONS,
+      ...saved,
+      dealSources: {
+        ...DEFAULT_APP_OPTIONS.dealSources,
+        ...(saved.dealSources || {}),
+      },
+    };
+  } catch (error) {
+    return DEFAULT_APP_OPTIONS;
+  }
+}
+
 function formatRating10(value, emptyLabel = "Pas note") {
   const rating = clampRating(value);
   if (!rating) return emptyLabel;
+
+  const displayMode = getRatingDisplayMode();
+
+  if (displayMode === "stars") {
+    const stars = Math.max(1, Math.round(rating / 2));
+    return `${"★".repeat(stars)}${"☆".repeat(5 - stars)}`;
+  }
+
+  if (displayMode === "compact") {
+    return String(rating);
+  }
 
   return `${rating}/10`;
 }
@@ -4301,6 +4376,7 @@ const DEFAULT_SOCIAL_PROFILE = {
   identityGameIds: [],
   setupPhotos: [],
   collectionPhotos: [],
+  publicSections: DEFAULT_PUBLIC_SECTIONS,
 };
 
 function getInitials(name = "") {
@@ -4609,6 +4685,10 @@ function PublicProfilePreview({
   const [selectedHardware, setSelectedHardware] = useState(null);
 
   if (!profile) return null;
+  const publicSections = {
+    ...DEFAULT_PUBLIC_SECTIONS,
+    ...(profile.publicSections || {}),
+  };
 
   return (
     <div className="search-panel social-public-profile">
@@ -4642,7 +4722,7 @@ function PublicProfilePreview({
         </div>
       </div>
 
-      {profile.setupPhotos?.length > 0 && (
+      {publicSections.photos && profile.setupPhotos?.length > 0 && (
         <div className="social-public-mini-section">
           <strong>Setup</strong>
           <div className="social-photo-gallery">
@@ -4653,7 +4733,7 @@ function PublicProfilePreview({
         </div>
       )}
 
-      {profile.collectionPhotos?.length > 0 && (
+      {publicSections.photos && profile.collectionPhotos?.length > 0 && (
         <div className="social-public-mini-section">
           <strong>Collection physique</strong>
           <div className="social-photo-gallery">
@@ -4668,7 +4748,7 @@ function PublicProfilePreview({
         </div>
       )}
 
-      {(profile.identityTitle || profile.essentialTops?.length > 0) && (
+      {publicSections.essential && (profile.identityTitle || profile.essentialTops?.length > 0) && (
         <div className="social-public-mini-section">
           <strong>Essentiel</strong>
           <div className="social-essential-grid">
@@ -4691,7 +4771,7 @@ function PublicProfilePreview({
         </div>
       )}
 
-      {profile.identityGames?.length > 0 && (
+      {publicSections.identityGames && profile.identityGames?.length > 0 && (
         <div className="social-public-mini-section">
           <strong>Mes 3 jeux fondateurs</strong>
           {profile.identityTitle && (
@@ -4722,7 +4802,7 @@ function PublicProfilePreview({
         </div>
       )}
 
-      {profile.currentHardware?.length > 0 && (
+      {publicSections.hardware && profile.currentHardware?.length > 0 && (
         <div className="social-public-mini-section">
           <strong>Matériel actuel</strong>
           <div className="social-public-hardware-groups">
@@ -4806,7 +4886,7 @@ function PublicProfilePreview({
         </div>
       )}
 
-      {profile.recentActivity?.length > 0 && (
+      {publicSections.activity && profile.recentActivity?.length > 0 && (
         <div className="social-public-mini-section">
           <strong>Activité récente</strong>
           <ActivityFeed activities={profile.recentActivity.slice(0, 4)} compact />
@@ -4871,6 +4951,10 @@ function SocialTab({
     bio: socialProfile.bio || "",
     platform: socialProfile.platform || "",
     visibility: socialProfile.visibility || "prive",
+    publicSections: {
+      ...DEFAULT_PUBLIC_SECTIONS,
+      ...(socialProfile.publicSections || {}),
+    },
     featuredBadge,
     level,
     totalGames: games.length,
@@ -8384,6 +8468,14 @@ function OptionsTab({
   setUiMode,
   soundEnabled,
   setSoundEnabled,
+  appOptions,
+  onOptionChange,
+  socialProfile,
+  onProfileChange,
+  onProfileVisibilityChange,
+  onExportBackup,
+  onImportBackup,
+  onResetOptions,
 }) {
   const themes = [
   { id: "theme-indigo", label: "Aurora Neon" },
@@ -8396,6 +8488,33 @@ function OptionsTab({
   { id: "theme-retro", label: "Arcade Sunset" },
   { id: "theme-cyberpunk", label: "Neon Tokyo" },
 ];
+  const startTabs = [
+    { id: "home", label: "Accueil" },
+    { id: "library", label: "Bibliotheque" },
+    { id: "social", label: "Social" },
+    { id: "top5", label: "Top 5" },
+    { id: "hardware", label: "Materiel" },
+  ];
+  const publicSections = {
+    ...DEFAULT_PUBLIC_SECTIONS,
+    ...(socialProfile.publicSections || {}),
+  };
+  const dealSources = {
+    ...DEFAULT_APP_OPTIONS.dealSources,
+    ...(appOptions.dealSources || {}),
+  };
+  const updateDealSource = (source, enabled) => {
+    onOptionChange("dealSources", {
+      ...dealSources,
+      [source]: enabled,
+    });
+  };
+  const updatePublicSection = (section, enabled) => {
+    onProfileChange("publicSections", {
+      ...publicSections,
+      [section]: enabled,
+    });
+  };
 
   return (
     <div className="progression-stack options-tab">
@@ -8418,6 +8537,68 @@ function OptionsTab({
                 {item.label}
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="option-section">
+          <h3>Apparence</h3>
+
+          <div className="option-pill-grid three">
+            <button
+              type="button"
+              className={`option-pill ${appOptions.visualEffects === "calm" ? "active" : ""}`}
+              onClick={() => onOptionChange("visualEffects", "calm")}
+            >
+              Calme
+            </button>
+            <button
+              type="button"
+              className={`option-pill ${appOptions.visualEffects === "balanced" ? "active" : ""}`}
+              onClick={() => onOptionChange("visualEffects", "balanced")}
+            >
+              Equilibre
+            </button>
+            <button
+              type="button"
+              className={`option-pill ${appOptions.visualEffects === "boost" ? "active" : ""}`}
+              onClick={() => onOptionChange("visualEffects", "boost")}
+            >
+              Boost
+            </button>
+          </div>
+
+          <div className="option-pill-grid two option-subgrid">
+            <button
+              type="button"
+              className={`option-pill ${appOptions.animatedBackground ? "active" : ""}`}
+              onClick={() => onOptionChange("animatedBackground", true)}
+            >
+              Fond anime
+            </button>
+            <button
+              type="button"
+              className={`option-pill ${!appOptions.animatedBackground ? "active" : ""}`}
+              onClick={() => onOptionChange("animatedBackground", false)}
+            >
+              Fond fixe
+            </button>
+          </div>
+
+          <div className="option-pill-grid two option-subgrid">
+            <button
+              type="button"
+              className={`option-pill ${appOptions.appIcon === "theme" ? "active" : ""}`}
+              onClick={() => onOptionChange("appIcon", "theme")}
+            >
+              Icone theme
+            </button>
+            <button
+              type="button"
+              className={`option-pill ${appOptions.appIcon === "classic" ? "active" : ""}`}
+              onClick={() => onOptionChange("appIcon", "classic")}
+            >
+              Icone CP
+            </button>
           </div>
         </div>
 
@@ -8472,6 +8653,146 @@ function OptionsTab({
               onClick={() => playSound("success", { force: true })}
             >
               Test
+            </button>
+          </div>
+        </div>
+
+        <div className="option-section">
+          <h3>Navigation</h3>
+
+          <div className="option-pill-grid">
+            {startTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                className={`option-pill ${appOptions.startTab === tab.id ? "active" : ""}`}
+                onClick={() => onOptionChange("startTab", tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="option-section">
+          <h3>Profil public</h3>
+
+          <div className="option-pill-grid two">
+            <button
+              type="button"
+              className={`option-pill ${socialProfile.visibility !== "public" ? "active" : ""}`}
+              onClick={() => onProfileVisibilityChange("prive")}
+            >
+              Prive
+            </button>
+            <button
+              type="button"
+              className={`option-pill ${socialProfile.visibility === "public" ? "active" : ""}`}
+              onClick={() => onProfileVisibilityChange("public")}
+            >
+              Public
+            </button>
+          </div>
+
+          <div className="option-pill-grid option-subgrid">
+            {[
+              ["photos", "Photos"],
+              ["essential", "Essentiel"],
+              ["identityGames", "Jeux fondateurs"],
+              ["hardware", "Materiel"],
+              ["activity", "Activite"],
+            ].map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                className={`option-pill ${publicSections[id] ? "active" : ""}`}
+                onClick={() => updatePublicSection(id, !publicSections[id])}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="option-section">
+          <h3>Notation</h3>
+
+          <div className="option-pill-grid three">
+            <button
+              type="button"
+              className={`option-pill ${appOptions.ratingDisplay === "number" ? "active" : ""}`}
+              onClick={() => onOptionChange("ratingDisplay", "number")}
+            >
+              8.5/10
+            </button>
+            <button
+              type="button"
+              className={`option-pill ${appOptions.ratingDisplay === "stars" ? "active" : ""}`}
+              onClick={() => onOptionChange("ratingDisplay", "stars")}
+            >
+              Etoiles
+            </button>
+            <button
+              type="button"
+              className={`option-pill ${appOptions.ratingDisplay === "compact" ? "active" : ""}`}
+              onClick={() => onOptionChange("ratingDisplay", "compact")}
+            >
+              Compact
+            </button>
+          </div>
+        </div>
+
+        <div className="option-section">
+          <h3>Promos</h3>
+
+          <div className="option-pill-grid three">
+            {["FR", "EU", "US"].map((region) => (
+              <button
+                key={region}
+                type="button"
+                className={`option-pill ${appOptions.dealRegion === region ? "active" : ""}`}
+                onClick={() => onOptionChange("dealRegion", region)}
+              >
+                {region}
+              </button>
+            ))}
+          </div>
+
+          <div className="option-pill-grid three option-subgrid">
+            {[
+              ["steam", "Steam"],
+              ["epic", "Epic"],
+              ["psn", "PSN"],
+            ].map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                className={`option-pill ${dealSources[id] ? "active" : ""}`}
+                onClick={() => updateDealSource(id, !dealSources[id])}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="option-section">
+          <h3>Donnees</h3>
+
+          <div className="option-pill-grid three">
+            <button type="button" className="option-pill" onClick={onExportBackup}>
+              Exporter
+            </button>
+            <label className="option-pill option-file-pill">
+              Importer
+              <input
+                type="file"
+                accept="application/json"
+                onChange={onImportBackup}
+              />
+            </label>
+            <button type="button" className="option-pill" onClick={onResetOptions}>
+              Reset options
             </button>
           </div>
         </div>
@@ -8722,6 +9043,11 @@ const DEAL_SOURCES = [
 ];
 
 const PSN_DEALS_URL = "https://store.playstation.com/fr-fr/pages/deals";
+const DEAL_REGION_CONFIG = {
+  FR: { country: "FR", locale: "fr-FR", steamLang: "french", currency: "EUR", psn: "fr-fr" },
+  EU: { country: "DE", locale: "fr-FR", steamLang: "french", currency: "EUR", psn: "fr-fr" },
+  US: { country: "US", locale: "en-US", steamLang: "english", currency: "USD", psn: "en-us" },
+};
 
 function formatSteamPrice(value, currency = "EUR") {
   if (typeof value !== "number") return "";
@@ -8801,7 +9127,15 @@ function normalizeEpicDeals(data) {
     });
 }
 
-function DealsTab() {
+function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS }) {
+  const sourcePreferences = {
+    ...DEFAULT_APP_OPTIONS.dealSources,
+    ...(dealPreferences.dealSources || {}),
+  };
+  const region = DEAL_REGION_CONFIG[dealPreferences.dealRegion] || DEAL_REGION_CONFIG.FR;
+  const enabledSources = DEAL_SOURCES.filter(
+    (source) => source.id === "all" || sourcePreferences[source.id]
+  );
   const [activeSource, setActiveSource] = useState("all");
   const [deals, setDeals] = useState([]);
   const [sourceStatus, setSourceStatus] = useState({});
@@ -8847,16 +9181,16 @@ function DealsTab() {
       {
         id: "steam",
         label: "Steam",
-        url: "https://store.steampowered.com/api/featuredcategories?cc=FR&l=french",
+        url: `https://store.steampowered.com/api/featuredcategories?cc=${region.country}&l=${region.steamLang}`,
         normalize: normalizeSteamDeals,
       },
       {
         id: "epic",
         label: "Epic",
-        url: "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=fr-FR&country=FR&allowCountries=FR",
+        url: `https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=${region.locale}&country=${region.country}&allowCountries=${region.country}`,
         normalize: normalizeEpicDeals,
       },
-    ];
+    ].filter((source) => sourcePreferences[source.id]);
 
     const results = await Promise.allSettled(
       requests.map(async (source) => {
@@ -8868,9 +9202,11 @@ function DealsTab() {
     );
 
     const nextDeals = [];
-    const nextStatus = {
-      psn: "PSN demande une source serveur fiable avant affichage automatique.",
-    };
+    const nextStatus = {};
+
+    if (sourcePreferences.psn) {
+      nextStatus.psn = "PSN demande une source serveur fiable avant affichage automatique.";
+    }
 
     results.forEach((result, index) => {
       const source = requests[index];
@@ -8889,8 +9225,14 @@ function DealsTab() {
   };
 
   useEffect(() => {
+    if (!enabledSources.some((source) => source.id === activeSource)) {
+      setActiveSource("all");
+    }
+  }, [dealPreferences.dealSources, activeSource]);
+
+  useEffect(() => {
     loadDeals();
-  }, []);
+  }, [dealPreferences.dealRegion, dealPreferences.dealSources]);
 
   const visibleDeals =
     activeSource === "all"
@@ -8910,7 +9252,7 @@ function DealsTab() {
       </div>
 
       <div className="deals-source-tabs">
-        {DEAL_SOURCES.map((source) => (
+        {enabledSources.map((source) => (
           <button
             key={source.id}
             type="button"
@@ -8929,14 +9271,14 @@ function DealsTab() {
             Sony n'expose pas un flux public stable comme Steam. Pour une vraie synchro propre, on passera
             par une petite fonction serveur qui cache les offres.
           </span>
-          <a href={PSN_DEALS_URL} target="_blank" rel="noreferrer">
+          <a href={`https://store.playstation.com/${region.psn}/pages/deals`} target="_blank" rel="noreferrer">
             Voir les promos PlayStation
           </a>
         </div>
       )}
 
       <div className="deals-status-row">
-        {["steam", "epic", "psn"].map((source) => (
+        {["steam", "epic", "psn"].filter((source) => sourcePreferences[source]).map((source) => (
           <span key={source} className={`deals-status-pill ${sourceStatus[source] === "OK" ? "ok" : ""}`}>
             {source.toUpperCase()} - {sourceStatus[source] || "Chargement"}
           </span>
@@ -8992,7 +9334,13 @@ export default function App() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [results, setResults] = useState([]);
   const [games, setGames] = useState([]);
-  const [activeTab, setActiveTab] = useState("home")
+  const [appOptions, setAppOptions] = useState(() => getStoredAppOptions());
+  const [activeTab, setActiveTab] = useState(() => {
+    const savedOptions = getStoredAppOptions();
+    return APP_TAB_IDS.includes(savedOptions.startTab)
+      ? savedOptions.startTab
+      : "home";
+  })
   
   const [theme, setTheme] = useState(
     localStorage.getItem("checkpoint-theme") || "theme-indigo"
@@ -9041,6 +9389,10 @@ export default function App() {
       return {
         ...DEFAULT_SOCIAL_PROFILE,
         ...JSON.parse(localStorage.getItem("checkpoint-social-profile") || "{}"),
+        publicSections: {
+          ...DEFAULT_PUBLIC_SECTIONS,
+          ...(JSON.parse(localStorage.getItem("checkpoint-social-profile") || "{}").publicSections || {}),
+        },
       };
     } catch (error) {
       return DEFAULT_SOCIAL_PROFILE;
@@ -9067,11 +9419,18 @@ export default function App() {
   const tabSwitchTimerRef = useRef(null);
   const tabTransitionTimerRef = useRef(null);
   const pixelTransitionParticles = useMemo(
-    () =>
-      Array.from({ length: 96 }).map((_, i) => {
+    () => {
+      const particleCount =
+        appOptions.visualEffects === "boost"
+          ? 128
+          : appOptions.visualEffects === "calm"
+            ? 64
+            : 96;
+
+      return Array.from({ length: particleCount }).map((_, i) => {
         const x = (i * 37) % 100;
         const wave = Math.sin(i * 0.24) * 24;
-        const y = (i / 124) * 100 + wave;
+        const y = (i / (particleCount + 28)) * 100 + wave;
 
         return {
           id: i,
@@ -9080,8 +9439,9 @@ export default function App() {
           delay: `${(i % 18) * 0.01}s`,
           size: `${4 + (i % 6)}px`,
         };
-      }),
-    []
+      });
+    },
+    [appOptions.visualEffects]
   );
 
 const tabOrder = [
@@ -9104,6 +9464,98 @@ const tabOrder = [
 const [soundEnabled, setSoundEnabled] = useState(
   localStorage.getItem("checkpoint-sound-enabled") !== "false"
 );
+
+const updateAppOption = (key, value) => {
+  setAppOptions((prev) => {
+    const nextOptions = {
+      ...prev,
+      [key]: value,
+    };
+
+    localStorage.setItem("checkpoint-app-options", JSON.stringify(nextOptions));
+    return nextOptions;
+  });
+};
+
+const resetAppOptions = () => {
+  setAppOptions(DEFAULT_APP_OPTIONS);
+  localStorage.setItem("checkpoint-app-options", JSON.stringify(DEFAULT_APP_OPTIONS));
+  showToast("Options remises par defaut.");
+};
+
+const exportCheckpointBackup = () => {
+  const payload = {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    options: appOptions,
+    socialProfile,
+    socialFriends,
+    games,
+    hardware,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: "application/json",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = `checkpoint-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast("Sauvegarde exportee.");
+};
+
+const importCheckpointBackup = async (event) => {
+  const file = event.target.files?.[0];
+  event.target.value = "";
+
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const payload = JSON.parse(text);
+
+    if (payload.options) {
+      const nextOptions = {
+        ...DEFAULT_APP_OPTIONS,
+        ...payload.options,
+        dealSources: {
+          ...DEFAULT_APP_OPTIONS.dealSources,
+          ...(payload.options.dealSources || {}),
+        },
+      };
+      setAppOptions(nextOptions);
+      localStorage.setItem("checkpoint-app-options", JSON.stringify(nextOptions));
+    }
+
+    if (payload.socialProfile) {
+      const nextProfile = {
+        ...DEFAULT_SOCIAL_PROFILE,
+        ...payload.socialProfile,
+        publicSections: {
+          ...DEFAULT_PUBLIC_SECTIONS,
+          ...(payload.socialProfile.publicSections || {}),
+        },
+      };
+      setSocialProfile(nextProfile);
+      localStorage.setItem("checkpoint-social-profile", JSON.stringify(nextProfile));
+      await syncPublicProfileIfNeeded(nextProfile);
+    }
+
+    if (Array.isArray(payload.socialFriends)) {
+      setSocialFriends(payload.socialFriends);
+      localStorage.setItem("checkpoint-social-friends", JSON.stringify(payload.socialFriends));
+    }
+
+    showToast("Sauvegarde importee.");
+  } catch (error) {
+    console.error("Erreur import sauvegarde :", error);
+    showToast("Sauvegarde illisible.");
+  }
+};
 
 const updateHardwareRank = async (id, rank) => {
   setHardware((prev) =>
@@ -9333,6 +9785,10 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
     bio: profileOverride.bio || "",
     platform: profileOverride.platform || "",
     visibility: profileOverride.visibility || "prive",
+    publicSections: {
+      ...DEFAULT_PUBLIC_SECTIONS,
+      ...(profileOverride.publicSections || {}),
+    },
     featuredBadge: featuredBadge
       ? {
           id: featuredBadge.id,
@@ -9717,6 +10173,28 @@ useEffect(() => {
     document.body.setAttribute("data-ui", uiMode);
     localStorage.setItem("checkpoint-ui-mode", uiMode);
   }, [uiMode]);
+
+  useEffect(() => {
+    localStorage.setItem("checkpoint-app-options", JSON.stringify(appOptions));
+    document.body.setAttribute("data-effects", appOptions.visualEffects || "balanced");
+    document.body.setAttribute(
+      "data-background-motion",
+      appOptions.animatedBackground ? "on" : "off"
+    );
+    document.body.setAttribute("data-app-icon", appOptions.appIcon || "theme");
+
+    let iconLink = document.querySelector('link[rel="icon"]');
+    if (!iconLink) {
+      iconLink = document.createElement("link");
+      iconLink.setAttribute("rel", "icon");
+      document.head.appendChild(iconLink);
+    }
+
+    iconLink.setAttribute(
+      "href",
+      appOptions.appIcon === "classic" ? "/favicon.ico" : "/logo-cp-transparent.png"
+    );
+  }, [appOptions]);
 
   useEffect(() => {
     return () => {
@@ -10841,7 +11319,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 )}
 
 {activeTab === "deals" && (
-  <DealsTab />
+  <DealsTab dealPreferences={appOptions} />
 )}
 
           {activeTab === "search" && (
@@ -11314,6 +11792,17 @@ const setPlayedPlatforms = async (id, platforms) => {
                 setUiMode={setUiMode}
                 soundEnabled={soundEnabled}
                 setSoundEnabled={setSoundEnabled}
+                appOptions={appOptions}
+                onOptionChange={updateAppOption}
+                socialProfile={socialProfile}
+                onProfileChange={updateSocialProfile}
+                onProfileVisibilityChange={async (visibility) => {
+                  const result = await setSocialProfileVisibility(visibility);
+                  showToast(result.message);
+                }}
+                onExportBackup={exportCheckpointBackup}
+                onImportBackup={importCheckpointBackup}
+                onResetOptions={resetAppOptions}
               />
 
               <AdminPanel events={gamingEvents} onImportNews={importNewsFromRSS} />

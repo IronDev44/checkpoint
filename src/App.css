@@ -9999,6 +9999,10 @@ html body[data-theme="theme-indigo"] {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.option-subgrid {
+  margin-top: 10px;
+}
+
 .option-pill {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
@@ -10016,6 +10020,18 @@ html body[data-theme="theme-indigo"] {
   align-items: center;
   justify-content: center;
   text-align: center;
+}
+
+.option-file-pill {
+  position: relative;
+  overflow: hidden;
+}
+
+.option-file-pill input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .option-pill.active {
@@ -10040,6 +10056,25 @@ body[data-ui="reduced"] *::after {
   scroll-behavior: auto !important;
   transition-duration: 0.08s !important;
   animation-duration: 0.08s !important;
+}
+
+body[data-effects="calm"] .pixel-transition span,
+body[data-effects="calm"] .checkpoint-splash .splash-particles-premium span {
+  opacity: 0.58;
+  filter: none;
+  box-shadow: 0 0 5px rgba(130, 170, 255, 0.28);
+}
+
+body[data-effects="boost"] .pixel-transition span,
+body[data-effects="boost"] .checkpoint-splash .splash-particles-premium span {
+  filter: saturate(1.25) brightness(1.12);
+  box-shadow: 0 0 14px rgba(130, 170, 255, 0.62);
+}
+
+body[data-background-motion="off"] .checkpoint-splash .splash-particles-premium span,
+body[data-background-motion="off"] .background-particles span {
+  animation-play-state: paused !important;
+  opacity: 0.25 !important;
 }
 
 @media (max-width: 560px) {
