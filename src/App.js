@@ -8477,6 +8477,7 @@ function OptionsTab({
   onImportBackup,
   onResetOptions,
 }) {
+  const [helpTopic, setHelpTopic] = useState(null);
   const themes = [
   { id: "theme-indigo", label: "Aurora Neon" },
   { id: "theme-playstation", label: "PS5 Premium" },
@@ -8515,11 +8516,67 @@ function OptionsTab({
       [section]: enabled,
     });
   };
+  const helpTopics = {
+    appearance: {
+      title: "Apparence",
+      text: "L'intensite regle les effets visuels comme les pixels, reflets et particules. Fond fixe coupe les animations de fond pour rendre l'app plus calme sur iPhone.",
+    },
+    icon: {
+      title: "Icone de l'app",
+      text: "Ce choix met a jour l'icone utilisee par le navigateur. Sur iPhone, l'icone deja ajoutee a l'ecran d'accueil peut demander de supprimer puis rajouter la PWA.",
+    },
+    animations: {
+      title: "Animations",
+      text: "Fluides garde les transitions visuelles. Reduites limite les animations et transitions pour un rendu plus direct et plus leger.",
+    },
+    navigation: {
+      title: "Navigation",
+      text: "L'onglet choisi ici sera celui ouvert au lancement de l'app. Pratique si tu vas surtout dans Bibliotheque, Materiel ou Top 5.",
+    },
+    publicProfile: {
+      title: "Profil public",
+      text: "Public rend ton profil trouvable et partageable. Les blocs visibles permettent de choisir ce que les autres voient dans l'aperçu public.",
+    },
+    rating: {
+      title: "Notation",
+      text: "Le systeme interne reste toujours sur 10. Cette option change seulement l'affichage des notes dans l'interface.",
+    },
+    deals: {
+      title: "Promos",
+      text: "La region change les boutiques appelees quand elles le permettent. PSN reste un lien public car Sony ne fournit pas de flux stable comme Steam ou Epic.",
+    },
+    data: {
+      title: "Donnees",
+      text: "Exporter cree une sauvegarde JSON locale. Importer restaure les options et le profil social. Reset options remet uniquement les reglages d'options par defaut.",
+    },
+  };
+  const SectionTitle = ({ title, help }) => (
+    <div className="option-section-headline">
+      <h3>{title}</h3>
+      {help && (
+        <button
+          type="button"
+          className="option-help-btn"
+          onClick={() => setHelpTopic(helpTopics[help])}
+          aria-label={`Aide ${title}`}
+        >
+          ?
+        </button>
+      )}
+    </div>
+  );
 
   return (
     <div className="progression-stack options-tab">
       <div className="search-panel options-panel">
-        <h2 className="panel-title">Options</h2>
+        <div className="options-header">
+          <div>
+            <h2 className="panel-title">Options</h2>
+            <div className="option-value">
+              Regle l'app sans toucher a tes jeux ni a ton materiel.
+            </div>
+          </div>
+        </div>
 
         <div className="option-section">
           <h3>Thème</h3>
@@ -8541,7 +8598,7 @@ function OptionsTab({
         </div>
 
         <div className="option-section">
-          <h3>Apparence</h3>
+          <SectionTitle title="Apparence" help="appearance" />
 
           <div className="option-pill-grid three">
             <button
@@ -8603,7 +8660,7 @@ function OptionsTab({
         </div>
 
         <div className="option-section">
-          <h3>Animations</h3>
+          <SectionTitle title="Animations" help="animations" />
 
           <div className="option-pill-grid two">
             <button
@@ -8625,7 +8682,7 @@ function OptionsTab({
         </div>
 
         <div className="option-section">
-          <h3>Son</h3>
+          <SectionTitle title="Son" />
 
           <div className="option-pill-grid three">
             <button
@@ -8658,7 +8715,7 @@ function OptionsTab({
         </div>
 
         <div className="option-section">
-          <h3>Navigation</h3>
+          <SectionTitle title="Navigation" help="navigation" />
 
           <div className="option-pill-grid">
             {startTabs.map((tab) => (
@@ -8675,7 +8732,7 @@ function OptionsTab({
         </div>
 
         <div className="option-section">
-          <h3>Profil public</h3>
+          <SectionTitle title="Profil public" help="publicProfile" />
 
           <div className="option-pill-grid two">
             <button
@@ -8715,7 +8772,7 @@ function OptionsTab({
         </div>
 
         <div className="option-section">
-          <h3>Notation</h3>
+          <SectionTitle title="Notation" help="rating" />
 
           <div className="option-pill-grid three">
             <button
@@ -8743,7 +8800,7 @@ function OptionsTab({
         </div>
 
         <div className="option-section">
-          <h3>Promos</h3>
+          <SectionTitle title="Promos" help="deals" />
 
           <div className="option-pill-grid three">
             {["FR", "EU", "US"].map((region) => (
@@ -8777,7 +8834,7 @@ function OptionsTab({
         </div>
 
         <div className="option-section">
-          <h3>Donnees</h3>
+          <SectionTitle title="Donnees" help="data" />
 
           <div className="option-pill-grid three">
             <button type="button" className="option-pill" onClick={onExportBackup}>
@@ -8796,8 +8853,21 @@ function OptionsTab({
             </button>
           </div>
         </div>
-
       </div>
+
+      {helpTopic && (
+        <div className="option-help-backdrop" onClick={() => setHelpTopic(null)}>
+          <div className="option-help-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="option-help-modal-head">
+              <h3>{helpTopic.title}</h3>
+              <button type="button" onClick={() => setHelpTopic(null)}>
+                Fermer
+              </button>
+            </div>
+            <p>{helpTopic.text}</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

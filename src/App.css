@@ -9975,14 +9975,46 @@ html body[data-theme="theme-indigo"] {
 }
 
 .option-section {
-  margin-top: 22px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--ui-radius-lg);
+  background: rgba(255, 255, 255, 0.035);
 }
 
 .option-section h3 {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 16px;
   font-weight: 900;
   color: var(--text-main);
+}
+
+.options-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 6px;
+}
+
+.option-section-headline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.option-help-btn {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  border: 1px solid var(--surface-border);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  font-weight: 950;
+  cursor: pointer;
 }
 
 .option-pill-grid {
@@ -10031,6 +10063,57 @@ html body[data-theme="theme-indigo"] {
   position: absolute;
   inset: 0;
   opacity: 0;
+  cursor: pointer;
+}
+
+.option-help-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(3, 5, 18, 0.68);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.option-help-modal {
+  width: min(460px, 100%);
+  border: 1px solid var(--surface-border);
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--panel-bg), #050714 16%);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
+  padding: 18px;
+}
+
+.option-help-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.option-help-modal h3 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 18px;
+}
+
+.option-help-modal p {
+  margin: 0;
+  color: var(--text-soft);
+  line-height: 1.5;
+}
+
+.option-help-modal button {
+  border: 1px solid var(--surface-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-main);
+  font-weight: 850;
+  padding: 8px 12px;
   cursor: pointer;
 }
 
