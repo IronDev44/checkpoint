@@ -7060,6 +7060,7 @@ function getHardwareCatalogVersionSizes(item) {
 
 function HardwareDetailModal({
   item,
+  detailRef,
   onClose,
   onDeleteHardware,
   openedDropdown,
@@ -7098,7 +7099,7 @@ function HardwareDetailModal({
       : displaySizeOptions;
 
   return (
-    <div className="hardware-inline-detail">
+    <div className="hardware-inline-detail" ref={detailRef}>
       <div className="hardware-inline-detail-panel">
         <button className="hardware-inline-close" type="button" onClick={onClose}>
           ✕
@@ -7298,6 +7299,22 @@ function HardwareTab({
 
   const autoControllerSyncRef = useRef(new Set());
   const hardwareTopRef = useRef(null);
+  const hardwareCatalogPanelRef = useRef(null);
+  const hardwareDetailRef = useRef(null);
+
+  const scrollToHardwareArea = (ref, block = "start") => {
+    window.requestAnimationFrame(() => {
+      ref.current?.scrollIntoView({
+        behavior: "smooth",
+        block,
+      });
+    });
+  };
+
+  useEffect(() => {
+    if (!selectedHardwareDetail) return;
+    scrollToHardwareArea(hardwareDetailRef, "nearest");
+  }, [selectedHardwareDetail?.id]);
 
   const brandLogos = {
     Sony: "/images/brands/sony-corporate.png",
@@ -7650,11 +7667,7 @@ function HardwareTab({
     setSelectedHardwareBrandView(catalogItem.brand);
     setSelectedHardwareId(catalogItem.id);
     setHardwareSearch("");
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
-    });
+    scrollToHardwareArea(hardwareTopRef);
   };
 
   const addFromCatalog = async (
@@ -7927,7 +7940,10 @@ function HardwareTab({
         </div>
       )}
 
-      <div className={`search-panel hardware-catalog-panel ${showHardwareCatalog ? "open" : "collapsed"}`}>
+      <div
+        className={`search-panel hardware-catalog-panel ${showHardwareCatalog ? "open" : "collapsed"}`}
+        ref={hardwareCatalogPanelRef}
+      >
         <h2 className="panel-title">Catalogue matériel</h2>
 
         <div className="hardware-catalog-header">
@@ -7941,6 +7957,7 @@ function HardwareTab({
               setSelectedHardwareId(null);
               setSelectedHardwareBrandView(null);
               setHardwareSearch("");
+              scrollToHardwareArea(hardwareCatalogPanelRef);
             }}
           >
             {showHardwareCatalog ? "Fermer" : "Ajouter / rechercher"}
@@ -7964,7 +7981,9 @@ function HardwareTab({
                 setHardwareCategory(category.id);
                 setSelectedHardwareId(null);
                 setSelectedHardwareBrandView(null);
+                setSelectedHardwareDetail(null);
                 setHardwareSearch("");
+                scrollToHardwareArea(hardwareCatalogPanelRef);
               }}
             >
               {category.label}
@@ -8043,6 +8062,7 @@ function HardwareTab({
                     onClick={() => {
                       setSelectedHardwareBrandView(brand);
                       setSelectedHardwareId(null);
+                      scrollToHardwareArea(hardwareTopRef);
                     }}
                   >
                     {getHardwareBrandLogo(brand) && (
@@ -8067,6 +8087,7 @@ function HardwareTab({
                   onClick={() => {
                     setSelectedHardwareBrandView(null);
                     setSelectedHardwareId(null);
+                    scrollToHardwareArea(hardwareTopRef);
                   }}
                 >
                   <span>⬅</span> Marques
@@ -8121,7 +8142,10 @@ function HardwareTab({
                 <button
                   type="button"
                   className="hardware-back-button"
-                  onClick={() => setSelectedHardwareId(null)}
+                  onClick={() => {
+                    setSelectedHardwareId(null);
+                    scrollToHardwareArea(hardwareTopRef);
+                  }}
                 >
                   <span>⬅</span> {selectedHardwareBrandView}
                 </button>
@@ -8302,6 +8326,7 @@ function HardwareTab({
                       {selectedHardwareDetail?.id === item.id ? (
                         <HardwareDetailModal
                           item={hardware.find((h) => h.id === item.id) || item}
+                          detailRef={hardwareDetailRef}
                           onClose={() => setSelectedHardwareDetail(null)}
                           onDeleteHardware={onDeleteHardware}
                           openedDropdown={openedDropdown}
@@ -11323,6 +11348,16 @@ const setPlayedPlatforms = async (id, platforms) => {
     }, 16);
   };
 
+  useEffect(() => {
+    window.requestAnimationFrame(() => {
+      window.scrollTo({
+        top: 0,
+        left: 0,
+        behavior: "auto",
+      });
+    });
+  }, [activeTab]);
+
   function getBadgeProgress(badge, stats) {
   if (badge.id.startsWith("collector_")) {
     const target = parseInt(badge.id.split("_")[1]);
@@ -11423,7 +11458,7 @@ const setPlayedPlatforms = async (id, platforms) => {
   level={level}
   totalXP={totalXP}
   progress={progress}
-  setActiveTab={setActiveTab}
+  setActiveTab={changeTab}
   onOpenDetail={(game) => openGameDetail(game, games)}
   gamingEvents={gamingEvents}
   socialActivities={socialActivities}
