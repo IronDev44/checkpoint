@@ -7302,18 +7302,27 @@ function HardwareTab({
   const hardwareCatalogPanelRef = useRef(null);
   const hardwareDetailRef = useRef(null);
 
-  const scrollToHardwareArea = (ref, block = "start") => {
+  const scrollToHardwareArea = (ref, offset = 96) => {
     window.requestAnimationFrame(() => {
-      ref.current?.scrollIntoView({
+      if (!ref.current) return;
+
+      const mobileOffset = window.matchMedia("(max-width: 700px)").matches
+        ? Math.max(offset, 132)
+        : offset;
+
+      const top =
+        ref.current.getBoundingClientRect().top + window.scrollY - mobileOffset;
+
+      window.scrollTo({
+        top: Math.max(0, top),
         behavior: "smooth",
-        block,
       });
     });
   };
 
   useEffect(() => {
     if (!selectedHardwareDetail) return;
-    scrollToHardwareArea(hardwareDetailRef, "nearest");
+    scrollToHardwareArea(hardwareDetailRef, 116);
   }, [selectedHardwareDetail?.id]);
 
   const brandLogos = {
