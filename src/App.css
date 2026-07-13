@@ -18827,21 +18827,27 @@ body[data-theme="theme-cyberpunk"] {
 @media (max-width: 700px) {
   .hardware-console-card {
     display: grid !important;
-    grid-template-columns: 86px minmax(0, 1fr) 18px !important;
-    gap: 12px !important;
+    grid-template-columns: 82px minmax(0, 1fr) 18px !important;
+    grid-template-areas:
+      "title title arrow"
+      "image meta arrow" !important;
+    column-gap: 12px !important;
+    row-gap: 8px !important;
     align-items: center !important;
-    padding: 14px 12px !important;
+    padding: 15px 12px !important;
   }
 
   .hardware-console-card .hardware-image-wrapper {
-    width: 86px !important;
-    min-width: 86px !important;
-    max-width: 86px !important;
-    height: 82px !important;
+    grid-area: image !important;
+    width: 82px !important;
+    min-width: 82px !important;
+    max-width: 82px !important;
+    height: 72px !important;
     flex: none !important;
   }
 
   .hardware-console-info {
+    display: contents !important;
     min-width: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -18849,25 +18855,30 @@ body[data-theme="theme-cyberpunk"] {
   }
 
   .hardware-console-info .hardware-name {
+    grid-area: title !important;
     display: block !important;
     max-width: 100% !important;
     white-space: normal !important;
     word-break: normal !important;
     overflow-wrap: normal !important;
     hyphens: none !important;
-    font-size: clamp(1.18rem, 5vw, 1.55rem) !important;
+    font-size: clamp(1.22rem, 5vw, 1.55rem) !important;
     line-height: 1.05 !important;
     letter-spacing: 0 !important;
+    padding-right: 6px !important;
   }
 
   .hardware-console-info .hardware-meta {
+    grid-area: meta !important;
     white-space: normal !important;
     word-break: normal !important;
     overflow-wrap: normal !important;
     hyphens: none !important;
+    align-self: start !important;
   }
 
   .hardware-console-arrow {
+    grid-area: arrow !important;
     justify-self: end !important;
     width: 18px !important;
     min-width: 18px !important;
@@ -18877,15 +18888,15 @@ body[data-theme="theme-cyberpunk"] {
 
 @media (max-width: 380px) {
   .hardware-console-card {
-    grid-template-columns: 76px minmax(0, 1fr) 16px !important;
-    gap: 10px !important;
+    grid-template-columns: 74px minmax(0, 1fr) 16px !important;
+    column-gap: 10px !important;
   }
 
   .hardware-console-card .hardware-image-wrapper {
-    width: 76px !important;
-    min-width: 76px !important;
-    max-width: 76px !important;
-    height: 76px !important;
+    width: 74px !important;
+    min-width: 74px !important;
+    max-width: 74px !important;
+    height: 68px !important;
   }
 
   .hardware-console-info .hardware-name {
