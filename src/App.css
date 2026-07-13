@@ -18827,22 +18827,22 @@ body[data-theme="theme-cyberpunk"] {
 @media (max-width: 700px) {
   .hardware-console-card {
     display: grid !important;
-    grid-template-columns: 82px minmax(0, 1fr) 18px !important;
+    grid-template-columns: 72px minmax(0, 1fr) 18px !important;
     grid-template-areas:
-      "title title arrow"
+      "image title arrow"
       "image meta arrow" !important;
-    column-gap: 12px !important;
-    row-gap: 8px !important;
+    column-gap: 10px !important;
+    row-gap: 4px !important;
     align-items: center !important;
-    padding: 15px 12px !important;
+    padding: 14px 12px !important;
   }
 
   .hardware-console-card .hardware-image-wrapper {
     grid-area: image !important;
-    width: 82px !important;
-    min-width: 82px !important;
-    max-width: 82px !important;
-    height: 72px !important;
+    width: 72px !important;
+    min-width: 72px !important;
+    max-width: 72px !important;
+    height: 76px !important;
     flex: none !important;
   }
 
@@ -18862,10 +18862,10 @@ body[data-theme="theme-cyberpunk"] {
     word-break: normal !important;
     overflow-wrap: normal !important;
     hyphens: none !important;
-    font-size: clamp(1.22rem, 5vw, 1.55rem) !important;
+    font-size: clamp(1.2rem, 4.8vw, 1.48rem) !important;
     line-height: 1.05 !important;
     letter-spacing: 0 !important;
-    padding-right: 6px !important;
+    padding-right: 4px !important;
   }
 
   .hardware-console-info .hardware-meta {
@@ -18888,19 +18888,19 @@ body[data-theme="theme-cyberpunk"] {
 
 @media (max-width: 380px) {
   .hardware-console-card {
-    grid-template-columns: 74px minmax(0, 1fr) 16px !important;
-    column-gap: 10px !important;
+    grid-template-columns: 64px minmax(0, 1fr) 16px !important;
+    column-gap: 9px !important;
   }
 
   .hardware-console-card .hardware-image-wrapper {
-    width: 74px !important;
-    min-width: 74px !important;
-    max-width: 74px !important;
-    height: 68px !important;
+    width: 64px !important;
+    min-width: 64px !important;
+    max-width: 64px !important;
+    height: 70px !important;
   }
 
   .hardware-console-info .hardware-name {
-    font-size: clamp(1.08rem, 5vw, 1.38rem) !important;
+    font-size: clamp(1.08rem, 4.8vw, 1.32rem) !important;
   }
 }
 
