@@ -10082,9 +10082,11 @@ html body[data-theme="theme-indigo"] {
   width: min(460px, 100%);
   border: 1px solid var(--surface-border);
   border-radius: 22px;
-  background: color-mix(in srgb, var(--panel-bg), #050714 16%);
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--genre-color), transparent 72%), transparent 34%),
+    color-mix(in srgb, var(--panel-bg), #050714 16%);
   box-shadow: 0 28px 80px rgba(0, 0, 0, 0.42);
-  padding: 18px;
+  padding: 20px;
 }
 
 .option-help-modal-head {
@@ -10098,13 +10100,48 @@ html body[data-theme="theme-indigo"] {
 .option-help-modal h3 {
   margin: 0;
   color: var(--text-main);
-  font-size: 18px;
+  font-size: 20px;
+  line-height: 1.05;
 }
 
-.option-help-modal p {
+.option-help-lead {
   margin: 0;
   color: var(--text-soft);
   line-height: 1.5;
+  font-size: 0.98rem;
+}
+
+.option-help-points {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.option-help-point {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.055);
+  padding: 11px;
+}
+
+.option-help-point span {
+  width: 8px;
+  height: 8px;
+  margin-top: 7px;
+  border-radius: 50%;
+  background: var(--genre-color);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--genre-color), transparent 42%);
+}
+
+.option-help-point p {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  line-height: 1.42;
 }
 
 .option-help-modal button {

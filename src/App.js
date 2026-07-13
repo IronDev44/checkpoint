@@ -8491,10 +8491,10 @@ function OptionsTab({
 ];
   const startTabs = [
     { id: "home", label: "Accueil" },
-    { id: "library", label: "Bibliotheque" },
+    { id: "library", label: "Bibliothèque" },
     { id: "social", label: "Social" },
     { id: "top5", label: "Top 5" },
-    { id: "hardware", label: "Materiel" },
+    { id: "hardware", label: "Matériel" },
   ];
   const publicSections = {
     ...DEFAULT_PUBLIC_SECTIONS,
@@ -8519,35 +8519,71 @@ function OptionsTab({
   const helpTopics = {
     appearance: {
       title: "Apparence",
-      text: "L'intensite regle les effets visuels comme les pixels, reflets et particules. Fond fixe coupe les animations de fond pour rendre l'app plus calme sur iPhone.",
+      lead: "Ajuste l'ambiance visuelle sans changer la structure de l'app.",
+      bullets: [
+        "Calme réduit les effets pour un rendu plus discret.",
+        "Équilibré garde le style Checkpoint sans trop charger l'écran.",
+        "Boost rend les pixels, reflets et particules plus présents.",
+      ],
     },
     icon: {
-      title: "Icone de l'app",
-      text: "Ce choix met a jour l'icone utilisee par le navigateur. Sur iPhone, l'icone deja ajoutee a l'ecran d'accueil peut demander de supprimer puis rajouter la PWA.",
+      title: "Icône de l'app",
+      lead: "Change l'icône utilisée par le navigateur et la PWA.",
+      bullets: [
+        "Sur iPhone, l'icône déjà ajoutée à l'écran d'accueil ne se met pas toujours à jour seule.",
+        "Si elle ne change pas, supprime le raccourci puis ajoute à nouveau l'app à l'écran d'accueil.",
+      ],
     },
     animations: {
       title: "Animations",
-      text: "Fluides garde les transitions visuelles. Reduites limite les animations et transitions pour un rendu plus direct et plus leger.",
+      lead: "Choisis entre une app plus vivante ou plus directe.",
+      bullets: [
+        "Fluides conserve les transitions pixel et les petits mouvements d'interface.",
+        "Réduites limite les animations pour gagner en confort et en performance.",
+      ],
     },
     navigation: {
       title: "Navigation",
-      text: "L'onglet choisi ici sera celui ouvert au lancement de l'app. Pratique si tu vas surtout dans Bibliotheque, Materiel ou Top 5.",
+      lead: "Décide où l'app s'ouvre au lancement.",
+      bullets: [
+        "Accueil reste le choix le plus général.",
+        "Bibliothèque, Matériel ou Top 5 sont plus pratiques si tu consultes souvent ces sections.",
+      ],
     },
     publicProfile: {
       title: "Profil public",
-      text: "Public rend ton profil trouvable et partageable. Les blocs visibles permettent de choisir ce que les autres voient dans l'aperçu public.",
+      lead: "Contrôle ce que les autres peuvent voir de ton profil.",
+      bullets: [
+        "Privé garde le profil uniquement dans ton app.",
+        "Public permet de partager ton profil avec ton identifiant.",
+        "Les blocs visibles masquent ou affichent photos, matériel, activité et jeux fondateurs.",
+      ],
     },
     rating: {
       title: "Notation",
-      text: "Le systeme interne reste toujours sur 10. Cette option change seulement l'affichage des notes dans l'interface.",
+      lead: "Change seulement la façon d'afficher les notes.",
+      bullets: [
+        "Le calcul interne reste toujours sur 10 pour éviter les erreurs.",
+        "Les étoiles et le mode compact sont uniquement des affichages.",
+      ],
     },
     deals: {
       title: "Promos",
-      text: "La region change les boutiques appelees quand elles le permettent. PSN reste un lien public car Sony ne fournit pas de flux stable comme Steam ou Epic.",
+      lead: "Filtre les boutiques et la région utilisées pour les promotions.",
+      bullets: [
+        "Steam et Epic peuvent être chargés automatiquement quand leurs sources répondent.",
+        "PSN reste un lien public, car Sony ne fournit pas de flux stable équivalent.",
+        "La région change les prix ou les pages quand la boutique le permet.",
+      ],
     },
     data: {
-      title: "Donnees",
-      text: "Exporter cree une sauvegarde JSON locale. Importer restaure les options et le profil social. Reset options remet uniquement les reglages d'options par defaut.",
+      title: "Données",
+      lead: "Garde une porte de secours pour tes réglages.",
+      bullets: [
+        "Exporter crée une sauvegarde JSON locale.",
+        "Importer restaure les options et le profil social depuis une sauvegarde.",
+        "Reset options remet uniquement les réglages d'options par défaut.",
+      ],
     },
   };
   const SectionTitle = ({ title, help }) => (
@@ -8573,13 +8609,13 @@ function OptionsTab({
           <div>
             <h2 className="panel-title">Options</h2>
             <div className="option-value">
-              Regle l'app sans toucher a tes jeux ni a ton materiel.
+              Règle l'app sans toucher à tes jeux ni à ton matériel.
             </div>
           </div>
         </div>
 
         <div className="option-section">
-          <h3>Thème</h3>
+          <SectionTitle title="Thème" />
 
           <div className="option-pill-grid">
             {themes.map((item) => (
@@ -8613,7 +8649,7 @@ function OptionsTab({
               className={`option-pill ${appOptions.visualEffects === "balanced" ? "active" : ""}`}
               onClick={() => onOptionChange("visualEffects", "balanced")}
             >
-              Equilibre
+              Équilibré
             </button>
             <button
               type="button"
@@ -8630,7 +8666,7 @@ function OptionsTab({
               className={`option-pill ${appOptions.animatedBackground ? "active" : ""}`}
               onClick={() => onOptionChange("animatedBackground", true)}
             >
-              Fond anime
+              Fond animé
             </button>
             <button
               type="button"
@@ -8647,14 +8683,14 @@ function OptionsTab({
               className={`option-pill ${appOptions.appIcon === "theme" ? "active" : ""}`}
               onClick={() => onOptionChange("appIcon", "theme")}
             >
-              Icone theme
+              Icône thème
             </button>
             <button
               type="button"
               className={`option-pill ${appOptions.appIcon === "classic" ? "active" : ""}`}
               onClick={() => onOptionChange("appIcon", "classic")}
             >
-              Icone CP
+              Icône CP
             </button>
           </div>
         </div>
@@ -8676,7 +8712,7 @@ function OptionsTab({
               className={`option-pill ${uiMode === "reduced" ? "active" : ""}`}
               onClick={() => setUiMode("reduced")}
             >
-              Reduites
+              Réduites
             </button>
           </div>
         </div>
@@ -8740,7 +8776,7 @@ function OptionsTab({
               className={`option-pill ${socialProfile.visibility !== "public" ? "active" : ""}`}
               onClick={() => onProfileVisibilityChange("prive")}
             >
-              Prive
+              Privé
             </button>
             <button
               type="button"
@@ -8756,8 +8792,8 @@ function OptionsTab({
               ["photos", "Photos"],
               ["essential", "Essentiel"],
               ["identityGames", "Jeux fondateurs"],
-              ["hardware", "Materiel"],
-              ["activity", "Activite"],
+              ["hardware", "Matériel"],
+              ["activity", "Activité"],
             ].map(([id, label]) => (
               <button
                 key={id}
@@ -8787,7 +8823,7 @@ function OptionsTab({
               className={`option-pill ${appOptions.ratingDisplay === "stars" ? "active" : ""}`}
               onClick={() => onOptionChange("ratingDisplay", "stars")}
             >
-              Etoiles
+              Étoiles
             </button>
             <button
               type="button"
@@ -8834,7 +8870,7 @@ function OptionsTab({
         </div>
 
         <div className="option-section">
-          <SectionTitle title="Donnees" help="data" />
+          <SectionTitle title="Données" help="data" />
 
           <div className="option-pill-grid three">
             <button type="button" className="option-pill" onClick={onExportBackup}>
@@ -8864,7 +8900,17 @@ function OptionsTab({
                 Fermer
               </button>
             </div>
-            <p>{helpTopic.text}</p>
+            <p className="option-help-lead">{helpTopic.lead}</p>
+            {helpTopic.bullets?.length > 0 && (
+              <div className="option-help-points">
+                {helpTopic.bullets.map((item) => (
+                  <div key={item} className="option-help-point">
+                    <span />
+                    <p>{item}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
