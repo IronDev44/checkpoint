@@ -7095,6 +7095,183 @@ body[data-ui="modern"] .chip.active {
   box-shadow: var(--accent-shadow);
 }
 
+.weekly-quiz-card {
+  padding: 16px;
+  border-radius: var(--ui-radius-xl);
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 22%, transparent), transparent 34%),
+    var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--panel-shadow);
+}
+
+.weekly-quiz-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.weekly-quiz-top p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.weekly-quiz-reward {
+  flex-shrink: 0;
+  min-width: 96px;
+  padding: 10px 12px;
+  border-radius: var(--ui-radius-lg);
+  background: color-mix(in srgb, var(--accent) 22%, rgba(255,255,255,0.08));
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, rgba(255,255,255,0.14));
+  text-align: right;
+}
+
+.weekly-quiz-reward span {
+  display: block;
+  font-size: 11px;
+  color: var(--text-soft);
+  font-weight: 800;
+}
+
+.weekly-quiz-reward strong {
+  display: block;
+  margin-top: 3px;
+  color: white;
+  font-size: 16px;
+}
+
+.weekly-quiz-meta,
+.weekly-quiz-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.weekly-quiz-meta span,
+.weekly-quiz-stats span {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.weekly-quiz-question {
+  margin: 16px 0 12px;
+  font-size: 20px;
+  line-height: 1.22;
+}
+
+.weekly-quiz-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.weekly-quiz-controls button {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--ui-radius-md);
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.07);
+  color: white;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.weekly-quiz-controls button:hover {
+  border-color: color-mix(in srgb, var(--accent) 62%, white);
+  background: color-mix(in srgb, var(--accent) 16%, rgba(255,255,255,0.07));
+}
+
+.weekly-quiz-answers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.weekly-quiz-answer {
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--ui-radius-lg);
+  background: var(--surface-bg);
+  border: 1px solid var(--surface-border);
+  color: white;
+  font-weight: 900;
+  text-align: left;
+  cursor: pointer;
+}
+
+.weekly-quiz-answer span {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.09);
+  color: var(--text-soft);
+}
+
+.weekly-quiz-answer:not(:disabled):hover,
+.weekly-quiz-answer.selected {
+  border-color: color-mix(in srgb, var(--accent) 70%, white);
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface-bg));
+}
+
+.weekly-quiz-answer.correct {
+  border-color: rgba(74, 222, 128, 0.75);
+  background: rgba(34, 197, 94, 0.16);
+}
+
+.weekly-quiz-answer.wrong {
+  border-color: rgba(248, 113, 113, 0.78);
+  background: rgba(239, 68, 68, 0.14);
+}
+
+.weekly-quiz-answer:disabled {
+  cursor: default;
+}
+
+.weekly-quiz-result {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: var(--ui-radius-lg);
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.weekly-quiz-result.correct {
+  border-color: rgba(74, 222, 128, 0.45);
+}
+
+.weekly-quiz-result.wrong {
+  border-color: rgba(248, 113, 113, 0.45);
+}
+
+.weekly-quiz-result strong {
+  color: white;
+}
+
+.weekly-quiz-result span {
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
 .home-stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -7177,6 +7354,31 @@ body[data-ui="modern"] .chip.active {
 @media (max-width: 560px) {
   .home-hero {
     align-items: flex-start;
+  }
+
+  .weekly-quiz-card {
+    padding: 14px;
+  }
+
+  .weekly-quiz-top {
+    flex-direction: column;
+  }
+
+  .weekly-quiz-reward {
+    width: 100%;
+    text-align: left;
+  }
+
+  .weekly-quiz-question {
+    font-size: 18px;
+  }
+
+  .weekly-quiz-answers {
+    grid-template-columns: 1fr;
+  }
+
+  .weekly-quiz-answer {
+    min-height: 48px;
   }
 
   .home-actions-grid,

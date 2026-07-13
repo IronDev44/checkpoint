@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import "./App.css";
 import { db } from "./firebase";
 import { HARDWARE_CATALOG } from "./data/hardware";
+import { WEEKLY_QUIZ_QUESTIONS, WEEKLY_QUIZ_XP } from "./data/weeklyQuiz";
 import SplashScreen from "./components/SplashScreen";
 import {
   collection,
@@ -59,6 +60,78 @@ import {
 } from "lucide-react";
 
 const API_KEY = "d7b763a492c745cd82217c285f897e08";
+
+const WEEKLY_QUIZ_STORAGE_KEY = "checkpoint-weekly-quiz";
+
+const DEFAULT_WEEKLY_QUIZ_PROGRESS = {
+  answers: {},
+  totalXP: 0,
+  streak: 0,
+  bestStreak: 0,
+  lastCorrectWeek: "",
+};
+
+function getWeeklyQuizKey(date = new Date()) {
+  const current = new Date(date);
+  current.setHours(0, 0, 0, 0);
+  const day = current.getDay() || 7;
+  current.setDate(current.getDate() + 4 - day);
+  const yearStart = new Date(current.getFullYear(), 0, 1);
+  const week = Math.ceil((((current - yearStart) / 86400000) + 1) / 7);
+  return `${current.getFullYear()}-W${String(week).padStart(2, "0")}`;
+}
+
+function getPreviousWeeklyQuizKey(weekKey) {
+  const [yearPart, weekPart] = String(weekKey).split("-W");
+  const year = Number(yearPart);
+  const week = Number(weekPart);
+
+  if (!year || !week) return "";
+  if (week > 1) return `${year}-W${String(week - 1).padStart(2, "0")}`;
+
+  return `${year - 1}-W${String(getWeeksInYear(year - 1)).padStart(2, "0")}`;
+}
+
+function getWeeksInYear(year) {
+  return getWeeklyQuizKey(new Date(year, 11, 28)).split("-W")[1];
+}
+
+function hashString(value) {
+  return String(value)
+    .split("")
+    .reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0);
+}
+
+function getWeeklyQuizQuestion(weekKey = getWeeklyQuizKey()) {
+  const questions = WEEKLY_QUIZ_QUESTIONS.length ? WEEKLY_QUIZ_QUESTIONS : [];
+  if (questions.length === 0) return null;
+
+  const index = Math.abs(hashString(weekKey)) % questions.length;
+  return questions[index];
+}
+
+function getStoredWeeklyQuizProgress() {
+  try {
+    const storedProgress = JSON.parse(
+      localStorage.getItem(WEEKLY_QUIZ_STORAGE_KEY) || "{}"
+    );
+
+    return {
+      ...DEFAULT_WEEKLY_QUIZ_PROGRESS,
+      ...storedProgress,
+      answers: {
+        ...DEFAULT_WEEKLY_QUIZ_PROGRESS.answers,
+        ...(storedProgress.answers || {}),
+      },
+    };
+  } catch (error) {
+    return DEFAULT_WEEKLY_QUIZ_PROGRESS;
+  }
+}
+
+function storeWeeklyQuizProgress(progress) {
+  localStorage.setItem(WEEKLY_QUIZ_STORAGE_KEY, JSON.stringify(progress));
+}
 
 function isAbortError(error) {
   const message = String(
@@ -1176,6 +1249,10 @@ const BADGES = [
   { id: "audio_2", icon: "\uD83C\uDFA7", name: "Immersion", desc: "Posseder 2 equipements audio", rarity: "common", condition: (s) => s.audio >= 2 },
   { id: "top_console", icon: "\u2728", name: "Console coup de coeur", desc: "Noter une console a 9/10", rarity: "epic", condition: (s) => s.topConsoleRating >= 9 },
 
+  { id: "quiz_first", icon: "?", name: "Premier checkpoint", desc: "Repondre a 1 quiz hebdo", rarity: "common", condition: (s) => s.quizAnswered >= 1 },
+  { id: "quiz_5", icon: "5", name: "Memoire active", desc: "Repondre a 5 quiz hebdo", rarity: "rare", condition: (s) => s.quizAnswered >= 5 },
+  { id: "quiz_streak_4", icon: "4", name: "Serie parfaite", desc: "Enchainer 4 bonnes reponses hebdomadaires", rarity: "epic", condition: (s) => s.quizBestStreak >= 4 },
+
   { id: "creator_checkpoint", icon: "C", name: "Createur de Checkpoint", desc: "Badge unique du createur de l'application", rarity: "creator", special: "creator", hiddenWhenLocked: true, condition: (s) => s.isCreator },
 
   { id: "brand_playstation_50", icon: "PS", platformFamily: "playstation", name: "Explorateur PlayStation", desc: "Jouer 50 jeux sur PlayStation", rarity: "rare", condition: (s) => s.platformFamilies.playstation >= 50 },
@@ -1276,6 +1353,9 @@ const BADGE_ICON_COMPONENTS = {
   controllers_6: Target,
   audio_2: Headphones,
   top_console: Sparkles,
+  quiz_first: Target,
+  quiz_5: Puzzle,
+  quiz_streak_4: Trophy,
 };
 
 const BADGE_BRAND_LOGOS = {
@@ -1522,7 +1602,13 @@ function getPlatformBadgeCounts(games = []) {
   return counts;
 }
 
-function calculateBadgeStats(games, level, hardware = [], socialProfile = DEFAULT_SOCIAL_PROFILE) {
+function calculateBadgeStats(
+  games,
+  level,
+  hardware = [],
+  socialProfile = DEFAULT_SOCIAL_PROFILE,
+  quizProgress = DEFAULT_WEEKLY_QUIZ_PROGRESS
+) {
   const currentHardware = hardware.filter((item) =>
     ["possédé", "à réparer", "possÃ©dÃ©", "Ã  rÃ©parer"].includes(item.status)
   );
@@ -1546,12 +1632,20 @@ function calculateBadgeStats(games, level, hardware = [], socialProfile = DEFAUL
     ),
     platformFamilies: getPlatformFamilyBadgeCounts(games),
     platformCounts: getPlatformBadgeCounts(games),
+    quizAnswered: Object.keys(quizProgress.answers || {}).length,
+    quizBestStreak: quizProgress.bestStreak || 0,
     isCreator: isCreatorProfile(socialProfile),
   };
 }
 
-function getUnlockedBadgesV2(games, level, hardware = [], socialProfile = DEFAULT_SOCIAL_PROFILE) {
-  const stats = calculateBadgeStats(games, level, hardware, socialProfile);
+function getUnlockedBadgesV2(
+  games,
+  level,
+  hardware = [],
+  socialProfile = DEFAULT_SOCIAL_PROFILE,
+  quizProgress = DEFAULT_WEEKLY_QUIZ_PROGRESS
+) {
+  const stats = calculateBadgeStats(games, level, hardware, socialProfile, quizProgress);
   return BADGES.map(b => ({
     ...b,
     unlocked: b.condition(stats)
@@ -1573,6 +1667,18 @@ function getBadgeProgress(badge, stats) {
 
   if (badge.id.startsWith("reviews_")) {
     return { current: stats.reviews, target: Number(badge.id.split("_")[1]) };
+  }
+
+  if (badge.id === "quiz_first") {
+    return { current: stats.quizAnswered, target: 1 };
+  }
+
+  if (badge.id === "quiz_5") {
+    return { current: stats.quizAnswered, target: 5 };
+  }
+
+  if (badge.id === "quiz_streak_4") {
+    return { current: stats.quizBestStreak, target: 4 };
   }
 
   if (badge.id.startsWith("hours_")) {
@@ -5426,11 +5532,23 @@ function HomeTab({
   onOpenDetail,
   gamingEvents = [],
   socialActivities = [],
+  weeklyQuiz,
+  weeklyQuizProgress = DEFAULT_WEEKLY_QUIZ_PROGRESS,
+  onAnswerWeeklyQuiz,
 }) {
   const [recommendations, setRecommendations] = useState([]);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+  const [selectedQuizAnswer, setSelectedQuizAnswer] = useState(null);
+  const [quizQuestionIndex, setQuizQuestionIndex] = useState(() => {
+    if (WEEKLY_QUIZ_QUESTIONS.length === 0) return 0;
+    return Math.abs(hashString(weeklyQuiz?.weekKey || "checkpoint")) % WEEKLY_QUIZ_QUESTIONS.length;
+  });
 
   const profile = getPlayerProfile(games);
+  const quizQuestion = WEEKLY_QUIZ_QUESTIONS[quizQuestionIndex] || weeklyQuiz?.question;
+  const quizAnswerKey = quizQuestion ? `free-${quizQuestion.id}` : weeklyQuiz?.weekKey;
+  const quizAnswer = weeklyQuizProgress.answers?.[quizAnswerKey];
+  const quizLocked = Boolean(quizAnswer);
 
   const total = games.length;
   const finished = games.filter((g) => g.status === "terminé").length;
@@ -5469,6 +5587,10 @@ function HomeTab({
 
   const upcomingEvents = getUpcomingEvents(gamingEvents);
   const nextEvent = upcomingEvents[0];
+
+  useEffect(() => {
+    setSelectedQuizAnswer(null);
+  }, [quizAnswerKey]);
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -5597,6 +5719,102 @@ function HomeTab({
         title={getRankTitle(level)}
         progress={progress}
       />
+
+      {quizQuestion && (
+        <div className="weekly-quiz-card">
+          <div className="weekly-quiz-top">
+            <div>
+              <div className="home-card-title">Quiz gaming</div>
+              <p>Mode libre pour tester toute la base. Le rythme hebdo pourra être activé au lancement public.</p>
+            </div>
+
+            <div className="weekly-quiz-reward">
+              <span>Récompense</span>
+              <strong>+{WEEKLY_QUIZ_XP.correct} XP</strong>
+            </div>
+          </div>
+
+          <div className="weekly-quiz-meta">
+            <span>{quizQuestion.category}</span>
+            <span>{quizQuestion.difficulty}</span>
+            <span>Question {quizQuestionIndex + 1} / {WEEKLY_QUIZ_QUESTIONS.length}</span>
+          </div>
+
+          <h3 className="weekly-quiz-question">{quizQuestion.question}</h3>
+
+          <div className="weekly-quiz-controls">
+            <button
+              type="button"
+              onClick={() =>
+                setQuizQuestionIndex((index) =>
+                  index === 0 ? WEEKLY_QUIZ_QUESTIONS.length - 1 : index - 1
+                )
+              }
+            >
+              Précédente
+            </button>
+
+            <button
+              type="button"
+              onClick={() =>
+                setQuizQuestionIndex((index) =>
+                  (index + 1) % WEEKLY_QUIZ_QUESTIONS.length
+                )
+              }
+            >
+              Suivante
+            </button>
+          </div>
+
+          <div className="weekly-quiz-answers">
+            {quizQuestion.answers.map((answer, index) => {
+              const isSelected = selectedQuizAnswer === index || quizAnswer?.answerIndex === index;
+              const isCorrect = quizLocked && index === quizQuestion.correctIndex;
+              const isWrong = quizLocked && quizAnswer?.answerIndex === index && !quizAnswer.correct;
+
+              return (
+                <button
+                  key={answer}
+                  type="button"
+                  className={[
+                    "weekly-quiz-answer",
+                    isSelected ? "selected" : "",
+                    isCorrect ? "correct" : "",
+                    isWrong ? "wrong" : "",
+                  ].join(" ")}
+                  disabled={quizLocked}
+                  onClick={() => {
+                    setSelectedQuizAnswer(index);
+                    onAnswerWeeklyQuiz?.(index, {
+                      question: quizQuestion,
+                      answerKey: quizAnswerKey,
+                      mode: "free",
+                    });
+                  }}
+                >
+                  <span>{String.fromCharCode(65 + index)}</span>
+                  {answer}
+                </button>
+              );
+            })}
+          </div>
+
+          {quizLocked && (
+            <div className={`weekly-quiz-result ${quizAnswer.correct ? "correct" : "wrong"}`}>
+              <strong>{quizAnswer.correct ? "Bonne réponse" : "Réponse validée"}</strong>
+              <span>
+                +{quizAnswer.earnedXP} XP · {quizQuestion.explanation}
+              </span>
+            </div>
+          )}
+
+          <div className="weekly-quiz-stats">
+            <span>Série : {weeklyQuizProgress.streak || 0}</span>
+            <span>Record : {weeklyQuizProgress.bestStreak || 0}</span>
+            <span>XP quiz : {weeklyQuizProgress.totalXP || 0}</span>
+          </div>
+        </div>
+      )}
 
       <div className="home-card">
         <div className="home-card-title">🎯 Défi backlog</div>
@@ -9484,6 +9702,9 @@ export default function App() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [results, setResults] = useState([]);
   const [games, setGames] = useState([]);
+  const [weeklyQuizProgress, setWeeklyQuizProgress] = useState(() =>
+    getStoredWeeklyQuizProgress()
+  );
   const [appOptions, setAppOptions] = useState(() => getStoredAppOptions());
   const [activeTab, setActiveTab] = useState(() => {
     const savedOptions = getStoredAppOptions();
@@ -9827,6 +10048,64 @@ const toggleHardwareFavorite = async (id, currentFavorite) => {
 const showToast = (message, duration = 2000) => {
   setToast(message);
   setTimeout(() => setToast(""), duration);
+};
+
+const weeklyQuiz = useMemo(() => {
+  const weekKey = getWeeklyQuizKey();
+  return {
+    weekKey,
+    question: getWeeklyQuizQuestion(weekKey),
+  };
+}, []);
+
+const handleWeeklyQuizAnswer = (answerIndex, options = {}) => {
+  const question = options.question || weeklyQuiz.question;
+  if (!question) return;
+
+  const answerKey = options.answerKey || weeklyQuiz.weekKey;
+  if (weeklyQuizProgress.answers?.[answerKey]) return;
+
+  const correct = answerIndex === question.correctIndex;
+  const previousWeekKey = getPreviousWeeklyQuizKey(weeklyQuiz.weekKey);
+  const nextStreak =
+    options.mode === "free"
+      ? correct
+        ? (weeklyQuizProgress.streak || 0) + 1
+        : 0
+      : correct
+        ? weeklyQuizProgress.lastCorrectWeek === previousWeekKey
+          ? (weeklyQuizProgress.streak || 0) + 1
+          : 1
+        : 0;
+
+  const earnedXP = correct
+    ? WEEKLY_QUIZ_XP.correct +
+      Math.min(Math.max(nextStreak - 1, 0), 4) * WEEKLY_QUIZ_XP.streakBonus
+    : WEEKLY_QUIZ_XP.participation;
+
+  const nextProgress = {
+    ...weeklyQuizProgress,
+    totalXP: (weeklyQuizProgress.totalXP || 0) + earnedXP,
+    streak: nextStreak,
+    bestStreak: Math.max(weeklyQuizProgress.bestStreak || 0, nextStreak),
+    lastCorrectWeek: correct ? weeklyQuiz.weekKey : weeklyQuizProgress.lastCorrectWeek,
+    answers: {
+      ...(weeklyQuizProgress.answers || {}),
+      [answerKey]: {
+        questionId: question.id,
+        answerIndex,
+        correct,
+        earnedXP,
+        mode: options.mode || "weekly",
+        answeredAt: new Date().toISOString(),
+      },
+    },
+  };
+
+  setWeeklyQuizProgress(nextProgress);
+  storeWeeklyQuizProgress(nextProgress);
+  playSound(correct ? "success" : "click", soundStyle);
+  showToast(correct ? `Bonne réponse ! +${earnedXP} XP` : `Participation validée. +${earnedXP} XP`);
 };
 
 const updateSocialProfile = (field, value) => {
@@ -10505,10 +10784,12 @@ const url = `https://api.rawg.io/api/games?key=${API_KEY}&dates=${startDate},${e
   }, [search]);
 
   const totalXP = useMemo(() => {
-    return games
+    const gamesXP = games
       .filter((g) => g.status !== "wishlist")
       .reduce((sum, g) => sum + calculateXP(g), 0);
-  }, [games]);
+
+    return gamesXP + (weeklyQuizProgress.totalXP || 0);
+  }, [games, weeklyQuizProgress.totalXP]);
 
   const level = getLevel(totalXP);
   const progress = getProgress(totalXP);
@@ -10524,8 +10805,8 @@ useEffect(() => {
 }, [level, prevLevel, soundStyle]);
 
   const badges = useMemo(
-    () => getUnlockedBadgesV2(games, level, hardware, socialProfile),
-    [games, level, hardware, socialProfile]
+    () => getUnlockedBadgesV2(games, level, hardware, socialProfile, weeklyQuizProgress),
+    [games, level, hardware, socialProfile, weeklyQuizProgress]
   );
   const socialActivities = useMemo(
     () => getSocialActivityFeed(games, hardware, badges),
@@ -11471,6 +11752,9 @@ const setPlayedPlatforms = async (id, platforms) => {
   onOpenDetail={(game) => openGameDetail(game, games)}
   gamingEvents={gamingEvents}
   socialActivities={socialActivities}
+  weeklyQuiz={weeklyQuiz}
+  weeklyQuizProgress={weeklyQuizProgress}
+  onAnswerWeeklyQuiz={handleWeeklyQuizAnswer}
 />
 )}
 
