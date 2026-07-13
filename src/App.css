@@ -18823,6 +18823,76 @@ body[data-theme="theme-cyberpunk"] {
   }
 }
 
+/* HARDWARE MOBILE TITLE READABILITY */
+@media (max-width: 700px) {
+  .hardware-console-card {
+    display: grid !important;
+    grid-template-columns: 86px minmax(0, 1fr) 18px !important;
+    gap: 12px !important;
+    align-items: center !important;
+    padding: 14px 12px !important;
+  }
+
+  .hardware-console-card .hardware-image-wrapper {
+    width: 86px !important;
+    min-width: 86px !important;
+    max-width: 86px !important;
+    height: 82px !important;
+    flex: none !important;
+  }
+
+  .hardware-console-info {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+  }
+
+  .hardware-console-info .hardware-name {
+    display: block !important;
+    max-width: 100% !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+    font-size: clamp(1.18rem, 5vw, 1.55rem) !important;
+    line-height: 1.05 !important;
+    letter-spacing: 0 !important;
+  }
+
+  .hardware-console-info .hardware-meta {
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+  }
+
+  .hardware-console-arrow {
+    justify-self: end !important;
+    width: 18px !important;
+    min-width: 18px !important;
+    margin-left: 0 !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .hardware-console-card {
+    grid-template-columns: 76px minmax(0, 1fr) 16px !important;
+    gap: 10px !important;
+  }
+
+  .hardware-console-card .hardware-image-wrapper {
+    width: 76px !important;
+    min-width: 76px !important;
+    max-width: 76px !important;
+    height: 76px !important;
+  }
+
+  .hardware-console-info .hardware-name {
+    font-size: clamp(1.08rem, 5vw, 1.38rem) !important;
+  }
+}
+
 /* Final CP monogram override: no bitmap color, no bitmap background. */
 .checkpoint-splash .splash-logo-mark {
   position: relative !important;
