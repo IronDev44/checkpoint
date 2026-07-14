@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import "./App.css";
 import { db } from "./firebase";
 import { HARDWARE_CATALOG } from "./data/hardware";
+import { PC_COMPONENT_FIELDS, getPcComponentOptions } from "./data/pcComponents";
 import { WEEKLY_QUIZ_QUESTIONS, WEEKLY_QUIZ_XP } from "./data/weeklyQuiz";
 import SplashScreen from "./components/SplashScreen";
 import {
@@ -7294,6 +7295,29 @@ function getHardwareCatalogVersionSizes(item) {
   return [];
 }
 
+function isConfigurablePcHardware(item = {}) {
+  const text = [
+    item.name,
+    item.parentName,
+    item.variantName,
+    item.brand,
+    item.category,
+    item.versionId,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return (
+    item.versionId === "desktop-pc" ||
+    item.versionId === "gaming-laptop" ||
+    text.includes("pc fixe") ||
+    text.includes("pc portable") ||
+    text.includes("gaming pc") ||
+    text.includes("pc gaming")
+  );
+}
+
 function HardwareDetailModal({
   item,
   detailRef,
@@ -7307,6 +7331,7 @@ function HardwareDetailModal({
   onUpdateHardwareStatus,
   onUpdateHardwareCondition,
   onUpdateHardwareDisplaySize,
+  onUpdateHardwareComponent,
   onUpdateHardwareRating,
   onUpdateHardwareReview,
   onToggleHardwareFavorite,
@@ -7323,6 +7348,7 @@ function HardwareDetailModal({
   const fields = getHardwareRatingFields(item.type);
   const averageRating = getHardwareAverageRating(item);
   const catalogDisplaySizes = getHardwareCatalogVersionSizes(item);
+  const showPcConfiguration = isConfigurablePcHardware(item);
   const currentDisplaySizeOptions =
     item.type === "display" && catalogDisplaySizes.length
       ? [
@@ -7451,6 +7477,29 @@ function HardwareDetailModal({
             </div>
           </div>
 
+          {showPcConfiguration && (
+            <div className="modal-block hardware-pc-config-block">
+              <div className="modal-block-title">Configuration PC</div>
+
+              <div className="hardware-pc-config-grid">
+                {PC_COMPONENT_FIELDS.map((field) => (
+                  <HardwareDropdown
+                    key={field.key}
+                    id={`detail-pc-${field.key}-${item.id}`}
+                    label={field.label}
+                    value={item.pcConfig?.[field.key] || ""}
+                    options={getPcComponentOptions(field.key)}
+                    openedDropdown={openedDropdown}
+                    setOpenedDropdown={setOpenedDropdown}
+                    onChange={(value) =>
+                      onUpdateHardwareComponent?.(item.id, field.key, value)
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="modal-block">
             <div className="modal-block-title">Notes détaillées</div>
 
@@ -7523,6 +7572,7 @@ function HardwareTab({
   onUpdateHardwareRank,
   onUpdateHardwareRating,
   onUpdateHardwareReview,
+  onUpdateHardwareComponent,
 }) {
   const [hardwareSearch, setHardwareSearch] = useState("");
   const [selectedHardwareId, setSelectedHardwareId] = useState(null);
@@ -8582,6 +8632,7 @@ function HardwareTab({
                           onUpdateHardwareStatus={onUpdateHardwareStatus}
                           onUpdateHardwareCondition={onUpdateHardwareCondition}
                           onUpdateHardwareDisplaySize={onUpdateHardwareDisplaySize}
+                          onUpdateHardwareComponent={onUpdateHardwareComponent}
                           onUpdateHardwareRating={onUpdateHardwareRating}
                           onUpdateHardwareReview={onUpdateHardwareReview}
                           onToggleHardwareFavorite={onToggleHardwareFavorite}
@@ -11366,6 +11417,16 @@ const updateHardwareReview = async (hardwareId, review) => {
   }
 };
 
+const updateHardwareComponent = (hardwareId, key, value) => {
+  const currentItem = hardware.find((item) => item.id === hardwareId);
+  const nextConfig = {
+    ...(currentItem?.pcConfig || {}),
+    [key]: value,
+  };
+
+  updateHardwareFieldDebounced(hardwareId, { pcConfig: nextConfig });
+};
+
 const setRating = (id, rating) => {
     const nextRating = clampRating(rating);
 
@@ -12162,6 +12223,7 @@ const setPlayedPlatforms = async (id, platforms) => {
     onUpdateHardwareRank={updateHardwareRank}
     onUpdateHardwareRating={updateHardwareRating}
     onUpdateHardwareReview={updateHardwareReview}
+    onUpdateHardwareComponent={updateHardwareComponent}
   />
 )}
 

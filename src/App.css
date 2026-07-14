@@ -12256,6 +12256,27 @@ body {
   font-size: 0.9rem;
 }
 
+.hardware-pc-config-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.hardware-pc-config-grid .hardware-dropdown {
+  min-width: 0;
+}
+
+.hardware-pc-config-grid .hardware-dropdown-menu {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+@media (max-width: 640px) {
+  .hardware-pc-config-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* FIX FINAL SCROLL PROPRE */
 
 html,
