@@ -102,6 +102,18 @@ function hashString(value) {
     .reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0);
 }
 
+function getQuizAnswerChoices(question) {
+  if (!question?.answers) return [];
+
+  return question.answers
+    .map((answer, originalIndex) => ({
+      answer,
+      originalIndex,
+      sortKey: Math.abs(hashString(`${question.id}-${answer}-${originalIndex}`)),
+    }))
+    .sort((a, b) => a.sortKey - b.sortKey);
+}
+
 function getWeeklyQuizQuestion(weekKey = getWeeklyQuizKey()) {
   const questions = WEEKLY_QUIZ_QUESTIONS.length ? WEEKLY_QUIZ_QUESTIONS : [];
   if (questions.length === 0) return null;
@@ -5546,6 +5558,7 @@ function HomeTab({
 
   const profile = getPlayerProfile(games);
   const quizQuestion = WEEKLY_QUIZ_QUESTIONS[quizQuestionIndex] || weeklyQuiz?.question;
+  const quizChoices = useMemo(() => getQuizAnswerChoices(quizQuestion), [quizQuestion]);
   const quizAnswerKey = quizQuestion ? `free-${quizQuestion.id}` : weeklyQuiz?.weekKey;
   const quizAnswer = weeklyQuizProgress.answers?.[quizAnswerKey];
   const quizLocked = Boolean(quizAnswer);
@@ -5767,14 +5780,19 @@ function HomeTab({
           </div>
 
           <div className="weekly-quiz-answers">
-            {quizQuestion.answers.map((answer, index) => {
-              const isSelected = selectedQuizAnswer === index || quizAnswer?.answerIndex === index;
-              const isCorrect = quizLocked && index === quizQuestion.correctIndex;
-              const isWrong = quizLocked && quizAnswer?.answerIndex === index && !quizAnswer.correct;
+            {quizChoices.map((choice, index) => {
+              const isSelected =
+                selectedQuizAnswer === choice.originalIndex ||
+                quizAnswer?.answerIndex === choice.originalIndex;
+              const isCorrect = quizLocked && choice.originalIndex === quizQuestion.correctIndex;
+              const isWrong =
+                quizLocked &&
+                quizAnswer?.answerIndex === choice.originalIndex &&
+                !quizAnswer.correct;
 
               return (
                 <button
-                  key={answer}
+                  key={`${choice.answer}-${choice.originalIndex}`}
                   type="button"
                   className={[
                     "weekly-quiz-answer",
@@ -5784,8 +5802,8 @@ function HomeTab({
                   ].join(" ")}
                   disabled={quizLocked}
                   onClick={() => {
-                    setSelectedQuizAnswer(index);
-                    onAnswerWeeklyQuiz?.(index, {
+                    setSelectedQuizAnswer(choice.originalIndex);
+                    onAnswerWeeklyQuiz?.(choice.originalIndex, {
                       question: quizQuestion,
                       answerKey: quizAnswerKey,
                       mode: "free",
@@ -5793,7 +5811,7 @@ function HomeTab({
                   }}
                 >
                   <span>{String.fromCharCode(65 + index)}</span>
-                  {answer}
+                  {choice.answer}
                 </button>
               );
             })}
