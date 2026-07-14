@@ -7609,7 +7609,7 @@ function HardwareTab({
   useEffect(() => {
     if (!selectedHardwareDetail) return;
     scrollToHardwareArea(hardwareDetailRef, 116);
-  }, [selectedHardwareDetail?.id]);
+  }, [selectedHardwareDetail?.instanceKey]);
 
   const brandLogos = {
     Sony: "/images/brands/sony-corporate.png",
@@ -8616,9 +8616,12 @@ function HardwareTab({
                   <h3 className="hardware-group-title">{group.title}</h3>
 
                   <div className="hardware-collection-grid">
-                    {group.items.map((item, index) => (
-                      <Fragment key={item.id}>
-                      {selectedHardwareDetail?.id === item.id ? (
+                    {group.items.map((item, index) => {
+                      const detailInstanceKey = `${group.id}-${item.id}`;
+
+                      return (
+                      <Fragment key={detailInstanceKey}>
+                      {selectedHardwareDetail?.instanceKey === detailInstanceKey ? (
                         <HardwareDetailModal
                           item={hardware.find((h) => h.id === item.id) || item}
                           detailRef={hardwareDetailRef}
@@ -8646,7 +8649,9 @@ function HardwareTab({
                         data-type={item.type}
                         onClick={() => {
                           setSelectedHardwareDetail((current) =>
-                            current?.id === item.id ? null : item
+                            current?.instanceKey === detailInstanceKey
+                              ? null
+                              : { ...item, instanceKey: detailInstanceKey }
                           );
                         }}
                       >
@@ -8730,7 +8735,8 @@ function HardwareTab({
                       </div>
                       )}
                       </Fragment>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               ))}
