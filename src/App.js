@@ -2404,24 +2404,62 @@ function Star({ fill = 0, onHalfClick, onFullClick }) {
 
 function RatingSlider({ rating = 0, onRate }) {
   const safeRating = clampRating(rating);
+  const [draftRating, setDraftRating] = useState(safeRating);
+  const sliderRef = useRef(null);
+
+  useEffect(() => {
+    setDraftRating(safeRating);
+  }, [safeRating]);
+
+  const commitRating = (value) => {
+    const nextRating = clampRating(value);
+    setDraftRating(nextRating);
+    onRate(nextRating);
+  };
+
+  const commitPointerRating = (clientX) => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    const rect = slider.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    commitRating(Math.round(ratio * 20) / 2);
+  };
 
   return (
     <div className="rating-slider-wrap">
       <div className="rating-slider-top">
         <span>Note</span>
-        <strong>{formatRating10(safeRating, "Pas noté")}</strong>
+        <strong className="rating-live-value">
+          {formatRating10(draftRating, "Pas noté")}
+        </strong>
       </div>
 
       <input
+        ref={sliderRef}
         type="range"
         min="0"
         max="10"
         step="0.5"
-        value={safeRating}
+        value={draftRating}
         className="rating-slider"
+        style={{ "--rating-progress": `${draftRating * 10}%` }}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.currentTarget.setPointerCapture?.(e.pointerId);
+          commitPointerRating(e.clientX);
+
+          if (navigator.vibrate) {
+            navigator.vibrate(8);
+          }
+        }}
+        onPointerMove={(e) => {
+          if (e.buttons !== 1 && e.pointerType !== "touch") return;
+          e.preventDefault();
+          commitPointerRating(e.clientX);
+        }}
         onChange={(e) => {
-          const value = clampRating(e.target.value);
-          onRate(value);
+          commitRating(e.target.value);
 
           if (navigator.vibrate) {
             navigator.vibrate(8);
