@@ -9115,6 +9115,72 @@ body[data-ui="modern"] .panel-title {
   border-color: rgba(255,255,255,0.2);
 }
 
+.hardware-all-card {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, rgba(59, 130, 246, 0.24), rgba(34, 211, 238, 0.12)),
+    var(--surface-bg);
+  border-color: rgba(96, 165, 250, 0.34);
+}
+
+.hardware-all-card-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}
+
+.hardware-all-card small {
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.hardware-all-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.hardware-all-heading .hardware-group-title {
+  margin-bottom: 0;
+}
+
+.hardware-all-heading span,
+.hardware-all-brand-head > span {
+  color: var(--text-soft);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.hardware-all-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.hardware-all-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hardware-all-brand-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 4px;
+}
+
 .game-modal {
   width: 100%;
   max-width: 720px;

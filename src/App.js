@@ -7656,6 +7656,8 @@ function HardwareTab({
   const [hardwareSearch, setHardwareSearch] = useState("");
   const [selectedHardwareId, setSelectedHardwareId] = useState(null);
   const [selectedHardwareBrandView, setSelectedHardwareBrandView] = useState(null);
+  const [showAllHardwareByBrand, setShowAllHardwareByBrand] = useState(false);
+  const [returnToAllHardware, setReturnToAllHardware] = useState(false);
   const [openedDropdown, setOpenedDropdown] = useState(null);
   const [hardwareCategory, setHardwareCategory] = useState("console");
   const [zoomedHardwareImage, setZoomedHardwareImage] = useState(null);
@@ -8061,6 +8063,13 @@ function HardwareTab({
     ? catalogByType.filter((item) => item.brand === selectedHardwareBrandView)
     : [];
 
+  const catalogGroupsByBrand = brandList
+    .map((brand) => ({
+      brand,
+      items: catalogByType.filter((item) => item.brand === brand),
+    }))
+    .filter((group) => group.items.length > 0);
+
   const selectedHardware = catalogByType.find(
     (item) => item.id === selectedHardwareId
   );
@@ -8080,9 +8089,16 @@ function HardwareTab({
     );
   });
 
-  const openCatalogItem = (catalogItem) => {
+  const getCatalogModelCount = (catalogItem) =>
+    catalogItem.variants?.reduce(
+      (sum, variant) => sum + (variant.versions?.length || 0),
+      0
+    ) || 0;
+
+  const openCatalogItem = (catalogItem, options = {}) => {
     setSelectedHardwareBrandView(catalogItem.brand);
     setSelectedHardwareId(catalogItem.id);
+    setReturnToAllHardware(Boolean(options.fromAll));
     setHardwareSearch("");
     scrollToHardwareArea(hardwareTopRef);
   };
@@ -8431,6 +8447,8 @@ function HardwareTab({
               setShowHardwareCatalog((open) => !open);
               setSelectedHardwareId(null);
               setSelectedHardwareBrandView(null);
+              setShowAllHardwareByBrand(false);
+              setReturnToAllHardware(false);
               setHardwareSearch("");
               scrollToHardwareArea(hardwareCatalogPanelRef);
             }}
@@ -8459,6 +8477,8 @@ function HardwareTab({
                 setSelectedHardwareId(null);
                 setSelectedHardwareBrandView(null);
                 setSelectedHardwareDetail(null);
+                setShowAllHardwareByBrand(false);
+                setReturnToAllHardware(false);
                 setHardwareSearch("");
                 scrollToHardwareArea(hardwareCatalogPanelRef);
               }}
@@ -8475,6 +8495,8 @@ function HardwareTab({
               setHardwareSearch(e.target.value);
               setSelectedHardwareId(null);
               setSelectedHardwareBrandView(null);
+              setShowAllHardwareByBrand(false);
+              setReturnToAllHardware(false);
             }}
             placeholder={
               hardwareCategory === "controller"
@@ -8533,8 +8555,116 @@ function HardwareTab({
           </div>
         ) : (
           <div className="hardware-view-container" ref={hardwareTopRef}>
-            {!selectedHardwareBrandView ? (
+            {showAllHardwareByBrand ? (
+              <div className="hardware-view hardware-all-view">
+                <button
+                  type="button"
+                  className="hardware-back-button"
+                  onClick={() => {
+                    setShowAllHardwareByBrand(false);
+                    setSelectedHardwareBrandView(null);
+                    setSelectedHardwareId(null);
+                    setReturnToAllHardware(false);
+                    scrollToHardwareArea(hardwareTopRef);
+                  }}
+                >
+                  <span>â¬…</span> Marques
+                </button>
+
+                <div className="hardware-all-heading">
+                  <h3 className="hardware-group-title">Tout le matÃ©riel</h3>
+                  <span>{catalogByType.length} familles repertoriees</span>
+                </div>
+
+                <div className="hardware-all-groups">
+                  {catalogGroupsByBrand.map((group) => (
+                    <section key={group.brand} className="hardware-all-group">
+                      <div className="hardware-all-brand-head">
+                        <div className="hardware-brand-line">
+                          {getHardwareBrandLogo(group.brand) && (
+                            <img
+                              src={getHardwareBrandLogo(group.brand)}
+                              alt={group.brand}
+                              className="brand-logo"
+                              onError={(event) => {
+                                event.currentTarget.style.display = "none";
+                              }}
+                            />
+                          )}
+                          <span className="hardware-brand-name">
+                            {group.brand}
+                          </span>
+                        </div>
+                        <span>
+                          {group.items.length} gamme
+                          {group.items.length > 1 ? "s" : ""}
+                        </span>
+                      </div>
+
+                      <div className="hardware-console-list">
+                        {group.items.map((catalogItem) => (
+                          <button
+                            key={catalogItem.id}
+                            type="button"
+                            className="hardware-console-card"
+                            data-brand={catalogItem.brand}
+                            data-type={catalogItem.type}
+                            onClick={() =>
+                              openCatalogItem(catalogItem, { fromAll: true })
+                            }
+                          >
+                            <div className="hardware-image-wrapper">
+                              {catalogItem.variants?.[0]?.versions?.[0]?.image ? (
+                                <img
+                                  src={catalogItem.variants?.[0]?.versions?.[0]?.image}
+                                  alt={catalogItem.name}
+                                  className="hardware-catalog-image"
+                                  onError={handleHardwareImageError}
+                                />
+                              ) : (
+                                <div className="hardware-collection-placeholder">
+                                  {getHardwareTypeIcon(catalogItem.type)}
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="hardware-console-info">
+                              <div className="hardware-name">
+                                {catalogItem.name}
+                              </div>
+                              <div className="hardware-meta">
+                                {getCatalogModelCount(catalogItem)} modÃ¨les
+                              </div>
+                            </div>
+
+                            <div className="hardware-console-arrow">â€º</div>
+                          </button>
+                        ))}
+                      </div>
+                    </section>
+                  ))}
+                </div>
+              </div>
+            ) : !selectedHardwareBrandView ? (
               <div className="hardware-brand-grid">
+                <button
+                  type="button"
+                  className="hardware-brand-card hardware-all-card"
+                  onClick={() => {
+                    setShowAllHardwareByBrand(true);
+                    setSelectedHardwareBrandView(null);
+                    setSelectedHardwareId(null);
+                    setReturnToAllHardware(false);
+                    scrollToHardwareArea(hardwareTopRef);
+                  }}
+                >
+                  <span className="hardware-all-card-icon">
+                    {getHardwareTypeIcon(hardwareCategory)}
+                  </span>
+                  <span>Tout le matÃ©riel</span>
+                  <small>{catalogByType.length} familles</small>
+                </button>
+
                 {brandList.map((brand) => (
                   <button
                     key={brand}
@@ -8625,6 +8755,10 @@ function HardwareTab({
                   className="hardware-back-button"
                   onClick={() => {
                     setSelectedHardwareId(null);
+                    if (returnToAllHardware) {
+                      setSelectedHardwareBrandView(null);
+                      setShowAllHardwareByBrand(true);
+                    }
                     scrollToHardwareArea(hardwareTopRef);
                   }}
                 >
