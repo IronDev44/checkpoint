@@ -10,6 +10,7 @@ import { AUDIO_HARDWARE } from "./audio";
 import { DISPLAYS_HARDWARE } from "./displays";
 import { MICE_HARDWARE } from "./mice";
 import { KEYBOARDS_HARDWARE } from "./keyboards";
+import { SPEAKERS_HARDWARE } from "./speakers";
 
 export const HARDWARE_CATALOG = [
   ...SONY_HARDWARE,
@@ -24,4 +25,5 @@ export const HARDWARE_CATALOG = [
   ...DISPLAYS_HARDWARE,
   ...MICE_HARDWARE,
   ...KEYBOARDS_HARDWARE,
+  ...SPEAKERS_HARDWARE,
 ];

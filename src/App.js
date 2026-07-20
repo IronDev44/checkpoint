@@ -2627,6 +2627,7 @@ const TOP5_HARDWARE_GROUPS = [
   { id: "console", label: "Consoles", title: "Top 5 consoles" },
   { id: "controller", label: "Manettes", title: "Top 5 manettes" },
   { id: "audio", label: "Casques", title: "Top 5 casques" },
+  { id: "speaker", label: "Enceintes", title: "Top 5 enceintes" },
   { id: "mouse", label: "Souris", title: "Top 5 souris" },
   { id: "keyboard", label: "Claviers", title: "Top 5 claviers" },
   { id: "display", label: "Ecrans / TV", title: "Top 5 écrans / TV" },
@@ -4758,6 +4759,7 @@ const PUBLIC_HARDWARE_GROUPS = [
   { id: "console", label: "Consoles" },
   { id: "controller", label: "Manettes" },
   { id: "audio", label: "Audio" },
+  { id: "speaker", label: "Enceintes" },
   { id: "display", label: "Ecrans & TV" },
   { id: "mouse", label: "Souris" },
   { id: "keyboard", label: "Claviers" },
@@ -4765,7 +4767,7 @@ const PUBLIC_HARDWARE_GROUPS = [
 ];
 
 function getPublicHardwareGroup(type) {
-  if (["console", "controller", "audio", "display", "mouse", "keyboard"].includes(type)) {
+  if (["console", "controller", "audio", "speaker", "display", "mouse", "keyboard"].includes(type)) {
     return type;
   }
 
@@ -7251,6 +7253,15 @@ const HARDWARE_RATING_FIELDS = {
     { key: "battery", label: "Autonomie", icon: "🔋" },
     { key: "value", label: "Rapport qualité / prix", icon: "💰" },
   ],
+  speaker: [
+    { key: "sound", label: "Qualite sonore", icon: "SND" },
+    { key: "spatial", label: "Scene sonore / spatialisation", icon: "3D" },
+    { key: "bass", label: "Basses / impact", icon: "BASS" },
+    { key: "latency", label: "Latence / synchro", icon: "MS" },
+    { key: "connectivity", label: "Connectique", icon: "I/O" },
+    { key: "setup", label: "Integration setup", icon: "SET" },
+    { key: "value", label: "Rapport qualite / prix", icon: "EUR" },
+  ],
   display: [
     { key: "image", label: "Qualite d'image", icon: "IMG" },
     { key: "hdr", label: "HDR / luminosite", icon: "HDR" },
@@ -7283,6 +7294,7 @@ function getHardwareRatingFields(type) {
 
 function getHardwareTypeIcon(type) {
   if (type === "audio") return "AUDIO";
+  if (type === "speaker") return "SPK";
   if (type === "controller") return "PAD";
   if (type === "display") return "TV";
   if (type === "mouse") return "M";
@@ -7687,6 +7699,10 @@ function HardwareTab({
     Beyerdynamic: "/images/brands/beyerdynamic.png",
     Sennheiser: "/images/brands/sennheiser.png",
     JBL: "/images/brands/jbl.png",
+    Creative: "/images/brands/creative.png",
+    Edifier: "/images/brands/edifier.png",
+    Klipsch: "/images/brands/klipsch.png",
+    Panasonic: "/images/brands/panasonic.png",
     EPOS: "/images/brands/epos.png",
     Audeze: "/images/brands/audeze.png",
     "Audio-Technica": "/images/brands/audio-technica.png",
@@ -7855,6 +7871,7 @@ function HardwareTab({
   const rankedControllers = getRankedHardware("controller");
   const rankedConsoles = getRankedHardware("console");
   const rankedAudio = getRankedHardware("audio");
+  const rankedSpeakers = getRankedHardware("speaker");
   const rankedDisplays = getRankedHardware("display");
   const rankedMice = getRankedHardware("mouse");
   const rankedKeyboards = getRankedHardware("keyboard");
@@ -7949,6 +7966,10 @@ function HardwareTab({
     "Beyerdynamic",
     "Sennheiser",
     "JBL",
+    "Creative",
+    "Edifier",
+    "Klipsch",
+    "Panasonic",
     "EPOS",
     "Audeze",
     "Audio-Technica",
@@ -8134,6 +8155,28 @@ function HardwareTab({
             ),
           },
         ]
+      : hardwareCategory === "speaker"
+      ? [
+          {
+            id: "speaker-owned",
+            title: "Enceintes utilisees actuellement",
+            items: hardware.filter(
+              (item) => item.type === "speaker" && item.status === "possÃ©dÃ©"
+            ),
+          },
+          {
+            id: "speaker-ranking",
+            title: "Classement des enceintes par note",
+            items: rankedSpeakers,
+          },
+          {
+            id: "speaker-wishlist",
+            title: "Wishlist enceintes",
+            items: hardware.filter(
+              (item) => item.type === "speaker" && item.status === "wishlist"
+            ),
+          },
+        ]
       : hardwareCategory === "mouse"
       ? [
           {
@@ -8237,6 +8280,8 @@ function HardwareTab({
       ? "Mes manettes"
       : hardwareCategory === "audio"
       ? "Mon audio"
+      : hardwareCategory === "speaker"
+      ? "Mes enceintes"
       : hardwareCategory === "display"
       ? "Mes ecrans & TV"
       : hardwareCategory === "mouse"
@@ -8250,6 +8295,8 @@ function HardwareTab({
       ? "Aucune manette ajoutee"
       : hardwareCategory === "audio"
       ? "Aucun casque ajoute"
+      : hardwareCategory === "speaker"
+      ? "Aucune enceinte ajoutee"
       : hardwareCategory === "mouse"
       ? "Aucune souris ajoutee"
       : hardwareCategory === "keyboard"
@@ -8261,6 +8308,8 @@ function HardwareTab({
       ? "Ajoute une manette depuis le catalogue."
       : hardwareCategory === "audio"
       ? "Ajoute ton premier casque depuis le catalogue."
+      : hardwareCategory === "speaker"
+      ? "Ajoute tes premieres enceintes gaming depuis le catalogue."
       : hardwareCategory === "mouse"
       ? "Ajoute ta premiere souris gaming depuis le catalogue."
       : hardwareCategory === "keyboard"
@@ -8318,6 +8367,7 @@ function HardwareTab({
             { id: "console", label: "Consoles" },
             { id: "controller", label: "Manettes" },
             { id: "audio", label: "Audio" },
+            { id: "speaker", label: "Enceintes" },
             { id: "display", label: "Ecrans & TV" },
             { id: "mouse", label: "Souris" },
             { id: "keyboard", label: "Claviers" },
@@ -8353,6 +8403,8 @@ function HardwareTab({
                 ? "Rechercher une manette..."
                 : hardwareCategory === "audio"
                 ? "Rechercher un casque..."
+                : hardwareCategory === "speaker"
+                ? "Rechercher des enceintes gaming..."
                 : hardwareCategory === "display"
                 ? "Rechercher un ecran ou une TV gaming..."
                 : hardwareCategory === "mouse"
