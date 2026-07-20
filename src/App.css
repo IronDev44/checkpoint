@@ -9164,13 +9164,13 @@ body[data-ui="modern"] .panel-title {
 .hardware-all-groups {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 26px;
 }
 
 .hardware-all-group {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 .hardware-all-brand-head {
@@ -9178,7 +9178,45 @@ body[data-ui="modern"] .panel-title {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  padding: 12px 4px 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.hardware-all-brand-head .hardware-brand-name {
+  font-size: 1.02rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hardware-all-model {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hardware-all-model-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
   padding: 0 4px;
+}
+
+.hardware-all-model-title span {
+  color: var(--text-main);
+  font-size: 0.98rem;
+  font-weight: 900;
+}
+
+.hardware-all-model-title small {
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.hardware-all-version-card {
+  min-height: 96px;
 }
 
 .game-modal {

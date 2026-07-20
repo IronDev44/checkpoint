@@ -8585,14 +8585,20 @@ function HardwareTab({
                     scrollToHardwareArea(hardwareTopRef);
                   }}
                 >
-                  <span>â¬…</span> Marques
+                  <ArrowLeft size={16} /> Marques
                 </button>
 
                 <div className="hardware-all-heading">
                   <h3 className="hardware-group-title">
                     {allHardwareCatalogLabel}
                   </h3>
-                  <span>{catalogByType.length} familles repertoriees</span>
+                  <span>
+                    {catalogByType.reduce(
+                      (sum, catalogItem) => sum + getCatalogModelCount(catalogItem),
+                      0
+                    )}{" "}
+                    modeles
+                  </span>
                 </div>
 
                 <div className="hardware-all-groups">
@@ -8614,52 +8620,60 @@ function HardwareTab({
                             {group.brand}
                           </span>
                         </div>
-                        <span>
-                          {group.items.length} gamme
-                          {group.items.length > 1 ? "s" : ""}
-                        </span>
                       </div>
 
-                      <div className="hardware-console-list">
-                        {group.items.map((catalogItem) => (
-                          <button
-                            key={catalogItem.id}
-                            type="button"
-                            className="hardware-console-card"
-                            data-brand={catalogItem.brand}
-                            data-type={catalogItem.type}
-                            onClick={() =>
-                              openCatalogItem(catalogItem, { fromAll: true })
-                            }
-                          >
-                            <div className="hardware-image-wrapper">
-                              {catalogItem.variants?.[0]?.versions?.[0]?.image ? (
-                                <img
-                                  src={catalogItem.variants?.[0]?.versions?.[0]?.image}
-                                  alt={catalogItem.name}
-                                  className="hardware-catalog-image"
-                                  onError={handleHardwareImageError}
-                                />
-                              ) : (
-                                <div className="hardware-collection-placeholder">
-                                  {getHardwareTypeIcon(catalogItem.type)}
-                                </div>
-                              )}
-                            </div>
+                      {group.items.map((catalogItem) => (
+                        <div key={catalogItem.id} className="hardware-all-model">
+                          <div className="hardware-all-model-title">
+                            <span>{catalogItem.name}</span>
+                            <small>{getCatalogModelCount(catalogItem)} modeles</small>
+                          </div>
 
-                            <div className="hardware-console-info">
-                              <div className="hardware-name">
-                                {catalogItem.name}
-                              </div>
-                              <div className="hardware-meta">
-                                {getCatalogModelCount(catalogItem)} modÃ¨les
-                              </div>
-                            </div>
+                          <div className="hardware-console-list">
+                            {catalogItem.variants?.flatMap((variant) =>
+                              (variant.versions || []).map((version) => (
+                                <button
+                                  key={version.id}
+                                  type="button"
+                                  className="hardware-console-card hardware-all-version-card"
+                                  data-brand={catalogItem.brand}
+                                  data-type={catalogItem.type}
+                                  onClick={() =>
+                                    openCatalogItem(catalogItem, { fromAll: true })
+                                  }
+                                >
+                                  <div className="hardware-image-wrapper">
+                                    {version.image ? (
+                                      <img
+                                        src={version.image}
+                                        alt={version.name}
+                                        className="hardware-catalog-image"
+                                        onError={handleHardwareImageError}
+                                      />
+                                    ) : (
+                                      <div className="hardware-collection-placeholder">
+                                        {getHardwareTypeIcon(catalogItem.type)}
+                                      </div>
+                                    )}
+                                  </div>
 
-                            <div className="hardware-console-arrow">â€º</div>
-                          </button>
-                        ))}
-                      </div>
+                                  <div className="hardware-console-info">
+                                    <div className="hardware-name">
+                                      {version.name}
+                                    </div>
+                                    <div className="hardware-meta">
+                                      {variant.name}
+                                      {version.storage ? ` - ${version.storage}` : ""}
+                                    </div>
+                                  </div>
+
+                                  <div className="hardware-console-arrow">&rsaquo;</div>
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </section>
                   ))}
                 </div>
@@ -12747,3 +12761,5 @@ const setPlayedPlatforms = async (id, platforms) => {
     </>
   );
 }
+
+
