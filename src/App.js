@@ -7755,6 +7755,15 @@ function HardwareTab({
     Mountain: "/images/brands/mountain.png",
     Akko: "/images/brands/akko.png",
     DrunkDeer: "/images/brands/drunkdear.png",
+    "8BitDo": "/images/brands/8bitdo.png",
+    SCUF: "/images/brands/scuf.png",
+    Victrix: "/images/brands/victrix.png",
+    Nacon: "/images/brands/nacon.png",
+    Thrustmaster: "/images/brands/thrustmaster.png",
+    HORI: "/images/brands/hori.png",
+    PowerA: "/images/brands/powera.png",
+    Backbone: "/images/brands/backbone.png",
+    Gulikit: "/images/brands/gulikit.png",
   };
 
   const getHardwareBrandLogo = (brand, type = hardwareCategory) => {
@@ -8031,6 +8040,16 @@ function HardwareTab({
     "Mountain",
     "Akko",
     "DrunkDeer",
+    "8BitDo",
+    "SCUF",
+    "Victrix",
+    "Nacon",
+    "Thrustmaster",
+    "HORI",
+    "PowerA",
+    "Backbone",
+    "PDP",
+    "Gulikit",
   ];
 
   const brandList = [
