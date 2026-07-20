@@ -8379,6 +8379,23 @@ function HardwareTab({
       ? "Mes claviers"
       : "Mon materiel";
 
+  const allHardwareCatalogLabel =
+    hardwareCategory === "controller"
+      ? "Toutes les manettes"
+      : hardwareCategory === "audio"
+      ? "Tous les casques audio"
+      : hardwareCategory === "speaker"
+      ? "Toutes les enceintes"
+      : hardwareCategory === "vr"
+      ? "Tous les casques VR"
+      : hardwareCategory === "display"
+      ? "Tous les ecrans & TV"
+      : hardwareCategory === "mouse"
+      ? "Toutes les souris"
+      : hardwareCategory === "keyboard"
+      ? "Tous les claviers"
+      : "Toutes les consoles";
+
   const emptyTitle =
     hardwareCategory === "controller"
       ? "Aucune manette ajoutee"
@@ -8572,7 +8589,9 @@ function HardwareTab({
                 </button>
 
                 <div className="hardware-all-heading">
-                  <h3 className="hardware-group-title">Tout le matÃ©riel</h3>
+                  <h3 className="hardware-group-title">
+                    {allHardwareCatalogLabel}
+                  </h3>
                   <span>{catalogByType.length} familles repertoriees</span>
                 </div>
 
@@ -8661,7 +8680,7 @@ function HardwareTab({
                   <span className="hardware-all-card-icon">
                     {getHardwareTypeIcon(hardwareCategory)}
                   </span>
-                  <span>Tout le matÃ©riel</span>
+                  <span>{allHardwareCatalogLabel}</span>
                   <small>{catalogByType.length} familles</small>
                 </button>
 
@@ -8762,7 +8781,8 @@ function HardwareTab({
                     scrollToHardwareArea(hardwareTopRef);
                   }}
                 >
-                  <span>⬅</span> {selectedHardwareBrandView}
+                  <span>⬅</span>{" "}
+                  {returnToAllHardware ? allHardwareCatalogLabel : selectedHardwareBrandView}
                 </button>
 
                 <h3 className="hardware-group-title">
