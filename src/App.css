@@ -9219,6 +9219,17 @@ body[data-ui="modern"] .panel-title {
   min-height: 96px;
 }
 
+.hardware-catalog-card.selected-catalog-version {
+  border-color: color-mix(in srgb, var(--accent) 72%, white 12%);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent),
+    0 18px 34px rgba(0, 0, 0, 0.28);
+}
+
+.hardware-all-version-card .hardware-catalog-image {
+  cursor: zoom-in;
+}
+
 .game-modal {
   width: 100%;
   max-width: 720px;

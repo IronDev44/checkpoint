@@ -7658,6 +7658,7 @@ function HardwareTab({
   const [selectedHardwareBrandView, setSelectedHardwareBrandView] = useState(null);
   const [showAllHardwareByBrand, setShowAllHardwareByBrand] = useState(false);
   const [returnToAllHardware, setReturnToAllHardware] = useState(false);
+  const [selectedCatalogVersionId, setSelectedCatalogVersionId] = useState(null);
   const [openedDropdown, setOpenedDropdown] = useState(null);
   const [hardwareCategory, setHardwareCategory] = useState("console");
   const [zoomedHardwareImage, setZoomedHardwareImage] = useState(null);
@@ -7691,6 +7692,21 @@ function HardwareTab({
     if (!selectedHardwareDetail) return;
     scrollToHardwareArea(hardwareDetailRef, 116);
   }, [selectedHardwareDetail?.instanceKey]);
+
+  useEffect(() => {
+    if (!selectedHardwareId || !selectedCatalogVersionId) return;
+
+    window.requestAnimationFrame(() => {
+      const selectedVersionCard = document.querySelector(
+        `[data-catalog-version-id="${selectedCatalogVersionId}"]`
+      );
+
+      selectedVersionCard?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
+  }, [selectedHardwareId, selectedCatalogVersionId]);
 
   const brandLogos = {
     Sony: "/images/brands/sony-corporate.png",
@@ -8063,12 +8079,23 @@ function HardwareTab({
     ? catalogByType.filter((item) => item.brand === selectedHardwareBrandView)
     : [];
 
+  const getCatalogModelCount = (catalogItem) =>
+    catalogItem.variants?.reduce(
+      (sum, variant) => sum + (variant.versions?.length || 0),
+      0
+    ) || 0;
+
   const catalogGroupsByBrand = brandList
     .map((brand) => ({
       brand,
       items: catalogByType.filter((item) => item.brand === brand),
     }))
     .filter((group) => group.items.length > 0);
+
+  const catalogModelTotal = catalogByType.reduce(
+    (sum, catalogItem) => sum + getCatalogModelCount(catalogItem),
+    0
+  );
 
   const selectedHardware = catalogByType.find(
     (item) => item.id === selectedHardwareId
@@ -8089,16 +8116,11 @@ function HardwareTab({
     );
   });
 
-  const getCatalogModelCount = (catalogItem) =>
-    catalogItem.variants?.reduce(
-      (sum, variant) => sum + (variant.versions?.length || 0),
-      0
-    ) || 0;
-
   const openCatalogItem = (catalogItem, options = {}) => {
     setSelectedHardwareBrandView(catalogItem.brand);
     setSelectedHardwareId(catalogItem.id);
     setReturnToAllHardware(Boolean(options.fromAll));
+    setSelectedCatalogVersionId(options.versionId || null);
     setHardwareSearch("");
     scrollToHardwareArea(hardwareTopRef);
   };
@@ -8466,6 +8488,7 @@ function HardwareTab({
               setSelectedHardwareBrandView(null);
               setShowAllHardwareByBrand(false);
               setReturnToAllHardware(false);
+              setSelectedCatalogVersionId(null);
               setHardwareSearch("");
               scrollToHardwareArea(hardwareCatalogPanelRef);
             }}
@@ -8496,6 +8519,7 @@ function HardwareTab({
                 setSelectedHardwareDetail(null);
                 setShowAllHardwareByBrand(false);
                 setReturnToAllHardware(false);
+                setSelectedCatalogVersionId(null);
                 setHardwareSearch("");
                 scrollToHardwareArea(hardwareCatalogPanelRef);
               }}
@@ -8514,6 +8538,7 @@ function HardwareTab({
               setSelectedHardwareBrandView(null);
               setShowAllHardwareByBrand(false);
               setReturnToAllHardware(false);
+              setSelectedCatalogVersionId(null);
             }}
             placeholder={
               hardwareCategory === "controller"
@@ -8582,6 +8607,7 @@ function HardwareTab({
                     setSelectedHardwareBrandView(null);
                     setSelectedHardwareId(null);
                     setReturnToAllHardware(false);
+                    setSelectedCatalogVersionId(null);
                     scrollToHardwareArea(hardwareTopRef);
                   }}
                 >
@@ -8639,7 +8665,10 @@ function HardwareTab({
                                   data-brand={catalogItem.brand}
                                   data-type={catalogItem.type}
                                   onClick={() =>
-                                    openCatalogItem(catalogItem, { fromAll: true })
+                                    openCatalogItem(catalogItem, {
+                                      fromAll: true,
+                                      versionId: version.id,
+                                    })
                                   }
                                 >
                                   <div className="hardware-image-wrapper">
@@ -8648,6 +8677,15 @@ function HardwareTab({
                                         src={version.image}
                                         alt={version.name}
                                         className="hardware-catalog-image"
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          setZoomedHardwareImage({
+                                            image: version.image,
+                                            name: version.name,
+                                            x: event.clientX,
+                                            y: event.clientY,
+                                          });
+                                        }}
                                         onError={handleHardwareImageError}
                                       />
                                     ) : (
@@ -8688,6 +8726,7 @@ function HardwareTab({
                     setSelectedHardwareBrandView(null);
                     setSelectedHardwareId(null);
                     setReturnToAllHardware(false);
+                    setSelectedCatalogVersionId(null);
                     scrollToHardwareArea(hardwareTopRef);
                   }}
                 >
@@ -8695,7 +8734,7 @@ function HardwareTab({
                     {getHardwareTypeIcon(hardwareCategory)}
                   </span>
                   <span>{allHardwareCatalogLabel}</span>
-                  <small>{catalogByType.length} familles</small>
+                  <small>{catalogModelTotal} modeles</small>
                 </button>
 
                 {brandList.map((brand) => (
@@ -8706,6 +8745,7 @@ function HardwareTab({
                     onClick={() => {
                       setSelectedHardwareBrandView(brand);
                       setSelectedHardwareId(null);
+                      setSelectedCatalogVersionId(null);
                       scrollToHardwareArea(hardwareTopRef);
                     }}
                   >
@@ -8825,8 +8865,13 @@ function HardwareTab({
                         return (
                           <div
                             key={version.id}
-                            className="hardware-catalog-card"
+                            className={`hardware-catalog-card ${
+                              selectedCatalogVersionId === version.id
+                                ? "selected-catalog-version"
+                                : ""
+                            }`}
                             data-type={selectedHardware.type}
+                            data-catalog-version-id={version.id}
                           >
                             <div className="hardware-image-wrapper">
                               {version.image ? (
@@ -12761,5 +12806,3 @@ const setPlayedPlatforms = async (id, platforms) => {
     </>
   );
 }
-
-
