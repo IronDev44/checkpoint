@@ -2628,6 +2628,7 @@ const TOP5_HARDWARE_GROUPS = [
   { id: "controller", label: "Manettes", title: "Top 5 manettes" },
   { id: "audio", label: "Casques", title: "Top 5 casques" },
   { id: "speaker", label: "Enceintes", title: "Top 5 enceintes" },
+  { id: "vr", label: "VR", title: "Top 5 VR" },
   { id: "mouse", label: "Souris", title: "Top 5 souris" },
   { id: "keyboard", label: "Claviers", title: "Top 5 claviers" },
   { id: "display", label: "Ecrans / TV", title: "Top 5 écrans / TV" },
@@ -4760,6 +4761,7 @@ const PUBLIC_HARDWARE_GROUPS = [
   { id: "controller", label: "Manettes" },
   { id: "audio", label: "Audio" },
   { id: "speaker", label: "Enceintes" },
+  { id: "vr", label: "VR" },
   { id: "display", label: "Ecrans & TV" },
   { id: "mouse", label: "Souris" },
   { id: "keyboard", label: "Claviers" },
@@ -4767,7 +4769,7 @@ const PUBLIC_HARDWARE_GROUPS = [
 ];
 
 function getPublicHardwareGroup(type) {
-  if (["console", "controller", "audio", "speaker", "display", "mouse", "keyboard"].includes(type)) {
+  if (["console", "controller", "audio", "speaker", "vr", "display", "mouse", "keyboard"].includes(type)) {
     return type;
   }
 
@@ -7262,6 +7264,16 @@ const HARDWARE_RATING_FIELDS = {
     { key: "setup", label: "Integration setup", icon: "SET" },
     { key: "value", label: "Rapport qualite / prix", icon: "EUR" },
   ],
+  vr: [
+    { key: "image", label: "Nettete / effet grille", icon: "IMG" },
+    { key: "comfort", label: "Confort / poids", icon: "ERG" },
+    { key: "tracking", label: "Tracking / manettes", icon: "TRK" },
+    { key: "immersion", label: "Immersion / FOV", icon: "FOV" },
+    { key: "performance", label: "Fluidite / latence", icon: "HZ" },
+    { key: "ecosystem", label: "Catalogue / ecosysteme", icon: "APP" },
+    { key: "setup", label: "Installation / autonomie", icon: "SET" },
+    { key: "value", label: "Rapport qualite / prix", icon: "EUR" },
+  ],
   display: [
     { key: "image", label: "Qualite d'image", icon: "IMG" },
     { key: "hdr", label: "HDR / luminosite", icon: "HDR" },
@@ -7295,6 +7307,7 @@ function getHardwareRatingFields(type) {
 function getHardwareTypeIcon(type) {
   if (type === "audio") return "AUDIO";
   if (type === "speaker") return "SPK";
+  if (type === "vr") return "VR";
   if (type === "controller") return "PAD";
   if (type === "display") return "TV";
   if (type === "mouse") return "M";
@@ -7706,6 +7719,12 @@ function HardwareTab({
     EPOS: "/images/brands/epos.png",
     Audeze: "/images/brands/audeze.png",
     "Audio-Technica": "/images/brands/audio-technica.png",
+    Meta: "/images/brands/meta.png",
+    HTC: "/images/brands/htc.png",
+    Pimax: "/images/brands/pimax.png",
+    Bigscreen: "/images/brands/bigscreen.png",
+    Pico: "/images/brands/pico.png",
+    HP: "/images/brands/hp.png",
     Razer: "/images/brands/razer.png",
     Astro: "/images/brands/astro.png",
     Corsair: "/images/brands/corsair.png",
@@ -7872,6 +7891,7 @@ function HardwareTab({
   const rankedConsoles = getRankedHardware("console");
   const rankedAudio = getRankedHardware("audio");
   const rankedSpeakers = getRankedHardware("speaker");
+  const rankedVr = getRankedHardware("vr");
   const rankedDisplays = getRankedHardware("display");
   const rankedMice = getRankedHardware("mouse");
   const rankedKeyboards = getRankedHardware("keyboard");
@@ -7973,6 +7993,14 @@ function HardwareTab({
     "EPOS",
     "Audeze",
     "Audio-Technica",
+    "Meta",
+    "PlayStation",
+    "Valve",
+    "HTC",
+    "Pimax",
+    "Bigscreen",
+    "Pico",
+    "HP",
     "Razer",
     "Astro",
     "Corsair",
@@ -8177,6 +8205,30 @@ function HardwareTab({
             ),
           },
         ]
+      : hardwareCategory === "vr"
+      ? [
+          {
+            id: "vr-owned",
+            title: "Casques VR utilises actuellement",
+            items: hardware.filter(
+              (item) =>
+                item.type === "vr" &&
+                getNormalizedStatus(item.status).includes("possed")
+            ),
+          },
+          {
+            id: "vr-ranking",
+            title: "Classement des casques VR par note",
+            items: rankedVr,
+          },
+          {
+            id: "vr-wishlist",
+            title: "Wishlist VR",
+            items: hardware.filter(
+              (item) => item.type === "vr" && item.status === "wishlist"
+            ),
+          },
+        ]
       : hardwareCategory === "mouse"
       ? [
           {
@@ -8282,6 +8334,8 @@ function HardwareTab({
       ? "Mon audio"
       : hardwareCategory === "speaker"
       ? "Mes enceintes"
+      : hardwareCategory === "vr"
+      ? "Mes casques VR"
       : hardwareCategory === "display"
       ? "Mes ecrans & TV"
       : hardwareCategory === "mouse"
@@ -8297,6 +8351,8 @@ function HardwareTab({
       ? "Aucun casque ajoute"
       : hardwareCategory === "speaker"
       ? "Aucune enceinte ajoutee"
+      : hardwareCategory === "vr"
+      ? "Aucun casque VR ajoute"
       : hardwareCategory === "mouse"
       ? "Aucune souris ajoutee"
       : hardwareCategory === "keyboard"
@@ -8310,6 +8366,8 @@ function HardwareTab({
       ? "Ajoute ton premier casque depuis le catalogue."
       : hardwareCategory === "speaker"
       ? "Ajoute tes premieres enceintes gaming depuis le catalogue."
+      : hardwareCategory === "vr"
+      ? "Ajoute ton premier casque VR gaming depuis le catalogue."
       : hardwareCategory === "mouse"
       ? "Ajoute ta premiere souris gaming depuis le catalogue."
       : hardwareCategory === "keyboard"
@@ -8368,6 +8426,7 @@ function HardwareTab({
             { id: "controller", label: "Manettes" },
             { id: "audio", label: "Audio" },
             { id: "speaker", label: "Enceintes" },
+            { id: "vr", label: "VR" },
             { id: "display", label: "Ecrans & TV" },
             { id: "mouse", label: "Souris" },
             { id: "keyboard", label: "Claviers" },
@@ -8405,6 +8464,8 @@ function HardwareTab({
                 ? "Rechercher un casque..."
                 : hardwareCategory === "speaker"
                 ? "Rechercher des enceintes gaming..."
+                : hardwareCategory === "vr"
+                ? "Rechercher un casque VR gaming..."
                 : hardwareCategory === "display"
                 ? "Rechercher un ecran ou une TV gaming..."
                 : hardwareCategory === "mouse"

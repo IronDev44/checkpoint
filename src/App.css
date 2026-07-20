@@ -19010,7 +19010,9 @@ body[data-theme="theme-cyberpunk"] {
 .hardware-console-card[data-type="audio"] .hardware-catalog-image,
 .hardware-catalog-card[data-type="audio"] .hardware-catalog-image,
 .hardware-console-card[data-type="speaker"] .hardware-catalog-image,
-.hardware-catalog-card[data-type="speaker"] .hardware-catalog-image {
+.hardware-catalog-card[data-type="speaker"] .hardware-catalog-image,
+.hardware-console-card[data-type="vr"] .hardware-catalog-image,
+.hardware-catalog-card[data-type="vr"] .hardware-catalog-image {
   width: 112% !important;
   height: 112% !important;
   max-width: 112% !important;
@@ -19018,7 +19020,8 @@ body[data-theme="theme-cyberpunk"] {
 }
 
 .hardware-collection-card.hardware-card-v3[data-type="audio"] .hardware-collection-image,
-.hardware-collection-card.hardware-card-v3[data-type="speaker"] .hardware-collection-image {
+.hardware-collection-card.hardware-card-v3[data-type="speaker"] .hardware-collection-image,
+.hardware-collection-card.hardware-card-v3[data-type="vr"] .hardware-collection-image {
   width: 112% !important;
   height: 112% !important;
   max-width: 112% !important;
