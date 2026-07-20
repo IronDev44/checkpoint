@@ -2406,6 +2406,7 @@ function RatingSlider({ rating = 0, onRate }) {
   const safeRating = clampRating(rating);
   const [draftRating, setDraftRating] = useState(safeRating);
   const sliderRef = useRef(null);
+  const activePointerIdRef = useRef(null);
 
   useEffect(() => {
     setDraftRating(safeRating);
@@ -2424,6 +2425,13 @@ function RatingSlider({ rating = 0, onRate }) {
     const rect = slider.getBoundingClientRect();
     const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
     commitRating(Math.round(ratio * 20) / 2);
+  };
+
+  const stopPointerRating = (e) => {
+    if (activePointerIdRef.current !== e.pointerId) return;
+
+    activePointerIdRef.current = null;
+    e.currentTarget.releasePointerCapture?.(e.pointerId);
   };
 
   return (
@@ -2446,6 +2454,7 @@ function RatingSlider({ rating = 0, onRate }) {
         style={{ "--rating-progress": `${draftRating * 10}%` }}
         onPointerDown={(e) => {
           e.preventDefault();
+          activePointerIdRef.current = e.pointerId;
           e.currentTarget.setPointerCapture?.(e.pointerId);
           commitPointerRating(e.clientX);
 
@@ -2454,11 +2463,18 @@ function RatingSlider({ rating = 0, onRate }) {
           }
         }}
         onPointerMove={(e) => {
-          if (e.buttons !== 1 && e.pointerType !== "touch") return;
+          if (activePointerIdRef.current !== e.pointerId) return;
           e.preventDefault();
           commitPointerRating(e.clientX);
         }}
+        onPointerUp={stopPointerRating}
+        onPointerCancel={stopPointerRating}
+        onLostPointerCapture={() => {
+          activePointerIdRef.current = null;
+        }}
         onChange={(e) => {
+          if (activePointerIdRef.current !== null) return;
+
           commitRating(e.target.value);
 
           if (navigator.vibrate) {
