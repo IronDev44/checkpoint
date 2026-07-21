@@ -7696,7 +7696,7 @@ function HardwareTab({
   useEffect(() => {
     if (!selectedHardwareId || !selectedCatalogVersionId) return;
 
-    window.requestAnimationFrame(() => {
+    const scrollTimer = window.setTimeout(() => {
       const selectedVersionCard = document.querySelector(
         `[data-catalog-version-id="${selectedCatalogVersionId}"]`
       );
@@ -7705,7 +7705,9 @@ function HardwareTab({
         behavior: "smooth",
         block: "center",
       });
-    });
+    }, 80);
+
+    return () => window.clearTimeout(scrollTimer);
   }, [selectedHardwareId, selectedCatalogVersionId]);
 
   const brandLogos = {
@@ -8022,7 +8024,6 @@ function HardwareTab({
     "Audio-Technica",
     "Meta",
     "PlayStation",
-    "Valve",
     "HTC",
     "Pimax",
     "Bigscreen",
@@ -8071,8 +8072,10 @@ function HardwareTab({
   ];
 
   const brandList = [
-    ...preferredOrder.filter((brand) => hardwareBrands.includes(brand)),
-    ...hardwareBrands.filter((brand) => !preferredOrder.includes(brand)).sort(),
+    ...new Set([
+      ...preferredOrder.filter((brand) => hardwareBrands.includes(brand)),
+      ...hardwareBrands.filter((brand) => !preferredOrder.includes(brand)).sort(),
+    ]),
   ];
 
   const itemsBySelectedBrand = selectedHardwareBrandView
@@ -8122,7 +8125,9 @@ function HardwareTab({
     setReturnToAllHardware(Boolean(options.fromAll));
     setSelectedCatalogVersionId(options.versionId || null);
     setHardwareSearch("");
-    scrollToHardwareArea(hardwareTopRef);
+    if (!options.fromAll) {
+      scrollToHardwareArea(hardwareTopRef);
+    }
   };
 
   const addFromCatalog = async (
