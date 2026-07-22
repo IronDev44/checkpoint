@@ -25,8 +25,7 @@ export const SPEAKERS_HARDWARE = [
         id: "razer-leviathan",
         name: "Leviathan",
         versions: [
-          speakerVersion("razer-leviathan-v2-pro", "Razer Leviathan V2 Pro"),
-          speakerVersion("razer-leviathan-v2", "Razer Leviathan V2"),
+          speakerVersion("razer-leviathan-v2-pro", "Razer Leviathan V2"),
           speakerVersion("razer-leviathan-v2-x", "Razer Leviathan V2 X"),
           speakerVersion("razer-leviathan", "Razer Leviathan"),
         ],
@@ -133,7 +132,8 @@ export const SPEAKERS_HARDWARE = [
           speakerVersion("edifier-g5000", "Edifier G5000"),
           speakerVersion("edifier-g2000", "Edifier G2000"),
           speakerVersion("edifier-mg300", "Edifier MG300"),
-          speakerVersion("edifier-hecate-g1500", "Edifier Hecate G1500"),
+          speakerVersion("edifier-hecate-g1500-pro", "Edifier Hecate G1500 Pro 2.0"),
+          speakerVersion("edifier-hecate-g1500", "Edifier Hecate G1500 Bar"),
         ],
       },
     ],
@@ -201,6 +201,8 @@ export const SPEAKERS_HARDWARE = [
         name: "ProMedia",
         versions: [
           speakerVersion("klipsch-promedia-2-1", "Klipsch ProMedia 2.1"),
+          speakerVersion("klipsch-promedia-2-1-bt", "Klipsch ProMedia 2.1 BT"),
+          speakerVersion("klipsch-promedia-2-1-thx", "Klipsch ProMedia 2.1 THX"),
           speakerVersion("klipsch-promedia-heritage-2-1", "Klipsch ProMedia Heritage 2.1"),
         ],
       },
