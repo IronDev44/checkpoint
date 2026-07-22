@@ -5622,12 +5622,27 @@ function HomeTab({
   const quizAnswer = weeklyQuizProgress.answers?.[quizAnswerKey];
   const quizLocked = Boolean(quizAnswer);
 
+  const isFinishedGame = (game) =>
+    game.status === "terminé" ||
+    game.status === "terminÃ©" ||
+    game.status === "collection" ||
+    game.progressStatus === "completed";
+  const isOwnedHardware = (item) =>
+    item.status === "possédé" || item.status === "possÃ©dÃ©";
+
   const total = games.length;
   const finished = games.filter((g) => g.status === "terminé").length;
   const inProgressCount = games.filter((g) => g.status === "en cours").length;
   const wishlistCount = games.filter((g) => g.status === "wishlist").length;
 
   const completion = total ? Math.round((finished / total) * 100) : 0;
+  const dashboardFinished = games.filter(isFinishedGame).length;
+  const ownedHardwareCount = hardware.filter(isOwnedHardware).length;
+  const ratedGames = games.filter((game) => getGameRating(game) > 0);
+  const averageRating =
+    ratedGames.length > 0
+      ? ratedGames.reduce((sum, game) => sum + getGameRating(game), 0) / ratedGames.length
+      : 0;
 
   const backlogGoal = 5;
   const backlogFinished = Math.min(finished, backlogGoal);
@@ -5636,6 +5651,50 @@ function HomeTab({
   const inProgressGames = games
     .filter((g) => g.status === "en cours")
     .slice(0, 3);
+
+  const backlogCandidates = games
+    .filter((game) => game.status === "collection" || game.status === "wishlist")
+    .filter((game) => game.progressStatus !== "completed")
+    .sort((a, b) => {
+      const ratingGap = getGameRating(b) - getGameRating(a);
+      if (ratingGap !== 0) return ratingGap;
+      return String(b.released || "").localeCompare(String(a.released || ""));
+    });
+
+  const nextPlayCandidate = inProgressGames[0] || backlogCandidates[0] || null;
+  const dashboardAction = !quizLocked
+    ? {
+        label: "Repondre",
+        title: "Quiz disponible",
+        detail: `+${WEEKLY_QUIZ_XP.correct} XP a prendre maintenant.`,
+        tab: "home",
+      }
+    : nextPlayCandidate
+    ? {
+        label: nextPlayCandidate.status === "en cours" ? "Continuer" : "Voir le jeu",
+        title: nextPlayCandidate.status === "en cours" ? "Reprendre ta partie" : "Prochain jeu conseille",
+        detail: `${nextPlayCandidate.name} - ${formatRating10(getGameRating(nextPlayCandidate), "non note")}`,
+        game: nextPlayCandidate,
+      }
+    : {
+        label: "Ajouter",
+        title: "Construire ta collection",
+        detail: "Ajoute quelques jeux pour lancer les recommandations.",
+        tab: "search",
+      };
+
+  const hardwareByType = hardware.reduce((acc, item) => {
+    if (!isOwnedHardware(item)) return acc;
+    acc[item.type] = (acc[item.type] || 0) + 1;
+    return acc;
+  }, {});
+
+  const dashboardStats = [
+    { label: "Jeux", value: total, detail: `${dashboardFinished} termines` },
+    { label: "En cours", value: inProgressCount, detail: `${wishlistCount} wishlist` },
+    { label: "Note moy.", value: averageRating ? formatRating10(averageRating, "-") : "-", detail: `${ratedGames.length} notes` },
+    { label: "Materiel", value: ownedHardwareCount, detail: `${hardwareByType.console || 0} plateformes` },
+  ];
 
   const badgeStats = calculateBadgeStats(games, level, hardware);
 
@@ -5791,6 +5850,41 @@ function HomeTab({
         title={getRankTitle(level)}
         progress={progress}
       />
+
+      <div className="home-dashboard-panel">
+        <div className="home-focus-card">
+          <div className="home-focus-content">
+            <span className="home-kicker">Checkpoint du jour</span>
+            <h3>{dashboardAction.title}</h3>
+            <p>{dashboardAction.detail}</p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (dashboardAction.game) {
+                onOpenDetail(dashboardAction.game);
+                return;
+              }
+              if (dashboardAction.tab && dashboardAction.tab !== "home") {
+                setActiveTab(dashboardAction.tab);
+              }
+            }}
+          >
+            {dashboardAction.label}
+          </button>
+        </div>
+
+        <div className="home-dashboard-stats">
+          {dashboardStats.map((stat) => (
+            <div key={stat.label} className="home-dashboard-stat">
+              <strong>{stat.value}</strong>
+              <span>{stat.label}</span>
+              <small>{stat.detail}</small>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {quizQuestion && (
         <div className="weekly-quiz-card">

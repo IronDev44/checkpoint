@@ -7095,6 +7095,95 @@ body[data-ui="modern"] .chip.active {
   box-shadow: var(--accent-shadow);
 }
 
+.home-dashboard-panel {
+  display: grid;
+  gap: 12px;
+}
+
+.home-focus-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--ui-radius-xl);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, transparent), transparent 52%),
+    var(--panel-bg);
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--panel-border));
+  box-shadow: var(--panel-shadow);
+}
+
+.home-focus-content {
+  min-width: 0;
+}
+
+.home-focus-card h3 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.12;
+}
+
+.home-focus-card p {
+  margin: 7px 0 0;
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.home-focus-card button {
+  border: none;
+  cursor: pointer;
+  min-width: 104px;
+  min-height: 44px;
+  padding: 11px 14px;
+  border-radius: var(--ui-radius-md);
+  background: var(--accent);
+  color: white;
+  font-weight: 900;
+  box-shadow: var(--accent-shadow);
+}
+
+.home-dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.home-dashboard-stat {
+  min-width: 0;
+  padding: 13px 12px;
+  border-radius: var(--ui-radius-lg);
+  background: var(--surface-bg);
+  border: 1px solid var(--surface-border);
+}
+
+.home-dashboard-stat strong,
+.home-dashboard-stat span,
+.home-dashboard-stat small {
+  display: block;
+}
+
+.home-dashboard-stat strong {
+  color: white;
+  font-size: 22px;
+  line-height: 1.05;
+}
+
+.home-dashboard-stat span {
+  margin-top: 6px;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.home-dashboard-stat small {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
 .weekly-quiz-card {
   padding: 16px;
   border-radius: var(--ui-radius-xl);
@@ -7384,6 +7473,18 @@ body[data-ui="modern"] .chip.active {
   .home-actions-grid,
   .home-stats-grid {
     grid-template-columns: 1fr;
+  }
+
+  .home-focus-card {
+    grid-template-columns: 1fr;
+  }
+
+  .home-focus-card button {
+    width: 100%;
+  }
+
+  .home-dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
