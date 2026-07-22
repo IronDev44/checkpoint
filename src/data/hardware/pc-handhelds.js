@@ -181,4 +181,81 @@ export const PC_HANDHELDS_HARDWARE = [
     },
   ],
 },
+{
+  id: "apple-mac-gaming",
+  name: "Apple Mac",
+  brand: "Apple",
+  type: "console",
+  category: "PC",
+  variants: [
+    {
+      id: "apple-mac-desktop",
+      name: "Mac de bureau",
+      versions: [
+        {
+          id: "mac-mini-m4",
+          name: "Mac mini M4",
+          storage: "",
+          disc: false,
+          image: "/images/consoles/mac-mini-m4.png",
+        },
+        {
+          id: "mac-mini-m4-pro",
+          name: "Mac mini M4 Pro",
+          storage: "",
+          disc: false,
+          image: "/images/consoles/mac-mini-m4-pro.png",
+        },
+        {
+          id: "mac-studio-m4-max",
+          name: "Mac Studio M4 Max",
+          storage: "",
+          disc: false,
+          image: "/images/consoles/mac-studio-m4-max.png",
+        },
+        {
+          id: "mac-studio-m3-ultra",
+          name: "Mac Studio M3 Ultra",
+          storage: "",
+          disc: false,
+          image: "/images/consoles/mac-studio-m3-ultra.png",
+        },
+      ],
+    },
+    {
+      id: "apple-macbook-pro",
+      name: "MacBook Pro",
+      versions: [
+        {
+          id: "macbook-pro-14-m4-pro",
+          name: "MacBook Pro 14 M4 Pro",
+          storage: "",
+          disc: false,
+          image: "/images/consoles/macbook-pro-14-m4-pro.png",
+        },
+        {
+          id: "macbook-pro-14-m4-max",
+          name: "MacBook Pro 14 M4 Max",
+          storage: "",
+          disc: false,
+          image: "/images/consoles/macbook-pro-14-m4-max.png",
+        },
+        {
+          id: "macbook-pro-16-m4-pro",
+          name: "MacBook Pro 16 M4 Pro",
+          storage: "",
+          disc: false,
+          image: "/images/consoles/macbook-pro-16-m4-pro.png",
+        },
+        {
+          id: "macbook-pro-16-m4-max",
+          name: "MacBook Pro 16 M4 Max",
+          storage: "",
+          disc: false,
+          image: "/images/consoles/macbook-pro-16-m4-max.png",
+        },
+      ],
+    },
+  ],
+},
 ]

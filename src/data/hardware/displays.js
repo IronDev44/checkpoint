@@ -303,4 +303,27 @@ export const DISPLAYS_HARDWARE = [
       },
     ],
   },
+  {
+    id: "apple-displays",
+    name: "Apple Displays",
+    brand: "Apple",
+    type: "display",
+    category: "Ecrans premium",
+    variants: [
+      {
+        id: "apple-studio-display",
+        name: "Studio Display",
+        versions: [
+          displayVersion("apple-studio-display", "Apple Studio Display", ["27"]),
+        ],
+      },
+      {
+        id: "apple-pro-display",
+        name: "Pro Display",
+        versions: [
+          displayVersion("apple-pro-display-xdr", "Apple Pro Display XDR", ["32"]),
+        ],
+      },
+    ],
+  },
 ];

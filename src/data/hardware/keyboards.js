@@ -551,4 +551,22 @@ export const KEYBOARDS_HARDWARE = [
       },
     ],
   },
+  {
+    id: "apple-keyboards",
+    name: "Apple Keyboards",
+    brand: "Apple",
+    type: "keyboard",
+    category: "Claviers premium",
+    variants: [
+      {
+        id: "apple-magic-keyboard",
+        name: "Magic Keyboard",
+        versions: [
+          keyboardVersion("apple-magic-keyboard", "Apple Magic Keyboard"),
+          keyboardVersion("apple-magic-keyboard-touch-id", "Apple Magic Keyboard Touch ID"),
+          keyboardVersion("apple-magic-keyboard-numeric", "Apple Magic Keyboard Numeric"),
+        ],
+      },
+    ],
+  },
 ];

@@ -1354,4 +1354,32 @@ export const AUDIO_HARDWARE = [
   ],
 },
 
+{
+  id: "apple-audio",
+  brand: "Apple",
+  name: "Apple Audio",
+  type: "audio",
+  category: "Audio premium",
+  variants: [
+    {
+      id: "apple-airpods",
+      name: "AirPods",
+      versions: [
+        audioVersion("airpods-max", "AirPods Max"),
+        audioVersion("airpods-pro-2", "AirPods Pro 2"),
+        audioVersion("airpods-4", "AirPods 4"),
+      ],
+    },
+    {
+      id: "apple-beats",
+      name: "Beats",
+      versions: [
+        audioVersion("beats-studio-pro", "Beats Studio Pro"),
+        audioVersion("beats-solo-4", "Beats Solo 4"),
+        audioVersion("beats-fit-pro", "Beats Fit Pro"),
+      ],
+    },
+  ],
+},
+
 ];

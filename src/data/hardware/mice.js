@@ -547,4 +547,21 @@ export const MICE_HARDWARE = [
       },
     ],
   },
+  {
+    id: "apple-mice",
+    name: "Apple Pointing Devices",
+    brand: "Apple",
+    type: "mouse",
+    category: "Souris premium",
+    variants: [
+      {
+        id: "apple-magic",
+        name: "Magic",
+        versions: [
+          mouseVersion("apple-magic-mouse", "Apple Magic Mouse"),
+          mouseVersion("apple-magic-trackpad", "Apple Magic Trackpad"),
+        ],
+      },
+    ],
+  },
 ];
