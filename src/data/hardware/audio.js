@@ -1366,7 +1366,11 @@ export const AUDIO_HARDWARE = [
       name: "AirPods",
       versions: [
         audioVersion("airpods-max", "AirPods Max"),
+        audioVersion("airpods-max-2", "AirPods Max 2"),
         audioVersion("airpods-pro-2", "AirPods Pro 2"),
+        audioVersion("airpods-1", "AirPods"),
+        audioVersion("airpods-2", "AirPods 2"),
+        audioVersion("airpods-3", "AirPods 3"),
         audioVersion("airpods-4", "AirPods 4"),
       ],
     },
