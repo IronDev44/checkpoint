@@ -31,6 +31,22 @@ export const VR_HARDWARE = [
     ],
   },
   {
+    id: "apple-vr",
+    name: "Apple Vision",
+    brand: "Apple",
+    type: "vr",
+    category: "Casques VR premium",
+    variants: [
+      {
+        id: "apple-vision",
+        name: "Vision",
+        versions: [
+          vrVersion("apple-vision-pro", "Apple Vision Pro"),
+        ],
+      },
+    ],
+  },
+  {
     id: "playstation-vr",
     name: "PlayStation VR",
     brand: "PlayStation",
@@ -42,9 +58,7 @@ export const VR_HARDWARE = [
         name: "PS VR",
         versions: [
           vrVersion("playstation-vr2", "PlayStation VR2"),
-          vrVersion("playstation-vr2-horizon-bundle", "PlayStation VR2 Horizon Bundle"),
           vrVersion("playstation-vr", "PlayStation VR"),
-          vrVersion("playstation-vr-v2", "PlayStation VR V2"),
         ],
       },
     ],
@@ -187,7 +201,6 @@ export const VR_HARDWARE = [
         name: "Odyssey",
         versions: [
           vrVersion("samsung-hmd-odyssey-plus", "Samsung HMD Odyssey+"),
-          vrVersion("samsung-hmd-odyssey", "Samsung HMD Odyssey"),
         ],
       },
     ],
