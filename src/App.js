@@ -7305,14 +7305,7 @@ function getHardwareRatingFields(type) {
 }
 
 function getHardwareTypeIcon(type) {
-  if (type === "audio") return "AUDIO";
-  if (type === "speaker") return "SPK";
-  if (type === "vr") return "VR";
-  if (type === "controller") return "PAD";
-  if (type === "display") return "TV";
-  if (type === "mouse") return "M";
-  if (type === "keyboard") return "KB";
-  return "GAME";
+  return "";
 }
 
 function handleHardwareImageError(event) {
@@ -8737,9 +8730,6 @@ function HardwareTab({
                     scrollToHardwareArea(hardwareTopRef);
                   }}
                 >
-                  <span className="hardware-all-card-icon">
-                    {getHardwareTypeIcon(hardwareCategory)}
-                  </span>
                   <span>{allHardwareCatalogLabel}</span>
                   <small>{catalogModelTotal} modeles</small>
                 </button>
