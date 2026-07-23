@@ -18221,6 +18221,158 @@ body[data-theme="theme-steamdeck"] {
   }
 }
 
+/* Last hardware mobile override: wins over legacy passes above. */
+@media (max-width: 700px) {
+  .hardware-collection-filters {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 7px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    padding: 0 2px 4px !important;
+    scrollbar-width: none !important;
+  }
+
+  .hardware-collection-filters::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .hardware-collection-filters button {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 36px !important;
+    padding: 0 12px !important;
+    border-radius: 999px !important;
+    font-size: clamp(0.78rem, 3.6vw, 0.94rem) !important;
+    white-space: nowrap !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card {
+    display: grid !important;
+    grid-template-columns: 76px minmax(0, 1fr) !important;
+    grid-template-areas:
+      "image title"
+      "image meta"
+      "image actions" !important;
+    min-height: 106px !important;
+    padding: 11px !important;
+    gap: 4px 12px !important;
+    align-items: center !important;
+    overflow: visible !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-image-wrapper {
+    grid-area: image !important;
+    width: 76px !important;
+    height: 82px !important;
+    min-width: 76px !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-console-info {
+    display: contents !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-name {
+    grid-area: title !important;
+    align-self: end !important;
+    font-size: clamp(1.04rem, 4.7vw, 1.28rem) !important;
+    line-height: 1.04 !important;
+    padding: 0 !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-meta {
+    grid-area: meta !important;
+    align-self: start !important;
+    font-size: 0.78rem !important;
+    line-height: 1.1 !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-status-actions,
+  .hardware-all-view .hardware-all-version-card .hardware-status-badge {
+    grid-area: actions !important;
+    justify-self: start !important;
+    align-self: start !important;
+    margin-top: 2px !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-all-status-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    width: auto !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-all-status-actions button {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    min-height: 27px !important;
+    padding: 0 8px !important;
+    border-radius: 999px !important;
+    font-size: 0.66rem !important;
+    line-height: 1 !important;
+  }
+
+  .hardware-inline-detail-panel .modal-block {
+    background: transparent !important;
+    border: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .hardware-inline-detail-panel .modal-block + .modal-block {
+    padding-top: 15px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  }
+
+  .hardware-inline-detail-panel .hardware-detail-controls {
+    padding: 12px !important;
+    border-radius: 18px !important;
+    background: rgba(255, 255, 255, 0.045) !important;
+    border: 1px solid rgba(255, 255, 255, 0.075) !important;
+  }
+
+  .hardware-inline-detail-panel .hardware-rating-row {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  .hardware-inline-detail-panel .hardware-rating-row + .hardware-rating-row {
+    padding-top: 13px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.075) !important;
+  }
+
+  .hardware-inline-detail-panel .rating-slider-wrap {
+    padding: 11px !important;
+    border-radius: 15px !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.065) !important;
+    box-shadow: none !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .hardware-all-view .hardware-all-version-card {
+    grid-template-columns: 68px minmax(0, 1fr) !important;
+    min-height: 100px !important;
+    gap: 4px 9px !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-image-wrapper {
+    width: 68px !important;
+    height: 76px !important;
+    min-width: 68px !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-all-status-actions button {
+    padding: 0 7px !important;
+    font-size: 0.62rem !important;
+  }
+}
+
 /* Final hardware polish: mobile cards + inline detail readability. */
 .hardware-collection-card.hardware-card-v3 {
   transition:
