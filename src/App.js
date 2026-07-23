@@ -8761,8 +8761,12 @@ function HardwareTab({
                                     item.status !== "ranked"
                                 );
                                 const metaParts = [
-                                  catalogItem.name !== version.name ? catalogItem.name : "",
                                   version.storage || "",
+                                  variant.name &&
+                                  variant.name !== catalogItem.name &&
+                                  variant.name !== version.name
+                                    ? variant.name
+                                    : "",
                                 ].filter(Boolean);
 
                                 return (

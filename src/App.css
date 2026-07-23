@@ -9318,6 +9318,7 @@ body[data-ui="modern"] .panel-title {
 
 .hardware-all-version-card {
   min-height: 96px;
+  cursor: default;
 }
 
 .hardware-catalog-card.selected-catalog-version {
@@ -9329,6 +9330,16 @@ body[data-ui="modern"] .panel-title {
 
 .hardware-all-version-card .hardware-catalog-image {
   cursor: zoom-in;
+}
+
+.hardware-all-version-card .hardware-console-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.hardware-all-version-card .hardware-meta:empty {
+  display: none;
 }
 
 .game-modal {
@@ -19346,6 +19357,70 @@ body[data-theme="theme-cyberpunk"] {
     width: 18px !important;
     min-width: 18px !important;
     margin-left: 0 !important;
+  }
+
+  .hardware-all-version-card {
+    grid-template-columns: 76px minmax(0, 1fr) !important;
+    grid-template-areas:
+      "image title"
+      "image meta"
+      "image actions" !important;
+    min-height: 128px !important;
+    align-items: center !important;
+    column-gap: 14px !important;
+    row-gap: 6px !important;
+    overflow: hidden !important;
+  }
+
+  .hardware-all-version-card .hardware-image-wrapper {
+    grid-area: image !important;
+    align-self: center !important;
+  }
+
+  .hardware-all-version-card .hardware-console-info {
+    display: contents !important;
+  }
+
+  .hardware-all-version-card .hardware-name {
+    grid-area: title !important;
+    align-self: end !important;
+    padding-right: 0 !important;
+    font-size: clamp(1.18rem, 5vw, 1.42rem) !important;
+  }
+
+  .hardware-all-version-card .hardware-meta {
+    grid-area: meta !important;
+    align-self: start !important;
+    color: var(--text-soft) !important;
+    font-size: 0.86rem !important;
+    font-weight: 850 !important;
+  }
+
+  .hardware-all-version-card .hardware-status-actions,
+  .hardware-all-version-card .hardware-status-badge {
+    grid-area: actions !important;
+    align-self: start !important;
+    justify-self: stretch !important;
+  }
+
+  .hardware-all-version-card .hardware-all-status-actions {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    margin-top: 2px !important;
+  }
+
+  .hardware-all-version-card .hardware-all-status-actions button {
+    min-width: 0 !important;
+    width: 100% !important;
+    padding: 8px 5px !important;
+    font-size: 0.72rem !important;
+    white-space: nowrap !important;
+  }
+
+  .hardware-all-version-card .hardware-status-badge {
+    margin-top: 2px !important;
+    width: fit-content !important;
   }
 }
 
