@@ -8768,26 +8768,9 @@ function HardwareTab({
                                 return (
                                   <div
                                     key={version.id}
-                                    role="button"
-                                    tabIndex={0}
                                     className="hardware-console-card hardware-all-version-card"
                                     data-brand={catalogItem.brand}
                                     data-type={catalogItem.type}
-                                    onClick={() =>
-                                      openCatalogItem(catalogItem, {
-                                        fromAll: true,
-                                        versionId: version.id,
-                                      })
-                                    }
-                                    onKeyDown={(event) => {
-                                      if (event.key === "Enter" || event.key === " ") {
-                                        event.preventDefault();
-                                        openCatalogItem(catalogItem, {
-                                          fromAll: true,
-                                          versionId: version.id,
-                                        });
-                                      }
-                                    }}
                                   >
                                     <div className="hardware-image-wrapper">
                                       {version.image ? (
@@ -8830,7 +8813,7 @@ function HardwareTab({
                                       ) : (
                                         <div className="hardware-status-actions hardware-all-status-actions">
                                           {[
-                                            ["possÃ©dÃ©", "Je l'ai"],
+                                            ["possédé", "Je l'ai"],
                                             ["historique", "Historique"],
                                             ["wishlist", "Wishlist"],
                                           ].map(([status, label]) => (
@@ -8849,7 +8832,6 @@ function HardwareTab({
                                       )}
                                     </div>
 
-                                    <div className="hardware-console-arrow">&rsaquo;</div>
                                   </div>
                                 );
                               })
