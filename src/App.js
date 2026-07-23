@@ -666,12 +666,14 @@ function GenreStatsChart({ games }) {
 function getPlayerProfile(games) {
   if (!games.length) {
     return {
-      title: "Nouveau joueur",
-      subtitle: "Tu commences à construire ta bibliothèque."
+      title: "Signature en construction",
+      subtitle: "Ta bibliotheque commence a dessiner ton univers gaming."
     };
   }
 
-  const finishedGames = games.filter((g) => g.status === "terminé");
+  const finishedGames = games.filter((g) =>
+    g.status === "terminé" || g.status === "terminÃ©" || g.status === "collection"
+  );
   const favoriteGames = games.filter((g) => g.favorite);
   const stats = getAdvancedStats(games);
 
@@ -684,87 +686,86 @@ function getPlayerProfile(games) {
 
   if (finishedCount >= 20 && avgDifficulty >= 3.2) {
     return {
-      title: "Hardcore gamer",
-      subtitle: "Tu termines beaucoup de jeux exigeants."
+      title: "Mode Legende active",
+      subtitle: "Tu valides des jeux exigeants et tu fais monter ton checkpoint."
     };
   }
 
   if (topGenre === "RPG" || topGenre === "Role-Playing Games (RPG)") {
     return {
-      title: "Explorateur RPG",
-      subtitle: "Tu aimes les mondes riches, les quêtes et la progression."
+      title: "Cartographe d'univers",
+      subtitle: "Ton profil se construit autour des mondes riches, des quetes et de la progression."
     };
   }
 
   if (topGenre === "Adventure") {
     return {
-      title: "Aventurier",
-      subtitle: "Tu privilégies l’exploration et le voyage."
+      title: "Voyageur de mondes",
+      subtitle: "Tu avances par decouverte, ambiance et grands moments d'exploration."
     };
   }
 
   if (topGenre === "Action") {
     return {
-      title: "Accro à l’action",
-      subtitle: "Tu vas droit au rythme, à l’intensité et à l’impact."
+      title: "Instinct arcade",
+      subtitle: "Ton checkpoint prefere le rythme, l'impact et les sensations immediates."
     };
   }
 
   if (topGenre === "Shooter") {
     return {
-      title: "Tireur d’élite",
-      subtitle: "Tu apprécies la précision et les sensations nerveuses."
+      title: "Precision tactique",
+      subtitle: "Ton profil aime la visee propre, la pression et les decisions rapides."
     };
   }
 
   if (topGenre === "Simulation") {
     return {
-      title: "Stratège chill",
-      subtitle: "Tu aimes gérer, construire et prendre ton temps."
+      title: "Architecte de systemes",
+      subtitle: "Tu prends plaisir a gerer, optimiser et construire quelque chose qui tient."
     };
   }
 
   if (favoriteCount >= 8 && avgRating >= 8) {
     return {
-      title: "Chasseur de pépites",
-      subtitle: "Tu repères facilement les jeux qui te marquent."
+      title: "Curateur de pepites",
+      subtitle: "Tes favoris racontent une selection personnelle, pas juste une collection."
     };
   }
 
   if (avgRating >= 8.6) {
     return {
-      title: "Joueur exigeant",
-      subtitle: "Tu sélectionnes surtout des jeux que tu trouves vraiment solides."
+      title: "Oeil de selection",
+      subtitle: "Tu notes haut quand un jeu merite vraiment sa place dans ton univers."
     };
   }
 
   if (totalPlaytime >= 120) {
     return {
-      title: "Marathonien du backlog",
-      subtitle: "Tu investis beaucoup de temps dans ta bibliothèque."
+      title: "Gardien du backlog",
+      subtitle: "Tu donnes du temps a ta bibliotheque et tu fais vivre tes jeux sur la duree."
     };
   }
 
   if (finishedCount >= 10) {
     return {
-      title: "Collectionneur régulier",
-      subtitle: "Tu construis une ludothèque déjà bien installée."
+      title: "Bibliotheque consolidee",
+      subtitle: "Ton checkpoint a deja une vraie base de jeux termines et assumes."
     };
   }
 
   if (avgDifficulty <= 1.5) {
     return {
-      title: "Joueur détente",
-      subtitle: "Tu privilégies le confort et le plaisir immédiat."
+      title: "Session confort",
+      subtitle: "Tu privilegies les experiences fluides, accessibles et agreables a lancer."
     };
   }
 
   return {
-    title: "Joueur polyvalent",
-    subtitle: "Tu touches à tout et ton profil reste équilibré."
+    title: "Profil multi-plateforme",
+    subtitle: "Ton univers reste ouvert, varie et difficile a ranger dans une seule case."
   };
 }
-
 function normalizeIdentityText(value = "") {
   return String(value)
     .toLowerCase()
