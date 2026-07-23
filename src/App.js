@@ -4738,9 +4738,10 @@ function getProfileShareUrl(handle) {
 }
 
 function getCurrentOwnedHardware(hardware = []) {
-  return hardware.filter((item) =>
-    ["possédé", "à réparer"].includes(item.status)
-  );
+  return hardware.filter((item) => {
+    const status = getNormalizedStatus(item?.status || "");
+    return status.includes("poss") || status.includes("reparer");
+  });
 }
 
 function getHardwareConsoleGameStats(hardwareItem, games = []) {
@@ -5660,7 +5661,7 @@ function HomeTab({
     game.status === "collection" ||
     game.progressStatus === "completed";
   const isOwnedHardware = (item) =>
-    item.status === "possédé" || item.status === "possÃ©dÃ©";
+    String(item.status || "").toLowerCase().includes("poss");
 
   const total = games.length;
   const finished = games.filter((g) => g.status === "terminé").length;
@@ -7810,7 +7811,7 @@ function HardwareDetailModal({
             <div className="modal-block-title">État et statut</div>
 
             <div className="hardware-card-dropdowns">
-              {item.type === "console" && item.status === "possédé" && (
+              {item.type === "console" && String(item.status || "").toLowerCase().includes("poss") && (
                 <HardwareDropdown
                   id={`detail-condition-${item.id}`}
                   label="État"
@@ -7954,6 +7955,7 @@ function HardwareTab({
   const [zoomedHardwareImage, setZoomedHardwareImage] = useState(null);
   const [selectedHardwareDetail, setSelectedHardwareDetail] = useState(null);
   const [showHardwareCatalog, setShowHardwareCatalog] = useState(false);
+  const [hardwareCollectionFilter, setHardwareCollectionFilter] = useState("all");
 
   const autoControllerSyncRef = useRef(new Set());
   const hardwareTopRef = useRef(null);
@@ -8150,6 +8152,29 @@ function HardwareTab({
     HARDWARE_STATUS_OPTIONS.find((option) => option.id === status)?.label ||
     "Possédé";
 
+  const getHardwareStatusKey = (status = "") => {
+    const raw = String(status || "").toLowerCase();
+    const normalized = getNormalizedStatus(raw);
+
+    if (normalized.includes("wishlist")) return "wishlist";
+    if (normalized.includes("historique")) return "historique";
+    if (normalized.includes("vend")) return "vendu";
+    if (normalized.includes("reparer") || raw.includes("rÃ")) return "reparer";
+    if (normalized.includes("poss") || raw.includes("poss")) return "possede";
+
+    return normalized;
+  };
+
+  const hasHardwareStatus = (item, statusKey) =>
+    getHardwareStatusKey(item?.status) === statusKey;
+
+  const isCurrentHardware = (item) =>
+    hasHardwareStatus(item, "possede") || hasHardwareStatus(item, "reparer");
+
+  const isRankableHardware = (item) =>
+    ["possede", "historique", "vendu", "reparer"].includes(
+      getHardwareStatusKey(item?.status)
+    );
   const findControllerByVersionId = (versionId) => {
     for (const item of HARDWARE_CATALOG) {
       if (item.type !== "controller") continue;
@@ -8171,18 +8196,17 @@ function HardwareTab({
     "à réparer",
   ];
   const hardwareStatusPriority = {
-    possédé: 3,
-    "à réparer": 3,
+    possede: 3,
+    reparer: 3,
     historique: 2,
     vendu: 1,
   };
-
   const getRankedHardware = (type) =>
     Object.values(
     hardware
       .filter(
         (item) =>
-          item.type === type && hardwareRankingStatuses.includes(item.status)
+          item.type === type && isRankableHardware(item)
       )
       .reduce((rankedItems, item) => {
         const hardwareKey =
@@ -8191,8 +8215,8 @@ function HardwareTab({
 
         if (
           !currentItem ||
-          (hardwareStatusPriority[item.status] || 0) >
-            (hardwareStatusPriority[currentItem.status] || 0) ||
+          (hardwareStatusPriority[getHardwareStatusKey(item.status)] || 0) >
+            (hardwareStatusPriority[getHardwareStatusKey(currentItem.status)] || 0) ||
           getHardwareAverageRating(item) > getHardwareAverageRating(currentItem)
         ) {
           rankedItems[hardwareKey] = item;
@@ -8221,7 +8245,7 @@ function HardwareTab({
       const currentOrPastConsoles = hardware.filter(
         (item) =>
           item.type === "console" &&
-          ["possédé", "historique", "vendu"].includes(item.status)
+          ["possede", "historique", "vendu"].includes(getHardwareStatusKey(item.status))
       );
 
       for (const consoleItem of currentOrPastConsoles) {
@@ -8233,8 +8257,10 @@ function HardwareTab({
         const controllerData = findControllerByVersionId(controllerVersionId);
         if (!controllerData) continue;
 
-        const controllerStatus =
-          consoleItem.status === "possédé" ? "possédé" : "historique";
+        const ownedStatusId = HARDWARE_STATUS_OPTIONS[0].id;
+        const controllerStatus = hasHardwareStatus(consoleItem, "possede")
+          ? ownedStatusId
+          : "historique";
         const syncKey = `controller-${controllerVersionId}-${controllerStatus}`;
 
         const alreadySynced = hardware.some((item) => {
@@ -8243,8 +8269,8 @@ function HardwareTab({
           }
 
           return controllerStatus === "historique"
-            ? hardwareRankingStatuses.includes(item.status)
-            : item.status === controllerStatus;
+            ? isRankableHardware(item)
+            : hasHardwareStatus(item, "possede");
         });
 
         if (!alreadySynced && !autoControllerSyncRef.current.has(syncKey)) {
@@ -8266,19 +8292,17 @@ function HardwareTab({
             review: "",
             favorite: false,
             source:
-              controllerStatus === "possédé"
+              controllerStatus === ownedStatusId
                 ? "auto-controller"
                 : "auto-controller-history",
             createdAt: Date.now(),
           });
         }
-
       }
     };
 
     syncDefaultControllers();
   }, [hardware]);
-
   const catalogByType = HARDWARE_CATALOG.filter(
     (item) => item.type === hardwareCategory
   );
@@ -8483,7 +8507,7 @@ function HardwareTab({
         .filter(
           (item) =>
             item.type === hardwareCategory &&
-            ["possédé", "historique", "vendu", "à réparer"].includes(item.status)
+            isRankableHardware(item)
         )
         .map((item) => item.versionId)
         .filter(Boolean)
@@ -8507,7 +8531,7 @@ function HardwareTab({
             id: "controllers",
             title: "Manettes utilisées actuellement",
             items: hardware.filter(
-              (item) => item.type === "controller" && item.status === "possédé"
+              (item) => item.type === "controller" && hasHardwareStatus(item, "possede")
             ),
           },
           {
@@ -8522,7 +8546,7 @@ function HardwareTab({
             id: "audio-owned",
             title: "Casques utilisés actuellement",
             items: hardware.filter(
-              (item) => item.type === "audio" && item.status === "possédé"
+              (item) => item.type === "audio" && hasHardwareStatus(item, "possede")
             ),
           },
           {
@@ -8534,7 +8558,7 @@ function HardwareTab({
             id: "audio-wishlist",
             title: "Wishlist audio",
             items: hardware.filter(
-              (item) => item.type === "audio" && item.status === "wishlist"
+              (item) => item.type === "audio" && hasHardwareStatus(item, "wishlist")
             ),
           },
         ]
@@ -8544,7 +8568,7 @@ function HardwareTab({
             id: "speaker-owned",
             title: "Enceintes utilisees actuellement",
             items: hardware.filter(
-              (item) => item.type === "speaker" && item.status === "possÃ©dÃ©"
+              (item) => item.type === "speaker" && hasHardwareStatus(item, "possede")
             ),
           },
           {
@@ -8556,7 +8580,7 @@ function HardwareTab({
             id: "speaker-wishlist",
             title: "Wishlist enceintes",
             items: hardware.filter(
-              (item) => item.type === "speaker" && item.status === "wishlist"
+              (item) => item.type === "speaker" && hasHardwareStatus(item, "wishlist")
             ),
           },
         ]
@@ -8568,7 +8592,7 @@ function HardwareTab({
             items: hardware.filter(
               (item) =>
                 item.type === "vr" &&
-                getNormalizedStatus(item.status).includes("possed")
+                hasHardwareStatus(item, "possede")
             ),
           },
           {
@@ -8580,7 +8604,7 @@ function HardwareTab({
             id: "vr-wishlist",
             title: "Wishlist VR",
             items: hardware.filter(
-              (item) => item.type === "vr" && item.status === "wishlist"
+              (item) => item.type === "vr" && hasHardwareStatus(item, "wishlist")
             ),
           },
         ]
@@ -8590,7 +8614,7 @@ function HardwareTab({
             id: "mouse-owned",
             title: "Souris utilisees actuellement",
             items: hardware.filter(
-              (item) => item.type === "mouse" && item.status === "possédé"
+              (item) => item.type === "mouse" && hasHardwareStatus(item, "possede")
             ),
           },
           {
@@ -8602,7 +8626,7 @@ function HardwareTab({
             id: "mouse-wishlist",
             title: "Wishlist souris",
             items: hardware.filter(
-              (item) => item.type === "mouse" && item.status === "wishlist"
+              (item) => item.type === "mouse" && hasHardwareStatus(item, "wishlist")
             ),
           },
         ]
@@ -8612,7 +8636,7 @@ function HardwareTab({
             id: "keyboard-owned",
             title: "Claviers utilises actuellement",
             items: hardware.filter(
-              (item) => item.type === "keyboard" && item.status === "possédé"
+              (item) => item.type === "keyboard" && hasHardwareStatus(item, "possede")
             ),
           },
           {
@@ -8624,7 +8648,7 @@ function HardwareTab({
             id: "keyboard-wishlist",
             title: "Wishlist claviers",
             items: hardware.filter(
-              (item) => item.type === "keyboard" && item.status === "wishlist"
+              (item) => item.type === "keyboard" && hasHardwareStatus(item, "wishlist")
             ),
           },
         ]
@@ -8634,7 +8658,7 @@ function HardwareTab({
             id: "display-owned",
             title: "Ecrans et TV utilises actuellement",
             items: hardware.filter(
-              (item) => item.type === "display" && item.status === "possÃ©dÃ©"
+              (item) => item.type === "display" && hasHardwareStatus(item, "possede")
             ),
           },
           {
@@ -8646,7 +8670,7 @@ function HardwareTab({
             id: "display-wishlist",
             title: "Wishlist ecrans & TV",
             items: hardware.filter(
-              (item) => item.type === "display" && item.status === "wishlist"
+              (item) => item.type === "display" && hasHardwareStatus(item, "wishlist")
             ),
           },
         ]
@@ -8657,7 +8681,7 @@ function HardwareTab({
             items: hardware.filter(
               (item) =>
                 item.type === "console" &&
-                ["possédé", "à réparer"].includes(item.status)
+                isCurrentHardware(item)
             ),
           },
           {
@@ -8669,12 +8693,36 @@ function HardwareTab({
             id: "wishlist",
             title: "Wishlist matériel",
             items: hardware.filter(
-              (item) => item.type === "console" && item.status === "wishlist"
+              (item) => item.type === "console" && hasHardwareStatus(item, "wishlist")
             ),
           },
         ];
 
-  const hasVisibleHardware = collectionGroups.some(
+  const hardwareCollectionFilters = [
+    { id: "all", label: "Tout" },
+    { id: "current", label: "Actuel" },
+    { id: "history", label: "Historique" },
+    { id: "wishlist", label: "Wishlist" },
+  ];
+
+  const matchesHardwareCollectionFilter = (item) => {
+    if (hardwareCollectionFilter === "current") return isCurrentHardware(item);
+    if (hardwareCollectionFilter === "wishlist") return hasHardwareStatus(item, "wishlist");
+    if (hardwareCollectionFilter === "history") {
+      return ["historique", "vendu"].includes(getHardwareStatusKey(item.status));
+    }
+
+    return true;
+  };
+
+  const visibleCollectionGroups = collectionGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(matchesHardwareCollectionFilter),
+    }))
+    .filter((group) => group.items.length > 0);
+
+  const hasVisibleHardware = visibleCollectionGroups.some(
     (group) => group.items.length > 0
   );
 
@@ -8784,6 +8832,7 @@ function HardwareTab({
               setShowHardwareCatalog((open) => !open);
               setSelectedHardwareId(null);
               setSelectedHardwareBrandView(null);
+              setSelectedHardwareDetail(null);
               setShowAllHardwareByBrand(false);
               setReturnToAllHardware(false);
               setSelectedCatalogVersionId(null);
@@ -8819,6 +8868,7 @@ function HardwareTab({
                 setReturnToAllHardware(false);
                 setSelectedCatalogVersionId(null);
                 setHardwareSearch("");
+                setHardwareCollectionFilter("all");
                 scrollToHardwareArea(hardwareCatalogPanelRef);
               }}
             >
@@ -8837,6 +8887,7 @@ function HardwareTab({
               setShowAllHardwareByBrand(false);
               setReturnToAllHardware(false);
               setSelectedCatalogVersionId(null);
+              setSelectedHardwareDetail(null);
             }}
             placeholder={
               hardwareCategory === "controller"
@@ -8925,6 +8976,30 @@ function HardwareTab({
                   </span>
                 </div>
 
+                {selectedHardwareDetail?.instanceKey?.startsWith("all-") && (
+                  <HardwareDetailModal
+                    item={hardware.find((h) => h.id === selectedHardwareDetail.id) || selectedHardwareDetail}
+                    detailRef={hardwareDetailRef}
+                    onClose={() => setSelectedHardwareDetail(null)}
+                    onDeleteHardware={onDeleteHardware}
+                    openedDropdown={openedDropdown}
+                    setOpenedDropdown={setOpenedDropdown}
+                    statusOptions={HARDWARE_STATUS_OPTIONS}
+                    conditionOptions={CONDITION_OPTIONS}
+                    displaySizeOptions={DISPLAY_SIZE_OPTIONS}
+                    onUpdateHardwareStatus={onUpdateHardwareStatus}
+                    onUpdateHardwareCondition={onUpdateHardwareCondition}
+                    onUpdateHardwareDisplaySize={onUpdateHardwareDisplaySize}
+                    onUpdateHardwareComponent={onUpdateHardwareComponent}
+                    onUpdateHardwareRating={onUpdateHardwareRating}
+                    onUpdateHardwareReview={onUpdateHardwareReview}
+                    onToggleHardwareFavorite={onToggleHardwareFavorite}
+                    consoleGameStats={getConsoleGameStats(
+                      hardware.find((h) => h.id === selectedHardwareDetail.id) || selectedHardwareDetail
+                    )}
+                  />
+                )}
+
                 <div className="hardware-all-groups">
                   {catalogGroupsByBrand.map((group) => (
                     <section key={group.brand} className="hardware-all-group">
@@ -8970,13 +9045,26 @@ function HardwareTab({
                                     ? variant.name
                                     : "",
                                 ].filter(Boolean);
+                                const detailInstanceKey = `all-${catalogItem.id}-${version.id}`;
 
                                 return (
                                   <div
                                     key={version.id}
-                                    className="hardware-console-card hardware-all-version-card"
+                                    className={`hardware-console-card hardware-all-version-card ${existingItem ? "is-openable" : ""} ${
+                                      selectedHardwareDetail?.instanceKey === detailInstanceKey
+                                        ? "active"
+                                        : ""
+                                    }`}
                                     data-brand={catalogItem.brand}
                                     data-type={catalogItem.type}
+                                    onClick={() => {
+                                      if (!existingItem) return;
+                                      setSelectedHardwareDetail((current) =>
+                                        current?.instanceKey === detailInstanceKey
+                                          ? null
+                                          : { ...existingItem, instanceKey: detailInstanceKey }
+                                      );
+                                    }}
                                   >
                                     <div className="hardware-image-wrapper">
                                       {version.image ? (
@@ -9058,6 +9146,7 @@ function HardwareTab({
                     setShowAllHardwareByBrand(true);
                     setSelectedHardwareBrandView(null);
                     setSelectedHardwareId(null);
+                    setSelectedHardwareDetail(null);
                     setReturnToAllHardware(false);
                     setSelectedCatalogVersionId(null);
                     scrollToHardwareArea(hardwareTopRef);
@@ -9075,6 +9164,7 @@ function HardwareTab({
                     onClick={() => {
                       setSelectedHardwareBrandView(brand);
                       setSelectedHardwareId(null);
+                      setSelectedHardwareDetail(null);
                       setSelectedCatalogVersionId(null);
                       scrollToHardwareArea(hardwareTopRef);
                     }}
@@ -9182,7 +9272,7 @@ function HardwareTab({
                         const ownedItem = hardware.find(
                           (item) =>
                             item.versionId === version.id &&
-                            item.status === "possédé"
+                            hasHardwareStatus(item, "possede")
                         );
 
                         const existingItem = hardware.find(
@@ -9332,15 +9422,28 @@ function HardwareTab({
 
 
       <div className="search-panel">
-        <h2 className="panel-title">{hardwareTitle}</h2>
+        <div className="hardware-collection-head">
+          <h2 className="panel-title">{hardwareTitle}</h2>
+
+          <div className="hardware-collection-filters">
+            {hardwareCollectionFilters.map((filter) => (
+              <button
+                key={filter.id}
+                type="button"
+                className={hardwareCollectionFilter === filter.id ? "active" : ""}
+                onClick={() => setHardwareCollectionFilter(filter.id)}
+              >
+                {filter.label}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {!hasVisibleHardware ? (
           <EmptyState title={emptyTitle} subtitle={emptySubtitle} />
         ) : (
           <div className="hardware-collection-sections">
-            {collectionGroups
-              .filter((group) => group.items.length > 0)
-              .map((group) => (
+            {visibleCollectionGroups.map((group) => (
                 <div key={group.id} className="hardware-collection-section">
                   <h3 className="hardware-group-title">{group.title}</h3>
 
@@ -9449,7 +9552,7 @@ function HardwareTab({
 
                           <div className="hardware-card-bottom">
                             <div className="hardware-card-badges">
-                              {item.type === "console" && item.status === "possédé" && (
+                              {item.type === "console" && String(item.status || "").toLowerCase().includes("poss") && (
                                 <span className="hardware-card-badge">
                                   {CONDITION_OPTIONS.find((option) => option.id === (item.condition || "bon"))?.label || "Bon"}
                                 </span>
