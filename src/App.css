@@ -7686,6 +7686,52 @@ body[data-ui="modern"] .chip.active {
   gap: 12px;
 }
 
+.checkpoint-goals-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.checkpoint-goals-head .home-card-title {
+  margin-bottom: 4px;
+}
+
+.checkpoint-goals-head p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.checkpoint-goals-xp {
+  flex: 0 0 auto;
+  min-width: 76px;
+  padding: 9px 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.08);
+  text-align: center;
+}
+
+.checkpoint-goals-xp strong,
+.checkpoint-goals-xp span {
+  display: block;
+  line-height: 1.1;
+}
+
+.checkpoint-goals-xp strong {
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.checkpoint-goals-xp span {
+  margin-top: 3px;
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 900;
+}
+
 .checkpoint-goals-list {
   display: grid;
   gap: 10px;
@@ -7700,6 +7746,13 @@ body[data-ui="modern"] .chip.active {
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 12px;
   background: rgba(10, 18, 32, 0.34);
+}
+
+.checkpoint-goal-row.claimable {
+  border-color: color-mix(in srgb, var(--accent), transparent 36%);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent), transparent 86%), rgba(10, 18, 32, 0.36));
+  box-shadow: 0 0 20px color-mix(in srgb, var(--accent), transparent 86%);
 }
 
 .checkpoint-goal-main {
@@ -7752,6 +7805,15 @@ body[data-ui="modern"] .chip.active {
   box-shadow: var(--accent-shadow);
 }
 
+.checkpoint-goal-main em {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-soft);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
 .checkpoint-goal-action {
   min-width: 94px;
   border: 1px solid rgba(255,255,255,0.12);
@@ -7774,6 +7836,14 @@ body[data-ui="modern"] .chip.active {
 }
 
 @media (max-width: 560px) {
+  .checkpoint-goals-head {
+    flex-direction: column;
+  }
+
+  .checkpoint-goals-xp {
+    width: 100%;
+  }
+
   .checkpoint-goal-row {
     grid-template-columns: 1fr;
   }

@@ -63,6 +63,7 @@ import {
 const API_KEY = "d7b763a492c745cd82217c285f897e08";
 
 const WEEKLY_QUIZ_STORAGE_KEY = "checkpoint-weekly-quiz";
+const CHECKPOINT_GOALS_STORAGE_KEY = "checkpoint-goals";
 
 const DEFAULT_WEEKLY_QUIZ_PROGRESS = {
   answers: {},
@@ -70,6 +71,11 @@ const DEFAULT_WEEKLY_QUIZ_PROGRESS = {
   streak: 0,
   bestStreak: 0,
   lastCorrectWeek: "",
+};
+
+const DEFAULT_CHECKPOINT_GOAL_PROGRESS = {
+  claimed: {},
+  totalXP: 0,
 };
 
 function getWeeklyQuizKey(date = new Date()) {
@@ -144,6 +150,29 @@ function getStoredWeeklyQuizProgress() {
 
 function storeWeeklyQuizProgress(progress) {
   localStorage.setItem(WEEKLY_QUIZ_STORAGE_KEY, JSON.stringify(progress));
+}
+
+function getStoredCheckpointGoalProgress() {
+  try {
+    const storedProgress = JSON.parse(
+      localStorage.getItem(CHECKPOINT_GOALS_STORAGE_KEY) || "{}"
+    );
+
+    return {
+      ...DEFAULT_CHECKPOINT_GOAL_PROGRESS,
+      ...storedProgress,
+      claimed: {
+        ...DEFAULT_CHECKPOINT_GOAL_PROGRESS.claimed,
+        ...(storedProgress.claimed || {}),
+      },
+    };
+  } catch (error) {
+    return DEFAULT_CHECKPOINT_GOAL_PROGRESS;
+  }
+}
+
+function storeCheckpointGoalProgress(progress) {
+  localStorage.setItem(CHECKPOINT_GOALS_STORAGE_KEY, JSON.stringify(progress));
 }
 
 function isAbortError(error) {
@@ -5607,6 +5636,8 @@ function HomeTab({
   weeklyQuiz,
   weeklyQuizProgress = DEFAULT_WEEKLY_QUIZ_PROGRESS,
   onAnswerWeeklyQuiz,
+  checkpointGoalProgress = DEFAULT_CHECKPOINT_GOAL_PROGRESS,
+  onClaimCheckpointGoal,
 }) {
   const [recommendations, setRecommendations] = useState([]);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
@@ -5728,16 +5759,69 @@ function HomeTab({
     return mainRating <= 0 && !detailedRatings.some((value) => value > 0);
   });
 
-  const checkpointGoals = [
-    !quizLocked && {
-      id: "quiz",
-      title: "Quiz disponible",
-      detail: "Une question rapide pour gagner de l'XP et garder le rythme.",
-      actionLabel: "Repondre",
+  const claimedGoalIds = checkpointGoalProgress.claimed || {};
+  const ratedHardwareCount = Math.max(0, ownedHardwareCount - unratedOwnedHardware.length);
+  const makeCheckpointGoal = (goal) => {
+    const current = Math.min(Number(goal.current || 0), Number(goal.target || 1));
+    const target = Math.max(Number(goal.target || 1), 1);
+    const progress = Math.min((current / target) * 100, 100);
+    const claimed = Boolean(claimedGoalIds[goal.id]);
+
+    return {
+      ...goal,
+      current,
+      target,
+      progress,
+      claimed,
+      claimable: progress >= 100 && Number(goal.xp || 0) > 0 && !claimed,
+      reward: goal.xp ? `+${goal.xp} XP` : goal.reward,
+    };
+  };
+
+  const measurableGoals = [
+    makeCheckpointGoal({
+      id: `quiz-${weeklyQuiz?.weekKey || "free"}`,
+      title: "Checkpoint quiz",
+      detail: "Repondre au quiz actif pour entretenir ta serie.",
+      actionLabel: quizLocked ? "Valider" : "Repondre",
       tab: "home",
-      progress: 0,
-      reward: `+${WEEKLY_QUIZ_XP.correct} XP`,
-    },
+      current: quizLocked ? 1 : 0,
+      target: 1,
+      xp: 60,
+    }),
+    makeCheckpointGoal({
+      id: "rated-games-25",
+      title: "Profil fiable",
+      detail: "Atteindre 25 jeux notes pour fiabiliser tes tops.",
+      actionLabel: "Valider",
+      tab: "library",
+      current: ratedGames.length,
+      target: 25,
+      xp: 120,
+    }),
+    makeCheckpointGoal({
+      id: "rated-hardware-10",
+      title: "Materiel calibre",
+      detail: "Noter 10 materiels possedes pour solidifier le classement.",
+      actionLabel: "Valider",
+      tab: "hardware",
+      current: ratedHardwareCount,
+      target: 10,
+      xp: 100,
+    }),
+    makeCheckpointGoal({
+      id: "finished-games-25",
+      title: "Archive solide",
+      detail: "Valider 25 jeux termines dans ta collection.",
+      actionLabel: "Valider",
+      tab: "library",
+      current: dashboardFinished,
+      target: 25,
+      xp: 150,
+    }),
+  ].filter((goal) => !goal.claimed);
+
+  const shortcutGoals = [
     inProgressGames[0] && {
       id: "resume-game",
       title: "Reprendre une partie",
@@ -5745,37 +5829,16 @@ function HomeTab({
       actionLabel: "Ouvrir",
       game: inProgressGames[0],
       progress: Math.min((dashboardFinished / Math.max(total, 1)) * 100, 100),
-      reward: "Progression",
+      reward: "Raccourci",
     },
     unratedGames.length > 0 && {
       id: "rate-games",
-      title: "Nettoyer les notes",
-      detail: `${unratedGames.length} jeux attendent encore une note fiable.`,
+      title: "Notes a completer",
+      detail: `${unratedGames.length} jeux sans note dans la collection.`,
       actionLabel: "Bibliotheque",
       tab: "library",
       progress: Math.min((ratedGames.length / Math.max(total, 1)) * 100, 100),
-      reward: "Profil plus juste",
-    },
-    unratedOwnedHardware.length > 0 && {
-      id: "rate-hardware",
-      title: "Noter le materiel",
-      detail: `${unratedOwnedHardware.length} materiels possedes n'ont pas encore de note.`,
-      actionLabel: "Materiel",
-      tab: "hardware",
-      progress: Math.min(
-        ((ownedHardwareCount - unratedOwnedHardware.length) / Math.max(ownedHardwareCount, 1)) * 100,
-        100
-      ),
-      reward: "Top materiel",
-    },
-    wishlistCount > 0 && {
-      id: "wishlist",
-      title: "Faire le tri",
-      detail: `${wishlistCount} envies dans la wishlist a confirmer ou retirer.`,
-      actionLabel: "Wishlist",
-      tab: "library",
-      progress: Math.min(((total - wishlistCount) / Math.max(total, 1)) * 100, 100),
-      reward: "Collection propre",
+      reward: "Action utile",
     },
     nextBadge?.progressData && {
       id: "badge",
@@ -5789,7 +5852,15 @@ function HomeTab({
       ),
       reward: nextBadge.rarity,
     },
-  ].filter(Boolean).slice(0, 3);
+  ].filter(Boolean);
+
+  const checkpointGoals = [
+    ...measurableGoals.sort((a, b) => Number(b.claimable) - Number(a.claimable) || b.progress - a.progress),
+    ...shortcutGoals,
+  ].slice(0, 3);
+
+  const claimedGoals = Object.values(claimedGoalIds);
+  const claimedGoalsXP = checkpointGoalProgress.totalXP || 0;
 
   const upcomingEvents = getUpcomingEvents(gamingEvents);
   const nextEvent = upcomingEvents[0];
@@ -6063,12 +6134,22 @@ function HomeTab({
       )}
 
       <div className="home-card checkpoint-goals-card">
-        <div className="home-card-title">Objectifs Checkpoint</div>
+        <div className="checkpoint-goals-head">
+          <div>
+            <div className="home-card-title">Objectifs Checkpoint</div>
+            <p>Des objectifs utiles pour faire progresser ton hub sans remplir l'app de missions inutiles.</p>
+          </div>
+
+          <div className="checkpoint-goals-xp">
+            <strong>{claimedGoals.length}</strong>
+            <span>{claimedGoalsXP} XP</span>
+          </div>
+        </div>
 
         {checkpointGoals.length > 0 ? (
           <div className="checkpoint-goals-list">
             {checkpointGoals.map((goal) => (
-              <div key={goal.id} className="checkpoint-goal-row">
+              <div key={goal.id} className={`checkpoint-goal-row ${goal.claimable ? "claimable" : ""}`}>
                 <div className="checkpoint-goal-main">
                   <div>
                     <strong>{goal.title}</strong>
@@ -6080,12 +6161,21 @@ function HomeTab({
                   <div className="checkpoint-goal-progress">
                     <div style={{ width: `${goal.progress}%` }} />
                   </div>
+
+                  {goal.target && (
+                    <em>{goal.current} / {goal.target}</em>
+                  )}
                 </div>
 
                 <button
                   type="button"
                   className="checkpoint-goal-action"
                   onClick={() => {
+                    if (goal.claimable) {
+                      onClaimCheckpointGoal?.(goal);
+                      return;
+                    }
+
                     if (goal.game) {
                       onOpenDetail(goal.game);
                       return;
@@ -6103,7 +6193,7 @@ function HomeTab({
                     }
                   }}
                 >
-                  {goal.actionLabel}
+                  {goal.claimable ? "Valider" : goal.actionLabel}
                 </button>
               </div>
             ))}
@@ -10419,6 +10509,9 @@ export default function App() {
   const [weeklyQuizProgress, setWeeklyQuizProgress] = useState(() =>
     getStoredWeeklyQuizProgress()
   );
+  const [checkpointGoalProgress, setCheckpointGoalProgress] = useState(() =>
+    getStoredCheckpointGoalProgress()
+  );
   const [appOptions, setAppOptions] = useState(() => getStoredAppOptions());
   const [activeTab, setActiveTab] = useState(() => {
     const savedOptions = getStoredAppOptions();
@@ -10822,6 +10915,28 @@ const handleWeeklyQuizAnswer = (answerIndex, options = {}) => {
   showToast(correct ? `Bonne réponse ! +${earnedXP} XP` : `Participation validée. +${earnedXP} XP`);
 };
 
+const handleClaimCheckpointGoal = (goal) => {
+  if (!goal?.id || !goal.claimable || checkpointGoalProgress.claimed?.[goal.id]) return;
+
+  const earnedXP = Number(goal.xp || 0);
+  const nextProgress = {
+    ...checkpointGoalProgress,
+    totalXP: (checkpointGoalProgress.totalXP || 0) + earnedXP,
+    claimed: {
+      ...(checkpointGoalProgress.claimed || {}),
+      [goal.id]: {
+        title: goal.title,
+        earnedXP,
+        claimedAt: new Date().toISOString(),
+      },
+    },
+  };
+
+  setCheckpointGoalProgress(nextProgress);
+  storeCheckpointGoalProgress(nextProgress);
+  playSound("success", soundStyle);
+  showToast(`${goal.title} valide. +${earnedXP} XP`);
+};
 const updateSocialProfile = (field, value) => {
   const nextProfile = {
     ...socialProfile,
@@ -11502,8 +11617,8 @@ const url = `https://api.rawg.io/api/games?key=${API_KEY}&dates=${startDate},${e
       .filter((g) => g.status !== "wishlist")
       .reduce((sum, g) => sum + calculateXP(g), 0);
 
-    return gamesXP + (weeklyQuizProgress.totalXP || 0);
-  }, [games, weeklyQuizProgress.totalXP]);
+    return gamesXP + (weeklyQuizProgress.totalXP || 0) + (checkpointGoalProgress.totalXP || 0);
+  }, [games, weeklyQuizProgress.totalXP, checkpointGoalProgress.totalXP]);
 
   const level = getLevel(totalXP);
   const progress = getProgress(totalXP);
@@ -12479,6 +12594,8 @@ const setPlayedPlatforms = async (id, platforms) => {
   weeklyQuiz={weeklyQuiz}
   weeklyQuizProgress={weeklyQuizProgress}
   onAnswerWeeklyQuiz={handleWeeklyQuizAnswer}
+  checkpointGoalProgress={checkpointGoalProgress}
+  onClaimCheckpointGoal={handleClaimCheckpointGoal}
 />
 )}
 
