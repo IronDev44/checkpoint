@@ -7680,6 +7680,110 @@ body[data-ui="modern"] .chip.active {
   margin-bottom: 10px;
 }
 
+.checkpoint-goals-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.checkpoint-goals-list {
+  display: grid;
+  gap: 10px;
+}
+
+.checkpoint-goal-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  background: rgba(10, 18, 32, 0.34);
+}
+
+.checkpoint-goal-main {
+  min-width: 0;
+}
+
+.checkpoint-goal-main > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checkpoint-goal-main strong {
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.15;
+}
+
+.checkpoint-goal-main span {
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.checkpoint-goal-main small {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 8px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.checkpoint-goal-progress {
+  height: 6px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.09);
+}
+
+.checkpoint-goal-progress > div {
+  height: 100%;
+  min-width: 8px;
+  border-radius: inherit;
+  background: var(--accent);
+  box-shadow: var(--accent-shadow);
+}
+
+.checkpoint-goal-action {
+  min-width: 94px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 999px;
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.checkpoint-goal-action:active {
+  transform: scale(0.98);
+}
+
+.checkpoint-goals-empty {
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+@media (max-width: 560px) {
+  .checkpoint-goal-row {
+    grid-template-columns: 1fr;
+  }
+
+  .checkpoint-goal-action {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
 .home-big {
   font-size: 22px;
   font-weight: 900;

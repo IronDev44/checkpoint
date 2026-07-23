@@ -5645,10 +5645,6 @@ function HomeTab({
       ? ratedGames.reduce((sum, game) => sum + getGameRating(game), 0) / ratedGames.length
       : 0;
 
-  const backlogGoal = 5;
-  const backlogFinished = Math.min(finished, backlogGoal);
-  const backlogProgress = Math.min((backlogFinished / backlogGoal) * 100, 100);
-
   const inProgressGames = games
     .filter((g) => g.status === "en cours")
     .slice(0, 3);
@@ -5716,6 +5712,84 @@ function HomeTab({
 
       return bPercent - aPercent;
     })[0];
+
+  const unratedGames = games.filter(
+    (game) => game.status !== "wishlist" && getGameRating(game) <= 0
+  );
+
+  const unratedOwnedHardware = hardware.filter((item) => {
+    if (!isOwnedHardware(item)) return false;
+
+    const mainRating = Number(item.rating || 0);
+    const detailedRatings = Object.values(item.ratings || {}).map((value) =>
+      Number(value || 0)
+    );
+
+    return mainRating <= 0 && !detailedRatings.some((value) => value > 0);
+  });
+
+  const checkpointGoals = [
+    !quizLocked && {
+      id: "quiz",
+      title: "Quiz disponible",
+      detail: "Une question rapide pour gagner de l'XP et garder le rythme.",
+      actionLabel: "Repondre",
+      tab: "home",
+      progress: 0,
+      reward: `+${WEEKLY_QUIZ_XP.correct} XP`,
+    },
+    inProgressGames[0] && {
+      id: "resume-game",
+      title: "Reprendre une partie",
+      detail: inProgressGames[0].name,
+      actionLabel: "Ouvrir",
+      game: inProgressGames[0],
+      progress: Math.min((dashboardFinished / Math.max(total, 1)) * 100, 100),
+      reward: "Progression",
+    },
+    unratedGames.length > 0 && {
+      id: "rate-games",
+      title: "Nettoyer les notes",
+      detail: `${unratedGames.length} jeux attendent encore une note fiable.`,
+      actionLabel: "Bibliotheque",
+      tab: "library",
+      progress: Math.min((ratedGames.length / Math.max(total, 1)) * 100, 100),
+      reward: "Profil plus juste",
+    },
+    unratedOwnedHardware.length > 0 && {
+      id: "rate-hardware",
+      title: "Noter le materiel",
+      detail: `${unratedOwnedHardware.length} materiels possedes n'ont pas encore de note.`,
+      actionLabel: "Materiel",
+      tab: "hardware",
+      progress: Math.min(
+        ((ownedHardwareCount - unratedOwnedHardware.length) / Math.max(ownedHardwareCount, 1)) * 100,
+        100
+      ),
+      reward: "Top materiel",
+    },
+    wishlistCount > 0 && {
+      id: "wishlist",
+      title: "Faire le tri",
+      detail: `${wishlistCount} envies dans la wishlist a confirmer ou retirer.`,
+      actionLabel: "Wishlist",
+      tab: "library",
+      progress: Math.min(((total - wishlistCount) / Math.max(total, 1)) * 100, 100),
+      reward: "Collection propre",
+    },
+    nextBadge?.progressData && {
+      id: "badge",
+      title: "Badge a portee",
+      detail: `${nextBadge.name} - ${nextBadge.progressData.current}/${nextBadge.progressData.target}`,
+      actionLabel: "Badges",
+      tab: "profile",
+      progress: Math.min(
+        (nextBadge.progressData.current / Math.max(nextBadge.progressData.target, 1)) * 100,
+        100
+      ),
+      reward: nextBadge.rarity,
+    },
+  ].filter(Boolean).slice(0, 3);
 
   const upcomingEvents = getUpcomingEvents(gamingEvents);
   const nextEvent = upcomingEvents[0];
@@ -5988,19 +6062,57 @@ function HomeTab({
         </div>
       )}
 
-      <div className="home-card">
-        <div className="home-card-title">🎯 Défi backlog</div>
+      <div className="home-card checkpoint-goals-card">
+        <div className="home-card-title">Objectifs Checkpoint</div>
 
-        <div className="home-big">
-          {backlogFinished} / {backlogGoal}
-        </div>
+        {checkpointGoals.length > 0 ? (
+          <div className="checkpoint-goals-list">
+            {checkpointGoals.map((goal) => (
+              <div key={goal.id} className="checkpoint-goal-row">
+                <div className="checkpoint-goal-main">
+                  <div>
+                    <strong>{goal.title}</strong>
+                    <span>{goal.detail}</span>
+                  </div>
 
-        <div className="progress-bar">
-          <div
-            className="progress-fill"
-            style={{ width: `${backlogProgress}%` }}
-          />
-        </div>
+                  <small>{goal.reward}</small>
+
+                  <div className="checkpoint-goal-progress">
+                    <div style={{ width: `${goal.progress}%` }} />
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  className="checkpoint-goal-action"
+                  onClick={() => {
+                    if (goal.game) {
+                      onOpenDetail(goal.game);
+                      return;
+                    }
+
+                    if (goal.tab === "home") {
+                      document
+                        .querySelector(".weekly-quiz-card")
+                        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      return;
+                    }
+
+                    if (goal.tab) {
+                      setActiveTab(goal.tab);
+                    }
+                  }}
+                >
+                  {goal.actionLabel}
+                </button>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="checkpoint-goals-empty">
+            Ton hub est propre. Ajoute une nouvelle envie, une note ou un objectif pour relancer la machine.
+          </div>
+        )}
       </div>
 
       <div className="home-actions-grid">
