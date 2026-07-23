@@ -8214,6 +8214,7 @@ function HardwareTab({
     setSelectedHardwareId(catalogItem.id);
     setReturnToAllHardware(Boolean(options.fromAll));
     setSelectedCatalogVersionId(options.versionId || null);
+    setShowAllHardwareByBrand(false);
     setHardwareSearch("");
     if (!options.fromAll) {
       scrollToHardwareArea(hardwareTopRef);
@@ -8752,57 +8753,106 @@ function HardwareTab({
 
                           <div className="hardware-console-list">
                             {catalogItem.variants?.flatMap((variant) =>
-                              (variant.versions || []).map((version) => (
-                                <button
-                                  key={version.id}
-                                  type="button"
-                                  className="hardware-console-card hardware-all-version-card"
-                                  data-brand={catalogItem.brand}
-                                  data-type={catalogItem.type}
-                                  onClick={() =>
-                                    openCatalogItem(catalogItem, {
-                                      fromAll: true,
-                                      versionId: version.id,
-                                    })
-                                  }
-                                >
-                                  <div className="hardware-image-wrapper">
-                                    {version.image ? (
-                                      <img
-                                        src={version.image}
-                                        alt={version.name}
-                                        className="hardware-catalog-image"
-                                        onClick={(event) => {
-                                          event.stopPropagation();
-                                          setZoomedHardwareImage({
-                                            image: version.image,
-                                            name: version.name,
-                                            x: event.clientX,
-                                            y: event.clientY,
-                                          });
-                                        }}
-                                        onError={handleHardwareImageError}
-                                      />
-                                    ) : (
-                                      <div className="hardware-collection-placeholder">
-                                        {getHardwareTypeIcon(catalogItem.type)}
+                              (variant.versions || []).map((version) => {
+                                const existingItem = hardware.find(
+                                  (item) =>
+                                    item.versionId === version.id &&
+                                    item.type === catalogItem.type &&
+                                    item.status !== "ranked"
+                                );
+                                const metaParts = [
+                                  catalogItem.name !== version.name ? catalogItem.name : "",
+                                  version.storage || "",
+                                ].filter(Boolean);
+
+                                return (
+                                  <div
+                                    key={version.id}
+                                    role="button"
+                                    tabIndex={0}
+                                    className="hardware-console-card hardware-all-version-card"
+                                    data-brand={catalogItem.brand}
+                                    data-type={catalogItem.type}
+                                    onClick={() =>
+                                      openCatalogItem(catalogItem, {
+                                        fromAll: true,
+                                        versionId: version.id,
+                                      })
+                                    }
+                                    onKeyDown={(event) => {
+                                      if (event.key === "Enter" || event.key === " ") {
+                                        event.preventDefault();
+                                        openCatalogItem(catalogItem, {
+                                          fromAll: true,
+                                          versionId: version.id,
+                                        });
+                                      }
+                                    }}
+                                  >
+                                    <div className="hardware-image-wrapper">
+                                      {version.image ? (
+                                        <img
+                                          src={version.image}
+                                          alt={version.name}
+                                          className="hardware-catalog-image"
+                                          onClick={(event) => {
+                                            event.stopPropagation();
+                                            setZoomedHardwareImage({
+                                              image: version.image,
+                                              name: version.name,
+                                              x: event.clientX,
+                                              y: event.clientY,
+                                            });
+                                          }}
+                                          onError={handleHardwareImageError}
+                                        />
+                                      ) : (
+                                        <div className="hardware-collection-placeholder">
+                                          {getHardwareTypeIcon(catalogItem.type)}
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    <div className="hardware-console-info">
+                                      <div className="hardware-name">
+                                        {version.name}
                                       </div>
-                                    )}
-                                  </div>
+                                      {metaParts.length > 0 && (
+                                        <div className="hardware-meta">
+                                          {metaParts.join(" - ")}
+                                        </div>
+                                      )}
 
-                                  <div className="hardware-console-info">
-                                    <div className="hardware-name">
-                                      {version.name}
+                                      {existingItem ? (
+                                        <div className="hardware-status-badge">
+                                          {getHardwareStatusLabel(existingItem.status)}
+                                        </div>
+                                      ) : (
+                                        <div className="hardware-status-actions hardware-all-status-actions">
+                                          {[
+                                            ["possÃ©dÃ©", "Je l'ai"],
+                                            ["historique", "Historique"],
+                                            ["wishlist", "Wishlist"],
+                                          ].map(([status, label]) => (
+                                            <button
+                                              key={status}
+                                              type="button"
+                                              onClick={(event) => {
+                                                event.stopPropagation();
+                                                addFromCatalog(catalogItem, variant, version, status);
+                                              }}
+                                            >
+                                              {label}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      )}
                                     </div>
-                                    <div className="hardware-meta">
-                                      {variant.name}
-                                      {version.storage ? ` - ${version.storage}` : ""}
-                                    </div>
-                                  </div>
 
-                                  <div className="hardware-console-arrow">&rsaquo;</div>
-                                </button>
-                              ))
+                                    <div className="hardware-console-arrow">&rsaquo;</div>
+                                  </div>
+                                );
+                              })
                             )}
                           </div>
                         </div>

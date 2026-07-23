@@ -9490,6 +9490,17 @@ body[data-ui="modern"] .panel-title {
   cursor: pointer;
 }
 
+.hardware-all-status-actions {
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.hardware-all-status-actions button {
+  padding: 7px 9px;
+  font-size: 0.76rem;
+  line-height: 1;
+}
+
 .hardware-mini-status.active,
 .hardware-status-actions button.active {
   background: var(--accent);
