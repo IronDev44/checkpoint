@@ -1594,6 +1594,52 @@ textarea {
   margin-bottom: 8px;
 }
 
+.contextual-ratings-block {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.contextual-ratings-head {
+  display: grid;
+  gap: 3px;
+}
+
+.contextual-ratings-head strong {
+  color: white;
+  font-size: 0.98rem;
+}
+
+.contextual-ratings-head span {
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.detailed-ratings-grid.contextual {
+  gap: 10px;
+}
+
+.detailed-rating-card.contextual {
+  background:
+    linear-gradient(135deg, rgba(96,165,250,0.12), rgba(255,255,255,0.04)),
+    var(--surface-bg);
+}
+
+.detailed-rating-card.contextual .detailed-rating-title {
+  display: grid;
+  gap: 3px;
+}
+
+.detailed-rating-card.contextual .detailed-rating-title small {
+  color: var(--text-soft);
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
 .top5-list {
   display: flex;
   flex-direction: column;

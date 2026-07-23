@@ -2524,27 +2524,109 @@ function RatingSlider({ rating = 0, onRate }) {
   );
 }
 
+const CONTEXTUAL_GAME_RATING_FIELDS = [
+  {
+    key: "ratingOpenWorld",
+    label: "Open world",
+    hint: "Monde ouvert, densité, exploration libre",
+    keywords: ["open world", "adventure", "action-adventure", "rpg"],
+  },
+  {
+    key: "ratingGunplay",
+    label: "Sensation de tir",
+    hint: "Impact, feeling des armes, lisibilité des affrontements",
+    keywords: ["shooter", "fps", "tps", "first-person", "third-person"],
+  },
+  {
+    key: "ratingDriving",
+    label: "Conduite",
+    hint: "Feeling, vitesse, précision, plaisir au volant",
+    keywords: ["racing", "driving", "simulation", "sports"],
+  },
+  {
+    key: "ratingCombat",
+    label: "Combat",
+    hint: "Rythme, précision, profondeur des affrontements",
+    keywords: ["action", "fighting", "soulslike", "hack and slash", "rpg"],
+  },
+  {
+    key: "ratingExploration",
+    label: "Exploration",
+    hint: "Curiosité, récompenses, envie de fouiller",
+    keywords: ["adventure", "open world", "metroidvania", "platformer", "rpg"],
+  },
+  {
+    key: "ratingChallenge",
+    label: "Challenge / boss",
+    hint: "Difficulté, boss, tension et satisfaction",
+    keywords: ["soulslike", "action", "fighting", "platformer", "roguelike"],
+  },
+  {
+    key: "ratingMultiplayer",
+    label: "Coop / multi",
+    hint: "Plaisir à plusieurs, équilibre, rejouabilité",
+    keywords: ["multiplayer", "co-op", "coop", "online", "mmo"],
+  },
+];
+
+function getContextualRatingFields(game) {
+  const text = getTopGameSearchText(game);
+
+  return CONTEXTUAL_GAME_RATING_FIELDS.filter((field) =>
+    field.keywords.some((keyword) =>
+      text.includes(normalizeIdentityText(keyword))
+    )
+  );
+}
+
 function DetailedRatingsBlock({ game, onSetDetailedRating }) {
-  const items = [
+  const baseItems = [
     { key: "ratingGraphics", label: "Graphismes" },
     { key: "ratingGameplay", label: "Gameplay" },
     { key: "ratingStory", label: "Histoire" },
     { key: "ratingSound", label: "Audio" },
     { key: "ratingLongevity", label: "Durée de vie" },
   ];
+  const contextualItems = getContextualRatingFields(game);
 
   return (
-    <div className="detailed-ratings-grid">
-      {items.map((item) => (
-        <div key={item.key} className="detailed-rating-card">
-          <div className="detailed-rating-title">{item.label}</div>
-          <RatingSlider
-            rating={game[item.key] || 0}
-            onRate={(value) => onSetDetailedRating(game.id, item.key, value)}
-          />
+    <>
+      <div className="detailed-ratings-grid">
+        {baseItems.map((item) => (
+          <div key={item.key} className="detailed-rating-card">
+            <div className="detailed-rating-title">{item.label}</div>
+            <RatingSlider
+              rating={game[item.key] || 0}
+              onRate={(value) => onSetDetailedRating(game.id, item.key, value)}
+            />
+          </div>
+        ))}
+      </div>
+
+      {contextualItems.length > 0 && (
+        <div className="contextual-ratings-block">
+          <div className="contextual-ratings-head">
+            <strong>Critères contextuels</strong>
+            <span>Affinage utilisé pour les Tops avancés</span>
+          </div>
+
+          <div className="detailed-ratings-grid contextual">
+            {contextualItems.map((item) => (
+              <div key={item.key} className="detailed-rating-card contextual">
+                <div className="detailed-rating-title">
+                  <span>{item.label}</span>
+                  <small>{item.hint}</small>
+                </div>
+                <RatingSlider
+                  rating={game[item.key] || 0}
+                  onRate={(value) => onSetDetailedRating(game.id, item.key, value)}
+                />
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
-    </div>
+      )}
+    </>
   );
 }
 
@@ -2669,7 +2751,7 @@ const TOP5_ADVANCED_LISTS = [
     id: "open-world",
     label: "Open worlds",
     title: "Top open worlds",
-    scoreKey: "rating",
+    scoreKey: "ratingOpenWorld",
     keywords: ["open world", "adventure", "action-adventure", "rpg"],
   },
   {
@@ -2683,14 +2765,14 @@ const TOP5_ADVANCED_LISTS = [
     id: "shooters",
     label: "Shooters",
     title: "Top shooters",
-    scoreKey: "ratingGameplay",
+    scoreKey: "ratingGunplay",
     keywords: ["shooter", "fps", "tps", "first-person", "third-person"],
   },
   {
     id: "pilotage",
     label: "Pilotage",
     title: "Top pilotage",
-    scoreKey: "ratingGameplay",
+    scoreKey: "ratingDriving",
     keywords: ["racing", "driving", "simulation", "sports"],
   },
   {
@@ -2701,6 +2783,34 @@ const TOP5_ADVANCED_LISTS = [
     keywords: ["horror", "survival", "atmospheric", "adventure"],
   },
   {
+    id: "combat",
+    label: "Combat",
+    title: "Top combats",
+    scoreKey: "ratingCombat",
+    keywords: ["action", "fighting", "soulslike", "hack and slash", "rpg"],
+  },
+  {
+    id: "exploration",
+    label: "Exploration",
+    title: "Top exploration",
+    scoreKey: "ratingExploration",
+    keywords: ["adventure", "open world", "metroidvania", "platformer", "rpg"],
+  },
+  {
+    id: "challenge",
+    label: "Challenge",
+    title: "Top challenge",
+    scoreKey: "ratingChallenge",
+    keywords: ["soulslike", "action", "fighting", "platformer", "roguelike"],
+  },
+  {
+    id: "multi",
+    label: "Coop / multi",
+    title: "Top coop / multi",
+    scoreKey: "ratingMultiplayer",
+    keywords: ["multiplayer", "co-op", "coop", "online", "mmo"],
+  },
+  {
     id: "indes",
     label: "Indes",
     title: "Top jeux indes",
@@ -2709,8 +2819,22 @@ const TOP5_ADVANCED_LISTS = [
   },
 ];
 
+const TOP5_CONTEXT_SCORE_FALLBACKS = {
+  ratingOpenWorld: "rating",
+  ratingGunplay: "ratingGameplay",
+  ratingDriving: "ratingGameplay",
+  ratingCombat: "ratingGameplay",
+  ratingExploration: "rating",
+  ratingChallenge: "ratingGameplay",
+  ratingMultiplayer: "ratingLongevity",
+};
+
 function getGameScore(game, scoreKey) {
-  return clampRating(game?.[scoreKey]);
+  const contextualScore = clampRating(game?.[scoreKey]);
+  if (contextualScore > 0) return contextualScore;
+
+  const fallbackKey = TOP5_CONTEXT_SCORE_FALLBACKS[scoreKey];
+  return fallbackKey ? clampRating(game?.[fallbackKey]) : contextualScore;
 }
 
 function getNormalizedStatus(status = "") {
