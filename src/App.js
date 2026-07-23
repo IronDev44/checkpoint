@@ -3201,21 +3201,33 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
   const [hardwareType, setHardwareType] = useState("all");
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("");
+  const [selectedAdvancedTop, setSelectedAdvancedTop] = useState(
+    TOP5_ADVANCED_LISTS[0].id
+  );
 
   const selectedScore =
     TOP5_SCORE_OPTIONS.find((option) => option.id === scoreKey) ||
     TOP5_SCORE_OPTIONS[0];
+  const selectedAdvancedList =
+    TOP5_ADVANCED_LISTS.find((list) => list.id === selectedAdvancedTop) ||
+    TOP5_ADVANCED_LISTS[0];
   const platformGroups = getTopGroups(scopedGames, "platform");
   const genreGroups = getTopGroups(scopedGames, "genre");
   const selectedGroup =
     mode === "platform" ? selectedPlatform : mode === "genre" ? selectedGenre : "";
   const visibleGames = filterGamesForTop(scopedGames, mode, selectedGroup);
+  const visibleAdvancedGames = getTopAdvancedGames(
+    scopedGames,
+    selectedAdvancedList
+  );
   const selectedHardwareGroup =
     TOP5_HARDWARE_GROUPS.find((group) => group.id === hardwareType) ||
     TOP5_HARDWARE_GROUPS[0];
   const visibleHardware = getTopHardwareItems(scopedHardware, hardwareType, 5);
   const contextLabel =
-    mode === "criteria"
+    mode === "advanced"
+      ? `${selectedAdvancedList.label} - ${visibleAdvancedGames.length} jeux classes`
+      : mode === "criteria"
       ? "Jeux termines en priorite, puis jeux en cours notes si besoin."
       : selectedGroup
         ? `${selectedGroup} - ${visibleGames.length} jeux`
@@ -3258,6 +3270,7 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
         <div className="top5-mode-tabs">
           {[
             { id: "criteria", label: "Criteres" },
+            { id: "advanced", label: "Avances" },
             { id: "platform", label: "Plateformes" },
             { id: "genre", label: "Genres" },
           ].map((item) => (
@@ -3272,20 +3285,38 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
           ))}
         </div>
 
-        <div className="top5-score-tabs">
-          {TOP5_SCORE_OPTIONS.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              className={scoreKey === option.id ? "active" : ""}
-              onClick={() => setScoreKey(option.id)}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
+        {mode !== "advanced" && (
+          <div className="top5-score-tabs">
+            {TOP5_SCORE_OPTIONS.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                className={scoreKey === option.id ? "active" : ""}
+                onClick={() => setScoreKey(option.id)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
 
-        {mode !== "criteria" && (
+        {mode === "advanced" && (
+          <div className="top5-group-picker top5-advanced-picker">
+            {TOP5_ADVANCED_LISTS.map((list) => (
+              <button
+                key={list.id}
+                type="button"
+                className={selectedAdvancedTop === list.id ? "active" : ""}
+                onClick={() => setSelectedAdvancedTop(list.id)}
+              >
+                <span>{list.label}</span>
+                <small>{getTopAdvancedGames(scopedGames, list).length}</small>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {mode !== "criteria" && mode !== "advanced" && (
           <div className="top5-group-picker">
             {(mode === "platform" ? platformGroups : genreGroups).map((group) => (
               <button
@@ -3330,12 +3361,14 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
         <>
           <Top5RankingPanel
             title={
-              mode === "criteria"
+              mode === "advanced"
+                ? selectedAdvancedList.title
+                : mode === "criteria"
                 ? selectedScore.title
                 : `${selectedScore.title}${selectedGroup ? ` - ${selectedGroup}` : ""}`
             }
-            games={visibleGames}
-            scoreKey={scoreKey}
+            games={mode === "advanced" ? visibleAdvancedGames : visibleGames}
+            scoreKey={mode === "advanced" ? selectedAdvancedList.scoreKey : scoreKey}
             contextLabel={contextLabel}
           />
 
@@ -3355,28 +3388,6 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
                   ))}
               </div>
 
-              <div className="top5-advanced-section">
-                <div className="top5-section-head">
-                  <div>
-                    <h2 className="panel-title">Top avancés</h2>
-                    <div className="option-value">
-                      Des listes automatiques par ambiance et type de jeu, basées sur tes notes.
-                    </div>
-                  </div>
-                </div>
-
-                <div className="top5-mini-grid top5-advanced-grid">
-                  {TOP5_ADVANCED_LISTS.map((list) => (
-                    <Top5RankingPanel
-                      key={list.id}
-                      title={list.title}
-                      games={getTopAdvancedGames(scopedGames, list)}
-                      scoreKey={list.scoreKey}
-                      compact
-                    />
-                  ))}
-                </div>
-              </div>
             </>
           )}
         </>

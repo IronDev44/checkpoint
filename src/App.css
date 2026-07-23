@@ -1670,7 +1670,7 @@ textarea {
 }
 
 .top5-mode-tabs {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .top5-content-tabs button,
