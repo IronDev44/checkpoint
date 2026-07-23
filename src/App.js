@@ -7900,7 +7900,7 @@ function HardwareDetailModal({
 
             {highlightedFields.length > 0 && (
               <div className="hardware-detail-focus">
-                <span>Critères suivis</span>
+                <span>Critères de notation</span>
                 <div>
                   {highlightedFields.map((field) => (
                     <small key={field.key}>
