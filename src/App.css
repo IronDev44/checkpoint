@@ -14965,6 +14965,136 @@ body {
   }
 }
 
+/* Hardware full catalog lists: make version rows behave like real compact cards. */
+.hardware-all-view .hardware-console-list {
+  gap: 10px !important;
+}
+
+.hardware-all-view .hardware-all-version-card {
+  cursor: default !important;
+  min-height: 108px !important;
+}
+
+.hardware-all-view .hardware-all-version-card.is-openable {
+  cursor: pointer !important;
+}
+
+.hardware-all-view .hardware-all-version-card .hardware-image-wrapper {
+  flex: 0 0 104px !important;
+  width: 104px !important;
+  height: 104px !important;
+}
+
+.hardware-all-view .hardware-all-version-card .hardware-console-info {
+  min-width: 0 !important;
+  gap: 6px !important;
+  align-items: flex-start !important;
+}
+
+.hardware-all-view .hardware-all-version-card .hardware-name {
+  display: block !important;
+  max-width: 100% !important;
+  font-size: 1.12rem !important;
+  line-height: 1.08 !important;
+  white-space: normal !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+}
+
+.hardware-all-view .hardware-all-version-card .hardware-meta {
+  margin: 0 !important;
+}
+
+.hardware-all-view .hardware-all-version-card .hardware-status-actions,
+.hardware-all-view .hardware-all-version-card .hardware-status-badge {
+  margin-top: 6px !important;
+}
+
+.hardware-all-view .hardware-all-version-card .hardware-all-status-actions {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 7px !important;
+}
+
+.hardware-all-view .hardware-all-version-card .hardware-all-status-actions button {
+  min-height: 32px !important;
+  padding: 0 10px !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 640px) {
+  .hardware-all-heading {
+    align-items: flex-start !important;
+  }
+
+  .hardware-all-heading span {
+    text-align: right !important;
+  }
+
+  .hardware-all-view .hardware-all-brand-head {
+    padding-inline: 2px !important;
+  }
+
+  .hardware-all-view .hardware-all-model-title {
+    align-items: flex-start !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card {
+    display: grid !important;
+    grid-template-columns: 82px minmax(0, 1fr) !important;
+    gap: 12px !important;
+    align-items: center !important;
+    min-height: 120px !important;
+    padding: 12px !important;
+    border-radius: 20px !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-image-wrapper {
+    width: 82px !important;
+    height: 96px !important;
+    min-width: 82px !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-catalog-image {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    transform: none !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-name {
+    font-size: clamp(1rem, 5vw, 1.28rem) !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-meta {
+    font-size: 0.82rem !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-all-status-actions {
+    gap: 6px !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-all-status-actions button,
+  .hardware-all-view .hardware-all-version-card .hardware-status-badge {
+    min-height: 30px !important;
+    padding: 0 9px !important;
+    font-size: 0.76rem !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .hardware-all-view .hardware-all-version-card {
+    grid-template-columns: 74px minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .hardware-all-view .hardware-all-version-card .hardware-image-wrapper {
+    width: 74px !important;
+    height: 88px !important;
+    min-width: 74px !important;
+  }
+}
+
 /* Hardware dropdowns: pill size follows the selected text. */
 .hardware-collection-card.hardware-card-v3 .hardware-card-dropdowns {
   display: flex !important;

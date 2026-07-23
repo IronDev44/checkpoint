@@ -7706,6 +7706,7 @@ function HardwareDetailModal({
   onUpdateHardwareReview,
   onToggleHardwareFavorite,
   consoleGameStats,
+  getHardwareStatusLabel = (status) => status || "Possédé",
 }) {
   const [localReview, setLocalReview] = useState(item?.review || "");
 
@@ -7722,7 +7723,7 @@ function HardwareDetailModal({
   const currentDisplaySizeOptions =
     item.type === "display" && catalogDisplaySizes.length
       ? [
-          { id: "", label: "Taille non precisee" },
+          { id: "", label: "Taille non précisée" },
           ...catalogDisplaySizes.map((size) => {
             const option = displaySizeOptions.find((entry) => entry.id === size);
             return option || { id: size, label: `${size} pouces` };
@@ -7787,7 +7788,7 @@ function HardwareDetailModal({
           )}
 
           <div className="modal-meta">
-            <strong>Statut :</strong> {item.status || "possédé"}
+            <strong>Statut :</strong> {getHardwareStatusLabel(item.status)}
           </div>
 
           {item.type === "console" && consoleGameStats && (
@@ -8104,7 +8105,7 @@ function HardwareTab({
   ];
 
   const DISPLAY_SIZE_OPTIONS = [
-    { id: "", label: "Taille non precisee" },
+    { id: "", label: "Taille non précisée" },
     { id: "24", label: "24 pouces" },
     { id: "25", label: "25 pouces" },
     { id: "27", label: "27 pouces" },
@@ -8148,9 +8149,14 @@ function HardwareTab({
     "master-system": "master-system-controller",
   };
 
-  const getHardwareStatusLabel = (status) =>
-    HARDWARE_STATUS_OPTIONS.find((option) => option.id === status)?.label ||
-    "Possédé";
+  const getHardwareStatusLabel = (status) => {
+    const statusKey = getHardwareStatusKey(status);
+    return (
+      HARDWARE_STATUS_OPTIONS.find(
+        (option) => getHardwareStatusKey(option.id) === statusKey
+      )?.label || "Possédé"
+    );
+  };
 
   const getHardwareStatusKey = (status = "") => {
     const raw = String(status || "").toLowerCase();
@@ -8454,7 +8460,9 @@ function HardwareTab({
     status = "possédé"
   ) => {
     const alreadyExists = hardware.some(
-      (item) => item.versionId === version.id && item.status === status
+      (item) =>
+        item.versionId === version.id &&
+        getHardwareStatusKey(item.status) === getHardwareStatusKey(status)
     );
 
     if (alreadyExists) return;
@@ -8566,7 +8574,7 @@ function HardwareTab({
       ? [
           {
             id: "speaker-owned",
-            title: "Enceintes utilisees actuellement",
+            title: "Enceintes utilisées actuellement",
             items: hardware.filter(
               (item) => item.type === "speaker" && hasHardwareStatus(item, "possede")
             ),
@@ -8588,7 +8596,7 @@ function HardwareTab({
       ? [
           {
             id: "vr-owned",
-            title: "Casques VR utilises actuellement",
+            title: "Casques VR utilisés actuellement",
             items: hardware.filter(
               (item) =>
                 item.type === "vr" &&
@@ -8612,7 +8620,7 @@ function HardwareTab({
       ? [
           {
             id: "mouse-owned",
-            title: "Souris utilisees actuellement",
+            title: "Souris utilisées actuellement",
             items: hardware.filter(
               (item) => item.type === "mouse" && hasHardwareStatus(item, "possede")
             ),
@@ -8634,7 +8642,7 @@ function HardwareTab({
       ? [
           {
             id: "keyboard-owned",
-            title: "Claviers utilises actuellement",
+            title: "Claviers utilisés actuellement",
             items: hardware.filter(
               (item) => item.type === "keyboard" && hasHardwareStatus(item, "possede")
             ),
@@ -8656,19 +8664,19 @@ function HardwareTab({
       ? [
           {
             id: "display-owned",
-            title: "Ecrans et TV utilises actuellement",
+            title: "Écrans et TV utilisés actuellement",
             items: hardware.filter(
               (item) => item.type === "display" && hasHardwareStatus(item, "possede")
             ),
           },
           {
             id: "display-ranking",
-            title: "Classement des ecrans et TV par note",
+            title: "Classement des écrans et TV par note",
             items: rankedDisplays,
           },
           {
             id: "display-wishlist",
-            title: "Wishlist ecrans & TV",
+            title: "Wishlist écrans & TV",
             items: hardware.filter(
               (item) => item.type === "display" && hasHardwareStatus(item, "wishlist")
             ),
@@ -8740,12 +8748,12 @@ function HardwareTab({
       : hardwareCategory === "vr"
       ? "Mes casques VR"
       : hardwareCategory === "display"
-      ? "Mes ecrans & TV"
+      ? "Mes écrans & TV"
       : hardwareCategory === "mouse"
       ? "Mes souris"
       : hardwareCategory === "keyboard"
       ? "Mes claviers"
-      : "Mon materiel";
+      : "Mon matériel";
 
   const allHardwareCatalogLabel =
     hardwareCategory === "controller"
@@ -8757,7 +8765,7 @@ function HardwareTab({
       : hardwareCategory === "vr"
       ? "Tous les casques VR"
       : hardwareCategory === "display"
-      ? "Tous les ecrans & TV"
+      ? "Tous les écrans & TV"
       : hardwareCategory === "mouse"
       ? "Toutes les souris"
       : hardwareCategory === "keyboard"
@@ -8766,18 +8774,18 @@ function HardwareTab({
 
   const emptyTitle =
     hardwareCategory === "controller"
-      ? "Aucune manette ajoutee"
+      ? "Aucune manette ajoutée"
       : hardwareCategory === "audio"
-      ? "Aucun casque ajoute"
+      ? "Aucun casque ajouté"
       : hardwareCategory === "speaker"
-      ? "Aucune enceinte ajoutee"
+      ? "Aucune enceinte ajoutée"
       : hardwareCategory === "vr"
-      ? "Aucun casque VR ajoute"
+      ? "Aucun casque VR ajouté"
       : hardwareCategory === "mouse"
-      ? "Aucune souris ajoutee"
+      ? "Aucune souris ajoutée"
       : hardwareCategory === "keyboard"
-      ? "Aucun clavier ajoute"
-      : "Aucun materiel ajoute";
+      ? "Aucun clavier ajouté"
+      : "Aucun matériel ajouté";
 
   const emptySubtitle =
     hardwareCategory === "controller"
@@ -8785,14 +8793,14 @@ function HardwareTab({
       : hardwareCategory === "audio"
       ? "Ajoute ton premier casque depuis le catalogue."
       : hardwareCategory === "speaker"
-      ? "Ajoute tes premieres enceintes gaming depuis le catalogue."
+      ? "Ajoute tes premières enceintes gaming depuis le catalogue."
       : hardwareCategory === "vr"
       ? "Ajoute ton premier casque VR gaming depuis le catalogue."
       : hardwareCategory === "mouse"
-      ? "Ajoute ta premiere souris gaming depuis le catalogue."
+      ? "Ajoute ta première souris gaming depuis le catalogue."
       : hardwareCategory === "keyboard"
       ? "Ajoute ton premier clavier gaming depuis le catalogue."
-      : "Ajoute ta premiere console depuis le catalogue.";
+      : "Ajoute ta première console depuis le catalogue.";
 
   return (
     <div className="progression-stack">
@@ -8851,7 +8859,7 @@ function HardwareTab({
             { id: "audio", label: "Audio" },
             { id: "speaker", label: "Enceintes" },
             { id: "vr", label: "VR" },
-            { id: "display", label: "Ecrans & TV" },
+            { id: "display", label: "Écrans & TV" },
             { id: "mouse", label: "Souris" },
             { id: "keyboard", label: "Claviers" },
           ].map((category) => (
@@ -8899,7 +8907,7 @@ function HardwareTab({
                 : hardwareCategory === "vr"
                 ? "Rechercher un casque VR gaming..."
                 : hardwareCategory === "display"
-                ? "Rechercher un ecran ou une TV gaming..."
+                ? "Rechercher un écran ou une TV gaming..."
                 : hardwareCategory === "mouse"
                 ? "Rechercher une souris gaming..."
                 : hardwareCategory === "keyboard"
@@ -8972,7 +8980,7 @@ function HardwareTab({
                       (sum, catalogItem) => sum + getCatalogModelCount(catalogItem),
                       0
                     )}{" "}
-                    modeles
+                    modèles
                   </span>
                 </div>
 
@@ -8997,6 +9005,7 @@ function HardwareTab({
                     consoleGameStats={getConsoleGameStats(
                       hardware.find((h) => h.id === selectedHardwareDetail.id) || selectedHardwareDetail
                     )}
+                    getHardwareStatusLabel={getHardwareStatusLabel}
                   />
                 )}
 
@@ -9025,7 +9034,7 @@ function HardwareTab({
                         <div key={catalogItem.id} className="hardware-all-model">
                           <div className="hardware-all-model-title">
                             <span>{catalogItem.name}</span>
-                            <small>{getCatalogModelCount(catalogItem)} modeles</small>
+                            <small>{getCatalogModelCount(catalogItem)} modèles</small>
                           </div>
 
                           <div className="hardware-console-list">
@@ -9153,7 +9162,7 @@ function HardwareTab({
                   }}
                 >
                   <span>{allHardwareCatalogLabel}</span>
-                  <small>{catalogModelTotal} modeles</small>
+                  <small>{catalogModelTotal} modèles</small>
                 </button>
 
                 {brandList.map((brand) => (
@@ -9474,6 +9483,7 @@ function HardwareTab({
                           consoleGameStats={getConsoleGameStats(
                             hardware.find((h) => h.id === item.id) || item
                           )}
+                          getHardwareStatusLabel={getHardwareStatusLabel}
                         />
                       ) : (
                       <div
