@@ -2664,6 +2664,51 @@ const TOP5_HARDWARE_GROUPS = [
   { id: "display", label: "Ecrans / TV", title: "Top 5 écrans / TV" },
 ];
 
+const TOP5_ADVANCED_LISTS = [
+  {
+    id: "open-world",
+    label: "Open worlds",
+    title: "Top open worlds",
+    scoreKey: "rating",
+    keywords: ["open world", "adventure", "action-adventure", "rpg"],
+  },
+  {
+    id: "rpg",
+    label: "RPG",
+    title: "Top RPG",
+    scoreKey: "ratingStory",
+    keywords: ["rpg", "role-playing", "jrpg", "soulslike"],
+  },
+  {
+    id: "shooters",
+    label: "Shooters",
+    title: "Top shooters",
+    scoreKey: "ratingGameplay",
+    keywords: ["shooter", "fps", "tps", "first-person", "third-person"],
+  },
+  {
+    id: "pilotage",
+    label: "Pilotage",
+    title: "Top pilotage",
+    scoreKey: "ratingGameplay",
+    keywords: ["racing", "driving", "simulation", "sports"],
+  },
+  {
+    id: "ambiance",
+    label: "Ambiance",
+    title: "Top ambiance",
+    scoreKey: "ratingSound",
+    keywords: ["horror", "survival", "atmospheric", "adventure"],
+  },
+  {
+    id: "indes",
+    label: "Indes",
+    title: "Top jeux indes",
+    scoreKey: "rating",
+    keywords: ["indie", "platformer", "puzzle", "metroidvania"],
+  },
+];
+
 function getGameScore(game, scoreKey) {
   return clampRating(game?.[scoreKey]);
 }
@@ -2751,6 +2796,30 @@ function getTopGamesForScore(games, scoreKey, limit = 3) {
       return (a.name || "").localeCompare(b.name || "");
     })
     .slice(0, limit);
+}
+
+function getTopGameSearchText(game) {
+  return [
+    game.name,
+    game.slug,
+    ...(game.genreNames || []),
+    ...(game.platformNames || []),
+    ...(game.playedPlatforms || []),
+    ...(game.tags || []).map((tag) => tag?.name || tag),
+  ]
+    .filter(Boolean)
+    .map((value) => normalizeIdentityText(String(value)))
+    .join(" ");
+}
+
+function getTopAdvancedGames(games, list) {
+  const keywords = list.keywords.map((keyword) => normalizeIdentityText(keyword));
+  const filtered = games.filter((game) => {
+    const text = getTopGameSearchText(game);
+    return keywords.some((keyword) => text.includes(keyword));
+  });
+
+  return getTopGamesForScore(filtered, list.scoreKey, 5);
 }
 
 function getTopOstGames(games, limit = 5) {
@@ -3271,19 +3340,44 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
           />
 
           {mode === "criteria" && (
-            <div className="top5-mini-grid">
-              {TOP5_SCORE_OPTIONS.filter((option) => option.id !== scoreKey)
-                .slice(0, 4)
-                .map((option) => (
-                  <Top5RankingPanel
-                    key={option.id}
-                    title={option.title}
-                    games={scopedGames}
-                    scoreKey={option.id}
-                    compact
-                  />
-                ))}
-            </div>
+            <>
+              <div className="top5-mini-grid">
+                {TOP5_SCORE_OPTIONS.filter((option) => option.id !== scoreKey)
+                  .slice(0, 4)
+                  .map((option) => (
+                    <Top5RankingPanel
+                      key={option.id}
+                      title={option.title}
+                      games={scopedGames}
+                      scoreKey={option.id}
+                      compact
+                    />
+                  ))}
+              </div>
+
+              <div className="top5-advanced-section">
+                <div className="top5-section-head">
+                  <div>
+                    <h2 className="panel-title">Top avancés</h2>
+                    <div className="option-value">
+                      Des listes automatiques par ambiance et type de jeu, basées sur tes notes.
+                    </div>
+                  </div>
+                </div>
+
+                <div className="top5-mini-grid top5-advanced-grid">
+                  {TOP5_ADVANCED_LISTS.map((list) => (
+                    <Top5RankingPanel
+                      key={list.id}
+                      title={list.title}
+                      games={getTopAdvancedGames(scopedGames, list)}
+                      scoreKey={list.scoreKey}
+                      compact
+                    />
+                  ))}
+                </div>
+              </div>
+            </>
           )}
         </>
       ) : contentMode === "hardware" ? (
@@ -7730,6 +7824,21 @@ function HardwareDetailModal({
           }),
         ]
       : displaySizeOptions;
+  const hardwareTypeLabel = getHardwareTypeLabel(item.type);
+  const displaySizeLabel =
+    item.type === "display" && item.displaySize
+      ? currentDisplaySizeOptions.find((option) => option.id === item.displaySize)?.label ||
+        `${item.displaySize} pouces`
+      : "";
+  const hardwareFacts = [
+    { label: "Type", value: hardwareTypeLabel },
+    { label: "Marque", value: item.brand || "Marque inconnue" },
+    item.variantName && { label: "Gamme", value: item.variantName },
+    item.storage && { label: "Stockage", value: item.storage },
+    displaySizeLabel && { label: "Taille", value: displaySizeLabel },
+    { label: "Statut", value: getHardwareStatusLabel(item.status) },
+  ].filter(Boolean);
+  const highlightedFields = fields.slice(0, 3);
 
   return (
     <div className="hardware-inline-detail" ref={detailRef}>
@@ -7769,26 +7878,38 @@ function HardwareDetailModal({
             <small>Moyenne critères</small>
           </div>
 
-          <div className="modal-meta">
-            <strong>Marque :</strong> {item.brand || "Marque inconnue"}
-          </div>
-
-          {item.variantName && (
-            <div className="modal-meta">
-              <strong>Gamme :</strong> {item.variantName}
+          <div className="hardware-detail-profile">
+            <div className="hardware-detail-profile-head">
+              <span>Profil {hardwareTypeLabel.toLowerCase()}</span>
+              <strong>
+                {item.storage ||
+                  displaySizeLabel ||
+                  item.variantName ||
+                  getHardwareStatusLabel(item.status)}
+              </strong>
             </div>
-          )}
 
-          {item.type === "display" && item.displaySize && (
-            <div className="modal-meta">
-              <strong>Taille :</strong>{" "}
-              {currentDisplaySizeOptions.find((option) => option.id === item.displaySize)?.label ||
-                `${item.displaySize} pouces`}
+            <div className="hardware-detail-facts">
+              {hardwareFacts.map((fact) => (
+                <div key={`${fact.label}-${fact.value}`} className="hardware-detail-fact">
+                  <span>{fact.label}</span>
+                  <strong>{fact.value}</strong>
+                </div>
+              ))}
             </div>
-          )}
 
-          <div className="modal-meta">
-            <strong>Statut :</strong> {getHardwareStatusLabel(item.status)}
+            {highlightedFields.length > 0 && (
+              <div className="hardware-detail-focus">
+                <span>Critères suivis</span>
+                <div>
+                  {highlightedFields.map((field) => (
+                    <small key={field.key}>
+                      {field.icon} {field.label}
+                    </small>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {item.type === "console" && consoleGameStats && (

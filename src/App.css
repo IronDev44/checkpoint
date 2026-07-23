@@ -1774,6 +1774,19 @@ textarea {
   gap: 14px;
 }
 
+.top5-advanced-section {
+  display: grid;
+  gap: 12px;
+}
+
+.top5-advanced-section .top5-section-head {
+  margin: 2px 0 0;
+}
+
+.top5-advanced-grid {
+  align-items: start;
+}
+
 .top5-panel.compact .top5-item {
   padding: 10px;
 }
@@ -12625,6 +12638,88 @@ body {
   font-size: 0.76rem;
 }
 
+.hardware-detail-profile {
+  display: grid;
+  gap: 12px;
+  margin: 12px 0 14px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.035)),
+    rgba(255,255,255,0.04);
+}
+
+.hardware-detail-profile-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hardware-detail-profile-head span,
+.hardware-detail-focus > span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hardware-detail-profile-head strong {
+  min-width: 0;
+  color: white;
+  font-size: 0.95rem;
+  text-align: right;
+}
+
+.hardware-detail-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.hardware-detail-fact {
+  min-width: 0;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.055);
+  padding: 10px;
+}
+
+.hardware-detail-fact span {
+  display: block;
+  color: var(--text-soft);
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.hardware-detail-fact strong {
+  display: block;
+  margin-top: 3px;
+  color: white;
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+
+.hardware-detail-focus {
+  display: grid;
+  gap: 8px;
+}
+
+.hardware-detail-focus div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.hardware-detail-focus small {
+  border-radius: 999px;
+  background: rgba(255,255,255,0.075);
+  color: rgba(255,255,255,0.88);
+  padding: 7px 9px;
+  font-weight: 900;
+}
+
 .hardware-detail-console-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -12692,6 +12787,24 @@ body {
 
 @media (max-width: 640px) {
   .hardware-pc-config-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hardware-detail-profile {
+    padding: 12px;
+  }
+
+  .hardware-detail-profile-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hardware-detail-profile-head strong {
+    text-align: left;
+  }
+
+  .hardware-detail-facts {
     grid-template-columns: 1fr;
   }
 }
