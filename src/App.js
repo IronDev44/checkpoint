@@ -2551,42 +2551,49 @@ const CONTEXTUAL_GAME_RATING_FIELDS = [
     key: "ratingOpenWorld",
     label: "Open world",
     hint: "Monde ouvert, densité, exploration libre",
+    topLabel: "Top open worlds",
     keywords: ["open world", "adventure", "action-adventure", "rpg"],
   },
   {
     key: "ratingGunplay",
     label: "Sensation de tir",
     hint: "Impact, feeling des armes, lisibilité des affrontements",
+    topLabel: "Top shooters",
     keywords: ["shooter", "fps", "tps", "first-person", "third-person"],
   },
   {
     key: "ratingDriving",
     label: "Conduite",
     hint: "Feeling, vitesse, précision, plaisir au volant",
+    topLabel: "Top pilotage",
     keywords: ["racing", "driving", "simulation", "sports"],
   },
   {
     key: "ratingCombat",
     label: "Combat",
     hint: "Rythme, précision, profondeur des affrontements",
+    topLabel: "Top combats",
     keywords: ["action", "fighting", "soulslike", "hack and slash", "rpg"],
   },
   {
     key: "ratingExploration",
     label: "Exploration",
     hint: "Curiosité, récompenses, envie de fouiller",
+    topLabel: "Top exploration",
     keywords: ["adventure", "open world", "metroidvania", "platformer", "rpg"],
   },
   {
     key: "ratingChallenge",
     label: "Challenge / boss",
     hint: "Difficulté, boss, tension et satisfaction",
+    topLabel: "Top challenge",
     keywords: ["soulslike", "action", "fighting", "platformer", "roguelike"],
   },
   {
     key: "ratingMultiplayer",
     label: "Coop / multi",
     hint: "Plaisir à plusieurs, équilibre, rejouabilité",
+    topLabel: "Top coop / multi",
     keywords: ["multiplayer", "co-op", "coop", "online", "mmo"],
   },
 ];
@@ -2610,6 +2617,9 @@ function DetailedRatingsBlock({ game, onSetDetailedRating }) {
     { key: "ratingLongevity", label: "Durée de vie" },
   ];
   const contextualItems = getContextualRatingFields(game);
+  const ratedContextualItems = contextualItems.filter(
+    (item) => clampRating(game[item.key]) > 0
+  );
 
   return (
     <>
@@ -2628,15 +2638,35 @@ function DetailedRatingsBlock({ game, onSetDetailedRating }) {
       {contextualItems.length > 0 && (
         <div className="contextual-ratings-block">
           <div className="contextual-ratings-head">
-            <strong>Critères contextuels</strong>
-            <span>Affinage utilisé pour les Tops avancés</span>
+            <div>
+              <strong>Notation avancée</strong>
+              <span>
+                Critères propres à ce type de jeu, utilisés pour affiner tes Tops.
+              </span>
+            </div>
+            <small>
+              {ratedContextualItems.length}/{contextualItems.length} notés
+            </small>
+          </div>
+
+          <div className="contextual-ratings-note">
+            Ces notes ne remplacent pas la note globale. Elles servent à départager
+            les jeux dans les classements spécialisés.
           </div>
 
           <div className="detailed-ratings-grid contextual">
             {contextualItems.map((item) => (
-              <div key={item.key} className="detailed-rating-card contextual">
+              <div
+                key={item.key}
+                className={`detailed-rating-card contextual ${
+                  clampRating(game[item.key]) > 0 ? "rated" : ""
+                }`}
+              >
                 <div className="detailed-rating-title">
-                  <span>{item.label}</span>
+                  <span>
+                    {item.label}
+                    <em>{item.topLabel}</em>
+                  </span>
                   <small>{item.hint}</small>
                 </div>
                 <RatingSlider

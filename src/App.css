@@ -1603,19 +1603,47 @@ textarea {
 }
 
 .contextual-ratings-head {
-  display: grid;
-  gap: 3px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .contextual-ratings-head strong {
+  display: block;
   color: white;
-  font-size: 0.98rem;
+  font-size: 1.02rem;
 }
 
 .contextual-ratings-head span {
+  display: block;
+  margin-top: 3px;
   color: var(--text-soft);
   font-size: 0.78rem;
   font-weight: 800;
+  line-height: 1.35;
+}
+
+.contextual-ratings-head > small {
+  flex: 0 0 auto;
+  border: 1px solid var(--surface-border);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.07);
+  color: white;
+  padding: 7px 10px;
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.contextual-ratings-note {
+  border: 1px solid rgba(96,165,250,0.18);
+  border-radius: var(--ui-radius-md);
+  background: rgba(96,165,250,0.08);
+  color: rgba(255,255,255,0.76);
+  padding: 10px 12px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.35;
 }
 
 .detailed-ratings-grid.contextual {
@@ -1628,9 +1656,34 @@ textarea {
     var(--surface-bg);
 }
 
+.detailed-rating-card.contextual.rated {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--surface-border));
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 14%, transparent), rgba(255,255,255,0.04)),
+    var(--surface-bg);
+}
+
 .detailed-rating-card.contextual .detailed-rating-title {
   display: grid;
-  gap: 3px;
+  gap: 5px;
+}
+
+.detailed-rating-card.contextual .detailed-rating-title span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.detailed-rating-card.contextual .detailed-rating-title em {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: var(--text-soft);
+  padding: 5px 8px;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 950;
 }
 
 .detailed-rating-card.contextual .detailed-rating-title small {
@@ -1638,6 +1691,23 @@ textarea {
   font-size: 0.74rem;
   font-weight: 800;
   line-height: 1.25;
+}
+
+@media (max-width: 640px) {
+  .contextual-ratings-head {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .contextual-ratings-head > small {
+    width: fit-content;
+  }
+
+  .detailed-rating-card.contextual .detailed-rating-title span {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
 }
 
 .top5-list {
