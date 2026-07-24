@@ -1405,6 +1405,46 @@ function averageDetailedRating(game) {
   return Math.round(avg * 10) / 10;
 }
 
+const BASE_GAME_RATING_FIELDS = [
+  { key: "ratingGraphics", label: "Graphismes", hint: "Direction visuelle, technique, lisibilité" },
+  { key: "ratingGameplay", label: "Gameplay", hint: "Feeling, rythme, plaisir manette en main" },
+  { key: "ratingStory", label: "Histoire", hint: "Écriture, personnages, mise en scène" },
+  { key: "ratingSound", label: "Audio", hint: "Sound design, doublage, ambiance sonore" },
+  { key: "ratingLongevity", label: "Durée de vie", hint: "Contenu, rejouabilité, rythme global" },
+];
+
+function getGameRatingBreakdown(game = {}) {
+  return BASE_GAME_RATING_FIELDS.map((field) => ({
+    ...field,
+    value: clampRating(game[field.key]),
+  }));
+}
+
+function getGameDetailedRatingSummary(game = {}) {
+  const baseFields = getGameRatingBreakdown(game);
+  const ratedBaseFields = baseFields.filter((field) => field.value > 0);
+  const contextualFields = getContextualRatingFields(game).map((field) => ({
+    ...field,
+    value: clampRating(game[field.key]),
+  }));
+  const ratedContextualFields = contextualFields.filter((field) => field.value > 0);
+  const rankedFields = [...ratedBaseFields, ...ratedContextualFields].sort(
+    (a, b) => b.value - a.value
+  );
+
+  return {
+    baseFields,
+    contextualFields,
+    ratedBaseFields,
+    ratedContextualFields,
+    bestField: rankedFields[0],
+    weakestField: rankedFields.length > 1 ? rankedFields[rankedFields.length - 1] : null,
+    completion: baseFields.length
+      ? Math.round((ratedBaseFields.length / baseFields.length) * 100)
+      : 0,
+  };
+}
+
 /* ==================== SONS ==================== */
 
 function playBootSoundNow() {
@@ -2857,57 +2897,96 @@ function getContextualRatingFields(game) {
 }
 
 function DetailedRatingsBlock({ game, onSetDetailedRating }) {
-  const baseItems = [
-    { key: "ratingGraphics", label: "Graphismes" },
-    { key: "ratingGameplay", label: "Gameplay" },
-    { key: "ratingStory", label: "Histoire" },
-    { key: "ratingSound", label: "Audio" },
-    { key: "ratingLongevity", label: "Durée de vie" },
-  ];
-  const contextualItems = getContextualRatingFields(game);
-  const ratedContextualItems = contextualItems.filter(
-    (item) => clampRating(game[item.key]) > 0
-  );
+  const summary = getGameDetailedRatingSummary(game);
 
   return (
-    <>
+    <div className="game-ratings-panel">
+      <div className="game-ratings-summary">
+        <div>
+          <span>Moyenne détaillée</span>
+          <strong>{formatRating10(averageDetailedRating(game), "À construire")}</strong>
+        </div>
+
+        <div>
+          <span>Critères essentiels</span>
+          <strong>
+            {summary.ratedBaseFields.length}/{summary.baseFields.length}
+          </strong>
+        </div>
+
+        <div>
+          <span>Affinité du jeu</span>
+          <strong>{summary.contextualFields.length || "Standard"}</strong>
+        </div>
+      </div>
+
+      {(summary.bestField || summary.weakestField) && (
+        <div className="game-ratings-insights">
+          {summary.bestField && (
+            <div className="game-ratings-insight strong">
+              <span>Point fort</span>
+              <strong>{summary.bestField.label}</strong>
+              <small>{formatRating10(summary.bestField.value, "-")}</small>
+            </div>
+          )}
+
+          {summary.weakestField && summary.weakestField.key !== summary.bestField?.key && (
+            <div className="game-ratings-insight">
+              <span>À surveiller</span>
+              <strong>{summary.weakestField.label}</strong>
+              <small>{formatRating10(summary.weakestField.value, "-")}</small>
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="game-ratings-section-head">
+        <div>
+          <strong>Critères essentiels</strong>
+          <span>La base commune à tous les jeux pour garder des notes comparables.</span>
+        </div>
+        <small>{summary.completion}%</small>
+      </div>
+
       <div className="detailed-ratings-grid">
-        {baseItems.map((item) => (
-          <div key={item.key} className="detailed-rating-card">
-            <div className="detailed-rating-title">{item.label}</div>
+        {summary.baseFields.map((item) => (
+          <div
+            key={item.key}
+            className={`detailed-rating-card ${item.value > 0 ? "rated" : ""}`}
+          >
+            <div className="detailed-rating-title">
+              <span>{item.label}</span>
+              <em>{formatRating10(item.value, "À noter")}</em>
+            </div>
+            <small className="detailed-rating-hint">{item.hint}</small>
             <RatingSlider
-              rating={game[item.key] || 0}
+              rating={item.value}
               onRate={(value) => onSetDetailedRating(game.id, item.key, value)}
             />
           </div>
         ))}
       </div>
 
-      {contextualItems.length > 0 && (
+      {summary.contextualFields.length > 0 && (
         <div className="contextual-ratings-block">
           <div className="contextual-ratings-head">
             <div>
-              <strong>Notation avancée</strong>
+              <strong>Critères adaptés à ce jeu</strong>
               <span>
-                Critères propres à ce type de jeu, utilisés pour affiner tes Tops.
+                Ces notes servent à affiner les Tops spécialisés sans alourdir tous les jeux.
               </span>
             </div>
             <small>
-              {ratedContextualItems.length}/{contextualItems.length} notés
+              {summary.ratedContextualFields.length}/{summary.contextualFields.length} notés
             </small>
           </div>
 
-          <div className="contextual-ratings-note">
-            Ces notes ne remplacent pas la note globale. Elles servent à départager
-            les jeux dans les classements spécialisés.
-          </div>
-
           <div className="detailed-ratings-grid contextual">
-            {contextualItems.map((item) => (
+            {summary.contextualFields.map((item) => (
               <div
                 key={item.key}
                 className={`detailed-rating-card contextual ${
-                  clampRating(game[item.key]) > 0 ? "rated" : ""
+                  item.value > 0 ? "rated" : ""
                 }`}
               >
                 <div className="detailed-rating-title">
@@ -2918,7 +2997,7 @@ function DetailedRatingsBlock({ game, onSetDetailedRating }) {
                   <small>{item.hint}</small>
                 </div>
                 <RatingSlider
-                  rating={game[item.key] || 0}
+                  rating={item.value}
                   onRate={(value) => onSetDetailedRating(game.id, item.key, value)}
                 />
               </div>
@@ -2926,7 +3005,7 @@ function DetailedRatingsBlock({ game, onSetDetailedRating }) {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -4397,6 +4476,12 @@ function GameDetailModal({
     }
   };
 
+  const ratingSummary = getGameDetailedRatingSummary(game);
+  const detailedAverage = averageDetailedRating(game);
+  const gameYear = game.released ? game.released.split("-")[0] : "";
+  const primaryPlatform =
+    game.playedPlatforms?.[0] || game.platformNames?.[0] || "Plateforme à choisir";
+
   return (
     <div
       className="modal-backdrop"
@@ -4497,9 +4582,26 @@ function GameDetailModal({
             <strong>XP estimée :</strong> {calculateXP(game)} XP
           </div>
 
-          <div className="modal-meta">
-            <strong>Moyenne détaillée :</strong>{" "}
-            {formatRating10(averageDetailedRating(game), "Pas encore notée")}
+          <div className="game-detail-scoreboard">
+            <div className="game-detail-score-main">
+              <span>Note globale</span>
+              <strong>{formatRating10(getGameRating(game), "À noter")}</strong>
+              <small>{gameYear || primaryPlatform}</small>
+            </div>
+
+            <div className="game-detail-score-card">
+              <span>Moyenne critères</span>
+              <strong>{formatRating10(detailedAverage, "À construire")}</strong>
+              <small>
+                {ratingSummary.ratedBaseFields.length}/{ratingSummary.baseFields.length} essentiels
+              </small>
+            </div>
+
+            <div className="game-detail-score-card">
+              <span>Critères adaptés</span>
+              <strong>{ratingSummary.contextualFields.length || "-"}</strong>
+              <small>{primaryPlatform}</small>
+            </div>
           </div>
 
           <div className="modal-block">
