@@ -1833,6 +1833,21 @@ textarea {
   gap: 8px;
 }
 
+.top5-group-picker.top5-advanced-picker button {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 132px;
+  text-align: left;
+}
+
+.top5-group-picker.top5-advanced-picker small {
+  min-width: 0;
+  background: rgba(255,255,255,0.075);
+  font-size: 10px;
+  line-height: 1.2;
+}
+
 .top5-group-picker small {
   min-width: 22px;
   border-radius: 999px;
@@ -1848,6 +1863,80 @@ textarea {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
+}
+
+.top5-advanced-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 22%, transparent), transparent 36%),
+    linear-gradient(135deg, rgba(255,255,255,0.085), rgba(255,255,255,0.035)),
+    var(--panel-bg);
+}
+
+.top5-advanced-kicker,
+.top5-criterion-chip,
+.top5-score-source {
+  display: inline-flex;
+  width: fit-content;
+  border-radius: 999px;
+  font-weight: 950;
+}
+
+.top5-advanced-kicker {
+  margin-bottom: 7px;
+  background: var(--accent);
+  color: white;
+  box-shadow: var(--accent-shadow);
+  padding: 6px 10px;
+  font-size: 11px;
+}
+
+.top5-advanced-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(82px, 1fr));
+  gap: 8px;
+}
+
+.top5-advanced-stats div {
+  border: 1px solid var(--surface-border);
+  border-radius: var(--ui-radius-md);
+  background: rgba(255,255,255,0.06);
+  padding: 10px;
+  text-align: center;
+}
+
+.top5-advanced-stats strong {
+  display: block;
+  color: white;
+  font-size: 1.1rem;
+}
+
+.top5-advanced-stats span {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-soft);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.top5-criterion-chip {
+  margin-top: 8px;
+  border: 1px solid color-mix(in srgb, var(--accent) 38%, var(--surface-border));
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: white;
+  padding: 6px 9px;
+  font-size: 11px;
+}
+
+.top5-score-source {
+  margin-top: 7px;
+  background: rgba(255,255,255,0.07);
+  color: var(--text-soft);
+  padding: 5px 8px;
+  font-size: 10px;
 }
 
 .top5-count,
@@ -2049,6 +2138,23 @@ textarea {
 
   .top5-group-picker {
     max-height: 220px;
+  }
+
+  .top5-group-picker.top5-advanced-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .top5-group-picker.top5-advanced-picker button {
+    min-width: 0;
+  }
+
+  .top5-advanced-hero {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .top5-advanced-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .top5-mini-grid {

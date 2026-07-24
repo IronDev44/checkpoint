@@ -2803,6 +2803,8 @@ const TOP5_ADVANCED_LISTS = [
     id: "open-world",
     label: "Open worlds",
     title: "Top open worlds",
+    criterionLabel: "Open world",
+    description: "Densité du monde, exploration libre, envie de s'y perdre.",
     scoreKey: "ratingOpenWorld",
     keywords: ["open world", "adventure", "action-adventure", "rpg"],
   },
@@ -2810,6 +2812,8 @@ const TOP5_ADVANCED_LISTS = [
     id: "rpg",
     label: "RPG",
     title: "Top RPG",
+    criterionLabel: "Histoire",
+    description: "Aventure, progression, écriture et attachement au voyage.",
     scoreKey: "ratingStory",
     keywords: ["rpg", "role-playing", "jrpg", "soulslike"],
   },
@@ -2817,6 +2821,8 @@ const TOP5_ADVANCED_LISTS = [
     id: "shooters",
     label: "Shooters",
     title: "Top shooters",
+    criterionLabel: "Sensation de tir",
+    description: "Impact des armes, précision, rythme des affrontements.",
     scoreKey: "ratingGunplay",
     keywords: ["shooter", "fps", "tps", "first-person", "third-person"],
   },
@@ -2824,6 +2830,8 @@ const TOP5_ADVANCED_LISTS = [
     id: "pilotage",
     label: "Pilotage",
     title: "Top pilotage",
+    criterionLabel: "Conduite",
+    description: "Feeling, vitesse, maîtrise, plaisir manette en main.",
     scoreKey: "ratingDriving",
     keywords: ["racing", "driving", "simulation", "sports"],
   },
@@ -2831,6 +2839,8 @@ const TOP5_ADVANCED_LISTS = [
     id: "ambiance",
     label: "Ambiance",
     title: "Top ambiance",
+    criterionLabel: "Audio",
+    description: "Immersion sonore, tension, identité et atmosphère.",
     scoreKey: "ratingSound",
     keywords: ["horror", "survival", "atmospheric", "adventure"],
   },
@@ -2838,6 +2848,8 @@ const TOP5_ADVANCED_LISTS = [
     id: "combat",
     label: "Combat",
     title: "Top combats",
+    criterionLabel: "Combat",
+    description: "Rythme, profondeur, lisibilité et satisfaction des duels.",
     scoreKey: "ratingCombat",
     keywords: ["action", "fighting", "soulslike", "hack and slash", "rpg"],
   },
@@ -2845,6 +2857,8 @@ const TOP5_ADVANCED_LISTS = [
     id: "exploration",
     label: "Exploration",
     title: "Top exploration",
+    criterionLabel: "Exploration",
+    description: "Curiosité, secrets, récompenses et envie de fouiller.",
     scoreKey: "ratingExploration",
     keywords: ["adventure", "open world", "metroidvania", "platformer", "rpg"],
   },
@@ -2852,6 +2866,8 @@ const TOP5_ADVANCED_LISTS = [
     id: "challenge",
     label: "Challenge",
     title: "Top challenge",
+    criterionLabel: "Challenge / boss",
+    description: "Difficulté, boss, tension et satisfaction après l'effort.",
     scoreKey: "ratingChallenge",
     keywords: ["soulslike", "action", "fighting", "platformer", "roguelike"],
   },
@@ -2859,6 +2875,8 @@ const TOP5_ADVANCED_LISTS = [
     id: "multi",
     label: "Coop / multi",
     title: "Top coop / multi",
+    criterionLabel: "Coop / multi",
+    description: "Plaisir à plusieurs, équilibre, rejouabilité et moments partagés.",
     scoreKey: "ratingMultiplayer",
     keywords: ["multiplayer", "co-op", "coop", "online", "mmo"],
   },
@@ -2866,6 +2884,8 @@ const TOP5_ADVANCED_LISTS = [
     id: "indes",
     label: "Indes",
     title: "Top jeux indes",
+    criterionLabel: "Global",
+    description: "Les jeux plus personnels, inventifs ou surprenants de ta bibliothèque.",
     scoreKey: "rating",
     keywords: ["indie", "platformer", "puzzle", "metroidvania"],
   },
@@ -2887,6 +2907,17 @@ function getGameScore(game, scoreKey) {
 
   const fallbackKey = TOP5_CONTEXT_SCORE_FALLBACKS[scoreKey];
   return fallbackKey ? clampRating(game?.[fallbackKey]) : contextualScore;
+}
+
+function getTopScoreSource(game, scoreKey) {
+  if (clampRating(game?.[scoreKey]) > 0) return "Note spécialisée";
+
+  const fallbackKey = TOP5_CONTEXT_SCORE_FALLBACKS[scoreKey];
+  if (fallbackKey && clampRating(game?.[fallbackKey]) > 0) {
+    return "Note approchée";
+  }
+
+  return "";
 }
 
 function getNormalizedStatus(status = "") {
@@ -3073,7 +3104,14 @@ function getGameOfYearYears(games) {
     .sort((a, b) => b - a);
 }
 
-function Top5RankingPanel({ title, games, scoreKey, contextLabel = "", compact = false }) {
+function Top5RankingPanel({
+  title,
+  games,
+  scoreKey,
+  contextLabel = "",
+  compact = false,
+  advancedList = null,
+}) {
   const sorted = [...games]
     .filter((game) => getGameScore(game, scoreKey) > 0)
     .sort((a, b) => {
@@ -3086,11 +3124,20 @@ function Top5RankingPanel({ title, games, scoreKey, contextLabel = "", compact =
     .slice(0, 5);
 
   return (
-    <div className={`search-panel top5-panel ${compact ? "compact" : ""}`}>
+    <div
+      className={`search-panel top5-panel ${compact ? "compact" : ""} ${
+        advancedList ? "advanced" : ""
+      }`}
+    >
       <div className="top5-section-head">
         <div>
           <h2 className="panel-title">{title}</h2>
           {contextLabel && <div className="option-value">{contextLabel}</div>}
+          {advancedList && (
+            <div className="top5-criterion-chip">
+              Basé sur {advancedList.criterionLabel}
+            </div>
+          )}
         </div>
         <span className="top5-count">{sorted.length}/5</span>
       </div>
@@ -3102,23 +3149,32 @@ function Top5RankingPanel({ title, games, scoreKey, contextLabel = "", compact =
         />
       ) : (
         <div className="top5-list">
-          {sorted.map((game, index) => (
-            <div key={`${title}-${game.id}`} className="top5-item">
-              <div className="top5-rank">{index + 1}</div>
-              {game.image ? (
-                <img src={game.image} alt={game.name} className="top5-thumb" />
-              ) : (
-                <div className="top5-thumb placeholder">Jeu</div>
-              )}
-              <div className="top5-main">
-                <div className="top5-name">{game.name}</div>
-                <div className="top5-meta">{getTopGameMeta(game)}</div>
+          {sorted.map((game, index) => {
+            const scoreSource = advancedList
+              ? getTopScoreSource(game, scoreKey)
+              : "";
+
+            return (
+              <div key={`${title}-${game.id}`} className="top5-item">
+                <div className="top5-rank">{index + 1}</div>
+                {game.image ? (
+                  <img src={game.image} alt={game.name} className="top5-thumb" />
+                ) : (
+                  <div className="top5-thumb placeholder">Jeu</div>
+                )}
+                <div className="top5-main">
+                  <div className="top5-name">{game.name}</div>
+                  <div className="top5-meta">{getTopGameMeta(game)}</div>
+                  {scoreSource && (
+                    <div className="top5-score-source">{scoreSource}</div>
+                  )}
+                </div>
+                <div className="top5-score">
+                  {formatTopScore(getGameScore(game, scoreKey), scoreKey)}
+                </div>
               </div>
-              <div className="top5-score">
-                {formatTopScore(getGameScore(game, scoreKey), scoreKey)}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -3412,6 +3468,9 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
     hardwareType === "all"
       ? "Matériel noté, hors wishlist."
       : `${selectedHardwareGroup.label} - ${visibleHardware.length} matériel noté`;
+  const selectedAdvancedRatedCount = visibleAdvancedGames.filter(
+    (game) => clampRating(game[selectedAdvancedList.scoreKey]) > 0
+  ).length;
 
   return (
     <div className="progression-stack top5-page">
@@ -3486,7 +3545,9 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
                 onClick={() => setSelectedAdvancedTop(list.id)}
               >
                 <span>{list.label}</span>
-                <small>{getTopAdvancedGames(scopedGames, list).length}</small>
+                <small>
+                  {list.criterionLabel} · {getTopAdvancedGames(scopedGames, list).length}
+                </small>
               </button>
             ))}
           </div>
@@ -3535,6 +3596,27 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
 
       {contentMode === "games" ? (
         <>
+          {mode === "advanced" && (
+            <div className="search-panel top5-advanced-hero">
+              <div>
+                <span className="top5-advanced-kicker">Top spécialisé</span>
+                <h2 className="panel-title">{selectedAdvancedList.title}</h2>
+                <div className="option-value">{selectedAdvancedList.description}</div>
+              </div>
+
+              <div className="top5-advanced-stats">
+                <div>
+                  <strong>{visibleAdvancedGames.length}</strong>
+                  <span>candidats</span>
+                </div>
+                <div>
+                  <strong>{selectedAdvancedRatedCount}</strong>
+                  <span>notes dédiées</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <Top5RankingPanel
             title={
               mode === "advanced"
@@ -3546,6 +3628,7 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
             games={mode === "advanced" ? visibleAdvancedGames : visibleGames}
             scoreKey={mode === "advanced" ? selectedAdvancedList.scoreKey : scoreKey}
             contextLabel={contextLabel}
+            advancedList={mode === "advanced" ? selectedAdvancedList : null}
           />
 
           {mode === "criteria" && (
