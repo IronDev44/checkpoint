@@ -222,6 +222,8 @@ const DEFAULT_APP_OPTIONS = {
   animatedBackground: true,
   appIcon: "theme",
   ratingDisplay: "number",
+  headerMode: "standard",
+  mobileNavMode: "standard",
   rememberLastTab: true,
   confirmDangerActions: true,
   afterAddAction: "stay",
@@ -11239,6 +11241,29 @@ function OptionsTab({
 
             <div className="option-setting-card">
               <div>
+                <strong>En-tête</strong>
+                <span>Standard garde les infos XP en haut. Compact libère de la hauteur pour les listes longues.</span>
+              </div>
+              <div className="option-pill-grid two compact">
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.headerMode !== "compact" ? "active" : ""}`}
+                  onClick={() => onOptionChange("headerMode", "standard")}
+                >
+                  Standard
+                </button>
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.headerMode === "compact" ? "active" : ""}`}
+                  onClick={() => onOptionChange("headerMode", "compact")}
+                >
+                  Compact
+                </button>
+              </div>
+            </div>
+
+            <div className="option-setting-card">
+              <div>
                 <strong>Icône de l'app</strong>
                 <span>Choisis l'icône utilisée par le navigateur et l'app installée.</span>
               </div>
@@ -11347,6 +11372,29 @@ function OptionsTab({
 
           <div className="option-section">
             <SectionTitle title="Ergonomie" help="ergonomics" />
+
+            <div className="option-setting-card">
+              <div>
+                <strong>Navigation mobile</strong>
+                <span>Confort agrandit la barre du bas et les zones tactiles sur iPhone.</span>
+              </div>
+              <div className="option-pill-grid two compact">
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.mobileNavMode !== "comfort" ? "active" : ""}`}
+                  onClick={() => onOptionChange("mobileNavMode", "standard")}
+                >
+                  Standard
+                </button>
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.mobileNavMode === "comfort" ? "active" : ""}`}
+                  onClick={() => onOptionChange("mobileNavMode", "comfort")}
+                >
+                  Confort
+                </button>
+              </div>
+            </div>
 
             <div className="option-setting-card">
               <div>
@@ -13112,6 +13160,8 @@ useEffect(() => {
       appOptions.animatedBackground ? "on" : "off"
     );
     document.body.setAttribute("data-app-icon", appOptions.appIcon || "theme");
+    document.body.setAttribute("data-header-mode", appOptions.headerMode || "standard");
+    document.body.setAttribute("data-mobile-nav", appOptions.mobileNavMode || "standard");
 
     let iconLink = document.querySelector('link[rel="icon"]');
     if (!iconLink) {

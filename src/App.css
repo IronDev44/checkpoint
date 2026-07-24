@@ -22282,3 +22282,71 @@ body[data-theme="theme-steamdeck"] {
     font-size: 0.76rem !important;
   }
 }
+
+/* =========================================================
+   OPTION MODES - VISIBLE ERGONOMICS
+========================================================= */
+
+body[data-header-mode="compact"] .container {
+  padding-top: max(8px, env(safe-area-inset-top)) !important;
+}
+
+body[data-header-mode="compact"] .title {
+  margin: 4px 0 12px !important;
+  font-size: clamp(1.48rem, 5.5vw, 2.1rem) !important;
+  letter-spacing: 0.11em !important;
+}
+
+body[data-header-mode="compact"] .container > .xp-card:not(.compact),
+body[data-header-mode="compact"] .container > .stats-grid:not(.compact),
+body[data-header-mode="compact"] .container > .console-xp-card {
+  display: none !important;
+}
+
+body[data-header-mode="compact"] .results-container,
+body[data-header-mode="compact"] .hardware-view-container,
+body[data-header-mode="compact"] .progression-stack {
+  margin-top: 10px !important;
+}
+
+@media (max-width: 768px) {
+  body[data-mobile-nav="comfort"] .container {
+    padding-bottom: calc(132px + env(safe-area-inset-bottom)) !important;
+  }
+
+  body[data-mobile-nav="comfort"] .bottom-tabs {
+    left: 10px !important;
+    right: 10px !important;
+    bottom: calc(env(safe-area-inset-bottom) + 12px) !important;
+    gap: 10px !important;
+    padding: 10px !important;
+    border-radius: 24px !important;
+    background:
+      linear-gradient(180deg, rgba(32, 43, 58, 0.94), rgba(17, 25, 38, 0.96)) !important;
+    box-shadow:
+      0 18px 44px rgba(0, 0, 0, 0.42),
+      inset 0 1px 0 rgba(255, 255, 255, 0.09) !important;
+  }
+
+  body[data-mobile-nav="comfort"] .tab-btn {
+    min-width: 96px !important;
+    height: 70px !important;
+    padding: 8px 10px !important;
+    border-radius: 18px !important;
+    gap: 5px !important;
+  }
+
+  body[data-mobile-nav="comfort"] .tab-btn.active {
+    min-width: 114px !important;
+    transform: translateY(-2px);
+  }
+
+  body[data-mobile-nav="comfort"] .tab-icon svg {
+    width: 23px !important;
+    height: 23px !important;
+  }
+
+  body[data-mobile-nav="comfort"] .tab-label {
+    font-size: 0.68rem !important;
+  }
+}
