@@ -9997,15 +9997,15 @@ body[data-ui="modern"] .panel-title {
 .choice-pill.active {
   background: var(--accent);
   color: white;
-  border-color: transparent;
+  border-color: color-mix(in srgb, var(--accent-solid) 72%, rgba(255, 255, 255, 0.18));
 
   transform: translateY(-1px);
 
   box-shadow:
-    0 0 0 1px rgba(255,255,255,0.08),
-    0 0 18px rgba(124, 58, 237, 0.45),
-    0 0 38px rgba(124, 58, 237, 0.35),
-    0 0 70px rgba(124, 58, 237, 0.22);
+    0 0 0 1px color-mix(in srgb, var(--accent-solid) 52%, rgba(255,255,255,0.08)),
+    0 0 18px color-mix(in srgb, var(--accent-solid) 50%, transparent),
+    0 0 38px color-mix(in srgb, var(--accent-solid) 38%, transparent),
+    0 0 70px color-mix(in srgb, var(--accent-solid) 22%, transparent);
 
   position: relative;
   overflow: hidden;
@@ -10021,7 +10021,7 @@ body[data-ui="modern"] .panel-title {
   background:
     radial-gradient(
       circle,
-      rgba(255,255,255,0.18) 0%,
+      color-mix(in srgb, var(--accent-solid) 24%, rgba(255,255,255,0.2)) 0%,
       transparent 70%
     );
 
@@ -22442,6 +22442,8 @@ textarea:focus-visible,
 }
 
 .option-pill.active,
+.status-btn.active,
+.choice-pill.active,
 .hardware-type-switch button.active,
 .hardware-collection-filters button.active,
 .hardware-catalog-toggle.active,
@@ -22466,6 +22468,8 @@ textarea:focus-visible,
 }
 
 .option-pill.active:hover,
+.status-btn.active:hover,
+.choice-pill.active:hover,
 .hardware-type-switch button.active:hover,
 .hardware-collection-filters button.active:hover,
 .hardware-catalog-toggle.active:hover,
