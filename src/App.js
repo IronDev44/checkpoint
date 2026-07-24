@@ -238,6 +238,17 @@ const GAME_RATING_KEYS = [
   "ratingSound",
   "ratingLongevity",
   "ostRating",
+  "ratingOpenWorld",
+  "ratingGunplay",
+  "ratingDriving",
+  "ratingCombat",
+  "ratingExploration",
+  "ratingChallenge",
+  "ratingMultiplayer",
+  "ratingStealth",
+  "ratingPuzzle",
+  "ratingPlatforming",
+  "ratingHorror",
 ];
 
 function clampRating(value, max = APP_RATING_MAX) {
@@ -304,8 +315,66 @@ function normalizeGameRatings(game = {}) {
   return normalizedGame;
 }
 
+const GAME_GENRE_SIGNAL_RULES = [
+  { label: "RPG", weight: 1.35, keywords: ["rpg", "role playing", "role-playing", "jrpg", "arpg", "soulslike"] },
+  { label: "Shooter", weight: 1.35, keywords: ["shooter", "fps", "tps", "first person", "third person", "gunplay"] },
+  { label: "Course", weight: 1.3, keywords: ["racing", "driving", "course", "pilotage", "motorsport", "rally"] },
+  { label: "Horreur", weight: 1.28, keywords: ["horror", "survival horror", "survie", "terror", "scary"] },
+  { label: "Stratégie", weight: 1.25, keywords: ["strategy", "tactical", "tactics", "rts", "4x", "gestion"] },
+  { label: "Simulation", weight: 1.18, keywords: ["simulation", "simulator", "management", "builder"] },
+  { label: "Plateforme", weight: 1.18, keywords: ["platformer", "platform", "metroidvania"] },
+  { label: "Puzzle", weight: 1.16, keywords: ["puzzle", "logic", "escape"] },
+  { label: "Sport", weight: 1.12, keywords: ["sports", "sport", "football", "basketball", "tennis"] },
+  { label: "Combat", weight: 1.08, keywords: ["fighting", "fight", "brawler", "beat em up", "beat-em-up"] },
+  { label: "Aventure", weight: 0.9, keywords: ["adventure", "action-adventure", "narrative", "story rich"] },
+  { label: "Indé", weight: 0.82, keywords: ["indie", "independent"] },
+  { label: "Action", weight: 0.58, keywords: ["action", "arcade"] },
+];
+
+function getGameGenreSignals(game = {}) {
+  const text = [
+    game.name,
+    game.slug,
+    ...(game.genreNames || []),
+    ...(game.tags || []).map((tag) => tag?.name || tag),
+  ]
+    .filter(Boolean)
+    .map((value) => normalizeIdentityText(String(value)))
+    .join(" ");
+
+  const scores = {};
+
+  GAME_GENRE_SIGNAL_RULES.forEach((rule) => {
+    const matched = rule.keywords.some((keyword) =>
+      text.includes(normalizeIdentityText(keyword))
+    );
+
+    if (matched) {
+      scores[rule.label] = Math.max(scores[rule.label] || 0, rule.weight);
+    }
+  });
+
+  const hasSpecificGenre = Object.entries(scores).some(
+    ([label, score]) => label !== "Action" && score >= 1
+  );
+
+  if (hasSpecificGenre && scores.Action) {
+    scores.Action = Math.min(scores.Action, 0.25);
+  }
+
+  if (!Object.keys(scores).length && game.genreNames?.[0]) {
+    scores[game.genreNames[0]] = 0.75;
+  }
+
+  return Object.entries(scores)
+    .sort((a, b) => b[1] - a[1])
+    .map(([label, weight]) => ({ label, weight }));
+}
+
 function getAdvancedStats(games) {
-  const finished = games.filter(g => g.status === "terminé");
+  const finished = games.filter((g) =>
+    normalizeIdentityText(g.status || "").includes("termin")
+  );
 
   const totalPlaytime = games.reduce((acc, g) => acc + (g.playtime || 0), 0);
 
@@ -325,8 +394,8 @@ function getAdvancedStats(games) {
   const platforms = {};
 
   games.forEach(g => {
-    g.genreNames?.forEach(genre => {
-      genres[genre] = (genres[genre] || 0) + 1;
+    getGameGenreSignals(g).forEach(({ label, weight }) => {
+      genres[label] = (genres[label] || 0) + weight;
     });
 
     g.platformNames?.forEach(p => {
@@ -336,6 +405,7 @@ function getAdvancedStats(games) {
 
   const topGenres = Object.entries(genres)
     .sort((a, b) => b[1] - a[1])
+    .map(([label, score]) => [label, Math.max(1, Math.round(score))])
     .slice(0, 3);
 
   const topPlatforms = Object.entries(platforms)
@@ -393,13 +463,14 @@ function getGenreChartData(games) {
   const genres = {};
 
   games.forEach((game) => {
-    (game.genreNames || []).forEach((genre) => {
-      genres[genre] = (genres[genre] || 0) + 1;
+    getGameGenreSignals(game).forEach(({ label, weight }) => {
+      genres[label] = (genres[label] || 0) + weight;
     });
   });
 
   return Object.entries(genres)
     .sort((a, b) => b[1] - a[1])
+    .map(([label, score]) => [label, Math.max(1, Math.round(score))])
     .slice(0, 5);
 }
 
@@ -720,31 +791,52 @@ function getPlayerProfile(games) {
     };
   }
 
-  if (topGenre === "RPG" || topGenre === "Role-Playing Games (RPG)") {
+  if (topGenre === "RPG") {
     return {
       title: "Cartographe d'univers",
       subtitle: "Ton profil se construit autour des mondes riches, des quetes et de la progression."
     };
   }
 
-  if (topGenre === "Adventure") {
+  if (topGenre === "Aventure") {
     return {
       title: "Voyageur de mondes",
       subtitle: "Tu avances par decouverte, ambiance et grands moments d'exploration."
     };
   }
 
-  if (topGenre === "Action") {
+  if (topGenre === "Shooter") {
     return {
-      title: "Instinct arcade",
-      subtitle: "Ton checkpoint prefere le rythme, l'impact et les sensations immediates."
+      title: "Précision tactique",
+      subtitle: "Ton profil aime la visée propre, la pression et les décisions rapides."
     };
   }
 
-  if (topGenre === "Shooter") {
+  if (topGenre === "Course") {
     return {
-      title: "Precision tactique",
-      subtitle: "Ton profil aime la visee propre, la pression et les decisions rapides."
+      title: "Pilote de trajectoires",
+      subtitle: "Ton univers aime la vitesse, la maîtrise et le feeling manette en main."
+    };
+  }
+
+  if (topGenre === "Horreur") {
+    return {
+      title: "Chasseur de tension",
+      subtitle: "Ton profil se nourrit d'ambiance, de survie et de moments qui restent."
+    };
+  }
+
+  if (topGenre === "Stratégie") {
+    return {
+      title: "Architecte tactique",
+      subtitle: "Tu aimes planifier, optimiser et gagner avant même que l'action explose."
+    };
+  }
+
+  if (topGenre === "Action" || topGenre === "Combat") {
+    return {
+      title: "Instinct arcade",
+      subtitle: "Ton checkpoint préfère le rythme, l'impact et les sensations immédiates."
     };
   }
 
@@ -2676,28 +2768,28 @@ const CONTEXTUAL_GAME_RATING_FIELDS = [
     label: "Open world",
     hint: "Monde ouvert, densité, exploration libre",
     topLabel: "Top open worlds",
-    keywords: ["open world", "adventure", "action-adventure", "rpg"],
+    keywords: ["open world", "sandbox", "action-adventure", "rpg"],
   },
   {
     key: "ratingGunplay",
     label: "Sensation de tir",
     hint: "Impact, feeling des armes, lisibilité des affrontements",
     topLabel: "Top shooters",
-    keywords: ["shooter", "fps", "tps", "first-person", "third-person"],
+    keywords: ["shooter", "fps", "tps", "first-person", "third-person", "gunplay"],
   },
   {
     key: "ratingDriving",
     label: "Conduite",
     hint: "Feeling, vitesse, précision, plaisir au volant",
     topLabel: "Top pilotage",
-    keywords: ["racing", "driving", "simulation", "sports"],
+    keywords: ["racing", "driving", "course", "pilotage", "motorsport", "rally"],
   },
   {
     key: "ratingCombat",
     label: "Combat",
     hint: "Rythme, précision, profondeur des affrontements",
     topLabel: "Top combats",
-    keywords: ["action", "fighting", "soulslike", "hack and slash", "rpg"],
+    keywords: ["fighting", "soulslike", "hack and slash", "beat em up", "beat-em-up", "brawler", "action rpg"],
   },
   {
     key: "ratingExploration",
@@ -2711,7 +2803,7 @@ const CONTEXTUAL_GAME_RATING_FIELDS = [
     label: "Challenge / boss",
     hint: "Difficulté, boss, tension et satisfaction",
     topLabel: "Top challenge",
-    keywords: ["soulslike", "action", "fighting", "platformer", "roguelike"],
+    keywords: ["soulslike", "fighting", "platformer", "roguelike", "boss", "hardcore"],
   },
   {
     key: "ratingMultiplayer",
@@ -2720,15 +2812,47 @@ const CONTEXTUAL_GAME_RATING_FIELDS = [
     topLabel: "Top coop / multi",
     keywords: ["multiplayer", "co-op", "coop", "online", "mmo"],
   },
+  {
+    key: "ratingStealth",
+    label: "Infiltration",
+    hint: "Discrétion, level design, tension et outils",
+    topLabel: "Top infiltration",
+    keywords: ["stealth", "infiltration", "tactical espionage", "assassin"],
+  },
+  {
+    key: "ratingPuzzle",
+    label: "Puzzle / réflexion",
+    hint: "Logique, lisibilité, satisfaction des énigmes",
+    topLabel: "Top puzzle",
+    keywords: ["puzzle", "logic", "escape", "detective"],
+  },
+  {
+    key: "ratingPlatforming",
+    label: "Plateforme",
+    hint: "Précision, rythme, level design et flow",
+    topLabel: "Top plateforme",
+    keywords: ["platformer", "platform", "metroidvania"],
+  },
+  {
+    key: "ratingHorror",
+    label: "Tension / survie",
+    hint: "Ambiance, vulnérabilité, peur et gestion des ressources",
+    topLabel: "Top horreur",
+    keywords: ["horror", "survival horror", "survie", "terror"],
+  },
 ];
 
 function getContextualRatingFields(game) {
   const text = getTopGameSearchText(game);
+  const genreLabels = getGameGenreSignals(game).map((genre) =>
+    normalizeIdentityText(genre.label)
+  );
 
   return CONTEXTUAL_GAME_RATING_FIELDS.filter((field) =>
-    field.keywords.some((keyword) =>
-      text.includes(normalizeIdentityText(keyword))
-    )
+    field.keywords.some((keyword) => {
+      const normalizedKeyword = normalizeIdentityText(keyword);
+      return text.includes(normalizedKeyword) || genreLabels.includes(normalizedKeyword);
+    })
   );
 }
 
@@ -2975,7 +3099,7 @@ const TOP5_ADVANCED_LISTS = [
     criterionLabel: "Combat",
     description: "Rythme, profondeur, lisibilité et satisfaction des duels.",
     scoreKey: "ratingCombat",
-    keywords: ["action", "fighting", "soulslike", "hack and slash", "rpg"],
+    keywords: ["fighting", "soulslike", "hack and slash", "beat em up", "beat-em-up", "brawler", "action rpg"],
   },
   {
     id: "exploration",
@@ -2993,7 +3117,7 @@ const TOP5_ADVANCED_LISTS = [
     criterionLabel: "Challenge / boss",
     description: "Difficulté, boss, tension et satisfaction après l'effort.",
     scoreKey: "ratingChallenge",
-    keywords: ["soulslike", "action", "fighting", "platformer", "roguelike"],
+    keywords: ["soulslike", "fighting", "platformer", "roguelike", "boss", "hardcore"],
   },
   {
     id: "multi",
@@ -3013,6 +3137,42 @@ const TOP5_ADVANCED_LISTS = [
     scoreKey: "rating",
     keywords: ["indie", "platformer", "puzzle", "metroidvania"],
   },
+  {
+    id: "infiltration",
+    label: "Infiltration",
+    title: "Top infiltration",
+    criterionLabel: "Infiltration",
+    description: "Discrétion, outils, tension et plaisir de passer sans bruit.",
+    scoreKey: "ratingStealth",
+    keywords: ["stealth", "infiltration", "tactical espionage", "assassin"],
+  },
+  {
+    id: "puzzle",
+    label: "Puzzle",
+    title: "Top puzzle",
+    criterionLabel: "Puzzle / réflexion",
+    description: "Logique, élégance des énigmes et satisfaction quand tout s'emboîte.",
+    scoreKey: "ratingPuzzle",
+    keywords: ["puzzle", "logic", "escape", "detective"],
+  },
+  {
+    id: "plateforme",
+    label: "Plateforme",
+    title: "Top plateforme",
+    criterionLabel: "Plateforme",
+    description: "Précision, rythme, level design et flow.",
+    scoreKey: "ratingPlatforming",
+    keywords: ["platformer", "platform", "metroidvania"],
+  },
+  {
+    id: "horreur",
+    label: "Horreur",
+    title: "Top horreur",
+    criterionLabel: "Tension / survie",
+    description: "Ambiance, vulnérabilité, peur et gestion des ressources.",
+    scoreKey: "ratingHorror",
+    keywords: ["horror", "survival horror", "survie", "terror"],
+  },
 ];
 
 const TOP5_CONTEXT_SCORE_FALLBACKS = {
@@ -3023,6 +3183,10 @@ const TOP5_CONTEXT_SCORE_FALLBACKS = {
   ratingExploration: "rating",
   ratingChallenge: "ratingGameplay",
   ratingMultiplayer: "ratingLongevity",
+  ratingStealth: "ratingGameplay",
+  ratingPuzzle: "ratingGameplay",
+  ratingPlatforming: "ratingGameplay",
+  ratingHorror: "ratingSound",
 };
 
 function getGameScore(game, scoreKey) {
