@@ -11,6 +11,7 @@
   --input-bg: rgba(12, 14, 24, 0.92);
   --muted-bg: rgba(255, 255, 255, 0.08);
   --accent: linear-gradient(135deg, #6d28d9, #2563eb);
+  --accent-solid: #6366f1;
   --accent-shadow: 0 0 24px rgba(79, 70, 229, 0.32);
   --text-main: #ffffff;
   --text-soft: #d1d5db;
@@ -87,6 +88,7 @@ body[data-theme="theme-indigo"] {
   --input-bg: rgba(12, 14, 24, 0.92);
   --muted-bg: rgba(255, 255, 255, 0.08);
   --accent: linear-gradient(135deg, #6d28d9, #2563eb);
+  --accent-solid: #6366f1;
   --accent-shadow: 0 0 24px rgba(79, 70, 229, 0.32);
   --genre-color: #c084fc;
 }
@@ -103,6 +105,7 @@ body[data-theme="theme-emerald"] {
   --input-bg: rgba(4, 28, 20, 0.94);
   --muted-bg: rgba(16, 185, 129, 0.14);
   --accent: linear-gradient(135deg, #059669, #22c55e);
+  --accent-solid: #22c55e;
   --accent-shadow: 0 0 26px rgba(16, 185, 129, 0.32);
   --genre-color: #86efac;
 }
@@ -119,6 +122,7 @@ body[data-theme="theme-crimson"] {
   --input-bg: rgba(32, 7, 13, 0.94);
   --muted-bg: rgba(244, 63, 94, 0.14);
   --accent: linear-gradient(135deg, #ef4444, #ec4899);
+  --accent-solid: #ef4444;
   --accent-shadow: 0 0 26px rgba(239, 68, 68, 0.3);
   --genre-color: #f9a8d4;
 }
@@ -135,6 +139,7 @@ body[data-theme="theme-graphite"] {
   --input-bg: rgba(18, 20, 28, 0.94);
   --muted-bg: rgba(255, 255, 255, 0.08);
   --accent: linear-gradient(135deg, #64748b, #e2e8f0);
+  --accent-solid: #94a3b8;
   --accent-shadow: 0 0 26px rgba(148, 163, 184, 0.24);
   --genre-color: #cbd5e1;
 }
@@ -150,6 +155,7 @@ body[data-theme="theme-retro"] {
   --input-bg: rgba(28, 22, 10, 0.96);
   --muted-bg: rgba(255, 204, 102, 0.12);
   --accent: linear-gradient(135deg, #f59e0b, #eab308);
+  --accent-solid: #f59e0b;
   --accent-shadow: 0 0 0 2px rgba(255, 204, 102, 0.12);
   --text-main: #fff4d6;
   --text-soft: #f2d59b;
@@ -169,6 +175,7 @@ body[data-theme="theme-cyberpunk"] {
   --input-bg: rgba(18, 6, 30, 0.96);
   --muted-bg: rgba(255, 0, 153, 0.1);
   --accent: linear-gradient(135deg, #ff0080, #00f5ff);
+  --accent-solid: #22d3ee;
   --accent-shadow: 0 0 26px rgba(255, 0, 153, 0.28);
   --text-main: #fdf4ff;
   --text-soft: #f3c9ff;
@@ -188,6 +195,7 @@ body[data-theme="theme-playstation"] {
   --input-bg: rgba(15, 23, 42, 0.88);
   --muted-bg: rgba(148, 163, 184, 0.14);
   --accent: linear-gradient(135deg, #2563eb, #60a5fa);
+  --accent-solid: #3b82f6;
   --accent-shadow: 0 0 26px rgba(37, 99, 235, 0.30);
   --text-main: #f8fafc;
   --text-soft: #cbd5e1;
@@ -207,6 +215,7 @@ body[data-theme="theme-xbox"] {
   --input-bg: rgba(5, 24, 12, 0.90);
   --muted-bg: rgba(34, 197, 94, 0.13);
   --accent: linear-gradient(135deg, #16a34a, #84cc16);
+  --accent-solid: #22c55e;
   --accent-shadow: 0 0 26px rgba(34, 197, 94, 0.28);
   --text-main: #f7fee7;
   --text-soft: #d9f99d;
@@ -226,6 +235,7 @@ body[data-theme="theme-steamdeck"] {
   --input-bg: rgba(23, 23, 23, 0.90);
   --muted-bg: rgba(255, 255, 255, 0.08);
   --accent: linear-gradient(135deg, #f97316, #0ea5e9);
+  --accent-solid: #f97316;
   --accent-shadow: 0 0 22px rgba(249, 115, 22, 0.22);
   --text-main: #fafafa;
   --text-soft: #d4d4d4;
@@ -20103,6 +20113,7 @@ body[data-theme="theme-indigo"] {
   --input-bg: rgba(7, 11, 30, 0.92);
   --muted-bg: rgba(125, 211, 252, 0.1);
   --accent: linear-gradient(135deg, #22d3ee, #6366f1 58%, #ec4899);
+  --accent-solid: #22d3ee;
   --accent-shadow: 0 0 28px rgba(34, 211, 238, 0.2);
   --text-main: #f8fbff;
   --text-soft: #cbd7ff;
@@ -20129,6 +20140,7 @@ body[data-theme="theme-emerald"] {
   --input-bg: rgba(3, 24, 20, 0.94);
   --muted-bg: rgba(45, 212, 191, 0.12);
   --accent: linear-gradient(135deg, #14b8a6, #22c55e 58%, #facc15);
+  --accent-solid: #14b8a6;
   --accent-shadow: 0 0 26px rgba(20, 184, 166, 0.26);
   --text-main: #f2fffb;
   --text-soft: #baf7e7;
@@ -20155,6 +20167,7 @@ body[data-theme="theme-crimson"] {
   --input-bg: rgba(31, 7, 13, 0.94);
   --muted-bg: rgba(251, 113, 133, 0.13);
   --accent: linear-gradient(135deg, #fb7185, #ef4444 56%, #38bdf8);
+  --accent-solid: #fb7185;
   --accent-shadow: 0 0 28px rgba(251, 113, 133, 0.24);
   --text-main: #fff7f8;
   --text-soft: #ffd1d8;
@@ -20181,6 +20194,7 @@ body[data-theme="theme-graphite"] {
   --input-bg: rgba(12, 17, 24, 0.94);
   --muted-bg: rgba(226, 232, 240, 0.08);
   --accent: linear-gradient(135deg, #e2e8f0, #38bdf8 58%, #fbbf24);
+  --accent-solid: #38bdf8;
   --accent-shadow: 0 0 24px rgba(56, 189, 248, 0.18);
   --text-main: #f8fafc;
   --text-soft: #cbd5e1;
@@ -20207,6 +20221,7 @@ body[data-theme="theme-retro"] {
   --input-bg: rgba(18, 16, 38, 0.94);
   --muted-bg: rgba(251, 146, 60, 0.12);
   --accent: linear-gradient(135deg, #fb923c, #f472b6 54%, #2dd4bf);
+  --accent-solid: #fb923c;
   --accent-shadow: 0 0 26px rgba(251, 146, 60, 0.22);
   --text-main: #fff8ed;
   --text-soft: #ffd7ad;
@@ -20233,6 +20248,7 @@ body[data-theme="theme-cyberpunk"] {
   --input-bg: rgba(12, 9, 30, 0.94);
   --muted-bg: rgba(236, 72, 153, 0.12);
   --accent: linear-gradient(135deg, #ec4899, #22d3ee 58%, #facc15);
+  --accent-solid: #ec4899;
   --accent-shadow: 0 0 28px rgba(236, 72, 153, 0.24);
   --text-main: #fff7ff;
   --text-soft: #f5c7ff;
@@ -20244,6 +20260,18 @@ body[data-theme="theme-cyberpunk"] {
   --checkpoint-splash-secondary: rgba(34, 211, 238, 0.9);
   --checkpoint-splash-glow: rgba(34, 211, 238, 0.38);
   --checkpoint-splash-fill: linear-gradient(90deg, #f0abfc 0%, #ec4899 42%, #22d3ee 78%, #facc15 100%);
+}
+
+body[data-theme="theme-playstation"] {
+  --accent-solid: #3b82f6;
+}
+
+body[data-theme="theme-xbox"] {
+  --accent-solid: #22c55e;
+}
+
+body[data-theme="theme-steamdeck"] {
+  --accent-solid: #f97316;
 }
 
 .option-pill.theme-theme-indigo.active {
@@ -22394,6 +22422,79 @@ body[data-header-mode="compact"] .results-container,
 body[data-header-mode="compact"] .hardware-view-container,
 body[data-header-mode="compact"] .progression-stack {
   margin-top: 10px !important;
+}
+
+/* Theme harmonization for independent controls and detail halos. */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.hardware-catalog-card.selected-catalog-version,
+.hardware-all-version-card.is-openable.active,
+.hardware-detail-panel:focus-within,
+.hardware-rating-card:focus-within,
+.rating-slider:focus-within {
+  outline: none !important;
+  border-color: color-mix(in srgb, var(--accent-solid) 70%, rgba(255, 255, 255, 0.22)) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent-solid) 46%, transparent),
+    0 0 24px color-mix(in srgb, var(--accent-solid) 26%, transparent) !important;
+}
+
+.option-pill.active,
+.hardware-type-switch button.active,
+.hardware-collection-filters button.active,
+.hardware-catalog-toggle.active,
+.tab-btn.active,
+.data-health-action:not(:disabled),
+.deals-refresh-btn,
+.hardware-rank-btn.active,
+.hardware-status-action.active {
+  background: var(--accent) !important;
+  box-shadow:
+    var(--accent-shadow),
+    0 0 0 1px color-mix(in srgb, var(--accent-solid) 38%, transparent) !important;
+}
+
+.hardware-type-switch button:hover,
+.hardware-collection-filters button:hover,
+.hardware-catalog-toggle:hover,
+.option-pill:hover {
+  border-color: color-mix(in srgb, var(--accent-solid) 42%, rgba(255, 255, 255, 0.12)) !important;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent-solid) 16%, rgba(255, 255, 255, 0.08)), rgba(255, 255, 255, 0.06)) !important;
+}
+
+.option-pill.active:hover,
+.hardware-type-switch button.active:hover,
+.hardware-collection-filters button.active:hover,
+.hardware-catalog-toggle.active:hover,
+.tab-btn.active:hover {
+  background: var(--accent) !important;
+}
+
+.hardware-back-btn:hover,
+.hardware-detail-back:hover,
+.hardware-selected-back:hover,
+.modal-close-btn:hover,
+.hardware-inline-close:hover {
+  background: var(--accent) !important;
+  box-shadow:
+    var(--accent-shadow),
+    0 0 0 1px color-mix(in srgb, var(--accent-solid) 42%, transparent) !important;
+}
+
+.hardware-detail-view .hardware-status-badge,
+.hardware-detail-view .hardware-meta-chip,
+.hardware-detail-view .criteria-tag,
+.hardware-detail-view .rating-badge {
+  border-color: color-mix(in srgb, var(--accent-solid) 26%, rgba(255, 255, 255, 0.08)) !important;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent-solid) 12%, transparent) !important;
+}
+
+.hardware-detail-view input[type="range"],
+.rating-slider input[type="range"] {
+  accent-color: var(--accent-solid);
 }
 
 @media (max-width: 768px) {
