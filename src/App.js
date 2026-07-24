@@ -3310,6 +3310,48 @@ function getNormalizedGameProgressPatch(game = {}) {
   return Object.keys(patch).length ? patch : null;
 }
 
+function getGameProgressState(game = {}) {
+  const status = getNormalizedStatus(game.status || "");
+  if (isGameFinishedStatus(game)) return "finished";
+  if (status.includes("cours") || game.progressStatus === "in_progress") return "inProgress";
+  if (status === "wishlist") return "wishlist";
+  return "collection";
+}
+
+function getGameProgressStateLabel(state) {
+  return (
+    {
+      finished: "Terminé",
+      inProgress: "En cours",
+      wishlist: "Wishlist",
+      collection: "Collection",
+    }[state] || "Collection"
+  );
+}
+
+function getGameIntegrityTargetLabel(game = {}, patch = {}) {
+  return getGameProgressStateLabel(
+    getGameProgressState({
+      ...game,
+      ...patch,
+    })
+  );
+}
+
+function getGameIntegrityChangeSummary(game = {}, patch = {}) {
+  const changes = [];
+  if (Object.prototype.hasOwnProperty.call(patch, "status")) {
+    changes.push(`statut ${game.status || "-"} -> ${patch.status}`);
+  }
+  if (Object.prototype.hasOwnProperty.call(patch, "progressStatus")) {
+    changes.push(`progression ${game.progressStatus || "not_started"} -> ${patch.progressStatus}`);
+  }
+  if (Object.prototype.hasOwnProperty.call(patch, "completed")) {
+    changes.push(`terminé ${game.completed ? "oui" : "non"} -> ${patch.completed ? "oui" : "non"}`);
+  }
+  return changes.join(" · ");
+}
+
 function getGameDataIntegrityIssues(games = []) {
   return games
     .map((game) => {
@@ -10980,6 +11022,7 @@ function OptionsTab({
 }) {
   const [helpTopic, setHelpTopic] = useState(null);
   const [isRepairingGameData, setIsRepairingGameData] = useState(false);
+  const [showIntegrityDetails, setShowIntegrityDetails] = useState(false);
   const themes = [
   { id: "theme-indigo", label: "Aurora Neon" },
   { id: "theme-playstation", label: "PS5 Premium" },
@@ -11010,13 +11053,17 @@ function OptionsTab({
     () => getGameDataIntegrityIssues(games),
     [games]
   );
-  const gameIntegrityPreview = gameIntegrityIssues.slice(0, 3);
+  const gameIntegrityPreview = gameIntegrityIssues.slice(
+    0,
+    showIntegrityDetails ? 8 : 3
+  );
   const handleRepairGameData = async () => {
     if (!gameIntegrityIssues.length || !onRepairGameData) return;
 
     setIsRepairingGameData(true);
     try {
       await onRepairGameData(gameIntegrityIssues);
+      setShowIntegrityDetails(false);
     } finally {
       setIsRepairingGameData(false);
     }
@@ -11422,20 +11469,41 @@ function OptionsTab({
 
             {gameIntegrityPreview.length > 0 && (
               <div className="data-health-preview">
-                {gameIntegrityPreview.map(({ game, reasons }) => (
+                {gameIntegrityPreview.map(({ game, patch, reasons }) => (
                   <div key={game.id || game.name} className="data-health-row">
-                    <span>{game.name}</span>
-                    <em>{reasons[0]}</em>
+                    <div className="data-health-game">
+                      <span>{game.name}</span>
+                      <em>{reasons[0]}</em>
+                    </div>
+                    <div className="data-health-flow">
+                      <b>{getGameProgressStateLabel(getGameProgressState(game))}</b>
+                      <i>-></i>
+                      <b>{getGameIntegrityTargetLabel(game, patch)}</b>
+                    </div>
+                    {showIntegrityDetails && (
+                      <small>{getGameIntegrityChangeSummary(game, patch)}</small>
+                    )}
                   </div>
                 ))}
                 {gameIntegrityIssues.length > gameIntegrityPreview.length && (
                   <div className="data-health-row muted">
-                    <span>
-                      +{gameIntegrityIssues.length - gameIntegrityPreview.length} autre
+                    <div className="data-health-game">
+                      <span>
+                        +{gameIntegrityIssues.length - gameIntegrityPreview.length} autre
                       {gameIntegrityIssues.length - gameIntegrityPreview.length > 1 ? "s" : ""}
-                    </span>
-                    <em>corrigé avec le même bouton</em>
+                      </span>
+                      <em>corrigé avec le même bouton</em>
+                    </div>
                   </div>
+                )}
+                {gameIntegrityIssues.length > 3 && (
+                  <button
+                    type="button"
+                    className="data-health-toggle"
+                    onClick={() => setShowIntegrityDetails((value) => !value)}
+                  >
+                    {showIntegrityDetails ? "Masquer le détail" : "Voir le détail"}
+                  </button>
                 )}
               </div>
             )}
