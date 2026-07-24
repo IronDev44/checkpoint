@@ -3084,6 +3084,45 @@ function getTopHardwareItems(hardware, type = "all", limit = 5) {
     .slice(0, limit);
 }
 
+function getHardwareCriterionScore(item, criterionKey = "average") {
+  if (criterionKey === "average") return getHardwareAverageRating(item);
+  return clampRating(item?.ratings?.[criterionKey]);
+}
+
+function getTopHardwareItemsForCriterion(
+  hardware,
+  type = "all",
+  criterionKey = "average",
+  limit = 5
+) {
+  return [...hardware]
+    .filter(
+      (item) =>
+        isTopEligibleHardware(item) &&
+        (type === "all" || item.type === type) &&
+        getHardwareCriterionScore(item, criterionKey) > 0
+    )
+    .sort((a, b) => {
+      const ratingDiff =
+        getHardwareCriterionScore(b, criterionKey) -
+        getHardwareCriterionScore(a, criterionKey);
+      if (ratingDiff !== 0) return ratingDiff;
+      return (a.name || "").localeCompare(b.name || "");
+    })
+    .slice(0, limit);
+}
+
+function getHardwareCriterionOptions(type = "all") {
+  if (type === "all") {
+    return [{ key: "average", label: "Moyenne globale", icon: "TOP" }];
+  }
+
+  return [
+    { key: "average", label: "Moyenne globale", icon: "TOP" },
+    ...getHardwareRatingFields(type),
+  ];
+}
+
 function getGameYear(game) {
   const year = Number(String(game?.released || "").slice(0, 4));
   return Number.isFinite(year) && year > 1970 ? year : null;
@@ -3181,13 +3220,30 @@ function Top5RankingPanel({
   );
 }
 
-function Top5HardwarePanel({ title, items, contextLabel = "", compact = false }) {
+function Top5HardwarePanel({
+  title,
+  items,
+  contextLabel = "",
+  compact = false,
+  criterion = null,
+}) {
+  const criterionKey = criterion?.key || "average";
+
   return (
-    <div className={`search-panel top5-panel ${compact ? "compact" : ""}`}>
+    <div
+      className={`search-panel top5-panel ${compact ? "compact" : ""} ${
+        criterion ? "advanced" : ""
+      }`}
+    >
       <div className="top5-section-head">
         <div>
           <h2 className="panel-title">{title}</h2>
           {contextLabel && <div className="option-value">{contextLabel}</div>}
+          {criterion && (
+            <div className="top5-criterion-chip">
+              Basé sur {criterion.label}
+            </div>
+          )}
         </div>
         <span className="top5-count">{items.length}/5</span>
       </div>
@@ -3210,9 +3266,12 @@ function Top5HardwarePanel({ title, items, contextLabel = "", compact = false })
               <div className="top5-main">
                 <div className="top5-name">{item.name}</div>
                 <div className="top5-meta">{getTopHardwareMeta(item)}</div>
+                {criterion && criterionKey !== "average" && (
+                  <div className="top5-score-source">Critère matériel</div>
+                )}
               </div>
               <div className="top5-score">
-                {formatRating10(getHardwareAverageRating(item), "-")}
+                {formatRating10(getHardwareCriterionScore(item, criterionKey), "-")}
               </div>
             </div>
           ))}
@@ -3433,6 +3492,8 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
   const [hardwareType, setHardwareType] = useState("all");
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("");
+  const [hardwareRankingMode, setHardwareRankingMode] = useState("global");
+  const [hardwareCriterionKey, setHardwareCriterionKey] = useState("average");
   const [selectedAdvancedTop, setSelectedAdvancedTop] = useState(
     TOP5_ADVANCED_LISTS[0].id
   );
@@ -3455,7 +3516,20 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
   const selectedHardwareGroup =
     TOP5_HARDWARE_GROUPS.find((group) => group.id === hardwareType) ||
     TOP5_HARDWARE_GROUPS[0];
-  const visibleHardware = getTopHardwareItems(scopedHardware, hardwareType, 5);
+  const hardwareCriterionOptions = getHardwareCriterionOptions(hardwareType);
+  const selectedHardwareCriterion =
+    hardwareCriterionOptions.find((option) => option.key === hardwareCriterionKey) ||
+    hardwareCriterionOptions[0];
+  const safeHardwareCriterionKey = selectedHardwareCriterion.key;
+  const visibleHardware =
+    hardwareRankingMode === "criteria"
+      ? getTopHardwareItemsForCriterion(
+          scopedHardware,
+          hardwareType,
+          safeHardwareCriterionKey,
+          5
+        )
+      : getTopHardwareItems(scopedHardware, hardwareType, 5);
   const contextLabel =
     mode === "advanced"
       ? `${selectedAdvancedList.label} - ${visibleAdvancedGames.length} jeux classes`
@@ -3465,12 +3539,24 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
         ? `${selectedGroup} - ${visibleGames.length} jeux`
         : "Choisis une categorie pour afficher son classement.";
   const hardwareContextLabel =
-    hardwareType === "all"
+    hardwareRankingMode === "criteria"
+      ? `${selectedHardwareGroup.label} - ${selectedHardwareCriterion.label}`
+      : hardwareType === "all"
       ? "Matériel noté, hors wishlist."
       : `${selectedHardwareGroup.label} - ${visibleHardware.length} matériel noté`;
   const selectedAdvancedRatedCount = visibleAdvancedGames.filter(
     (game) => clampRating(game[selectedAdvancedList.scoreKey]) > 0
   ).length;
+
+  useEffect(() => {
+    if (
+      !hardwareCriterionOptions.some(
+        (option) => option.key === hardwareCriterionKey
+      )
+    ) {
+      setHardwareCriterionKey("average");
+    }
+  }, [hardwareCriterionOptions, hardwareCriterionKey]);
 
   return (
     <div className="progression-stack top5-page">
@@ -3574,23 +3660,67 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
         )}
           </>
         ) : contentMode === "hardware" ? (
-          <div className="top5-group-picker hardware">
-            {TOP5_HARDWARE_GROUPS.map((group) => (
-              <button
-                key={group.id}
-                type="button"
-                className={hardwareType === group.id ? "active" : ""}
-                onClick={() => setHardwareType(group.id)}
-              >
-                <span>{group.label}</span>
-                <small>
-                  {group.id === "all"
-                    ? scopedHardware.length
-                    : scopedHardware.filter((item) => item.type === group.id).length}
-                </small>
-              </button>
-            ))}
-          </div>
+          <>
+            <div className="top5-mode-tabs hardware">
+              {[
+                { id: "global", label: "Global" },
+                { id: "criteria", label: "Critères" },
+              ].map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={hardwareRankingMode === item.id ? "active" : ""}
+                  onClick={() => setHardwareRankingMode(item.id)}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+
+            <div className="top5-group-picker hardware">
+              {TOP5_HARDWARE_GROUPS.map((group) => (
+                <button
+                  key={group.id}
+                  type="button"
+                  className={hardwareType === group.id ? "active" : ""}
+                  onClick={() => {
+                    setHardwareType(group.id);
+                    setHardwareCriterionKey("average");
+                  }}
+                >
+                  <span>{group.label}</span>
+                  <small>
+                    {group.id === "all"
+                      ? scopedHardware.length
+                      : scopedHardware.filter((item) => item.type === group.id).length}
+                  </small>
+                </button>
+              ))}
+            </div>
+
+            {hardwareRankingMode === "criteria" && hardwareType !== "all" && (
+              <div className="top5-group-picker top5-hardware-criteria-picker">
+                {hardwareCriterionOptions.map((criterion) => (
+                  <button
+                    key={criterion.key}
+                    type="button"
+                    className={safeHardwareCriterionKey === criterion.key ? "active" : ""}
+                    onClick={() => setHardwareCriterionKey(criterion.key)}
+                  >
+                    <span>{criterion.label}</span>
+                    <small>
+                      {getTopHardwareItemsForCriterion(
+                        scopedHardware,
+                        hardwareType,
+                        criterion.key,
+                        5
+                      ).length}
+                    </small>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         ) : null}
       </div>
 
@@ -3652,13 +3782,59 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
         </>
       ) : contentMode === "hardware" ? (
         <>
+          {hardwareRankingMode === "criteria" && hardwareType === "all" && (
+            <div className="search-panel top5-advanced-hero">
+              <div>
+                <span className="top5-advanced-kicker">Top matériel</span>
+                <h2 className="panel-title">Choisis un type de matériel</h2>
+                <div className="option-value">
+                  Les critères dépendent du type : manettes, casques, écrans, VR,
+                  souris, claviers...
+                </div>
+              </div>
+            </div>
+          )}
+
+          {hardwareRankingMode === "criteria" && hardwareType !== "all" && (
+            <div className="search-panel top5-advanced-hero">
+              <div>
+                <span className="top5-advanced-kicker">Top matériel</span>
+                <h2 className="panel-title">{selectedHardwareCriterion.label}</h2>
+                <div className="option-value">
+                  Classement {selectedHardwareGroup.label.toLowerCase()} basé sur ce
+                  critère de notation.
+                </div>
+              </div>
+
+              <div className="top5-advanced-stats">
+                <div>
+                  <strong>{visibleHardware.length}</strong>
+                  <span>candidats</span>
+                </div>
+                <div>
+                  <strong>{hardwareCriterionOptions.length - 1}</strong>
+                  <span>critères</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <Top5HardwarePanel
-            title={selectedHardwareGroup.title}
+            title={
+              hardwareRankingMode === "criteria" && hardwareType !== "all"
+                ? `Top ${selectedHardwareCriterion.label}`
+                : selectedHardwareGroup.title
+            }
             items={visibleHardware}
             contextLabel={hardwareContextLabel}
+            criterion={
+              hardwareRankingMode === "criteria" && hardwareType !== "all"
+                ? selectedHardwareCriterion
+                : null
+            }
           />
 
-          {hardwareType === "all" && (
+          {hardwareType === "all" && hardwareRankingMode === "global" && (
             <div className="top5-mini-grid">
               {TOP5_HARDWARE_GROUPS.filter((group) => group.id !== "all")
                 .slice(0, 4)

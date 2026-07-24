@@ -1789,6 +1789,10 @@ textarea {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.top5-mode-tabs.hardware {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .top5-content-tabs button,
 .top5-mode-tabs button,
 .top5-score-tabs button,
@@ -1841,7 +1845,16 @@ textarea {
   text-align: left;
 }
 
-.top5-group-picker.top5-advanced-picker small {
+.top5-group-picker.top5-hardware-criteria-picker button {
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 148px;
+  text-align: left;
+}
+
+.top5-group-picker.top5-advanced-picker small,
+.top5-group-picker.top5-hardware-criteria-picker small {
   min-width: 0;
   background: rgba(255,255,255,0.075);
   font-size: 10px;
@@ -2144,7 +2157,12 @@ textarea {
     grid-template-columns: 1fr;
   }
 
-  .top5-group-picker.top5-advanced-picker button {
+  .top5-group-picker.top5-hardware-criteria-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .top5-group-picker.top5-advanced-picker button,
+  .top5-group-picker.top5-hardware-criteria-picker button {
     min-width: 0;
   }
 
