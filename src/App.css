@@ -12856,6 +12856,10 @@ body {
 }
 
 .hardware-detail-score {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, auto);
+  align-items: center;
+  gap: 12px;
   margin: 10px 0 14px;
   padding: 12px 14px;
   border-radius: 16px;
@@ -12865,17 +12869,92 @@ body {
   border: 1px solid rgba(255,255,255,0.08);
 }
 
-.hardware-detail-score span {
+.hardware-detail-score-main span {
   display: block;
   font-size: 1.25rem;
   font-weight: 950;
 }
 
-.hardware-detail-score small {
+.hardware-detail-score-main small,
+.hardware-detail-score-progress small {
   display: block;
   margin-top: 2px;
   color: var(--text-soft);
   font-size: 0.76rem;
+}
+
+.hardware-detail-score-progress {
+  min-width: 120px;
+}
+
+.hardware-detail-score-progress strong {
+  display: block;
+  color: white;
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.hardware-detail-score-bar {
+  height: 5px;
+  margin-top: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.09);
+}
+
+.hardware-detail-score-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #5ee7ff);
+}
+
+.hardware-detail-insights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: -2px 0 12px;
+}
+
+.hardware-detail-insight {
+  min-width: 0;
+  padding: 11px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.045);
+}
+
+.hardware-detail-insight.strong {
+  border-color: color-mix(in srgb, var(--accent), transparent 62%);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent), transparent 84%), rgba(255,255,255,0.04));
+}
+
+.hardware-detail-insight span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hardware-detail-insight strong {
+  display: block;
+  margin-top: 5px;
+  color: white;
+  font-size: 0.86rem;
+  overflow-wrap: anywhere;
+}
+
+.hardware-detail-insight small {
+  display: inline-flex;
+  margin-top: 8px;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+  font-weight: 950;
 }
 
 .hardware-detail-profile {
@@ -13002,12 +13081,36 @@ body {
   border: 1px solid rgba(255,255,255,0.07);
 }
 
+.hardware-rating-row.rated {
+  border-color: color-mix(in srgb, var(--accent), transparent 68%);
+}
+
 .hardware-rating-label {
   display: flex;
   gap: 8px;
   align-items: center;
   margin-bottom: 8px;
   font-size: 0.9rem;
+}
+
+.hardware-rating-icon {
+  flex: 0 0 auto;
+}
+
+.hardware-rating-label strong {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.hardware-rating-label em {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.92);
+  font-size: 0.76rem;
+  font-style: normal;
+  font-weight: 950;
 }
 
 .hardware-pc-config-grid {
@@ -13045,6 +13148,11 @@ body {
   }
 
   .hardware-detail-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .hardware-detail-score,
+  .hardware-detail-insights {
     grid-template-columns: 1fr;
   }
 }
@@ -18811,9 +18919,9 @@ body[data-theme="theme-steamdeck"] {
 }
 
 .hardware-detail-score {
-  width: fit-content !important;
+  width: 100% !important;
   margin: 0 !important;
-  padding: 9px 11px !important;
+  padding: 12px !important;
   border-radius: 16px !important;
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--accent), transparent 78%), rgba(255, 255, 255, 0.05)) !important;
@@ -18865,7 +18973,9 @@ body[data-theme="theme-steamdeck"] {
 }
 
 .hardware-inline-detail-panel .hardware-rating-row {
-  padding: 10px 0 !important;
+  padding: 12px !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.04) !important;
 }
 
 .hardware-inline-detail-panel .hardware-pc-config-grid {

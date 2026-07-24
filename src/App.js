@@ -8285,6 +8285,19 @@ function HardwareDetailModal({
     { label: "Statut", value: getHardwareStatusLabel(item.status) },
   ].filter(Boolean);
   const highlightedFields = fields.slice(0, 3);
+  const ratedFields = fields
+    .map((field) => ({
+      ...field,
+      value: clampRating(item.ratings?.[field.key]),
+    }))
+    .filter((field) => field.value > 0)
+    .sort((a, b) => b.value - a.value);
+  const bestRatedField = ratedFields[0];
+  const weakestRatedField =
+    ratedFields.length > 1 ? ratedFields[ratedFields.length - 1] : null;
+  const ratingCompletion = fields.length
+    ? Math.round((ratedFields.length / fields.length) * 100)
+    : 0;
 
   return (
     <div className="hardware-inline-detail" ref={detailRef}>
@@ -8320,9 +8333,45 @@ function HardwareDetailModal({
           </div>
 
           <div className="hardware-detail-score">
-            <span>⭐ {formatRating10(averageRating, "Non noté")}</span>
-            <small>Moyenne critères</small>
+            <div className="hardware-detail-score-main">
+              <span>⭐ {formatRating10(averageRating, "Non noté")}</span>
+              <small>Moyenne critères</small>
+            </div>
+
+            <div className="hardware-detail-score-progress">
+              <strong>
+                {ratedFields.length}/{fields.length}
+              </strong>
+              <small>critères notés</small>
+              <div className="hardware-detail-score-bar">
+                <span style={{ width: `${ratingCompletion}%` }} />
+              </div>
+            </div>
           </div>
+
+          {ratedFields.length > 0 && (
+            <div className="hardware-detail-insights">
+              {bestRatedField && (
+                <div className="hardware-detail-insight strong">
+                  <span>Point fort</span>
+                  <strong>
+                    {bestRatedField.icon} {bestRatedField.label}
+                  </strong>
+                  <small>{formatRating10(bestRatedField.value, "-")}</small>
+                </div>
+              )}
+
+              {weakestRatedField && weakestRatedField.key !== bestRatedField?.key && (
+                <div className="hardware-detail-insight">
+                  <span>À surveiller</span>
+                  <strong>
+                    {weakestRatedField.icon} {weakestRatedField.label}
+                  </strong>
+                  <small>{formatRating10(weakestRatedField.value, "-")}</small>
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="hardware-detail-profile">
             <div className="hardware-detail-profile-head">
@@ -8442,21 +8491,29 @@ function HardwareDetailModal({
             <div className="modal-block-title">Notes détaillées</div>
 
             <div className="hardware-rating-list">
-              {fields.map((field) => (
-                <div key={field.key} className="hardware-rating-row">
-                  <div className="hardware-rating-label">
-                    <span>{field.icon}</span>
-                    <strong>{field.label}</strong>
-                  </div>
+              {fields.map((field) => {
+                const fieldRating = clampRating(item.ratings?.[field.key]);
 
-                  <RatingSlider
-                    rating={Number(item.ratings?.[field.key]) || 0}
-                    onRate={(value) =>
-                      onUpdateHardwareRating(item.id, field.key, value, item.type)
-                    }
-                  />
-                </div>
-              ))}
+                return (
+                  <div
+                    key={field.key}
+                    className={`hardware-rating-row ${fieldRating > 0 ? "rated" : ""}`}
+                  >
+                    <div className="hardware-rating-label">
+                      <span className="hardware-rating-icon">{field.icon}</span>
+                      <strong>{field.label}</strong>
+                      <em>{formatRating10(fieldRating, "À noter")}</em>
+                    </div>
+
+                    <RatingSlider
+                      rating={fieldRating}
+                      onRate={(value) =>
+                        onUpdateHardwareRating(item.id, field.key, value, item.type)
+                      }
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
 
