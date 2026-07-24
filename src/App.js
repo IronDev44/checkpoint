@@ -372,9 +372,7 @@ function getGameGenreSignals(game = {}) {
 }
 
 function getAdvancedStats(games) {
-  const finished = games.filter((g) =>
-    normalizeIdentityText(g.status || "").includes("termin")
-  );
+  const finished = games.filter(isGameFinishedStatus);
 
   const totalPlaytime = games.reduce((acc, g) => acc + (g.playtime || 0), 0);
 
@@ -888,11 +886,7 @@ function getPlayerProfile(games) {
 
 function getProfileInsights(games = [], hardware = [], badges = []) {
   const stats = getAdvancedStats(games);
-  const completedGames = games.filter((game) =>
-    ["termine", "completed"].includes(
-      normalizeIdentityText(game.status || "")
-    )
-  );
+  const completedGames = games.filter(isGameFinishedStatus);
   const ratedGames = games.filter((game) => getGameRating(game) > 0);
   const currentHardware = hardware.filter((item) => {
     const status = normalizeIdentityText(item.status || "");
@@ -1912,7 +1906,7 @@ function calculateBadgeStats(
 
   return {
     total: games.length,
-    finished: games.filter(g => g.status === "terminé").length,
+    finished: games.filter(isGameFinishedStatus).length,
     favorites: games.filter(g => g.favorite).length,
     reviews: games.filter(g => g.review && g.review.length > 10).length,
     hours: games.reduce((sum, g) => sum + (Number(g.playtime) || 0), 0),
@@ -3076,7 +3070,7 @@ function Top5Section({ title, games, scoreKey }) {
 }
 
 function Top5Tab({ games }) {
-  const scopedGames = games.filter((g) => g.status === "terminé" || g.status === "en cours");
+  const scopedGames = games.filter(isTopEligibleGame);
 
   return (
     <div className="progression-stack">
@@ -3280,18 +3274,23 @@ function isGameFinishedStatus(game = {}) {
   const status = getNormalizedStatus(game?.status || "");
   return (
     status.includes("termin") ||
-    status === "collection" ||
+    game?.completed === true ||
     game?.progressStatus === "completed"
   );
 }
 
+function isGameInCollection(game = {}) {
+  const status = getNormalizedStatus(game?.status || "");
+  return status === "collection" || isGameFinishedStatus(game);
+}
+
 function isTopFinishedGame(game) {
-  return getNormalizedStatus(game?.status).includes("termin");
+  return isGameFinishedStatus(game);
 }
 
 function isTopEligibleGame(game) {
   const status = getNormalizedStatus(game?.status);
-  return status.includes("termin") || status.includes("cours");
+  return isGameFinishedStatus(game) || status.includes("cours");
 }
 
 function formatTopScore(score, scoreKey = "rating") {
@@ -4665,9 +4664,7 @@ function GameDetailModal({
               </button>
 
               <button
-                className={`status-btn ${
-                  game.status === "collection" || game.status === "terminé" ? "active" : ""
-                }`}
+                className={`status-btn ${isGameInCollection(game) ? "active" : ""}`}
                 onClick={() => onSetStatus(game.id, "collection")}
                 type="button"
               >
@@ -4795,7 +4792,7 @@ function GameDetailModal({
                   key={option.id}
                   className={`choice-pill ${
                     (game.progressStatus ||
-                      (game.status === "terminé" ? "completed" : "not_started")) === option.id
+                      (isGameFinishedStatus(game) ? "completed" : "not_started")) === option.id
                       ? "active"
                       : ""
                   }`}
@@ -5131,7 +5128,7 @@ function LibrarySection({
   const renderGameCard = (game) => {
     const progressLabel = getProgressLabel(
       game.progressStatus ||
-        (game.status === "terminé" ? "completed" : "not_started")
+        (isGameFinishedStatus(game) ? "completed" : "not_started")
     );
 
     const playtimeLabel = getPlaytimeRangeLabel(game.playtimeRange);
@@ -5343,11 +5340,7 @@ function LibrarySection({
             </button>
 
             <button
-              className={`status-btn ${
-                game.status === "collection" || game.status === "terminé"
-                  ? "active"
-                  : ""
-              }`}
+              className={`status-btn ${isGameInCollection(game) ? "active" : ""}`}
               onClick={(e) => {
                 e.stopPropagation();
                 onSetStatus(game.id, "collection");
@@ -6220,7 +6213,7 @@ function SocialTab({
     badges,
     socialProfile.featuredBadgeId
   );
-  const finishedCount = games.filter((game) => game.status === "terminé").length;
+  const finishedCount = games.filter(isGameFinishedStatus).length;
   const avgRating = stats.avgRating ? stats.avgRating.toFixed(1) : "-";
   const shareUrl = getProfileShareUrl(socialProfile.handle);
   const ownPublicPreview = {
@@ -7802,11 +7795,7 @@ function ProfileTab({
     profileShowcase.hardwareHighlights.length > 0;
   const currentRank =
     [...RANKS].reverse().find((rank) => level >= rank.min) || RANKS[0];
-  const completedCount = games.filter((game) =>
-    ["termine", "completed"].includes(
-      normalizeIdentityText(game.status || "")
-    )
-  ).length;
+  const completedCount = games.filter(isGameFinishedStatus).length;
 
   return (
     <div className="progression-stack profile-tab">
@@ -8329,9 +8318,7 @@ function getDetectedGameSeries(games) {
   return Object.entries(groups)
     .filter(([, items]) => items.length >= 2)
     .map(([name, items]) => {
-      const finished = items.filter(
-        (g) => g.status === "terminé"
-      ).length;
+      const finished = items.filter(isGameFinishedStatus).length;
 
       const total = items.length;
 
@@ -8437,7 +8424,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
                   <div key={game.id} className="series-game-row">
                     <span>{game.name}</span>
                     <span>
-                      {game.progressStatus === "completed" || game.status === "terminé"
+                      {isGameFinishedStatus(game)
                         ? "✅ Terminé"
                         : game.status === "collection"
                         ? "Collection"
@@ -8638,7 +8625,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
                   <div key={game.id} className="series-game-row">
                     <span>{game.name}</span>
                     <span>
-                      {game.progressStatus === "completed" || game.status === "terminé"
+                      {isGameFinishedStatus(game)
                         ? "✅"
                         : "◌"}
                     </span>
@@ -12458,7 +12445,7 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
       : null,
     level,
     totalGames: games.length,
-    finishedGames: games.filter((game) => game.status === "terminé").length,
+    finishedGames: games.filter(isGameFinishedStatus).length,
     hardwareCount: currentHardware.length,
     averageRating: stats.avgRating ? Math.round(stats.avgRating * 10) / 10 : 0,
     setupPhotos: profileOverride.setupPhotos || [],
@@ -13190,9 +13177,7 @@ useEffect(() => {
     return 0;
   });
   const inProgressGames = filteredLibraryGames.filter((game) => game.status === "en cours");
-  const collectionGames = filteredLibraryGames.filter(
-  (game) => game.status === "collection" || game.status === "terminé"
-  );
+  const collectionGames = filteredLibraryGames.filter(isGameInCollection);
   const favoriteGames = filteredLibraryGames.filter((game) => game.favorite);
   const detailSourceGames = detailGameList.length ? detailGameList : games;
   const selectedDetailIndex = selectedGame
@@ -13276,14 +13261,16 @@ useEffect(() => {
         return false;
       }
 
+      const isFinished = isGameFinishedStatus(game);
+
       await addDoc(collection(db, "games"), {
         rawgId: game.rawgId || game.id || null,
         name: game.name,
-        completed: game.completed || game.status === "terminé" || false,
+        completed: game.completed || isFinished || false,
         rating: getGameRating(game),
         favorite: game.favorite || false,
         image: game.image || "",
-        status: game.status === "terminé" ? "collection" : game.status || "wishlist",
+        status: isFinished ? "collection" : game.status || "wishlist",
         released: game.released || "",
         platformNames: game.platformNames || [],
         genreNames: game.genreNames || [],
@@ -13641,9 +13628,22 @@ const setRating = (id, rating) => {
 
   const setStatus = async (id, status) => {
     try {
-      await updateDoc(doc(db, "games", id), { status });
+      const progressStatus =
+        status === "en cours"
+          ? "in_progress"
+          : isGameFinishedStatus({ status })
+            ? "completed"
+            : "not_started";
+      const completed = progressStatus === "completed";
+
+      await updateDoc(doc(db, "games", id), { status, progressStatus, completed });
       if (selectedGame?.id === id) {
-        setSelectedGame((prev) => ({ ...prev, status }));
+        setSelectedGame((prev) => ({
+          ...prev,
+          status,
+          progressStatus,
+          completed,
+        }));
       }
       if (["wishlist", "en cours", "collection"].includes(status)) {
         setLibraryView(status);
@@ -13655,18 +13655,28 @@ const setRating = (id, rating) => {
 
   const setProgressStatus = async (id, progressStatus) => {
   try {
+    const completed = progressStatus === "completed";
+    const currentGame = games.find((game) => game.id === id);
+    const status = completed
+      ? "collection"
+      : progressStatus === "in_progress"
+        ? "en cours"
+        : currentGame?.status === "wishlist"
+          ? "wishlist"
+          : "collection";
+
     await updateDoc(doc(db, "games", id), {
       progressStatus,
-      completed: progressStatus === "completed",
-      status: "collection",
+      completed,
+      status,
     });
 
     if (selectedGame?.id === id) {
       setSelectedGame((prev) => ({
         ...prev,
         progressStatus,
-        completed: progressStatus === "completed",
-        status: "collection",
+        completed,
+        status,
       }));
     }
 
@@ -13760,14 +13770,26 @@ const setPlayedPlatforms = async (id, platforms) => {
 
   const toggleCompleted = async (id, currentValue) => {
     try {
+      const completed = !currentValue;
+      const currentGame = games.find((game) => game.id === id);
+      const status =
+        completed || currentGame?.status === "terminé"
+          ? "collection"
+          : currentGame?.status || "collection";
+      const progressStatus = completed ? "completed" : "not_started";
+
       await updateDoc(doc(db, "games", id), {
-        completed: !currentValue,
+        completed,
+        progressStatus,
+        status,
       });
 
       if (selectedGame?.id === id) {
         setSelectedGame((prev) => ({
           ...prev,
-          completed: !currentValue,
+          completed,
+          progressStatus,
+          status,
         }));
       }
 
@@ -13954,7 +13976,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       total={games.length}
       wishlist={games.filter((g) => g.status === "wishlist").length}
       inProgress={games.filter((g) => g.status === "en cours").length}
-      finished={games.filter((g) => g.status === "terminé").length}
+      finished={games.filter(isGameFinishedStatus).length}
       favorites={games.filter((g) => g.favorite).length}
     />
 
@@ -13972,7 +13994,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
     <StatsBarCompact
       total={games.length}
-      finished={games.filter((g) => g.status === "terminé").length}
+      finished={games.filter(isGameFinishedStatus).length}
       favorites={games.filter((g) => g.favorite).length}
     />
   </>
