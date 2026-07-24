@@ -1947,7 +1947,20 @@ textarea {
 .top5-dashboard {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
+}
+
+.top5-control-block {
+  display: grid;
+  gap: 7px;
+}
+
+.top5-control-block > span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .top5-mode-tabs,
@@ -1962,10 +1975,10 @@ textarea {
 .top5-content-tabs,
 .top5-mode-tabs {
   display: grid;
-  padding: 4px;
+  padding: 3px;
   border: 1px solid var(--surface-border);
-  border-radius: var(--ui-radius-lg);
-  background: var(--surface-bg);
+  border-radius: 15px;
+  background: rgba(255,255,255,0.045);
 }
 
 .top5-content-tabs {
@@ -1985,18 +1998,19 @@ textarea {
 .top5-score-tabs button,
 .top5-group-picker button {
   border: 1px solid var(--surface-border);
-  border-radius: var(--ui-radius-md);
+  border-radius: 13px;
   background: rgba(255,255,255,0.045);
   color: var(--text-soft);
   cursor: pointer;
   font-weight: 900;
-  padding: 10px 12px;
+  padding: 9px 11px;
 }
 
 .top5-content-tabs button,
 .top5-mode-tabs button {
   border: 0;
   background: transparent;
+  min-height: 38px;
 }
 
 .top5-content-tabs button.active,
@@ -2074,6 +2088,11 @@ textarea {
     radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 22%, transparent), transparent 36%),
     linear-gradient(135deg, rgba(255,255,255,0.085), rgba(255,255,255,0.035)),
     var(--panel-bg);
+}
+
+.top5-inline-note {
+  border-style: dashed;
+  background: rgba(255,255,255,0.035);
 }
 
 .top5-advanced-kicker,
@@ -20800,9 +20819,13 @@ body[data-theme="theme-cyberpunk"] {
   }
 
   .top5-mode-tabs {
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 5px !important;
     padding: 3px !important;
+  }
+
+  .top5-mode-tabs.hardware {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
   .top5-score-tabs,
@@ -20814,11 +20837,19 @@ body[data-theme="theme-cyberpunk"] {
   .top5-mode-tabs button,
   .top5-score-tabs button,
   .top5-group-picker button {
-    min-height: 38px !important;
+    min-height: 36px !important;
     padding: 8px 7px !important;
     border-radius: 13px !important;
     font-size: 0.82rem !important;
     line-height: 1.1 !important;
+  }
+
+  .top5-control-block {
+    gap: 5px !important;
+  }
+
+  .top5-control-block > span {
+    font-size: 0.66rem !important;
   }
 
   .top5-list {
@@ -20827,24 +20858,24 @@ body[data-theme="theme-cyberpunk"] {
 
   .top5-page .top5-item {
     display: grid !important;
-    grid-template-columns: 32px 58px minmax(0, 1fr) auto !important;
+    grid-template-columns: 30px 54px minmax(0, 1fr) auto !important;
     align-items: center !important;
     gap: 8px !important;
     padding: 9px !important;
     border-radius: 14px !important;
-    min-height: 78px !important;
+    min-height: 74px !important;
   }
 
   .top5-page .top5-rank {
-    width: 32px !important;
-    height: 32px !important;
+    width: 30px !important;
+    height: 30px !important;
     border-radius: 10px !important;
     font-size: 0.92rem !important;
   }
 
   .top5-page .top5-thumb {
-    width: 58px !important;
-    height: 58px !important;
+    width: 54px !important;
+    height: 54px !important;
     border-radius: 12px !important;
     font-size: 0.72rem !important;
   }

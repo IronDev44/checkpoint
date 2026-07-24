@@ -3883,22 +3883,18 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
       : getTopHardwareItems(scopedHardware, hardwareType, 5);
   const contextLabel =
     mode === "advanced"
-      ? `${selectedAdvancedList.label} - ${visibleAdvancedGames.length} jeux classes`
+      ? `${selectedAdvancedList.label} - ${visibleAdvancedGames.length} jeux classés`
       : mode === "criteria"
-      ? "Jeux termines en priorite, puis jeux en cours notes si besoin."
+      ? "Jeux terminés en priorité, puis jeux en cours notés si besoin."
       : selectedGroup
         ? `${selectedGroup} - ${visibleGames.length} jeux`
-        : "Choisis une categorie pour afficher son classement.";
+        : "Choisis une catégorie pour afficher son classement.";
   const hardwareContextLabel =
     hardwareRankingMode === "criteria"
       ? `${selectedHardwareGroup.label} - ${selectedHardwareCriterion.label}`
       : hardwareType === "all"
       ? "Matériel noté, hors wishlist."
       : `${selectedHardwareGroup.label} - ${visibleHardware.length} matériel noté`;
-  const selectedAdvancedRatedCount = visibleAdvancedGames.filter(
-    (game) => clampRating(game[selectedAdvancedList.scoreKey]) > 0
-  ).length;
-
   useEffect(() => {
     if (
       !hardwareCriterionOptions.some(
@@ -3915,11 +3911,13 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
         <div>
           <h2 className="panel-title">Tes vrais Top 5</h2>
           <div className="option-value">
-            Classe tes jeux et ton matériel avec la même échelle de note.
+            Classe tes jeux, ton matériel, tes OST et tes GOTY sans mélanger les usages.
           </div>
         </div>
 
-        <div className="top5-content-tabs">
+        <div className="top5-control-block">
+          <span>Section</span>
+          <div className="top5-content-tabs">
           {[
             { id: "games", label: "Jeux" },
             { id: "hardware", label: "Matériel" },
@@ -3935,14 +3933,17 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
               {item.label}
             </button>
           ))}
+          </div>
         </div>
 
         {contentMode === "games" ? (
           <>
+        <div className="top5-control-block">
+          <span>Classement</span>
         <div className="top5-mode-tabs">
           {[
-            { id: "criteria", label: "Criteres" },
-            { id: "advanced", label: "Avances" },
+            { id: "criteria", label: "Notes" },
+            { id: "advanced", label: "Spécialisés" },
             { id: "platform", label: "Plateformes" },
             { id: "genre", label: "Genres" },
           ].map((item) => (
@@ -3956,8 +3957,11 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
             </button>
           ))}
         </div>
+        </div>
 
         {mode !== "advanced" && (
+          <div className="top5-control-block">
+            <span>Critère</span>
           <div className="top5-score-tabs">
             {TOP5_SCORE_OPTIONS.map((option) => (
               <button
@@ -3970,9 +3974,12 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
               </button>
             ))}
           </div>
+          </div>
         )}
 
         {mode === "advanced" && (
+          <div className="top5-control-block">
+            <span>Top spécialisé</span>
           <div className="top5-group-picker top5-advanced-picker">
             {TOP5_ADVANCED_LISTS.map((list) => (
               <button
@@ -3988,9 +3995,12 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
               </button>
             ))}
           </div>
+          </div>
         )}
 
         {mode !== "criteria" && mode !== "advanced" && (
+          <div className="top5-control-block">
+            <span>{mode === "platform" ? "Plateforme" : "Genre"}</span>
           <div className="top5-group-picker">
             {(mode === "platform" ? platformGroups : genreGroups).map((group) => (
               <button
@@ -4008,10 +4018,13 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
               </button>
             ))}
           </div>
+          </div>
         )}
           </>
         ) : contentMode === "hardware" ? (
           <>
+            <div className="top5-control-block">
+              <span>Classement</span>
             <div className="top5-mode-tabs hardware">
               {[
                 { id: "global", label: "Global" },
@@ -4027,7 +4040,10 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
                 </button>
               ))}
             </div>
+            </div>
 
+            <div className="top5-control-block">
+              <span>Type</span>
             <div className="top5-group-picker hardware">
               {TOP5_HARDWARE_GROUPS.map((group) => (
                 <button
@@ -4048,8 +4064,11 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
                 </button>
               ))}
             </div>
+            </div>
 
             {hardwareRankingMode === "criteria" && hardwareType !== "all" && (
+              <div className="top5-control-block">
+                <span>Critère matériel</span>
               <div className="top5-group-picker top5-hardware-criteria-picker">
                 {hardwareCriterionOptions.map((criterion) => (
                   <button
@@ -4070,6 +4089,7 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
                   </button>
                 ))}
               </div>
+              </div>
             )}
           </>
         ) : null}
@@ -4077,27 +4097,6 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
 
       {contentMode === "games" ? (
         <>
-          {mode === "advanced" && (
-            <div className="search-panel top5-advanced-hero">
-              <div>
-                <span className="top5-advanced-kicker">Top spécialisé</span>
-                <h2 className="panel-title">{selectedAdvancedList.title}</h2>
-                <div className="option-value">{selectedAdvancedList.description}</div>
-              </div>
-
-              <div className="top5-advanced-stats">
-                <div>
-                  <strong>{visibleAdvancedGames.length}</strong>
-                  <span>candidats</span>
-                </div>
-                <div>
-                  <strong>{selectedAdvancedRatedCount}</strong>
-                  <span>notes dédiées</span>
-                </div>
-              </div>
-            </div>
-          )}
-
           <Top5RankingPanel
             title={
               mode === "advanced"
@@ -4134,37 +4133,12 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
       ) : contentMode === "hardware" ? (
         <>
           {hardwareRankingMode === "criteria" && hardwareType === "all" && (
-            <div className="search-panel top5-advanced-hero">
+            <div className="search-panel top5-inline-note">
               <div>
-                <span className="top5-advanced-kicker">Top matériel</span>
                 <h2 className="panel-title">Choisis un type de matériel</h2>
                 <div className="option-value">
                   Les critères dépendent du type : manettes, casques, écrans, VR,
                   souris, claviers...
-                </div>
-              </div>
-            </div>
-          )}
-
-          {hardwareRankingMode === "criteria" && hardwareType !== "all" && (
-            <div className="search-panel top5-advanced-hero">
-              <div>
-                <span className="top5-advanced-kicker">Top matériel</span>
-                <h2 className="panel-title">{selectedHardwareCriterion.label}</h2>
-                <div className="option-value">
-                  Classement {selectedHardwareGroup.label.toLowerCase()} basé sur ce
-                  critère de notation.
-                </div>
-              </div>
-
-              <div className="top5-advanced-stats">
-                <div>
-                  <strong>{visibleHardware.length}</strong>
-                  <span>candidats</span>
-                </div>
-                <div>
-                  <strong>{hardwareCriterionOptions.length - 1}</strong>
-                  <span>critères</span>
                 </div>
               </div>
             </div>
