@@ -1438,7 +1438,6 @@ function getGameDetailedRatingSummary(game = {}) {
     ratedBaseFields,
     ratedContextualFields,
     bestField: rankedFields[0],
-    weakestField: rankedFields.length > 1 ? rankedFields[rankedFields.length - 1] : null,
     completion: baseFields.length
       ? Math.round((ratedBaseFields.length / baseFields.length) * 100)
       : 0,
@@ -2913,30 +2912,15 @@ function DetailedRatingsBlock({ game, onSetDetailedRating }) {
             {summary.ratedBaseFields.length}/{summary.baseFields.length}
           </strong>
         </div>
-
-        <div>
-          <span>Affinité du jeu</span>
-          <strong>{summary.contextualFields.length || "Standard"}</strong>
-        </div>
       </div>
 
-      {(summary.bestField || summary.weakestField) && (
+      {summary.bestField && (
         <div className="game-ratings-insights">
-          {summary.bestField && (
-            <div className="game-ratings-insight strong">
-              <span>Point fort</span>
-              <strong>{summary.bestField.label}</strong>
-              <small>{formatRating10(summary.bestField.value, "-")}</small>
-            </div>
-          )}
-
-          {summary.weakestField && summary.weakestField.key !== summary.bestField?.key && (
-            <div className="game-ratings-insight">
-              <span>À surveiller</span>
-              <strong>{summary.weakestField.label}</strong>
-              <small>{formatRating10(summary.weakestField.value, "-")}</small>
-            </div>
-          )}
+          <div className="game-ratings-insight strong">
+            <span>Point fort</span>
+            <strong>{summary.bestField.label}</strong>
+            <small>{formatRating10(summary.bestField.value, "-")}</small>
+          </div>
         </div>
       )}
 
@@ -2971,9 +2955,9 @@ function DetailedRatingsBlock({ game, onSetDetailedRating }) {
         <div className="contextual-ratings-block">
           <div className="contextual-ratings-head">
             <div>
-              <strong>Critères adaptés à ce jeu</strong>
+              <strong>Critères spécifiques</strong>
               <span>
-                Ces notes servent à affiner les Tops spécialisés sans alourdir tous les jeux.
+                Ces notes servent aux Tops spécialisés quand le jeu s'y prête.
               </span>
             </div>
             <small>
@@ -4478,9 +4462,7 @@ function GameDetailModal({
 
   const ratingSummary = getGameDetailedRatingSummary(game);
   const detailedAverage = averageDetailedRating(game);
-  const gameYear = game.released ? game.released.split("-")[0] : "";
-  const primaryPlatform =
-    game.playedPlatforms?.[0] || game.platformNames?.[0] || "Plateforme à choisir";
+  const hasSpecificCriteria = ratingSummary.contextualFields.length > 0;
 
   return (
     <div
@@ -4586,7 +4568,7 @@ function GameDetailModal({
             <div className="game-detail-score-main">
               <span>Note globale</span>
               <strong>{formatRating10(getGameRating(game), "À noter")}</strong>
-              <small>{gameYear || primaryPlatform}</small>
+              <small>Note principale</small>
             </div>
 
             <div className="game-detail-score-card">
@@ -4598,9 +4580,11 @@ function GameDetailModal({
             </div>
 
             <div className="game-detail-score-card">
-              <span>Critères adaptés</span>
+              <span>Critères spécifiques</span>
               <strong>{ratingSummary.contextualFields.length || "-"}</strong>
-              <small>{primaryPlatform}</small>
+              <small>
+                {hasSpecificCriteria ? "Détectés pour ce jeu" : "Aucun critère en plus"}
+              </small>
             </div>
           </div>
 
