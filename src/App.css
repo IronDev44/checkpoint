@@ -13,6 +13,10 @@
   --accent: linear-gradient(135deg, #6d28d9, #2563eb);
   --accent-solid: #6366f1;
   --accent-shadow: 0 0 24px rgba(79, 70, 229, 0.32);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(99, 102, 241, 0.26), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(34, 211, 238, 0.18), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(236, 72, 153, 0.11), transparent 34%);
   --text-main: #ffffff;
   --text-soft: #d1d5db;
   --text-muted: #9ca3af;
@@ -90,6 +94,10 @@ body[data-theme="theme-indigo"] {
   --accent: linear-gradient(135deg, #6d28d9, #2563eb);
   --accent-solid: #6366f1;
   --accent-shadow: 0 0 24px rgba(79, 70, 229, 0.32);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(99, 102, 241, 0.26), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(34, 211, 238, 0.18), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(236, 72, 153, 0.11), transparent 34%);
   --genre-color: #c084fc;
 }
 
@@ -107,6 +115,10 @@ body[data-theme="theme-emerald"] {
   --accent: linear-gradient(135deg, #059669, #22c55e);
   --accent-solid: #22c55e;
   --accent-shadow: 0 0 26px rgba(16, 185, 129, 0.32);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(20, 184, 166, 0.25), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(132, 204, 22, 0.18), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(250, 204, 21, 0.1), transparent 34%);
   --genre-color: #86efac;
 }
 
@@ -124,6 +136,10 @@ body[data-theme="theme-crimson"] {
   --accent: linear-gradient(135deg, #ef4444, #ec4899);
   --accent-solid: #ef4444;
   --accent-shadow: 0 0 26px rgba(239, 68, 68, 0.3);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(239, 68, 68, 0.26), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(236, 72, 153, 0.2), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(56, 189, 248, 0.1), transparent 34%);
   --genre-color: #f9a8d4;
 }
 
@@ -141,6 +157,10 @@ body[data-theme="theme-graphite"] {
   --accent: linear-gradient(135deg, #64748b, #e2e8f0);
   --accent-solid: #94a3b8;
   --accent-shadow: 0 0 26px rgba(148, 163, 184, 0.24);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(148, 163, 184, 0.18), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(56, 189, 248, 0.12), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(251, 191, 36, 0.08), transparent 34%);
   --genre-color: #cbd5e1;
 }
 
@@ -157,6 +177,10 @@ body[data-theme="theme-retro"] {
   --accent: linear-gradient(135deg, #f59e0b, #eab308);
   --accent-solid: #f59e0b;
   --accent-shadow: 0 0 0 2px rgba(255, 204, 102, 0.12);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(251, 146, 60, 0.22), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(244, 114, 182, 0.18), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(45, 212, 191, 0.12), transparent 34%);
   --text-main: #fff4d6;
   --text-soft: #f2d59b;
   --text-muted: #c7ab72;
@@ -177,6 +201,10 @@ body[data-theme="theme-cyberpunk"] {
   --accent: linear-gradient(135deg, #ff0080, #00f5ff);
   --accent-solid: #22d3ee;
   --accent-shadow: 0 0 26px rgba(255, 0, 153, 0.28);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(236, 72, 153, 0.26), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(34, 211, 238, 0.22), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(250, 204, 21, 0.1), transparent 34%);
   --text-main: #fdf4ff;
   --text-soft: #f3c9ff;
   --text-muted: #c792d9;
@@ -197,6 +225,10 @@ body[data-theme="theme-playstation"] {
   --accent: linear-gradient(135deg, #2563eb, #60a5fa);
   --accent-solid: #3b82f6;
   --accent-shadow: 0 0 26px rgba(37, 99, 235, 0.30);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(37, 99, 235, 0.24), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(96, 165, 250, 0.18), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(226, 232, 240, 0.08), transparent 34%);
   --text-main: #f8fafc;
   --text-soft: #cbd5e1;
   --text-muted: #94a3b8;
@@ -217,6 +249,10 @@ body[data-theme="theme-xbox"] {
   --accent: linear-gradient(135deg, #16a34a, #84cc16);
   --accent-solid: #22c55e;
   --accent-shadow: 0 0 26px rgba(34, 197, 94, 0.28);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(34, 197, 94, 0.24), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(132, 204, 22, 0.16), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(187, 247, 208, 0.08), transparent 34%);
   --text-main: #f7fee7;
   --text-soft: #d9f99d;
   --text-muted: #a7f3d0;
@@ -237,6 +273,10 @@ body[data-theme="theme-steamdeck"] {
   --accent: linear-gradient(135deg, #f97316, #0ea5e9);
   --accent-solid: #f97316;
   --accent-shadow: 0 0 22px rgba(249, 115, 22, 0.22);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(249, 115, 22, 0.18), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(14, 165, 233, 0.14), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(255, 255, 255, 0.06), transparent 34%);
   --text-main: #fafafa;
   --text-soft: #d4d4d4;
   --text-muted: #a3a3a3;
@@ -710,8 +750,9 @@ textarea {
 
 .xp-fill {
   height: 100%;
-  background: linear-gradient(90deg, #7c3aed, #22c55e);
+  background: var(--accent);
   transition: width 0.45s ease;
+  box-shadow: 0 0 18px color-mix(in srgb, var(--accent-solid) 42%, transparent);
 }
 
 .xp-bottom {
@@ -12634,9 +12675,7 @@ body {
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(circle at 22% 18%, rgba(96, 165, 250, 0.22), transparent 30%),
-    radial-gradient(circle at 82% 28%, rgba(168, 85, 247, 0.18), transparent 32%),
-    radial-gradient(circle at 52% 86%, rgba(34, 211, 238, 0.10), transparent 34%);
+    var(--theme-aurora);
   filter: blur(18px) saturate(1.08);
   opacity: 0.7;
   transform: scale(1.03);
@@ -20129,6 +20168,10 @@ body[data-theme="theme-indigo"] {
   --accent: linear-gradient(135deg, #22d3ee, #6366f1 58%, #ec4899);
   --accent-solid: #22d3ee;
   --accent-shadow: 0 0 28px rgba(34, 211, 238, 0.2);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(34, 211, 238, 0.22), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(99, 102, 241, 0.18), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(236, 72, 153, 0.12), transparent 34%);
   --text-main: #f8fbff;
   --text-soft: #cbd7ff;
   --text-muted: #95a3c7;
@@ -20156,6 +20199,10 @@ body[data-theme="theme-emerald"] {
   --accent: linear-gradient(135deg, #14b8a6, #22c55e 58%, #facc15);
   --accent-solid: #14b8a6;
   --accent-shadow: 0 0 26px rgba(20, 184, 166, 0.26);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(45, 212, 191, 0.24), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(34, 197, 94, 0.16), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(250, 204, 21, 0.1), transparent 34%);
   --text-main: #f2fffb;
   --text-soft: #baf7e7;
   --text-muted: #86c9bc;
@@ -20183,6 +20230,10 @@ body[data-theme="theme-crimson"] {
   --accent: linear-gradient(135deg, #fb7185, #ef4444 56%, #38bdf8);
   --accent-solid: #fb7185;
   --accent-shadow: 0 0 28px rgba(251, 113, 133, 0.24);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(251, 113, 133, 0.25), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(239, 68, 68, 0.18), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(56, 189, 248, 0.11), transparent 34%);
   --text-main: #fff7f8;
   --text-soft: #ffd1d8;
   --text-muted: #c99ba5;
@@ -20210,6 +20261,10 @@ body[data-theme="theme-graphite"] {
   --accent: linear-gradient(135deg, #e2e8f0, #38bdf8 58%, #fbbf24);
   --accent-solid: #38bdf8;
   --accent-shadow: 0 0 24px rgba(56, 189, 248, 0.18);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(226, 232, 240, 0.13), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(56, 189, 248, 0.12), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(251, 191, 36, 0.08), transparent 34%);
   --text-main: #f8fafc;
   --text-soft: #cbd5e1;
   --text-muted: #94a3b8;
@@ -20237,6 +20292,10 @@ body[data-theme="theme-retro"] {
   --accent: linear-gradient(135deg, #fb923c, #f472b6 54%, #2dd4bf);
   --accent-solid: #fb923c;
   --accent-shadow: 0 0 26px rgba(251, 146, 60, 0.22);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(251, 146, 60, 0.22), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(244, 114, 182, 0.16), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(45, 212, 191, 0.12), transparent 34%);
   --text-main: #fff8ed;
   --text-soft: #ffd7ad;
   --text-muted: #b9a9c9;
@@ -20264,6 +20323,10 @@ body[data-theme="theme-cyberpunk"] {
   --accent: linear-gradient(135deg, #ec4899, #22d3ee 58%, #facc15);
   --accent-solid: #ec4899;
   --accent-shadow: 0 0 28px rgba(236, 72, 153, 0.24);
+  --theme-aurora:
+    radial-gradient(circle at 20% 18%, rgba(236, 72, 153, 0.24), transparent 31%),
+    radial-gradient(circle at 82% 28%, rgba(34, 211, 238, 0.22), transparent 32%),
+    radial-gradient(circle at 52% 86%, rgba(250, 204, 21, 0.1), transparent 34%);
   --text-main: #fff7ff;
   --text-soft: #f5c7ff;
   --text-muted: #a7c7d9;
@@ -22436,6 +22499,45 @@ body[data-header-mode="compact"] .results-container,
 body[data-header-mode="compact"] .hardware-view-container,
 body[data-header-mode="compact"] .progression-stack {
   margin-top: 10px !important;
+}
+
+/* Theme-bound backgrounds and progress bars. */
+html,
+body,
+#root {
+  background: var(--bg-main) !important;
+}
+
+.app-shell::before {
+  background: var(--bg-main) !important;
+}
+
+.app-shell::after {
+  background: var(--theme-aurora) !important;
+}
+
+.xp-bar,
+.progress-bar,
+.console-xp-bar,
+.hardware-console-xp-bar,
+.badge-progress-bar,
+.checkpoint-goal-progress {
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.085), rgba(255,255,255,0.045)) !important;
+  border: 1px solid color-mix(in srgb, var(--accent-solid) 14%, rgba(255,255,255,0.06)) !important;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.34) !important;
+}
+
+.xp-fill,
+.progress-fill,
+.console-xp-fill,
+.hardware-console-xp-fill,
+.badge-progress-fill,
+.checkpoint-goal-progress > div {
+  background: var(--accent) !important;
+  box-shadow:
+    0 0 16px color-mix(in srgb, var(--accent-solid) 38%, transparent),
+    0 0 34px color-mix(in srgb, var(--accent-solid) 18%, transparent) !important;
 }
 
 /* Theme harmonization for independent controls and detail halos. */
