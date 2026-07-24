@@ -20794,62 +20794,85 @@ body[data-theme="theme-cyberpunk"] {
 
 @media (max-width: 700px) {
   .top5-page {
-    gap: 10px !important;
+    gap: 9px !important;
   }
 
   .top5-page .search-panel {
-    padding: 14px !important;
+    padding: 12px !important;
     border-radius: 16px !important;
   }
 
   .top5-page .panel-title {
-    font-size: 1.55rem !important;
+    font-size: 1.28rem !important;
     line-height: 1.08 !important;
   }
 
   .top5-page .option-value {
-    font-size: 0.9rem !important;
+    font-size: 0.82rem !important;
     line-height: 1.35 !important;
   }
 
-  .top5-content-tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 6px !important;
-    padding: 3px !important;
+  .top5-dashboard {
+    gap: 9px !important;
   }
 
-  .top5-mode-tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-    gap: 5px !important;
-    padding: 3px !important;
-  }
-
-  .top5-mode-tabs.hardware {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  }
-
+  .top5-content-tabs,
+  .top5-mode-tabs,
   .top5-score-tabs,
   .top5-group-picker {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
     gap: 6px !important;
+    padding: 1px 1px 3px !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  .top5-content-tabs::-webkit-scrollbar,
+  .top5-mode-tabs::-webkit-scrollbar,
+  .top5-score-tabs::-webkit-scrollbar,
+  .top5-group-picker::-webkit-scrollbar {
+    display: none;
+  }
+
+  .top5-content-tabs button,
+  .top5-mode-tabs button {
+    flex: 0 0 auto !important;
+    min-width: 76px !important;
+  }
+
+  .top5-score-tabs button,
+  .top5-group-picker button {
+    flex: 0 0 auto !important;
+    min-width: 88px !important;
+  }
+
+  .top5-group-picker {
+    max-height: none !important;
+    padding-right: 0 !important;
   }
 
   .top5-content-tabs button,
   .top5-mode-tabs button,
   .top5-score-tabs button,
   .top5-group-picker button {
-    min-height: 36px !important;
-    padding: 8px 7px !important;
-    border-radius: 13px !important;
-    font-size: 0.82rem !important;
+    min-height: 32px !important;
+    padding: 7px 9px !important;
+    border-radius: 999px !important;
+    font-size: 0.76rem !important;
     line-height: 1.1 !important;
   }
 
   .top5-control-block {
-    gap: 5px !important;
+    gap: 4px !important;
   }
 
   .top5-control-block > span {
-    font-size: 0.66rem !important;
+    font-size: 0.62rem !important;
   }
 
   .top5-list {
@@ -20904,6 +20927,26 @@ body[data-theme="theme-cyberpunk"] {
   .top5-count {
     padding: 6px 8px !important;
     font-size: 0.75rem !important;
+  }
+
+  .top5-page .empty-state {
+    padding: 14px 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .top5-page .empty-state-icon {
+    font-size: 20px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .top5-page .empty-state-title {
+    margin-bottom: 4px !important;
+    font-size: 0.92rem !important;
+  }
+
+  .top5-page .empty-state-subtitle {
+    font-size: 0.78rem !important;
+    line-height: 1.3 !important;
   }
 
   .ost-top-actions {

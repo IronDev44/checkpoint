@@ -3094,7 +3094,7 @@ const TOP5_SCORE_OPTIONS = [
   { id: "ratingGraphics", label: "Graphismes", title: "Top 5 graphismes" },
   { id: "ratingStory", label: "Histoire", title: "Top 5 histoire" },
   { id: "ratingSound", label: "Audio", title: "Top 5 audio" },
-  { id: "ratingLongevity", label: "Duree de vie", title: "Top 5 duree de vie" },
+  { id: "ratingLongevity", label: "Durée de vie", title: "Top 5 durée de vie" },
 ];
 
 const TOP5_HARDWARE_GROUPS = [
@@ -3106,7 +3106,7 @@ const TOP5_HARDWARE_GROUPS = [
   { id: "vr", label: "VR", title: "Top 5 VR" },
   { id: "mouse", label: "Souris", title: "Top 5 souris" },
   { id: "keyboard", label: "Claviers", title: "Top 5 claviers" },
-  { id: "display", label: "Ecrans / TV", title: "Top 5 écrans / TV" },
+  { id: "display", label: "Écrans / TV", title: "Top 5 écrans / TV" },
 ];
 
 const TOP5_ADVANCED_LISTS = [
@@ -3535,7 +3535,7 @@ function Top5RankingPanel({
       {sorted.length === 0 ? (
         <EmptyState
           title="Pas assez de notes"
-          subtitle="Ajoute des notes sur les jeux de cette selection."
+          subtitle="Ajoute des notes sur les jeux de cette sélection."
         />
       ) : (
         <div className="top5-list">
