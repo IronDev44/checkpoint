@@ -11448,107 +11448,131 @@ function OptionsTab({
             <p>Ce qui sort de ta bibliothèque personnelle : profil public, notes et promos.</p>
           </div>
 
-        <div className="option-section">
-          <SectionTitle title="Profil public" help="publicProfile" />
+          <div className="option-section option-section-split">
+            <div className="option-setting-card">
+              <div>
+                <SectionTitle title="Profil public" help="publicProfile" />
+                <span>Choisis si ton profil peut être partagé ou reste seulement visible par toi.</span>
+              </div>
+              <div className="option-pill-grid two startup-primary">
+                <button
+                  type="button"
+                  className={`option-pill ${socialProfile.visibility !== "public" ? "active" : ""}`}
+                  onClick={() => onProfileVisibilityChange("prive")}
+                >
+                  Privé
+                </button>
+                <button
+                  type="button"
+                  className={`option-pill ${socialProfile.visibility === "public" ? "active" : ""}`}
+                  onClick={() => onProfileVisibilityChange("public")}
+                >
+                  Public
+                </button>
+              </div>
+            </div>
 
-          <div className="option-pill-grid two">
-            <button
-              type="button"
-              className={`option-pill ${socialProfile.visibility !== "public" ? "active" : ""}`}
-              onClick={() => onProfileVisibilityChange("prive")}
-            >
-              Privé
-            </button>
-            <button
-              type="button"
-              className={`option-pill ${socialProfile.visibility === "public" ? "active" : ""}`}
-              onClick={() => onProfileVisibilityChange("public")}
-            >
-              Public
-            </button>
+            <div className="option-setting-card">
+              <div>
+                <strong>Sections visibles</strong>
+                <span>Active uniquement les blocs que tu veux montrer dans l'aperçu public.</span>
+              </div>
+              <div className="option-pill-grid compact public-section-grid">
+                {[
+                  ["photos", "Photos"],
+                  ["essential", "Essentiel"],
+                  ["identityGames", "Jeux fondateurs"],
+                  ["hardware", "Matériel"],
+                  ["activity", "Activité"],
+                ].map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`option-pill ${publicSections[id] ? "active" : ""}`}
+                    onClick={() => updatePublicSection(id, !publicSections[id])}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          <div className="option-pill-grid option-subgrid">
-            {[
-              ["photos", "Photos"],
-              ["essential", "Essentiel"],
-              ["identityGames", "Jeux fondateurs"],
-              ["hardware", "Matériel"],
-              ["activity", "Activité"],
-            ].map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                className={`option-pill ${publicSections[id] ? "active" : ""}`}
-                onClick={() => updatePublicSection(id, !publicSections[id])}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="option-section">
-          <SectionTitle title="Notation" help="rating" />
-
-          <div className="option-pill-grid three">
-            <button
-              type="button"
-              className={`option-pill ${appOptions.ratingDisplay === "number" ? "active" : ""}`}
-              onClick={() => onOptionChange("ratingDisplay", "number")}
-            >
-              8.5/10
-            </button>
-            <button
-              type="button"
-              className={`option-pill ${appOptions.ratingDisplay === "stars" ? "active" : ""}`}
-              onClick={() => onOptionChange("ratingDisplay", "stars")}
-            >
-              Étoiles
-            </button>
-            <button
-              type="button"
-              className={`option-pill ${appOptions.ratingDisplay === "compact" ? "active" : ""}`}
-              onClick={() => onOptionChange("ratingDisplay", "compact")}
-            >
-              Compact
-            </button>
-          </div>
-        </div>
-
-        <div className="option-section">
-          <SectionTitle title="Promos" help="deals" />
-
-          <div className="option-pill-grid three">
-            {["FR", "EU", "US"].map((region) => (
-              <button
-                key={region}
-                type="button"
-                className={`option-pill ${appOptions.dealRegion === region ? "active" : ""}`}
-                onClick={() => onOptionChange("dealRegion", region)}
-              >
-                {region}
-              </button>
-            ))}
+          <div className="option-section option-section-split">
+            <div className="option-setting-card">
+              <div>
+                <SectionTitle title="Notation" help="rating" />
+                <span>Définis comment les notes sont affichées dans les cartes et les tops.</span>
+              </div>
+              <div className="option-pill-grid three compact rating-display-grid">
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.ratingDisplay === "number" ? "active" : ""}`}
+                  onClick={() => onOptionChange("ratingDisplay", "number")}
+                >
+                  8.5/10
+                </button>
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.ratingDisplay === "stars" ? "active" : ""}`}
+                  onClick={() => onOptionChange("ratingDisplay", "stars")}
+                >
+                  Étoiles
+                </button>
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.ratingDisplay === "compact" ? "active" : ""}`}
+                  onClick={() => onOptionChange("ratingDisplay", "compact")}
+                >
+                  Compact
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="option-pill-grid three option-subgrid">
-            {[
-              ["steam", "Steam"],
-              ["epic", "Epic"],
-              ["psn", "PSN"],
-            ].map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                className={`option-pill ${dealSources[id] ? "active" : ""}`}
-                onClick={() => updateDealSource(id, !dealSources[id])}
-              >
-                {label}
-              </button>
-            ))}
+          <div className="option-section option-section-split">
+            <div className="option-setting-card">
+              <div>
+                <SectionTitle title="Promos" help="deals" />
+                <span>Choisis la région utilisée pour récupérer les prix et offres affichées.</span>
+              </div>
+              <div className="option-pill-grid three compact deal-region-grid">
+                {["FR", "EU", "US"].map((region) => (
+                  <button
+                    key={region}
+                    type="button"
+                    className={`option-pill ${appOptions.dealRegion === region ? "active" : ""}`}
+                    onClick={() => onOptionChange("dealRegion", region)}
+                  >
+                    {region}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="option-setting-card">
+              <div>
+                <strong>Sources des promos</strong>
+                <span>Garde uniquement les boutiques que tu veux voir dans l'onglet Promos.</span>
+              </div>
+              <div className="option-pill-grid three compact deal-source-grid">
+                {[
+                  ["steam", "Steam"],
+                  ["epic", "Epic"],
+                  ["psn", "PSN"],
+                ].map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`option-pill ${dealSources[id] ? "active" : ""}`}
+                    onClick={() => updateDealSource(id, !dealSources[id])}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
         </div>
 
         <div className="options-group">
@@ -11557,8 +11581,12 @@ function OptionsTab({
             <p>Sauvegarde, import et contrôle de cohérence de ta bibliothèque.</p>
           </div>
 
-        <div className="option-section">
-          <SectionTitle title="Données" help="data" />
+          <div className="option-section">
+            <div className="option-setting-card option-setting-card-featured">
+              <div>
+                <SectionTitle title="Données" help="data" />
+                <span>Contrôle la cohérence de la bibliothèque et prépare les sauvegardes.</span>
+              </div>
 
           <div
             className={`data-health-card ${
@@ -11631,24 +11659,45 @@ function OptionsTab({
               </div>
             )}
           </div>
+            </div>
 
-          <div className="option-pill-grid three">
-            <button type="button" className="option-pill" onClick={onExportBackup}>
-              Exporter
-            </button>
-            <label className="option-pill option-file-pill">
-              Importer
-              <input
-                type="file"
-                accept="application/json"
-                onChange={onImportBackup}
-              />
-            </label>
-            <button type="button" className="option-pill" onClick={onResetOptions}>
-              Reset options
-            </button>
+            <div className="option-section-split">
+              <div className="option-setting-card">
+                <div>
+                  <strong>Sauvegarde locale</strong>
+                  <span>Exporte un fichier JSON avec tes données pour le garder de côté.</span>
+                </div>
+                <button type="button" className="option-pill option-wide-action" onClick={onExportBackup}>
+                  Exporter
+                </button>
+              </div>
+
+              <div className="option-setting-card">
+                <div>
+                  <strong>Restaurer</strong>
+                  <span>Importe une sauvegarde JSON existante dans l'application.</span>
+                </div>
+                <label className="option-pill option-file-pill option-wide-action">
+                  Importer
+                  <input
+                    type="file"
+                    accept="application/json"
+                    onChange={onImportBackup}
+                  />
+                </label>
+              </div>
+
+              <div className="option-setting-card option-setting-card-danger">
+                <div>
+                  <strong>Réinitialiser les options</strong>
+                  <span>Remet uniquement les préférences de l'app à leur état par défaut.</span>
+                </div>
+                <button type="button" className="option-pill option-wide-action" onClick={onResetOptions}>
+                  Reset options
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
         </div>
       </div>
 

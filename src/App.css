@@ -11592,6 +11592,16 @@ html body[data-theme="theme-indigo"] {
   gap: 8px;
 }
 
+.option-pill-grid.public-section-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.option-pill-grid.rating-display-grid,
+.option-pill-grid.deal-region-grid,
+.option-pill-grid.deal-source-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .option-pill {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
@@ -11622,6 +11632,20 @@ html body[data-theme="theme-indigo"] {
 
 .option-setting-card + .option-setting-card {
   margin-top: 10px;
+}
+
+.option-section-split > .option-setting-card + .option-setting-card {
+  margin-top: 0;
+}
+
+.option-setting-card-featured {
+  background:
+    radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--genre-color), transparent 78%), transparent 34%),
+    rgba(0, 0, 0, 0.13);
+}
+
+.option-setting-card-danger {
+  border-color: rgba(255, 120, 120, 0.16);
 }
 
 .option-setting-card strong {
@@ -11662,6 +11686,21 @@ html body[data-theme="theme-indigo"] {
   padding: 9px 8px;
   border-radius: 13px;
   font-size: 0.78rem;
+}
+
+.public-section-grid .option-pill,
+.rating-display-grid .option-pill,
+.deal-region-grid .option-pill,
+.deal-source-grid .option-pill {
+  min-height: 38px;
+  padding: 9px 8px;
+  border-radius: 13px;
+  font-size: 0.8rem;
+}
+
+.option-wide-action {
+  width: 100%;
+  min-height: 46px;
 }
 
 .option-file-pill {
@@ -12005,6 +12044,17 @@ body[data-background-motion="off"] .background-particles span {
 
   .options-tab .option-pill-grid.startup-target-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .options-tab .option-pill-grid.public-section-grid,
+  .options-tab .option-pill-grid.rating-display-grid,
+  .options-tab .option-pill-grid.deal-region-grid,
+  .options-tab .option-pill-grid.deal-source-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .options-tab .option-pill-grid.deal-region-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
