@@ -3494,6 +3494,78 @@ function getGameOfYearYears(games) {
     .sort((a, b) => b - a);
 }
 
+function serializeShowcaseGame(game, scoreKey = "rating") {
+  if (!game) return null;
+
+  return {
+    id: game.id,
+    name: game.name,
+    image: game.image || "",
+    score: getGameScore(game, scoreKey),
+    meta: getTopGameMeta(game),
+  };
+}
+
+function getProfileShowcase(games = [], hardware = []) {
+  const topScores = TOP5_SCORE_OPTIONS.map((option) => {
+    const game = getTopGamesForScore(games, option.id, 1)[0];
+
+    return game
+      ? {
+          key: option.id,
+          label: option.label,
+          game: serializeShowcaseGame(game, option.id),
+        }
+      : null;
+  })
+    .filter(Boolean)
+    .slice(0, 6);
+
+  const specializedTops = TOP5_ADVANCED_LISTS.map((list) => {
+    const game = getTopAdvancedGames(games, list)[0];
+
+    return game
+      ? {
+          key: list.scoreKey,
+          label: list.label,
+          criterion: list.criterionLabel,
+          game: serializeShowcaseGame(game, list.scoreKey),
+        }
+      : null;
+  })
+    .filter(Boolean)
+    .slice(0, 4);
+
+  const gotyHighlights = games
+    .filter((game) => Number(game.gotyYear) > 0)
+    .sort((a, b) => Number(b.gotyYear) - Number(a.gotyYear))
+    .slice(0, 3)
+    .map((game) => ({
+      year: Number(game.gotyYear),
+      game: serializeShowcaseGame(game, "rating"),
+    }));
+
+  const hardwareHighlights = getTopHardwareItems(
+    getCurrentOwnedHardware(hardware),
+    "all",
+    3
+  ).map((item) => ({
+    id: item.id,
+    name: item.name,
+    image: item.image || "",
+    type: item.type || "",
+    label: getHardwareTypeLabel(item.type),
+    score: getHardwareAverageRating(item),
+  }));
+
+  return {
+    topScores,
+    specializedTops,
+    gotyHighlights,
+    hardwareHighlights,
+  };
+}
+
 function Top5RankingPanel({
   title,
   games,
@@ -5785,6 +5857,16 @@ function PublicProfilePreview({
     ...DEFAULT_PUBLIC_SECTIONS,
     ...(profile.publicSections || {}),
   };
+  const profileShowcase = profile.showcase || {
+    topScores: (profile.essentialTops || []).map((section) => ({
+      key: section.key,
+      label: section.label,
+      game: section.game,
+    })),
+    specializedTops: [],
+    gotyHighlights: [],
+    hardwareHighlights: [],
+  };
 
   return (
     <div className="search-panel social-public-profile">
@@ -5844,39 +5926,21 @@ function PublicProfilePreview({
         </div>
       )}
 
-      {publicSections.essential && (profile.identityTitle || profile.essentialTops?.length > 0) && (
+      {publicSections.essential &&
+        (profile.identityTitle ||
+          profileShowcase.topScores?.length > 0 ||
+          profileShowcase.specializedTops?.length > 0 ||
+          profileShowcase.gotyHighlights?.length > 0 ||
+          profileShowcase.hardwareHighlights?.length > 0) && (
         <div className="social-public-mini-section">
-          <strong>Essentiel</strong>
-          <div className="social-essential-grid">
-            {profile.identityTitle && (
-              <div className="social-essential-card signature">
-                <span>Signature</span>
-                <strong>{profile.identityTitle.title}</strong>
-                <p>{profile.identityTitle.subtitle}</p>
-              </div>
-            )}
-
-            {profile.essentialTops?.map((section) => (
-              <div key={section.key} className="social-essential-card">
-                <span>Top {section.label}</span>
-                <strong>{section.game.name}</strong>
-                <p>{formatTopScore(section.game.score, section.key)}</p>
-              </div>
-            ))}
-          </div>
+          <strong>Vitrine Checkpoint</strong>
+          <ProfileShowcase showcase={profileShowcase} identityTitle={profile.identityTitle} />
         </div>
       )}
 
       {publicSections.identityGames && profile.identityGames?.length > 0 && (
         <div className="social-public-mini-section">
           <strong>Mes 3 jeux fondateurs</strong>
-          {profile.identityTitle && (
-            <div className="social-identity-title-card">
-              <span>Signature de joueur</span>
-              <strong>{profile.identityTitle.title}</strong>
-              <p>{profile.identityTitle.subtitle}</p>
-            </div>
-          )}
           <div className="social-identity-games">
             {profile.identityGames.map((game, index) => (
               <div key={game.id || game.name} className="social-identity-game">
@@ -5998,6 +6062,113 @@ function PublicProfilePreview({
   );
 }
 
+function ProfileShowcase({ showcase, identityTitle = null }) {
+  const hasTopScores = showcase?.topScores?.length > 0;
+  const hasSpecialized = showcase?.specializedTops?.length > 0;
+  const hasGoty = showcase?.gotyHighlights?.length > 0;
+  const hasHardware = showcase?.hardwareHighlights?.length > 0;
+
+  if (!identityTitle && !hasTopScores && !hasSpecialized && !hasGoty && !hasHardware) {
+    return null;
+  }
+
+  return (
+    <div className="profile-showcase">
+      {identityTitle && (
+        <div className="profile-showcase-signature">
+          <span>Signature joueur</span>
+          <strong>{identityTitle.title}</strong>
+          <p>{identityTitle.subtitle}</p>
+        </div>
+      )}
+
+      {hasTopScores && (
+        <div className="profile-showcase-section">
+          <div className="profile-showcase-section-title">Tops jeux</div>
+          <div className="profile-showcase-grid">
+            {showcase.topScores.map((item) => (
+              <div
+                key={item.key}
+                className={`profile-showcase-card ${item.game.image ? "" : "no-image"}`}
+              >
+                {item.game.image ? <img src={item.game.image} alt={item.game.name} /> : null}
+                <div>
+                  <span>{item.label}</span>
+                  <strong>{item.game.name}</strong>
+                  <small>{formatTopScore(item.game.score, item.key)}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {hasSpecialized && (
+        <div className="profile-showcase-section">
+          <div className="profile-showcase-section-title">Tops spécialisés</div>
+          <div className="profile-showcase-grid">
+            {showcase.specializedTops.map((item) => (
+              <div
+                key={`${item.label}-${item.game.id}`}
+                className={`profile-showcase-card ${item.game.image ? "" : "no-image"}`}
+              >
+                {item.game.image ? <img src={item.game.image} alt={item.game.name} /> : null}
+                <div>
+                  <span>{item.label}</span>
+                  <strong>{item.game.name}</strong>
+                  <small>{item.criterion} · {formatTopScore(item.game.score, item.key)}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {hasGoty && (
+        <div className="profile-showcase-section">
+          <div className="profile-showcase-section-title">GOTY personnels</div>
+          <div className="profile-showcase-grid compact">
+            {showcase.gotyHighlights.map((item) => (
+              <div
+                key={`${item.year}-${item.game.id}`}
+                className={`profile-showcase-card ${item.game.image ? "" : "no-image"}`}
+              >
+                {item.game.image ? <img src={item.game.image} alt={item.game.name} /> : null}
+                <div>
+                  <span>GOTY {item.year}</span>
+                  <strong>{item.game.name}</strong>
+                  <small>{formatTopScore(item.game.score, "rating")}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {hasHardware && (
+        <div className="profile-showcase-section">
+          <div className="profile-showcase-section-title">Matériel préféré</div>
+          <div className="profile-showcase-grid compact">
+            {showcase.hardwareHighlights.map((item) => (
+              <div
+                key={item.id || item.name}
+                className={`profile-showcase-card hardware ${item.image ? "" : "no-image"}`}
+              >
+                {item.image ? <img src={item.image} alt={item.name} /> : null}
+                <div>
+                  <span>{item.label}</span>
+                  <strong>{item.name}</strong>
+                  <small>{formatRating10(item.score, "-")}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SocialTab({
   games,
   hardware,
@@ -6034,6 +6205,7 @@ function SocialTab({
     { key: "ratingGraphics", label: "Graphismes", games: getTopGamesForScore(games, "ratingGraphics", 1) },
   ].filter((section) => section.games.length > 0);
   const currentHardware = getCurrentOwnedHardware(hardware);
+  const profileShowcase = getProfileShowcase(games, hardware);
   const featuredBadge = getFeaturedBadgeFromSelection(
     badges,
     socialProfile.featuredBadgeId
@@ -6060,6 +6232,7 @@ function SocialTab({
     setupPhotos: socialProfile.setupPhotos || [],
     collectionPhotos: socialProfile.collectionPhotos || [],
     identityTitle,
+    showcase: profileShowcase,
     identityGames: identityGames.map((game) => ({
       id: game.id,
       name: game.name,
@@ -7615,6 +7788,12 @@ function ProfileTab({
   const badgeStats = calculateBadgeStats(games, level, hardware);
   const featuredBadge = getFeaturedBadgeFromSelection(badges, featuredBadgeId);
   const profileInsights = getProfileInsights(games, hardware, badges);
+  const profileShowcase = getProfileShowcase(games, hardware);
+  const hasProfileShowcase =
+    profileShowcase.topScores.length > 0 ||
+    profileShowcase.specializedTops.length > 0 ||
+    profileShowcase.gotyHighlights.length > 0 ||
+    profileShowcase.hardwareHighlights.length > 0;
   const currentRank =
     [...RANKS].reverse().find((rank) => level >= rank.min) || RANKS[0];
   const completedCount = games.filter((game) =>
@@ -7687,6 +7866,21 @@ function ProfileTab({
           <div className="stat-label">Complétion</div>
         </div>
       </div>
+
+      {hasProfileShowcase && (
+        <div className="search-panel profile-showcase-panel">
+          <div className="profile-section-header">
+            <div>
+              <h2 className="panel-title">Vitrine Checkpoint</h2>
+              <div className="option-value">
+                Tes meilleurs Tops, GOTY et matériels préférés au même endroit.
+              </div>
+            </div>
+          </div>
+
+          <ProfileShowcase showcase={profileShowcase} />
+        </div>
+      )}
 
       <div className="search-panel profile-insights-panel">
         <div className="profile-section-header">
@@ -12210,6 +12404,7 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
     { key: "ratingGameplay", label: "Gameplay", games: getTopGamesForScore(games, "ratingGameplay", 1) },
     { key: "ratingGraphics", label: "Graphismes", games: getTopGamesForScore(games, "ratingGraphics", 1) },
   ].filter((section) => section.games.length > 0);
+  const profileShowcase = getProfileShowcase(games, hardware);
   const featuredBadge = getFeaturedBadgeFromSelection(
     badges,
     profileOverride.featuredBadgeId
@@ -12244,6 +12439,7 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
     setupPhotos: profileOverride.setupPhotos || [],
     collectionPhotos: profileOverride.collectionPhotos || [],
     identityTitle,
+    showcase: profileShowcase,
     identityGames: identityGames.map((game) => ({
       id: game.id,
       name: game.name,
