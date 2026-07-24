@@ -11336,7 +11336,7 @@ function OptionsTab({
                 <strong>Ouverture de l'app</strong>
                 <span>Reprendre où tu t'étais arrêté ou ouvrir toujours le même onglet.</span>
               </div>
-              <div className="option-pill-grid two compact">
+              <div className="option-pill-grid two startup-primary">
                 <button
                   type="button"
                   className={`option-pill ${appOptions.rememberLastTab ? "active" : ""}`}
@@ -11355,7 +11355,7 @@ function OptionsTab({
             </div>
 
             {!appOptions.rememberLastTab && (
-              <div className="option-pill-grid option-subgrid">
+              <div className="option-pill-grid compact option-subgrid startup-target-grid">
                 {startTabs.map((tab) => (
                   <button
                     key={tab.id}
