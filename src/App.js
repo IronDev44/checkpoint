@@ -795,6 +795,93 @@ function getPlayerProfile(games) {
     subtitle: "Ton univers reste ouvert, varie et difficile a ranger dans une seule case."
   };
 }
+
+function getProfileInsights(games = [], hardware = [], badges = []) {
+  const stats = getAdvancedStats(games);
+  const completedGames = games.filter((game) =>
+    ["terminé", "terminÃ©", "completed"].includes(String(game.status || "").toLowerCase())
+  );
+  const ratedGames = games.filter((game) => getGameRating(game) > 0);
+  const currentHardware = hardware.filter((item) => {
+    const status = normalizeIdentityText(item.status || "");
+    return status.includes("poss") || status.includes("reparer");
+  });
+  const ratedHardware = currentHardware
+    .map((item) => ({
+      ...item,
+      average: getHardwareAverageRating(item),
+    }))
+    .filter((item) => item.average > 0)
+    .sort((a, b) => b.average - a.average);
+
+  const topGenre = stats.topGenres[0];
+  const topPlatform = stats.topPlatforms[0];
+  const topHardware = ratedHardware[0];
+  const unlockedBadges = badges.filter((badge) => badge.unlocked);
+  const badgeCompletion = badges.length
+    ? Math.round((unlockedBadges.length / badges.length) * 100)
+    : 0;
+  const averageRating = stats.avgRating || 0;
+
+  const cards = [
+    {
+      label: "Signature",
+      value: topGenre ? topGenre[0] : "À définir",
+      detail: topGenre
+        ? `${topGenre[1]} jeux dans ce registre`
+        : "Ajoute ou classe tes jeux pour révéler ton style.",
+    },
+    {
+      label: "Terrain favori",
+      value: topPlatform ? topPlatform[0] : "Multi-plateforme",
+      detail: topPlatform
+        ? `${topPlatform[1]} jeux liés à cette plateforme`
+        : "Tes plateformes ressortiront avec plus de jeux classés.",
+    },
+    {
+      label: "Exigence",
+      value: averageRating ? formatRating10(averageRating, "-") : "À noter",
+      detail: ratedGames.length
+        ? `${ratedGames.length} jeux notés`
+        : "Tes notes construiront une vraie lecture de ton profil.",
+    },
+    {
+      label: "Matériel repère",
+      value: topHardware ? topHardware.name : "À choisir",
+      detail: topHardware
+        ? `${formatRating10(topHardware.average, "-")} sur tes critères`
+        : `${currentHardware.length} matériels actuellement en possession`,
+    },
+  ];
+
+  const focus = [];
+
+  if (completedGames.length >= 25) {
+    focus.push("Tu as une base solide de jeux terminés, ton profil commence à raconter une vraie trajectoire.");
+  } else if (completedGames.length > 0) {
+    focus.push(`Encore ${Math.max(1, 25 - completedGames.length)} jeux terminés pour consolider ta trajectoire.`);
+  } else {
+    focus.push("Terminer quelques jeux donnera plus de poids à ton profil joueur.");
+  }
+
+  if (badgeCompletion >= 70) {
+    focus.push("Ta chasse aux badges est déjà bien avancée.");
+  } else if (badges.length) {
+    focus.push(`${badgeCompletion}% des badges débloqués, il reste de quoi faire évoluer ton identité.`);
+  }
+
+  if (ratedHardware.length >= 5) {
+    focus.push("Tes notes matériel commencent à donner une vraie hiérarchie à ton setup.");
+  } else if (currentHardware.length) {
+    focus.push("Noter plus de matériel rendra tes classements beaucoup plus fiables.");
+  }
+
+  return {
+    cards,
+    focus: focus.slice(0, 3),
+  };
+}
+
 function normalizeIdentityText(value = "") {
   return String(value)
     .toLowerCase()
@@ -7266,6 +7353,7 @@ function ProfileTab({
   const profile = getPlayerProfile(games);
   const badgeStats = calculateBadgeStats(games, level, hardware);
   const featuredBadge = getFeaturedBadgeFromSelection(badges, featuredBadgeId);
+  const profileInsights = getProfileInsights(games, hardware, badges);
 
   return (
     <div className="progression-stack profile-tab">
@@ -7309,6 +7397,37 @@ function ProfileTab({
           <div className="stat-value">{games.filter((g) => g.status === "terminé").length}</div>
           <div className="stat-label">Terminés</div>
         </div>
+      </div>
+
+      <div className="search-panel profile-insights-panel">
+        <div className="profile-section-header">
+          <div>
+            <h2 className="panel-title">Insights joueur</h2>
+            <div className="option-value">
+              Lecture rapide de ton style, de tes habitudes et de ton setup.
+            </div>
+          </div>
+        </div>
+
+        <div className="profile-insights-grid">
+          {profileInsights.cards.map((card) => (
+            <div key={card.label} className="profile-insight-card">
+              <span>{card.label}</span>
+              <strong>{card.value}</strong>
+              <small>{card.detail}</small>
+            </div>
+          ))}
+        </div>
+
+        {profileInsights.focus.length > 0 && (
+          <div className="profile-insights-focus">
+            {profileInsights.focus.map((item) => (
+              <div key={item} className="profile-insights-focus-item">
+                {item}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="search-panel">
