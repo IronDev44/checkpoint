@@ -11562,6 +11562,107 @@ html body[data-theme="theme-indigo"] {
   cursor: pointer;
 }
 
+.data-health-card {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.data-health-card.clean {
+  border-color: rgba(79, 220, 143, 0.38);
+}
+
+.data-health-card.needs-action {
+  border-color: color-mix(in srgb, var(--genre-color), transparent 45%);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--genre-color), transparent 86%), transparent),
+    rgba(255, 255, 255, 0.055);
+}
+
+.data-health-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.data-health-main > div {
+  min-width: 0;
+}
+
+.data-health-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.data-health-main strong {
+  display: block;
+  color: var(--text-main);
+  font-size: 1.05rem;
+  line-height: 1.15;
+}
+
+.data-health-main p {
+  margin: 6px 0 0;
+  color: var(--text-soft);
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.data-health-action {
+  min-width: 112px;
+  flex: 0 0 auto;
+}
+
+.data-health-action:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.data-health-preview {
+  display: grid;
+  gap: 7px;
+}
+
+.data-health-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.data-health-row span {
+  overflow: hidden;
+  color: var(--text-main);
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.data-health-row em {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-style: normal;
+  text-align: right;
+}
+
+.data-health-row.muted span,
+.data-health-row.muted em {
+  color: var(--text-soft);
+}
+
 .option-help-backdrop {
   position: fixed;
   inset: 0;

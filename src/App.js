@@ -3284,6 +3284,66 @@ function isGameInCollection(game = {}) {
   return status === "collection" || isGameFinishedStatus(game);
 }
 
+function getNormalizedGameProgressPatch(game = {}) {
+  const status = getNormalizedStatus(game.status || "");
+  const isFinished = isGameFinishedStatus(game);
+  const isInProgress = status.includes("cours") || game.progressStatus === "in_progress";
+  const isWishlist = status === "wishlist";
+
+  const nextState = isFinished
+    ? { status: "collection", progressStatus: "completed", completed: true }
+    : isInProgress
+      ? { status: "en cours", progressStatus: "in_progress", completed: false }
+      : isWishlist
+        ? { status: "wishlist", progressStatus: "not_started", completed: false }
+        : { status: "collection", progressStatus: "not_started", completed: false };
+
+  const patch = {};
+  if (game.status !== nextState.status) patch.status = nextState.status;
+  if ((game.progressStatus || "not_started") !== nextState.progressStatus) {
+    patch.progressStatus = nextState.progressStatus;
+  }
+  if (Boolean(game.completed) !== nextState.completed) {
+    patch.completed = nextState.completed;
+  }
+
+  return Object.keys(patch).length ? patch : null;
+}
+
+function getGameDataIntegrityIssues(games = []) {
+  return games
+    .map((game) => {
+      const patch = getNormalizedGameProgressPatch(game);
+      if (!patch) return null;
+
+      const reasons = [];
+      const status = getNormalizedStatus(game.status || "");
+
+      if (status.includes("termin")) {
+        reasons.push("ancien statut terminé");
+      }
+      if (game.completed === true && game.progressStatus !== "completed") {
+        reasons.push("terminé sans progression terminée");
+      }
+      if (game.progressStatus === "completed" && game.completed !== true) {
+        reasons.push("progression terminée sans validation");
+      }
+      if (status.includes("cours") && game.progressStatus !== "in_progress") {
+        reasons.push("en cours sans progression en cours");
+      }
+      if (game.progressStatus === "in_progress" && !status.includes("cours")) {
+        reasons.push("progression en cours hors onglet en cours");
+      }
+
+      return {
+        game,
+        patch,
+        reasons: reasons.length ? reasons : ["statut à normaliser"],
+      };
+    })
+    .filter(Boolean);
+}
+
 function isTopFinishedGame(game) {
   return isGameFinishedStatus(game);
 }
@@ -10915,8 +10975,11 @@ function OptionsTab({
   onExportBackup,
   onImportBackup,
   onResetOptions,
+  games = [],
+  onRepairGameData,
 }) {
   const [helpTopic, setHelpTopic] = useState(null);
+  const [isRepairingGameData, setIsRepairingGameData] = useState(false);
   const themes = [
   { id: "theme-indigo", label: "Aurora Neon" },
   { id: "theme-playstation", label: "PS5 Premium" },
@@ -10942,6 +11005,21 @@ function OptionsTab({
   const dealSources = {
     ...DEFAULT_APP_OPTIONS.dealSources,
     ...(appOptions.dealSources || {}),
+  };
+  const gameIntegrityIssues = useMemo(
+    () => getGameDataIntegrityIssues(games),
+    [games]
+  );
+  const gameIntegrityPreview = gameIntegrityIssues.slice(0, 3);
+  const handleRepairGameData = async () => {
+    if (!gameIntegrityIssues.length || !onRepairGameData) return;
+
+    setIsRepairingGameData(true);
+    try {
+      await onRepairGameData(gameIntegrityIssues);
+    } finally {
+      setIsRepairingGameData(false);
+    }
   };
   const updateDealSource = (source, enabled) => {
     onOptionChange("dealSources", {
@@ -11017,11 +11095,12 @@ function OptionsTab({
     },
     data: {
       title: "Données",
-      lead: "Garde une porte de secours pour tes réglages.",
+      lead: "Garde une porte de secours pour tes réglages et vérifie les anciennes données.",
       bullets: [
         "Exporter crée une sauvegarde JSON locale.",
         "Importer restaure les options et le profil social depuis une sauvegarde.",
         "Reset options remet uniquement les réglages d'options par défaut.",
+        "Le diagnostic aligne statut, progression et jeu terminé pour éviter les compteurs faux.",
       ],
     },
   };
@@ -11310,6 +11389,57 @@ function OptionsTab({
 
         <div className="option-section">
           <SectionTitle title="Données" help="data" />
+
+          <div
+            className={`data-health-card ${
+              gameIntegrityIssues.length ? "needs-action" : "clean"
+            }`}
+          >
+            <div className="data-health-main">
+              <div>
+                <span className="data-health-kicker">Diagnostic bibliothèque</span>
+                <strong>
+                  {gameIntegrityIssues.length
+                    ? `${gameIntegrityIssues.length} fiche${gameIntegrityIssues.length > 1 ? "s" : ""} à aligner`
+                    : "Bibliothèque cohérente"}
+                </strong>
+                <p>
+                  {gameIntegrityIssues.length
+                    ? "L'app peut synchroniser statut, progression et compteur terminé."
+                    : "Les compteurs utilisent déjà la même logique partout."}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="option-pill data-health-action"
+                onClick={handleRepairGameData}
+                disabled={!gameIntegrityIssues.length || isRepairingGameData}
+              >
+                {isRepairingGameData ? "Réparation..." : "Réparer"}
+              </button>
+            </div>
+
+            {gameIntegrityPreview.length > 0 && (
+              <div className="data-health-preview">
+                {gameIntegrityPreview.map(({ game, reasons }) => (
+                  <div key={game.id || game.name} className="data-health-row">
+                    <span>{game.name}</span>
+                    <em>{reasons[0]}</em>
+                  </div>
+                ))}
+                {gameIntegrityIssues.length > gameIntegrityPreview.length && (
+                  <div className="data-health-row muted">
+                    <span>
+                      +{gameIntegrityIssues.length - gameIntegrityPreview.length} autre
+                      {gameIntegrityIssues.length - gameIntegrityPreview.length > 1 ? "s" : ""}
+                    </span>
+                    <em>corrigé avec le même bouton</em>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
 
           <div className="option-pill-grid three">
             <button type="button" className="option-pill" onClick={onExportBackup}>
@@ -13768,6 +13898,39 @@ const setPlayedPlatforms = async (id, platforms) => {
   }
 };
 
+  const repairGameDataIntegrity = async (providedIssues = null) => {
+    const issues = providedIssues || getGameDataIntegrityIssues(games);
+
+    if (!issues.length) {
+      showToast("Bibliothèque déjà cohérente.");
+      return;
+    }
+
+    try {
+      await Promise.all(
+        issues.map(({ game, patch }) => updateDoc(doc(db, "games", game.id), patch))
+      );
+
+      setGames((prev) =>
+        prev.map((game) => {
+          const issue = issues.find((item) => item.game.id === game.id);
+          return issue ? { ...game, ...issue.patch } : game;
+        })
+      );
+
+      setSelectedGame((prev) => {
+        if (!prev) return prev;
+        const issue = issues.find((item) => item.game.id === prev.id);
+        return issue ? { ...prev, ...issue.patch } : prev;
+      });
+
+      showToast(`${issues.length} fiche${issues.length > 1 ? "s" : ""} synchronisée${issues.length > 1 ? "s" : ""}`);
+    } catch (error) {
+      console.error("Erreur diagnostic bibliothèque :", error);
+      showToast("Impossible de réparer les données pour le moment.");
+    }
+  };
+
   const toggleCompleted = async (id, currentValue) => {
     try {
       const completed = !currentValue;
@@ -14510,6 +14673,8 @@ const setPlayedPlatforms = async (id, platforms) => {
                 onExportBackup={exportCheckpointBackup}
                 onImportBackup={importCheckpointBackup}
                 onResetOptions={resetAppOptions}
+                games={games}
+                onRepairGameData={repairGameDataIntegrity}
               />
 
               <AdminPanel events={gamingEvents} onImportNews={importNewsFromRSS} />
