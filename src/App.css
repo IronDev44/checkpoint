@@ -22442,8 +22442,6 @@ textarea:focus-visible,
 }
 
 .option-pill.active,
-.status-btn.active,
-.choice-pill.active,
 .hardware-type-switch button.active,
 .hardware-collection-filters button.active,
 .hardware-catalog-toggle.active,
@@ -22468,13 +22466,32 @@ textarea:focus-visible,
 }
 
 .option-pill.active:hover,
-.status-btn.active:hover,
-.choice-pill.active:hover,
 .hardware-type-switch button.active:hover,
 .hardware-collection-filters button.active:hover,
 .hardware-catalog-toggle.active:hover,
 .tab-btn.active:hover {
   background: var(--accent) !important;
+}
+
+.status-btn.active,
+.choice-pill.active {
+  background: var(--accent) !important;
+  border-color: color-mix(in srgb, var(--accent-solid) 72%, rgba(255, 255, 255, 0.2)) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent-solid) 62%, rgba(255, 255, 255, 0.1)),
+    0 0 18px color-mix(in srgb, var(--accent-solid) 72%, transparent),
+    0 0 42px color-mix(in srgb, var(--accent-solid) 54%, transparent),
+    0 0 78px color-mix(in srgb, var(--accent-solid) 34%, transparent) !important;
+}
+
+.status-btn.active:hover,
+.choice-pill.active:hover {
+  background: var(--accent) !important;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent-solid) 70%, rgba(255, 255, 255, 0.12)),
+    0 0 22px color-mix(in srgb, var(--accent-solid) 78%, transparent),
+    0 0 52px color-mix(in srgb, var(--accent-solid) 58%, transparent),
+    0 0 88px color-mix(in srgb, var(--accent-solid) 38%, transparent) !important;
 }
 
 .hardware-back-btn:hover,
