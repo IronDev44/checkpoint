@@ -771,9 +771,7 @@ function getPlayerProfile(games) {
     };
   }
 
-  const finishedGames = games.filter((g) =>
-    g.status === "terminé" || g.status === "terminÃ©" || g.status === "collection"
-  );
+  const finishedGames = games.filter(isGameFinishedStatus);
   const favoriteGames = games.filter((g) => g.favorite);
   const stats = getAdvancedStats(games);
 
@@ -1816,7 +1814,7 @@ function getPlatformFamilyCounts(games = []) {
   };
 
   games
-    .filter((game) => game.status === "collection" || game.status === "terminÃ©")
+    .filter(isGameFinishedStatus)
     .forEach((game) => {
       const platforms =
         game.playedPlatforms?.length > 0
@@ -2131,7 +2129,9 @@ function getBonusXP(game) {
 function calculateXP(game) {
   return (
     BASE_XP +
-    getProgressXP(game.progressStatus || (game.status === "terminé" ? "completed" : "not_started")) +
+    getProgressXP(
+      game.progressStatus || (isGameFinishedStatus(game) ? "completed" : "not_started")
+    ) +
     getPlaytimeRangeXP(game.playtimeRange || "none") +
     0 +
     getBonusXP(game)
@@ -2142,7 +2142,7 @@ function getConsoleXPStats(games) {
   const stats = {};
 
   games
-    .filter((game) => game.status === "collection" || game.status === "terminé")
+    .filter(isGameFinishedStatus)
     .forEach((game) => {
       const playedPlatforms =
         game.playedPlatforms?.length > 0
@@ -3274,6 +3274,15 @@ function getTopScoreSource(game, scoreKey) {
 
 function getNormalizedStatus(status = "") {
   return normalizeIdentityText(status).replace(/\s+/g, " ").trim();
+}
+
+function isGameFinishedStatus(game = {}) {
+  const status = getNormalizedStatus(game?.status || "");
+  return (
+    status.includes("termin") ||
+    status === "collection" ||
+    game?.progressStatus === "completed"
+  );
 }
 
 function isTopFinishedGame(game) {
@@ -6464,7 +6473,7 @@ function SocialTab({
         <div>
           <h2 className="panel-title">Jeux fondateurs</h2>
           <div className="option-value">
-            Choisis les 3 jeux qui ont construit ton identitÃ© de joueur.
+            Choisis les 3 jeux qui ont construit ton identité de joueur.
           </div>
         </div>
 
@@ -6717,16 +6726,12 @@ function HomeTab({
   const quizAnswer = weeklyQuizProgress.answers?.[quizAnswerKey];
   const quizLocked = Boolean(quizAnswer);
 
-  const isFinishedGame = (game) =>
-    game.status === "terminé" ||
-    game.status === "terminÃ©" ||
-    game.status === "collection" ||
-    game.progressStatus === "completed";
+  const isFinishedGame = isGameFinishedStatus;
   const isOwnedHardware = (item) =>
     String(item.status || "").toLowerCase().includes("poss");
 
   const total = games.length;
-  const finished = games.filter((g) => g.status === "terminé").length;
+  const finished = games.filter(isFinishedGame).length;
   const inProgressCount = games.filter((g) => g.status === "en cours").length;
   const wishlistCount = games.filter((g) => g.status === "wishlist").length;
 
@@ -9424,7 +9429,7 @@ function HardwareTab({
     if (normalized.includes("wishlist")) return "wishlist";
     if (normalized.includes("historique")) return "historique";
     if (normalized.includes("vend")) return "vendu";
-    if (normalized.includes("reparer") || raw.includes("rÃ")) return "reparer";
+    if (normalized.includes("reparer")) return "reparer";
     if (normalized.includes("poss") || raw.includes("poss")) return "possede";
 
     return normalized;
