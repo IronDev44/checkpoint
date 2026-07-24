@@ -1907,9 +1907,10 @@ function calculateBadgeStats(
   socialProfile = DEFAULT_SOCIAL_PROFILE,
   quizProgress = DEFAULT_WEEKLY_QUIZ_PROGRESS
 ) {
-  const currentHardware = hardware.filter((item) =>
-    ["possédé", "à réparer", "possÃ©dÃ©", "Ã  rÃ©parer"].includes(item.status)
-  );
+  const currentHardware = hardware.filter((item) => {
+    const status = getNormalizedStatus(item?.status || "");
+    return status.includes("poss") || status.includes("reparer");
+  });
 
   return {
     total: games.length,
@@ -9680,6 +9681,22 @@ function HardwareTab({
     0
   );
 
+  const findExistingCatalogHardware = (catalogItem, variant, version) =>
+    hardware.find(
+      (item) =>
+        item.catalogId === catalogItem.id &&
+        item.variantId === variant.id &&
+        item.versionId === version.id &&
+        item.type === catalogItem.type &&
+        item.status !== "ranked"
+    ) ||
+    hardware.find(
+      (item) =>
+        item.versionId === version.id &&
+        item.type === catalogItem.type &&
+        item.status !== "ranked"
+    );
+
   const selectedHardware = catalogByType.find(
     (item) => item.id === selectedHardwareId
   );
@@ -10243,31 +10260,6 @@ function HardwareTab({
                   </span>
                 </div>
 
-                {selectedHardwareDetail?.instanceKey?.startsWith("all-") && (
-                  <HardwareDetailModal
-                    item={hardware.find((h) => h.id === selectedHardwareDetail.id) || selectedHardwareDetail}
-                    detailRef={hardwareDetailRef}
-                    onClose={() => setSelectedHardwareDetail(null)}
-                    onDeleteHardware={onDeleteHardware}
-                    openedDropdown={openedDropdown}
-                    setOpenedDropdown={setOpenedDropdown}
-                    statusOptions={HARDWARE_STATUS_OPTIONS}
-                    conditionOptions={CONDITION_OPTIONS}
-                    displaySizeOptions={DISPLAY_SIZE_OPTIONS}
-                    onUpdateHardwareStatus={onUpdateHardwareStatus}
-                    onUpdateHardwareCondition={onUpdateHardwareCondition}
-                    onUpdateHardwareDisplaySize={onUpdateHardwareDisplaySize}
-                    onUpdateHardwareComponent={onUpdateHardwareComponent}
-                    onUpdateHardwareRating={onUpdateHardwareRating}
-                    onUpdateHardwareReview={onUpdateHardwareReview}
-                    onToggleHardwareFavorite={onToggleHardwareFavorite}
-                    consoleGameStats={getConsoleGameStats(
-                      hardware.find((h) => h.id === selectedHardwareDetail.id) || selectedHardwareDetail
-                    )}
-                    getHardwareStatusLabel={getHardwareStatusLabel}
-                  />
-                )}
-
                 <div className="hardware-all-groups">
                   {catalogGroupsByBrand.map((group) => (
                     <section key={group.brand} className="hardware-all-group">
@@ -10299,11 +10291,10 @@ function HardwareTab({
                           <div className="hardware-console-list">
                             {catalogItem.variants?.flatMap((variant) =>
                               (variant.versions || []).map((version) => {
-                                const existingItem = hardware.find(
-                                  (item) =>
-                                    item.versionId === version.id &&
-                                    item.type === catalogItem.type &&
-                                    item.status !== "ranked"
+                                const existingItem = findExistingCatalogHardware(
+                                  catalogItem,
+                                  variant,
+                                  version
                                 );
                                 const metaParts = [
                                   version.storage || "",
@@ -10314,10 +10305,13 @@ function HardwareTab({
                                     : "",
                                 ].filter(Boolean);
                                 const detailInstanceKey = `all-${catalogItem.id}-${version.id}`;
+                                const detailItem =
+                                  hardware.find((item) => item.id === existingItem?.id) ||
+                                  existingItem;
 
                                 return (
+                                  <Fragment key={version.id}>
                                   <div
-                                    key={version.id}
                                     className={`hardware-console-card hardware-all-version-card ${existingItem ? "is-openable" : ""} ${
                                       selectedHardwareDetail?.instanceKey === detailInstanceKey
                                         ? "active"
@@ -10395,6 +10389,33 @@ function HardwareTab({
                                     </div>
 
                                   </div>
+                                  {selectedHardwareDetail?.instanceKey === detailInstanceKey &&
+                                    detailItem && (
+                                      <HardwareDetailModal
+                                        item={{
+                                          ...detailItem,
+                                          instanceKey: detailInstanceKey,
+                                        }}
+                                        detailRef={hardwareDetailRef}
+                                        onClose={() => setSelectedHardwareDetail(null)}
+                                        onDeleteHardware={onDeleteHardware}
+                                        openedDropdown={openedDropdown}
+                                        setOpenedDropdown={setOpenedDropdown}
+                                        statusOptions={HARDWARE_STATUS_OPTIONS}
+                                        conditionOptions={CONDITION_OPTIONS}
+                                        displaySizeOptions={DISPLAY_SIZE_OPTIONS}
+                                        onUpdateHardwareStatus={onUpdateHardwareStatus}
+                                        onUpdateHardwareCondition={onUpdateHardwareCondition}
+                                        onUpdateHardwareDisplaySize={onUpdateHardwareDisplaySize}
+                                        onUpdateHardwareComponent={onUpdateHardwareComponent}
+                                        onUpdateHardwareRating={onUpdateHardwareRating}
+                                        onUpdateHardwareReview={onUpdateHardwareReview}
+                                        onToggleHardwareFavorite={onToggleHardwareFavorite}
+                                        consoleGameStats={getConsoleGameStats(detailItem)}
+                                        getHardwareStatusLabel={getHardwareStatusLabel}
+                                      />
+                                    )}
+                                  </Fragment>
                                 );
                               })
                             )}
@@ -10537,18 +10558,16 @@ function HardwareTab({
 
                     <div className="hardware-catalog-grid">
                       {variant.versions?.map((version) => {
-                        const ownedItem = hardware.find(
-                          (item) =>
-                            item.versionId === version.id &&
-                            hasHardwareStatus(item, "possede")
+                        const existingItem = findExistingCatalogHardware(
+                          selectedHardware,
+                          variant,
+                          version
                         );
 
-                        const existingItem = hardware.find(
-                          (item) =>
-                            item.versionId === version.id &&
-                            item.type === selectedHardware.type &&
-                            item.status !== "ranked"
-                        );
+                        const ownedItem =
+                          existingItem && hasHardwareStatus(existingItem, "possede")
+                            ? existingItem
+                            : null;
 
                         return (
                           <div

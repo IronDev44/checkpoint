@@ -16400,6 +16400,10 @@ body {
   animation: hardwareInlineOpen 180ms ease both;
 }
 
+.hardware-all-view .hardware-inline-detail {
+  margin: 2px 0 12px;
+}
+
 .hardware-inline-detail-panel {
   position: relative;
   overflow: hidden;
