@@ -11089,15 +11089,6 @@ function OptionsTab({
     });
   };
   const helpTopics = {
-    appearance: {
-      title: "Apparence",
-      lead: "Ajuste l'ambiance visuelle sans changer la structure de l'app.",
-      bullets: [
-        "Calme réduit les effets pour un rendu plus discret.",
-        "Équilibré garde le style Checkpoint sans trop charger l'écran.",
-        "Boost rend les pixels, reflets et particules plus présents.",
-      ],
-    },
     icon: {
       title: "Icône de l'app",
       lead: "Change l'icône utilisée par le navigateur et la PWA.",
@@ -11107,26 +11098,26 @@ function OptionsTab({
       ],
     },
     animations: {
-      title: "Animations",
-      lead: "Choisis entre une app plus vivante ou plus directe.",
+      title: "Transition d'onglet",
+      lead: "Ce réglage concerne uniquement l'animation pixel quand tu changes d'onglet.",
       bullets: [
-        "Fluides conserve les transitions pixel et les petits mouvements d'interface.",
-        "Réduites limite les animations pour gagner en confort et en performance.",
+        "Activée garde l'effet pixel entre deux onglets.",
+        "Désactivée change d'onglet plus directement, utile si l'animation paraît lente.",
       ],
     },
     navigation: {
-      title: "Navigation",
-      lead: "Décide où l'app s'ouvre au lancement.",
+      title: "Démarrage",
+      lead: "Décide où l'app s'ouvre quand tu la relances.",
       bullets: [
-        "Accueil reste le choix le plus général.",
-        "Bibliothèque, Matériel ou Top 5 sont plus pratiques si tu consultes souvent ces sections.",
+        "Dernier onglet reprend automatiquement l'endroit où tu t'étais arrêté.",
+        "Onglet fixe ouvre toujours la section choisie.",
+        "Accueil reste le choix le plus neutre si tu veux un point de départ stable.",
       ],
     },
     ergonomics: {
       title: "Ergonomie",
-      lead: "Règle les comportements qui changent vraiment le confort d'utilisation.",
+      lead: "Règle les comportements qui changent vraiment le confort d'utilisation au quotidien.",
       bullets: [
-        "Dernier onglet reprend l'endroit où tu étais à la dernière ouverture.",
         "Confirmation protège les suppressions de jeux et de matériel.",
         "Après ajout décide si la recherche reste ouverte, si tu vas à la bibliothèque ou si la fiche du jeu s'ouvre directement.",
       ],
@@ -11196,229 +11187,218 @@ function OptionsTab({
           </div>
         </div>
 
-        <div className="option-section">
-          <SectionTitle title="Thème" />
-
-          <div className="option-pill-grid">
-            {themes.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={`option-pill theme-${item.id} ${
-                  theme === item.id ? "active" : ""
-                }`}
-                onClick={() => setTheme(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="option-section">
-          <SectionTitle title="Apparence" help="appearance" />
-
-          <div className="option-pill-grid three">
-            <button
-              type="button"
-              className={`option-pill ${appOptions.visualEffects === "calm" ? "active" : ""}`}
-              onClick={() => onOptionChange("visualEffects", "calm")}
-            >
-              Calme
-            </button>
-            <button
-              type="button"
-              className={`option-pill ${appOptions.visualEffects === "balanced" ? "active" : ""}`}
-              onClick={() => onOptionChange("visualEffects", "balanced")}
-            >
-              Équilibré
-            </button>
-            <button
-              type="button"
-              className={`option-pill ${appOptions.visualEffects === "boost" ? "active" : ""}`}
-              onClick={() => onOptionChange("visualEffects", "boost")}
-            >
-              Boost
-            </button>
+        <div className="options-group">
+          <div className="options-group-head">
+            <span>Interface</span>
+            <p>Ce qui change l'identité visuelle et les retours de l'app.</p>
           </div>
 
-          <div className="option-pill-grid two option-subgrid">
-            <button
-              type="button"
-              className={`option-pill ${appOptions.animatedBackground ? "active" : ""}`}
-              onClick={() => onOptionChange("animatedBackground", true)}
-            >
-              Fond animé
-            </button>
-            <button
-              type="button"
-              className={`option-pill ${!appOptions.animatedBackground ? "active" : ""}`}
-              onClick={() => onOptionChange("animatedBackground", false)}
-            >
-              Fond fixe
-            </button>
-          </div>
+          <div className="option-section">
+            <SectionTitle title="Thème" />
 
-          <div className="option-pill-grid two option-subgrid">
-            <button
-              type="button"
-              className={`option-pill ${appOptions.appIcon === "theme" ? "active" : ""}`}
-              onClick={() => onOptionChange("appIcon", "theme")}
-            >
-              Icône thème
-            </button>
-            <button
-              type="button"
-              className={`option-pill ${appOptions.appIcon === "classic" ? "active" : ""}`}
-              onClick={() => onOptionChange("appIcon", "classic")}
-            >
-              Icône CP
-            </button>
-          </div>
-        </div>
-
-        <div className="option-section">
-          <SectionTitle title="Animations" help="animations" />
-
-          <div className="option-pill-grid two">
-            <button
-              type="button"
-              className={`option-pill ${uiMode === "modern" ? "active" : ""}`}
-              onClick={() => setUiMode("modern")}
-            >
-              Fluides
-            </button>
-
-            <button
-              type="button"
-              className={`option-pill ${uiMode === "reduced" ? "active" : ""}`}
-              onClick={() => setUiMode("reduced")}
-            >
-              Réduites
-            </button>
-          </div>
-        </div>
-
-        <div className="option-section">
-          <SectionTitle title="Son" />
-
-          <div className="option-pill-grid three">
-            <button
-              type="button"
-              className={`option-pill ${soundEnabled ? "active" : ""}`}
-              onClick={() => {
-                setSoundEnabled(true);
-                localStorage.setItem("checkpoint-sound-enabled", "true");
-                playSound("success", { force: true });
-              }}
-            >
-              Activé
-            </button>
-
-            <button
-              type="button"
-              className={`option-pill ${!soundEnabled ? "active" : ""}`}
-              onClick={() => setSoundEnabled(false)}
-            >
-              Désactivé
-            </button>
-            <button
-              type="button"
-              className="option-pill"
-              onClick={() => playSound("success", { force: true })}
-            >
-              Test
-            </button>
-          </div>
-        </div>
-
-        <div className="option-section">
-          <SectionTitle title="Navigation" help="navigation" />
-
-          <div className="option-pill-grid">
-            {startTabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                className={`option-pill ${appOptions.startTab === tab.id ? "active" : ""}`}
-                onClick={() => onOptionChange("startTab", tab.id)}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="option-section">
-          <SectionTitle title="Ergonomie" help="ergonomics" />
-
-          <div className="option-setting-card">
-            <div>
-              <strong>Ouverture de l'app</strong>
-              <span>Reprendre le dernier onglet visité ou toujours utiliser l'onglet choisi au-dessus.</span>
-            </div>
-            <div className="option-pill-grid two compact">
-              <button
-                type="button"
-                className={`option-pill ${appOptions.rememberLastTab ? "active" : ""}`}
-                onClick={() => onOptionChange("rememberLastTab", true)}
-              >
-                Dernier onglet
-              </button>
-              <button
-                type="button"
-                className={`option-pill ${!appOptions.rememberLastTab ? "active" : ""}`}
-                onClick={() => onOptionChange("rememberLastTab", false)}
-              >
-                Onglet fixe
-              </button>
-            </div>
-          </div>
-
-          <div className="option-setting-card">
-            <div>
-              <strong>Suppressions</strong>
-              <span>Demander une validation avant de supprimer un jeu ou un matériel.</span>
-            </div>
-            <div className="option-pill-grid two compact">
-              <button
-                type="button"
-                className={`option-pill ${appOptions.confirmDangerActions ? "active" : ""}`}
-                onClick={() => onOptionChange("confirmDangerActions", true)}
-              >
-                Confirmer
-              </button>
-              <button
-                type="button"
-                className={`option-pill ${!appOptions.confirmDangerActions ? "active" : ""}`}
-                onClick={() => onOptionChange("confirmDangerActions", false)}
-              >
-                Direct
-              </button>
-            </div>
-          </div>
-
-          <div className="option-setting-card">
-            <div>
-              <strong>Après ajout d'un jeu</strong>
-              <span>Choisir ce que fait l'app quand tu ajoutes un résultat de recherche.</span>
-            </div>
-            <div className="option-pill-grid three compact">
-              {afterAddActions.map((action) => (
+            <div className="option-pill-grid themes">
+              {themes.map((item) => (
                 <button
-                  key={action.id}
+                  key={item.id}
                   type="button"
-                  className={`option-pill ${
-                    appOptions.afterAddAction === action.id ? "active" : ""
+                  className={`option-pill theme-${item.id} ${
+                    theme === item.id ? "active" : ""
                   }`}
-                  onClick={() => onOptionChange("afterAddAction", action.id)}
+                  onClick={() => setTheme(item.id)}
                 >
-                  {action.label}
+                  {item.label}
                 </button>
               ))}
             </div>
           </div>
+
+          <div className="option-section option-section-split">
+            <div className="option-setting-card">
+              <div>
+                <SectionTitle title="Transition d'onglet" help="animations" />
+                <span>Active ou désactive uniquement l'effet pixel entre les onglets.</span>
+              </div>
+              <div className="option-pill-grid two compact">
+                <button
+                  type="button"
+                  className={`option-pill ${uiMode === "modern" ? "active" : ""}`}
+                  onClick={() => setUiMode("modern")}
+                >
+                  Activée
+                </button>
+
+                <button
+                  type="button"
+                  className={`option-pill ${uiMode === "reduced" ? "active" : ""}`}
+                  onClick={() => setUiMode("reduced")}
+                >
+                  Désactivée
+                </button>
+              </div>
+            </div>
+
+            <div className="option-setting-card">
+              <div>
+                <strong>Icône de l'app</strong>
+                <span>Choisis l'icône utilisée par le navigateur et l'app installée.</span>
+              </div>
+              <div className="option-pill-grid two compact">
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.appIcon === "theme" ? "active" : ""}`}
+                  onClick={() => onOptionChange("appIcon", "theme")}
+                >
+                  Thème
+                </button>
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.appIcon === "classic" ? "active" : ""}`}
+                  onClick={() => onOptionChange("appIcon", "classic")}
+                >
+                  CP
+                </button>
+              </div>
+            </div>
+
+            <div className="option-setting-card">
+              <div>
+                <strong>Son</strong>
+                <span>Active les retours sonores de l'interface ou teste le son actuel.</span>
+              </div>
+              <div className="option-pill-grid three compact">
+                <button
+                  type="button"
+                  className={`option-pill ${soundEnabled ? "active" : ""}`}
+                  onClick={() => {
+                    setSoundEnabled(true);
+                    localStorage.setItem("checkpoint-sound-enabled", "true");
+                    playSound("success", { force: true });
+                  }}
+                >
+                  Activé
+                </button>
+
+                <button
+                  type="button"
+                  className={`option-pill ${!soundEnabled ? "active" : ""}`}
+                  onClick={() => setSoundEnabled(false)}
+                >
+                  Désactivé
+                </button>
+                <button
+                  type="button"
+                  className="option-pill"
+                  onClick={() => playSound("success", { force: true })}
+                >
+                  Test
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <div className="options-group">
+          <div className="options-group-head">
+            <span>Comportement</span>
+            <p>Les choix qui évitent des gestes inutiles ou des erreurs.</p>
+          </div>
+
+          <div className="option-section">
+            <SectionTitle title="Démarrage" help="navigation" />
+
+            <div className="option-setting-card">
+              <div>
+                <strong>Ouverture de l'app</strong>
+                <span>Reprendre où tu t'étais arrêté ou ouvrir toujours le même onglet.</span>
+              </div>
+              <div className="option-pill-grid two compact">
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.rememberLastTab ? "active" : ""}`}
+                  onClick={() => onOptionChange("rememberLastTab", true)}
+                >
+                  Dernier onglet
+                </button>
+                <button
+                  type="button"
+                  className={`option-pill ${!appOptions.rememberLastTab ? "active" : ""}`}
+                  onClick={() => onOptionChange("rememberLastTab", false)}
+                >
+                  Onglet fixe
+                </button>
+              </div>
+            </div>
+
+            {!appOptions.rememberLastTab && (
+              <div className="option-pill-grid option-subgrid">
+                {startTabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    className={`option-pill ${appOptions.startTab === tab.id ? "active" : ""}`}
+                    onClick={() => onOptionChange("startTab", tab.id)}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="option-section">
+            <SectionTitle title="Ergonomie" help="ergonomics" />
+
+            <div className="option-setting-card">
+              <div>
+                <strong>Suppressions</strong>
+                <span>Demander une validation avant de supprimer un jeu ou un matériel.</span>
+              </div>
+              <div className="option-pill-grid two compact">
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.confirmDangerActions ? "active" : ""}`}
+                  onClick={() => onOptionChange("confirmDangerActions", true)}
+                >
+                  Confirmer
+                </button>
+                <button
+                  type="button"
+                  className={`option-pill ${!appOptions.confirmDangerActions ? "active" : ""}`}
+                  onClick={() => onOptionChange("confirmDangerActions", false)}
+                >
+                  Direct
+                </button>
+              </div>
+            </div>
+
+            <div className="option-setting-card">
+              <div>
+                <strong>Après ajout d'un jeu</strong>
+                <span>Choisir ce que fait l'app quand tu ajoutes un résultat de recherche.</span>
+              </div>
+              <div className="option-pill-grid three compact">
+                {afterAddActions.map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    className={`option-pill ${
+                      appOptions.afterAddAction === action.id ? "active" : ""
+                    }`}
+                    onClick={() => onOptionChange("afterAddAction", action.id)}
+                  >
+                    {action.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="options-group">
+          <div className="options-group-head">
+            <span>Profil & services</span>
+            <p>Ce qui sort de ta bibliothèque personnelle : profil public, notes et promos.</p>
+          </div>
 
         <div className="option-section">
           <SectionTitle title="Profil public" help="publicProfile" />
@@ -11521,6 +11501,13 @@ function OptionsTab({
             ))}
           </div>
         </div>
+        </div>
+
+        <div className="options-group">
+          <div className="options-group-head">
+            <span>Données</span>
+            <p>Sauvegarde, import et contrôle de cohérence de ta bibliothèque.</p>
+          </div>
 
         <div className="option-section">
           <SectionTitle title="Données" help="data" />
@@ -11613,6 +11600,7 @@ function OptionsTab({
               Reset options
             </button>
           </div>
+        </div>
         </div>
       </div>
 
