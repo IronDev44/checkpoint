@@ -1695,6 +1695,28 @@ function getUnlockedBadgesV2(
   }));
 }
 
+const UNLOCKED_BADGES_STORAGE_KEY = "checkpoint-unlocked-badges";
+
+function readStoredUnlockedBadgeIds() {
+  try {
+    const parsed = JSON.parse(
+      localStorage.getItem(UNLOCKED_BADGES_STORAGE_KEY) || "[]"
+    );
+
+    return Array.isArray(parsed) ? parsed.filter(Boolean).map(String) : [];
+  } catch (error) {
+    console.warn("Badges sauvegardes illisibles, reinitialisation.", error);
+    return [];
+  }
+}
+
+function storeUnlockedBadgeIds(ids) {
+  localStorage.setItem(
+    UNLOCKED_BADGES_STORAGE_KEY,
+    JSON.stringify([...new Set(ids.filter(Boolean).map(String))])
+  );
+}
+
 function getBadgeProgress(badge, stats) {
   if (badge.id.startsWith("collector_")) {
     return { current: stats.total, target: Number(badge.id.split("_")[1]) };
@@ -11185,6 +11207,7 @@ const importNewsFromRSS = async ({ silent = false, force = false } = {}) => {
 };
 
 const [newUnlockedBadge, setNewUnlockedBadge] = useState(null);
+const badgeToastInitializedRef = useRef(false);
 
 const addHardware = async (item) => {
   try {
@@ -12014,18 +12037,18 @@ useEffect(() => {
 useEffect(() => {
   if (!badges || badges.length === 0) return;
 
-  const storageKey = "checkpoint-unlocked-badges";
-  const unlockedIds = badges.filter((b) => b.unlocked).map((b) => b.id);
+  const unlockedIds = badges.filter((b) => b.unlocked).map((b) => String(b.id));
+  const savedIds = readStoredUnlockedBadgeIds();
+  const savedSet = new Set(savedIds);
 
-  const savedIds = JSON.parse(localStorage.getItem(storageKey) || "[]");
-
-  if (savedIds.length === 0) {
-    localStorage.setItem(storageKey, JSON.stringify(unlockedIds));
+  if (!badgeToastInitializedRef.current) {
+    badgeToastInitializedRef.current = true;
+    storeUnlockedBadgeIds([...savedIds, ...unlockedIds]);
     return;
   }
 
   const newlyUnlocked = badges.find(
-    (badge) => badge.unlocked && !savedIds.includes(badge.id)
+    (badge) => badge.unlocked && !savedSet.has(String(badge.id))
   );
 
   if (newlyUnlocked) {
@@ -12041,7 +12064,7 @@ useEffect(() => {
     }, 2800);
   }
 
-  localStorage.setItem(storageKey, JSON.stringify(unlockedIds));
+  storeUnlockedBadgeIds([...savedIds, ...unlockedIds]);
 }, [badges, soundStyle]);
 
 useEffect(() => {
