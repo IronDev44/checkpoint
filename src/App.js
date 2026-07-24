@@ -222,6 +222,9 @@ const DEFAULT_APP_OPTIONS = {
   animatedBackground: true,
   appIcon: "theme",
   ratingDisplay: "number",
+  rememberLastTab: true,
+  confirmDangerActions: true,
+  afterAddAction: "stay",
   dealRegion: "FR",
   dealSources: {
     steam: true,
@@ -11041,6 +11044,11 @@ function OptionsTab({
     { id: "top5", label: "Top 5" },
     { id: "hardware", label: "Matériel" },
   ];
+  const afterAddActions = [
+    { id: "stay", label: "Rester" },
+    { id: "library", label: "Bibliothèque" },
+    { id: "detail", label: "Fiche" },
+  ];
   const publicSections = {
     ...DEFAULT_PUBLIC_SECTIONS,
     ...(socialProfile.publicSections || {}),
@@ -11112,6 +11120,15 @@ function OptionsTab({
       bullets: [
         "Accueil reste le choix le plus général.",
         "Bibliothèque, Matériel ou Top 5 sont plus pratiques si tu consultes souvent ces sections.",
+      ],
+    },
+    ergonomics: {
+      title: "Ergonomie",
+      lead: "Règle les comportements qui changent vraiment le confort d'utilisation.",
+      bullets: [
+        "Dernier onglet reprend l'endroit où tu étais à la dernière ouverture.",
+        "Confirmation protège les suppressions de jeux et de matériel.",
+        "Après ajout décide si la recherche reste ouverte, si tu vas à la bibliothèque ou si la fiche du jeu s'ouvre directement.",
       ],
     },
     publicProfile: {
@@ -11329,6 +11346,77 @@ function OptionsTab({
                 {tab.label}
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className="option-section">
+          <SectionTitle title="Ergonomie" help="ergonomics" />
+
+          <div className="option-setting-card">
+            <div>
+              <strong>Ouverture de l'app</strong>
+              <span>Reprendre le dernier onglet visité ou toujours utiliser l'onglet choisi au-dessus.</span>
+            </div>
+            <div className="option-pill-grid two compact">
+              <button
+                type="button"
+                className={`option-pill ${appOptions.rememberLastTab ? "active" : ""}`}
+                onClick={() => onOptionChange("rememberLastTab", true)}
+              >
+                Dernier onglet
+              </button>
+              <button
+                type="button"
+                className={`option-pill ${!appOptions.rememberLastTab ? "active" : ""}`}
+                onClick={() => onOptionChange("rememberLastTab", false)}
+              >
+                Onglet fixe
+              </button>
+            </div>
+          </div>
+
+          <div className="option-setting-card">
+            <div>
+              <strong>Suppressions</strong>
+              <span>Demander une validation avant de supprimer un jeu ou un matériel.</span>
+            </div>
+            <div className="option-pill-grid two compact">
+              <button
+                type="button"
+                className={`option-pill ${appOptions.confirmDangerActions ? "active" : ""}`}
+                onClick={() => onOptionChange("confirmDangerActions", true)}
+              >
+                Confirmer
+              </button>
+              <button
+                type="button"
+                className={`option-pill ${!appOptions.confirmDangerActions ? "active" : ""}`}
+                onClick={() => onOptionChange("confirmDangerActions", false)}
+              >
+                Direct
+              </button>
+            </div>
+          </div>
+
+          <div className="option-setting-card">
+            <div>
+              <strong>Après ajout d'un jeu</strong>
+              <span>Choisir ce que fait l'app quand tu ajoutes un résultat de recherche.</span>
+            </div>
+            <div className="option-pill-grid three compact">
+              {afterAddActions.map((action) => (
+                <button
+                  key={action.id}
+                  type="button"
+                  className={`option-pill ${
+                    appOptions.afterAddAction === action.id ? "active" : ""
+                  }`}
+                  onClick={() => onOptionChange("afterAddAction", action.id)}
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -12096,6 +12184,10 @@ export default function App() {
   const [appOptions, setAppOptions] = useState(() => getStoredAppOptions());
   const [activeTab, setActiveTab] = useState(() => {
     const savedOptions = getStoredAppOptions();
+    const savedTab = localStorage.getItem("checkpoint-last-tab");
+    if (savedOptions.rememberLastTab && APP_TAB_IDS.includes(savedTab)) {
+      return savedTab;
+    }
     return APP_TAB_IDS.includes(savedOptions.startTab)
       ? savedOptions.startTab
       : "home";
@@ -12412,6 +12504,14 @@ const addHardware = async (item) => {
 };
 
 const deleteHardware = async (id) => {
+  const item = hardware.find((hardwareItem) => hardwareItem.id === id);
+  if (
+    appOptions.confirmDangerActions &&
+    !window.confirm(`Supprimer "${item?.name || "ce matériel"}" ?`)
+  ) {
+    return;
+  }
+
   try {
     await deleteDoc(doc(db, "hardware", id));
     showToast("Matériel supprimé.");
@@ -13016,10 +13116,10 @@ useEffect(() => {
     localStorage.setItem("checkpoint-ui-mode", uiMode);
   }, [uiMode]);
 
-  useEffect(() => {
-    localStorage.setItem("checkpoint-app-options", JSON.stringify(appOptions));
-    document.body.setAttribute("data-effects", appOptions.visualEffects || "balanced");
-    document.body.setAttribute(
+useEffect(() => {
+  localStorage.setItem("checkpoint-app-options", JSON.stringify(appOptions));
+  document.body.setAttribute("data-effects", appOptions.visualEffects || "balanced");
+  document.body.setAttribute(
       "data-background-motion",
       appOptions.animatedBackground ? "on" : "off"
     );
@@ -13037,6 +13137,13 @@ useEffect(() => {
       appOptions.appIcon === "classic" ? "/favicon.ico" : "/logo-cp-transparent.png"
     );
   }, [appOptions]);
+
+useEffect(() => {
+  if (!appOptions.rememberLastTab) return;
+  if (!APP_TAB_IDS.includes(activeTab)) return;
+
+  localStorage.setItem("checkpoint-last-tab", activeTab);
+}, [activeTab, appOptions.rememberLastTab]);
 
   useEffect(() => {
     return () => {
@@ -13460,8 +13567,7 @@ useEffect(() => {
       }
 
       const isFinished = isGameFinishedStatus(game);
-
-      await addDoc(collection(db, "games"), {
+      const newGame = {
         rawgId: game.rawgId || game.id || null,
         name: game.name,
         completed: game.completed || isFinished || false,
@@ -13484,7 +13590,21 @@ useEffect(() => {
         ratingSound: clampRating(game.ratingSound),
         ratingLongevity: clampRating(game.ratingLongevity),
         createdAt: new Date(),
-      });
+      };
+
+      const ref = await addDoc(collection(db, "games"), newGame);
+      const savedGame = { ...newGame, id: ref.id };
+
+      if (appOptions.afterAddAction === "library") {
+        setSelectedSearchGame(null);
+        changeTab("library");
+      }
+
+      if (appOptions.afterAddAction === "detail") {
+        setSelectedSearchGame(null);
+        setDetailGameList([savedGame]);
+        setSelectedGame(savedGame);
+      }
 
       return true;
     } catch (e) {
@@ -13697,6 +13817,14 @@ useEffect(() => {
   }, [debouncedSearch]);
 
   const deleteGame = async (id) => {
+  const game = games.find((currentGame) => currentGame.id === id);
+  if (
+    appOptions.confirmDangerActions &&
+    !window.confirm(`Supprimer "${game?.name || "ce jeu"}" ?`)
+  ) {
+    return;
+  }
+
   try {
     await deleteDoc(doc(db, "games", id));
 

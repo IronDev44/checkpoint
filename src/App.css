@@ -11531,6 +11531,10 @@ html body[data-theme="theme-indigo"] {
   margin-top: 10px;
 }
 
+.option-pill-grid.compact {
+  gap: 8px;
+}
+
 .option-pill {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 18px;
@@ -11548,6 +11552,41 @@ html body[data-theme="theme-indigo"] {
   align-items: center;
   justify-content: center;
   text-align: center;
+}
+
+.option-setting-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  background: rgba(0, 0, 0, 0.11);
+}
+
+.option-setting-card + .option-setting-card {
+  margin-top: 10px;
+}
+
+.option-setting-card strong {
+  display: block;
+  color: var(--text-main);
+  font-size: 0.98rem;
+  line-height: 1.2;
+}
+
+.option-setting-card span {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-soft);
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.option-setting-card .option-pill {
+  min-height: 40px;
+  padding: 10px 9px;
+  border-radius: 14px;
+  font-size: 0.86rem;
 }
 
 .option-file-pill {
