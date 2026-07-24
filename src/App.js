@@ -9719,6 +9719,7 @@ function HardwareTab({
   ) => {
     const alreadyExists = hardware.some(
       (item) =>
+        item.type === catalogItem.type &&
         item.versionId === version.id &&
         getHardwareStatusKey(item.status) === getHardwareStatusKey(status)
     );

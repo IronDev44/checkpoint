@@ -790,7 +790,7 @@ export const AUDIO_HARDWARE = [
         {
           id: "corsair-virtuoso-max",
           name: "Corsair Virtuoso MAX",
-          image: "/images/hardware/audio/corsair-virtuoso-max.png",
+          image: "/images/hardware/audio/corsair-virtuoso-pro.png",
         },
       ],
     },
