@@ -799,7 +799,9 @@ function getPlayerProfile(games) {
 function getProfileInsights(games = [], hardware = [], badges = []) {
   const stats = getAdvancedStats(games);
   const completedGames = games.filter((game) =>
-    ["terminé", "terminÃ©", "completed"].includes(String(game.status || "").toLowerCase())
+    ["termine", "completed"].includes(
+      normalizeIdentityText(game.status || "")
+    )
   );
   const ratedGames = games.filter((game) => getGameRating(game) > 0);
   const currentHardware = hardware.filter((item) => {
@@ -818,10 +820,36 @@ function getProfileInsights(games = [], hardware = [], badges = []) {
   const topPlatform = stats.topPlatforms[0];
   const topHardware = ratedHardware[0];
   const unlockedBadges = badges.filter((badge) => badge.unlocked);
+  const favoriteGames = games.filter((game) => game.favorite);
   const badgeCompletion = badges.length
     ? Math.round((unlockedBadges.length / badges.length) * 100)
     : 0;
   const averageRating = stats.avgRating || 0;
+  const completionRate = games.length
+    ? Math.round((completedGames.length / games.length) * 100)
+    : 0;
+  const topGenreName = topGenre?.[0] || "univers varié";
+  const topPlatformName = topPlatform?.[0] || "multi-plateforme";
+  const hardwareTone = topHardware
+    ? `et un setup porté par ${topHardware.name}`
+    : "avec un setup encore en construction";
+
+  const headline =
+    games.length > 0
+      ? `${topGenreName} sur ${topPlatformName}`
+      : "Signature à révéler";
+  const summary =
+    games.length > 0
+      ? `Ton profil penche vers ${topGenreName}, avec ${completedGames.length} jeux terminés, ${favoriteGames.length} favoris ${hardwareTone}.`
+      : "Ajoute tes jeux, ton matériel et quelques notes pour que Checkpoint commence à lire ton identité de joueur.";
+  const maturity =
+    completedGames.length >= 50
+      ? "Profil solide"
+      : completedGames.length >= 20
+        ? "Profil établi"
+        : completedGames.length >= 5
+          ? "Profil en progression"
+          : "Profil naissant";
 
   const cards = [
     {
@@ -830,6 +858,7 @@ function getProfileInsights(games = [], hardware = [], badges = []) {
       detail: topGenre
         ? `${topGenre[1]} jeux dans ce registre`
         : "Ajoute ou classe tes jeux pour révéler ton style.",
+      tone: "primary",
     },
     {
       label: "Terrain favori",
@@ -837,6 +866,7 @@ function getProfileInsights(games = [], hardware = [], badges = []) {
       detail: topPlatform
         ? `${topPlatform[1]} jeux liés à cette plateforme`
         : "Tes plateformes ressortiront avec plus de jeux classés.",
+      tone: "platform",
     },
     {
       label: "Exigence",
@@ -844,6 +874,7 @@ function getProfileInsights(games = [], hardware = [], badges = []) {
       detail: ratedGames.length
         ? `${ratedGames.length} jeux notés`
         : "Tes notes construiront une vraie lecture de ton profil.",
+      tone: averageRating >= 8.5 ? "high" : "neutral",
     },
     {
       label: "Matériel repère",
@@ -851,6 +882,7 @@ function getProfileInsights(games = [], hardware = [], badges = []) {
       detail: topHardware
         ? `${formatRating10(topHardware.average, "-")} sur tes critères`
         : `${currentHardware.length} matériels actuellement en possession`,
+      tone: "hardware",
     },
   ];
 
@@ -877,6 +909,11 @@ function getProfileInsights(games = [], hardware = [], badges = []) {
   }
 
   return {
+    headline,
+    summary,
+    maturity,
+    completionRate,
+    badgeCompletion,
     cards,
     focus: focus.slice(0, 3),
   };
@@ -7354,29 +7391,52 @@ function ProfileTab({
   const badgeStats = calculateBadgeStats(games, level, hardware);
   const featuredBadge = getFeaturedBadgeFromSelection(badges, featuredBadgeId);
   const profileInsights = getProfileInsights(games, hardware, badges);
+  const currentRank =
+    [...RANKS].reverse().find((rank) => level >= rank.min) || RANKS[0];
+  const completedCount = games.filter((game) =>
+    ["termine", "completed"].includes(
+      normalizeIdentityText(game.status || "")
+    )
+  ).length;
 
   return (
     <div className="progression-stack profile-tab">
-      <XPCard
-        totalXP={totalXP}
-        level={level}
-        title={getRankTitle(level)}
-        progress={progress}
-      />
-
       <div className="search-panel profile-hero">
-        <div>
+        <div className="profile-hero-main">
           <div className="profile-kicker">Profil joueur</div>
           <div className="social-profile-name-row">
             <h2 className="profile-title">{profile.title}</h2>
             <FeaturedBadgePill badge={featuredBadge} />
           </div>
           <div className="profile-subtitle">{profile.subtitle}</div>
+
+          <div className="profile-hero-tags">
+            <span>Niveau {level}</span>
+            <span>{currentRank.title}</span>
+            <span>{profileInsights.maturity}</span>
+          </div>
         </div>
 
-        <div className="profile-badge-count">
-          <strong>{unlockedBadges.length}</strong>
-          <span>/ {badges.length} badges</span>
+        <div className="profile-hero-side">
+          <div className="profile-badge-count">
+            <strong>{unlockedBadges.length}</strong>
+            <span>/ {badges.length} badges</span>
+          </div>
+
+          <div className="profile-hero-xp">
+            <div className="profile-hero-xp-top">
+              <span>{totalXP} XP</span>
+              <strong>{progress.percent}%</strong>
+            </div>
+            <div className="xp-bar compact">
+              <div className="xp-fill" style={{ width: `${progress.percent}%` }} />
+            </div>
+            <small>
+              {level >= 100
+                ? "Rang maximal atteint"
+                : `${progress.currentXP} / ${progress.xpToNext} XP avant le niveau suivant`}
+            </small>
+          </div>
         </div>
       </div>
 
@@ -7394,8 +7454,13 @@ function ProfileTab({
         </div>
 
         <div className="stat-card">
-          <div className="stat-value">{games.filter((g) => g.status === "terminé").length}</div>
+          <div className="stat-value">{completedCount}</div>
           <div className="stat-label">Terminés</div>
+        </div>
+
+        <div className="stat-card">
+          <div className="stat-value">{profileInsights.completionRate}%</div>
+          <div className="stat-label">Complétion</div>
         </div>
       </div>
 
@@ -7404,14 +7469,28 @@ function ProfileTab({
           <div>
             <h2 className="panel-title">Insights joueur</h2>
             <div className="option-value">
-              Lecture rapide de ton style, de tes habitudes et de ton setup.
+              Une lecture de ton identité à partir de tes jeux, notes, badges et matériel.
             </div>
+          </div>
+        </div>
+
+        <div className="profile-insights-lead">
+          <span>Lecture Checkpoint</span>
+          <strong>{profileInsights.headline}</strong>
+          <p>{profileInsights.summary}</p>
+          <div>
+            <small>{profileInsights.completionRate}% de complétion</small>
+            <small>{profileInsights.badgeCompletion}% badges</small>
+            <small>{profileInsights.maturity}</small>
           </div>
         </div>
 
         <div className="profile-insights-grid">
           {profileInsights.cards.map((card) => (
-            <div key={card.label} className="profile-insight-card">
+            <div
+              key={card.label}
+              className={`profile-insight-card tone-${card.tone || "neutral"}`}
+            >
               <span>{card.label}</span>
               <strong>{card.value}</strong>
               <small>{card.detail}</small>
@@ -7421,6 +7500,7 @@ function ProfileTab({
 
         {profileInsights.focus.length > 0 && (
           <div className="profile-insights-focus">
+            <span>À faire évoluer</span>
             {profileInsights.focus.map((item) => (
               <div key={item} className="profile-insights-focus-item">
                 {item}
@@ -7430,34 +7510,51 @@ function ProfileTab({
         )}
       </div>
 
-      <div className="search-panel">
-        <h2 className="panel-title">Prochain objectif</h2>
-
-        {nextBadges[0] ? (
-          <div className="next-goal-card">
-            <div className="badge-icon">
-              <BadgeVisualIcon badge={nextBadges[0]} />
-            </div>
-            <div>
-              <div className="badge-name">{nextBadges[0].name}</div>
-              <div className="badge-desc">{nextBadges[0].desc}</div>
+      <div className="search-panel profile-growth-panel">
+        <div className="profile-section-header">
+          <div>
+            <h2 className="panel-title">Progression</h2>
+            <div className="option-value">
+              Rang actuel, prochain cap et objectifs utiles à court terme.
             </div>
           </div>
-        ) : nextRank ? (
-          <div className="next-goal-card">
-            <div className="badge-icon">⬆️</div>
-            <div>
-              <div className="badge-name">{nextRank.title}</div>
-              <div className="badge-desc">Atteindre le niveau {nextRank.min}</div>
-            </div>
-          </div>
-        ) : (
-          <div className="option-value">Tous les objectifs principaux sont débloqués.</div>
-        )}
-      </div>
+        </div>
 
-      <div className="search-panel">
-        <h2 className="panel-title">Progression des rangs</h2>
+        <div className="profile-growth-grid">
+          {nextBadges[0] ? (
+            <div className="next-goal-card profile-next-goal">
+              <div className="badge-icon">
+                <BadgeVisualIcon badge={nextBadges[0]} />
+              </div>
+              <div>
+                <span>Prochain badge</span>
+                <div className="badge-name">{nextBadges[0].name}</div>
+                <div className="badge-desc">{nextBadges[0].desc}</div>
+              </div>
+            </div>
+          ) : nextRank ? (
+            <div className="next-goal-card profile-next-goal">
+              <div className="badge-icon">⬆️</div>
+              <div>
+                <span>Prochain rang</span>
+                <div className="badge-name">{nextRank.title}</div>
+                <div className="badge-desc">Atteindre le niveau {nextRank.min}</div>
+              </div>
+            </div>
+          ) : (
+            <div className="option-value">Tous les objectifs principaux sont débloqués.</div>
+          )}
+
+          <div className="profile-rank-summary">
+            <span>Rang actuel</span>
+            <strong>{currentRank.title}</strong>
+            <small>
+              {nextRank
+                ? `Prochain cap : ${nextRank.title} au niveau ${nextRank.min}`
+                : "Tu es sur le dernier palier de rang."}
+            </small>
+          </div>
+        </div>
 
         <div className="rank-list compact-ranks">
           {RANKS.map((rank) => {
