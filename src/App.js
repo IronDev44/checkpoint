@@ -11033,6 +11033,9 @@ function OptionsTab({
   { id: "theme-playstation", label: "PS5 Premium" },
   { id: "theme-xbox", label: "Xbox Dashboard" },
   { id: "theme-steamdeck", label: "Steam Deck" },
+  { id: "theme-arcane", label: "Academie mystique" },
+  { id: "theme-stellar", label: "Odyssee stellaire" },
+  { id: "theme-multiverse", label: "Multivers heroique" },
   { id: "theme-emerald", label: "Circuit Mint" },
   { id: "theme-crimson", label: "Redline" },
   { id: "theme-graphite", label: "Carbon Ice" },
@@ -13189,6 +13192,9 @@ useEffect(() => {
       "theme-playstation": "#101827",
       "theme-xbox": "#07120b",
       "theme-steamdeck": "#171717",
+      "theme-arcane": "#100814",
+      "theme-stellar": "#020716",
+      "theme-multiverse": "#10040b",
           };
 
     if (metaTheme) {
