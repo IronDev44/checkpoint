@@ -11036,6 +11036,12 @@ function OptionsTab({
   { id: "theme-arcane", label: "Academie mystique" },
   { id: "theme-stellar", label: "Odyssee stellaire" },
   { id: "theme-multiverse", label: "Multivers heroique" },
+  { id: "theme-relic", label: "Relique legendaire" },
+  { id: "theme-tamer", label: "Dresseur aventure" },
+  { id: "theme-matrix", label: "Reseau quantique" },
+  { id: "theme-wasteland", label: "Terres brulees" },
+  { id: "theme-treasure", label: "Carte au tresor" },
+  { id: "theme-vigilante", label: "Vigilante nocturne" },
   { id: "theme-emerald", label: "Circuit Mint" },
   { id: "theme-crimson", label: "Redline" },
   { id: "theme-graphite", label: "Carbon Ice" },
@@ -13195,6 +13201,12 @@ useEffect(() => {
       "theme-arcane": "#100814",
       "theme-stellar": "#020716",
       "theme-multiverse": "#10040b",
+      "theme-relic": "#0a1008",
+      "theme-tamer": "#07131c",
+      "theme-matrix": "#020a06",
+      "theme-wasteland": "#130b05",
+      "theme-treasure": "#071722",
+      "theme-vigilante": "#050711",
           };
 
     if (metaTheme) {

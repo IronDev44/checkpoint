@@ -22359,6 +22359,472 @@ body[data-theme="theme-multiverse"] .checkpoint-splash .splash-logo-mark {
     0 0 34px rgba(37, 99, 235, 0.34) !important;
 }
 
+body[data-theme="theme-relic"] {
+  --bg-main:
+    radial-gradient(circle at 18% 9%, rgba(234, 179, 8, 0.22), transparent 26%),
+    radial-gradient(circle at 82% 12%, rgba(34, 197, 94, 0.14), transparent 26%),
+    radial-gradient(circle at 50% 88%, rgba(120, 53, 15, 0.2), transparent 32%),
+    linear-gradient(180deg, #0a1008 0%, #111a0e 46%, #030503 100%);
+  --panel-bg: rgba(19, 28, 18, 0.82);
+  --panel-border: rgba(234, 179, 8, 0.2);
+  --surface-bg: rgba(29, 41, 25, 0.62);
+  --surface-border: rgba(132, 204, 22, 0.16);
+  --input-bg: rgba(6, 10, 5, 0.94);
+  --muted-bg: rgba(234, 179, 8, 0.12);
+  --accent: linear-gradient(135deg, #facc15, #84cc16 48%, #14532d 100%);
+  --accent-solid: #facc15;
+  --accent-shadow: 0 0 30px rgba(234, 179, 8, 0.28);
+  --theme-aurora:
+    radial-gradient(circle at 20% 22%, rgba(234, 179, 8, 0.18), transparent 30%),
+    radial-gradient(circle at 78% 25%, rgba(34, 197, 94, 0.12), transparent 34%),
+    radial-gradient(circle at 50% 84%, rgba(120, 53, 15, 0.14), transparent 36%);
+  --text-main: #fff9dc;
+  --text-soft: #dfd5ad;
+  --text-muted: #a9a98c;
+  --genre-color: #bef264;
+  --checkpoint-title-gradient: linear-gradient(180deg, #fffbea 0%, #facc15 34%, #84cc16 62%, #14532d 100%);
+  --checkpoint-title-glow: rgba(234, 179, 8, 0.34);
+  --checkpoint-splash-bg:
+    radial-gradient(circle at 50% 34%, rgba(234, 179, 8, 0.24), transparent 24%),
+    radial-gradient(circle at 16% 58%, rgba(132, 204, 22, 0.12), transparent 28%),
+    radial-gradient(circle at 86% 58%, rgba(120, 53, 15, 0.28), transparent 30%),
+    linear-gradient(180deg, #020401 0%, #0d1308 48%, #010201 100%);
+  --checkpoint-splash-bg-layer:
+    radial-gradient(circle at 50% 36%, rgba(234, 179, 8, 0.3), transparent 21%),
+    repeating-conic-gradient(from 14deg at 50% 48%, transparent 0deg 16deg, rgba(234, 179, 8, 0.055) 16deg 17deg),
+    linear-gradient(180deg, #020401, #10180a 54%, #010201);
+  --checkpoint-splash-primary: rgba(234, 179, 8, 0.94);
+  --checkpoint-splash-secondary: rgba(190, 242, 100, 0.86);
+  --checkpoint-splash-glow: rgba(234, 179, 8, 0.5);
+  --checkpoint-splash-fill: linear-gradient(90deg, #fff7ad 0%, #facc15 45%, #84cc16 100%);
+}
+
+body[data-theme="theme-tamer"] {
+  --bg-main:
+    radial-gradient(circle at 18% 10%, rgba(239, 68, 68, 0.2), transparent 26%),
+    radial-gradient(circle at 82% 8%, rgba(59, 130, 246, 0.24), transparent 25%),
+    radial-gradient(circle at 52% 88%, rgba(250, 204, 21, 0.12), transparent 30%),
+    linear-gradient(180deg, #07131c 0%, #0c2030 48%, #02070b 100%);
+  --panel-bg: rgba(13, 32, 48, 0.8);
+  --panel-border: rgba(125, 211, 252, 0.18);
+  --surface-bg: rgba(21, 45, 65, 0.62);
+  --surface-border: rgba(250, 204, 21, 0.16);
+  --input-bg: rgba(4, 11, 17, 0.95);
+  --muted-bg: rgba(59, 130, 246, 0.12);
+  --accent: linear-gradient(135deg, #ef4444, #f8fafc 48%, #3b82f6 100%);
+  --accent-solid: #3b82f6;
+  --accent-shadow: 0 0 30px rgba(59, 130, 246, 0.28);
+  --theme-aurora:
+    radial-gradient(circle at 18% 22%, rgba(239, 68, 68, 0.16), transparent 30%),
+    radial-gradient(circle at 82% 26%, rgba(59, 130, 246, 0.18), transparent 34%),
+    radial-gradient(circle at 50% 82%, rgba(250, 204, 21, 0.08), transparent 36%);
+  --text-main: #f8fbff;
+  --text-soft: #c8ddf4;
+  --text-muted: #91a7bd;
+  --genre-color: #facc15;
+  --checkpoint-title-gradient: linear-gradient(180deg, #ffffff 0%, #fee2e2 32%, #ef4444 48%, #3b82f6 100%);
+  --checkpoint-title-glow: rgba(59, 130, 246, 0.34);
+  --checkpoint-splash-bg:
+    radial-gradient(circle at 50% 34%, rgba(59, 130, 246, 0.24), transparent 24%),
+    radial-gradient(circle at 15% 58%, rgba(239, 68, 68, 0.14), transparent 28%),
+    radial-gradient(circle at 86% 58%, rgba(250, 204, 21, 0.12), transparent 30%),
+    linear-gradient(180deg, #02070b 0%, #071927 47%, #010305 100%);
+  --checkpoint-splash-bg-layer:
+    radial-gradient(circle at 50% 36%, rgba(59, 130, 246, 0.3), transparent 21%),
+    radial-gradient(circle at 50% 36%, rgba(248, 250, 252, 0.18), transparent 12%),
+    linear-gradient(90deg, rgba(239, 68, 68, 0.08), transparent 42%, transparent 58%, rgba(59, 130, 246, 0.08)),
+    linear-gradient(180deg, #02070b, #082033 54%, #010305);
+  --checkpoint-splash-primary: rgba(59, 130, 246, 0.94);
+  --checkpoint-splash-secondary: rgba(248, 250, 252, 0.9);
+  --checkpoint-splash-glow: rgba(59, 130, 246, 0.52);
+  --checkpoint-splash-fill: linear-gradient(90deg, #ef4444 0%, #f8fafc 50%, #3b82f6 100%);
+}
+
+body[data-theme="theme-matrix"] {
+  --bg-main:
+    radial-gradient(circle at 18% 8%, rgba(34, 197, 94, 0.2), transparent 26%),
+    radial-gradient(circle at 82% 8%, rgba(16, 185, 129, 0.14), transparent 26%),
+    repeating-linear-gradient(90deg, rgba(34, 197, 94, 0.035) 0 1px, transparent 1px 18px),
+    linear-gradient(180deg, #020a06 0%, #06140c 48%, #010302 100%);
+  --panel-bg: rgba(5, 24, 13, 0.82);
+  --panel-border: rgba(74, 222, 128, 0.22);
+  --surface-bg: rgba(10, 36, 20, 0.62);
+  --surface-border: rgba(34, 197, 94, 0.18);
+  --input-bg: rgba(1, 10, 5, 0.96);
+  --muted-bg: rgba(34, 197, 94, 0.12);
+  --accent: linear-gradient(135deg, #dcfce7, #22c55e 48%, #064e3b 100%);
+  --accent-solid: #22c55e;
+  --accent-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+  --theme-aurora:
+    radial-gradient(circle at 18% 22%, rgba(34, 197, 94, 0.2), transparent 30%),
+    radial-gradient(circle at 80% 24%, rgba(16, 185, 129, 0.12), transparent 34%),
+    repeating-linear-gradient(180deg, rgba(34, 197, 94, 0.035) 0 1px, transparent 1px 26px);
+  --text-main: #f0fff4;
+  --text-soft: #bbf7d0;
+  --text-muted: #74a887;
+  --genre-color: #86efac;
+  --checkpoint-title-gradient: linear-gradient(180deg, #f0fff4 0%, #bbf7d0 34%, #22c55e 62%, #064e3b 100%);
+  --checkpoint-title-glow: rgba(34, 197, 94, 0.38);
+  --checkpoint-splash-bg:
+    repeating-linear-gradient(90deg, rgba(34, 197, 94, 0.045) 0 1px, transparent 1px 20px),
+    radial-gradient(circle at 50% 34%, rgba(34, 197, 94, 0.24), transparent 24%),
+    linear-gradient(180deg, #010503 0%, #06110a 48%, #000201 100%);
+  --checkpoint-splash-bg-layer:
+    repeating-linear-gradient(180deg, rgba(34, 197, 94, 0.05) 0 1px, transparent 1px 18px),
+    radial-gradient(circle at 50% 36%, rgba(34, 197, 94, 0.28), transparent 21%),
+    linear-gradient(180deg, #010503, #07140c 54%, #000201);
+  --checkpoint-splash-primary: rgba(34, 197, 94, 0.94);
+  --checkpoint-splash-secondary: rgba(220, 252, 231, 0.88);
+  --checkpoint-splash-glow: rgba(34, 197, 94, 0.54);
+  --checkpoint-splash-fill: linear-gradient(90deg, #dcfce7 0%, #22c55e 52%, #064e3b 100%);
+}
+
+body[data-theme="theme-wasteland"] {
+  --bg-main:
+    radial-gradient(circle at 20% 10%, rgba(251, 146, 60, 0.22), transparent 27%),
+    radial-gradient(circle at 82% 10%, rgba(239, 68, 68, 0.12), transparent 24%),
+    radial-gradient(circle at 50% 88%, rgba(120, 53, 15, 0.24), transparent 34%),
+    linear-gradient(180deg, #130b05 0%, #211207 48%, #060301 100%);
+  --panel-bg: rgba(42, 24, 12, 0.82);
+  --panel-border: rgba(251, 146, 60, 0.2);
+  --surface-bg: rgba(58, 34, 18, 0.62);
+  --surface-border: rgba(239, 68, 68, 0.14);
+  --input-bg: rgba(17, 9, 4, 0.95);
+  --muted-bg: rgba(251, 146, 60, 0.12);
+  --accent: linear-gradient(135deg, #fed7aa, #fb923c 50%, #7f1d1d 100%);
+  --accent-solid: #fb923c;
+  --accent-shadow: 0 0 30px rgba(251, 146, 60, 0.26);
+  --theme-aurora:
+    radial-gradient(circle at 18% 22%, rgba(251, 146, 60, 0.18), transparent 30%),
+    radial-gradient(circle at 80% 28%, rgba(239, 68, 68, 0.1), transparent 34%),
+    radial-gradient(circle at 50% 84%, rgba(120, 53, 15, 0.18), transparent 36%);
+  --text-main: #fff7ed;
+  --text-soft: #fed7aa;
+  --text-muted: #c7a384;
+  --genre-color: #fca5a5;
+  --checkpoint-title-gradient: linear-gradient(180deg, #fff7ed 0%, #fed7aa 34%, #fb923c 58%, #7f1d1d 100%);
+  --checkpoint-title-glow: rgba(251, 146, 60, 0.32);
+  --checkpoint-splash-bg:
+    radial-gradient(circle at 50% 34%, rgba(251, 146, 60, 0.24), transparent 24%),
+    radial-gradient(circle at 15% 58%, rgba(254, 215, 170, 0.12), transparent 28%),
+    radial-gradient(circle at 86% 58%, rgba(127, 29, 29, 0.24), transparent 30%),
+    linear-gradient(180deg, #050201 0%, #160b04 47%, #020100 100%);
+  --checkpoint-splash-bg-layer:
+    radial-gradient(circle at 50% 36%, rgba(251, 146, 60, 0.3), transparent 21%),
+    repeating-linear-gradient(12deg, rgba(254, 215, 170, 0.04) 0 1px, transparent 1px 22px),
+    linear-gradient(180deg, #050201, #190d05 54%, #020100);
+  --checkpoint-splash-primary: rgba(251, 146, 60, 0.94);
+  --checkpoint-splash-secondary: rgba(254, 215, 170, 0.88);
+  --checkpoint-splash-glow: rgba(251, 146, 60, 0.5);
+  --checkpoint-splash-fill: linear-gradient(90deg, #fed7aa 0%, #fb923c 52%, #7f1d1d 100%);
+}
+
+body[data-theme="theme-treasure"] {
+  --bg-main:
+    radial-gradient(circle at 18% 10%, rgba(20, 184, 166, 0.2), transparent 26%),
+    radial-gradient(circle at 82% 8%, rgba(250, 204, 21, 0.16), transparent 26%),
+    radial-gradient(circle at 52% 88%, rgba(2, 132, 199, 0.18), transparent 30%),
+    linear-gradient(180deg, #071722 0%, #0b2634 48%, #02080d 100%);
+  --panel-bg: rgba(12, 37, 51, 0.82);
+  --panel-border: rgba(45, 212, 191, 0.18);
+  --surface-bg: rgba(18, 52, 68, 0.62);
+  --surface-border: rgba(250, 204, 21, 0.16);
+  --input-bg: rgba(5, 16, 23, 0.95);
+  --muted-bg: rgba(20, 184, 166, 0.12);
+  --accent: linear-gradient(135deg, #2dd4bf, #0ea5e9 46%, #facc15 100%);
+  --accent-solid: #2dd4bf;
+  --accent-shadow: 0 0 30px rgba(45, 212, 191, 0.26);
+  --theme-aurora:
+    radial-gradient(circle at 18% 22%, rgba(20, 184, 166, 0.18), transparent 30%),
+    radial-gradient(circle at 80% 26%, rgba(250, 204, 21, 0.11), transparent 34%),
+    radial-gradient(circle at 50% 84%, rgba(14, 165, 233, 0.13), transparent 36%);
+  --text-main: #f2fffb;
+  --text-soft: #b8eee5;
+  --text-muted: #85aeb8;
+  --genre-color: #facc15;
+  --checkpoint-title-gradient: linear-gradient(180deg, #f2fffb 0%, #99f6e4 34%, #0ea5e9 58%, #facc15 100%);
+  --checkpoint-title-glow: rgba(45, 212, 191, 0.34);
+  --checkpoint-splash-bg:
+    radial-gradient(circle at 50% 34%, rgba(45, 212, 191, 0.24), transparent 24%),
+    radial-gradient(circle at 15% 58%, rgba(14, 165, 233, 0.14), transparent 28%),
+    radial-gradient(circle at 86% 58%, rgba(250, 204, 21, 0.12), transparent 30%),
+    linear-gradient(180deg, #02080d 0%, #08202d 47%, #010407 100%);
+  --checkpoint-splash-bg-layer:
+    radial-gradient(circle at 50% 36%, rgba(45, 212, 191, 0.3), transparent 21%),
+    repeating-linear-gradient(145deg, rgba(250, 204, 21, 0.04) 0 1px, transparent 1px 18px),
+    linear-gradient(180deg, #02080d, #092637 54%, #010407);
+  --checkpoint-splash-primary: rgba(45, 212, 191, 0.94);
+  --checkpoint-splash-secondary: rgba(250, 204, 21, 0.86);
+  --checkpoint-splash-glow: rgba(45, 212, 191, 0.5);
+  --checkpoint-splash-fill: linear-gradient(90deg, #99f6e4 0%, #0ea5e9 52%, #facc15 100%);
+}
+
+body[data-theme="theme-vigilante"] {
+  --bg-main:
+    radial-gradient(circle at 16% 8%, rgba(250, 204, 21, 0.16), transparent 24%),
+    radial-gradient(circle at 84% 8%, rgba(59, 130, 246, 0.14), transparent 26%),
+    linear-gradient(180deg, #050711 0%, #0b1020 48%, #010208 100%);
+  --panel-bg: rgba(12, 17, 32, 0.84);
+  --panel-border: rgba(250, 204, 21, 0.16);
+  --surface-bg: rgba(20, 27, 46, 0.64);
+  --surface-border: rgba(59, 130, 246, 0.14);
+  --input-bg: rgba(3, 5, 12, 0.96);
+  --muted-bg: rgba(250, 204, 21, 0.1);
+  --accent: linear-gradient(135deg, #facc15, #334155 46%, #3b82f6 100%);
+  --accent-solid: #facc15;
+  --accent-shadow: 0 0 30px rgba(250, 204, 21, 0.22);
+  --theme-aurora:
+    radial-gradient(circle at 18% 22%, rgba(250, 204, 21, 0.14), transparent 30%),
+    radial-gradient(circle at 82% 26%, rgba(59, 130, 246, 0.12), transparent 34%),
+    radial-gradient(circle at 50% 78%, rgba(15, 23, 42, 0.6), transparent 40%);
+  --text-main: #f8fafc;
+  --text-soft: #cbd5e1;
+  --text-muted: #8491a8;
+  --genre-color: #facc15;
+  --checkpoint-title-gradient: linear-gradient(180deg, #ffffff 0%, #facc15 36%, #94a3b8 58%, #3b82f6 100%);
+  --checkpoint-title-glow: rgba(250, 204, 21, 0.28);
+  --checkpoint-splash-bg:
+    radial-gradient(circle at 50% 34%, rgba(250, 204, 21, 0.16), transparent 24%),
+    radial-gradient(circle at 84% 58%, rgba(59, 130, 246, 0.14), transparent 30%),
+    linear-gradient(180deg, #010208 0%, #060b16 47%, #000104 100%);
+  --checkpoint-splash-bg-layer:
+    radial-gradient(ellipse at 50% 28%, rgba(250, 204, 21, 0.22), transparent 15%),
+    linear-gradient(180deg, transparent 0 58%, rgba(15, 23, 42, 0.7) 58% 100%),
+    linear-gradient(180deg, #010208, #070d18 54%, #000104);
+  --checkpoint-splash-primary: rgba(250, 204, 21, 0.9);
+  --checkpoint-splash-secondary: rgba(203, 213, 225, 0.86);
+  --checkpoint-splash-glow: rgba(250, 204, 21, 0.42);
+  --checkpoint-splash-fill: linear-gradient(90deg, #facc15 0%, #94a3b8 52%, #3b82f6 100%);
+}
+
+.option-pill.theme-theme-relic.active {
+  background: linear-gradient(135deg, #facc15, #84cc16 48%, #14532d);
+  color: #081007;
+}
+
+.option-pill.theme-theme-tamer.active {
+  background: linear-gradient(135deg, #ef4444, #f8fafc 48%, #3b82f6);
+  color: #07131c;
+}
+
+.option-pill.theme-theme-matrix.active {
+  background: linear-gradient(135deg, #dcfce7, #22c55e 48%, #064e3b);
+  color: #020a06;
+}
+
+.option-pill.theme-theme-wasteland.active {
+  background: linear-gradient(135deg, #fed7aa, #fb923c 50%, #7f1d1d);
+  color: #170a03;
+}
+
+.option-pill.theme-theme-treasure.active {
+  background: linear-gradient(135deg, #2dd4bf, #0ea5e9 46%, #facc15);
+  color: #04131c;
+}
+
+.option-pill.theme-theme-vigilante.active {
+  background: linear-gradient(135deg, #facc15, #334155 46%, #3b82f6);
+  color: #ffffff;
+}
+
+body[data-theme="theme-relic"] .pixel-transition span,
+body[data-theme="theme-treasure"] .pixel-transition span {
+  border-radius: 50%;
+  background: var(--checkpoint-splash-secondary);
+  box-shadow: 0 0 14px var(--checkpoint-splash-secondary), 0 0 32px var(--checkpoint-splash-glow);
+  animation-name: relicTransitionRight !important;
+}
+
+body[data-theme="theme-relic"] .pixel-transition.left span,
+body[data-theme="theme-treasure"] .pixel-transition.left span {
+  animation-name: relicTransitionLeft !important;
+}
+
+body[data-theme="theme-tamer"] .pixel-transition span {
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ef4444 0 48%, #f8fafc 48% 54%, #3b82f6 54% 100%);
+  box-shadow: 0 0 14px rgba(248, 250, 252, 0.5), 0 0 28px rgba(59, 130, 246, 0.34);
+  animation-name: tamerTransitionRight !important;
+}
+
+body[data-theme="theme-tamer"] .pixel-transition.left span {
+  animation-name: tamerTransitionLeft !important;
+}
+
+body[data-theme="theme-matrix"] .pixel-transition span {
+  width: max(2px, calc(var(--size) * 0.45));
+  height: calc(var(--size) * 3.2);
+  border-radius: 999px;
+  background: linear-gradient(180deg, transparent, #dcfce7 16%, #22c55e 70%, transparent);
+  box-shadow: 0 0 16px rgba(34, 197, 94, 0.58);
+  animation-name: matrixTransitionRight !important;
+}
+
+body[data-theme="theme-matrix"] .pixel-transition.left span {
+  animation-name: matrixTransitionLeft !important;
+}
+
+body[data-theme="theme-wasteland"] .pixel-transition span {
+  border-radius: 2px 10px 2px 10px;
+  background: linear-gradient(135deg, #fed7aa, #fb923c 50%, #7f1d1d);
+  box-shadow: 0 0 14px rgba(251, 146, 60, 0.46);
+  animation-name: wastelandTransitionRight !important;
+}
+
+body[data-theme="theme-wasteland"] .pixel-transition.left span {
+  animation-name: wastelandTransitionLeft !important;
+}
+
+body[data-theme="theme-vigilante"] .pixel-transition span {
+  width: calc(var(--size) * 2.2);
+  height: calc(var(--size) * 0.55);
+  border-radius: 999px 999px 2px 2px;
+  background: linear-gradient(90deg, transparent, #facc15 42%, #3b82f6);
+  box-shadow: 0 0 16px rgba(250, 204, 21, 0.52);
+  animation-name: vigilanteTransitionRight !important;
+}
+
+body[data-theme="theme-vigilante"] .pixel-transition.left span {
+  animation-name: vigilanteTransitionLeft !important;
+}
+
+@keyframes relicTransitionRight {
+  0% { opacity: 0; transform: translate(-84px, 22px) scale(0.25); }
+  38% { opacity: 1; transform: translate(0, -8px) scale(1.1); }
+  100% { opacity: 0; transform: translate(120px, -44px) scale(0.16); }
+}
+
+@keyframes relicTransitionLeft {
+  0% { opacity: 0; transform: translate(84px, 22px) scale(0.25); }
+  38% { opacity: 1; transform: translate(0, -8px) scale(1.1); }
+  100% { opacity: 0; transform: translate(-120px, -44px) scale(0.16); }
+}
+
+@keyframes tamerTransitionRight {
+  0% { opacity: 0; transform: translateX(-92px) rotate(-160deg) scale(0.35); }
+  40% { opacity: 1; transform: translateX(0) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translateX(118px) rotate(180deg) scale(0.18); }
+}
+
+@keyframes tamerTransitionLeft {
+  0% { opacity: 0; transform: translateX(92px) rotate(160deg) scale(0.35); }
+  40% { opacity: 1; transform: translateX(0) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translateX(-118px) rotate(-180deg) scale(0.18); }
+}
+
+@keyframes matrixTransitionRight {
+  0% { opacity: 0; transform: translate(-70px, -80px) scaleY(0.35); }
+  36% { opacity: 1; transform: translate(0, 0) scaleY(1); }
+  100% { opacity: 0; transform: translate(90px, 120px) scaleY(0.12); }
+}
+
+@keyframes matrixTransitionLeft {
+  0% { opacity: 0; transform: translate(70px, -80px) scaleY(0.35); }
+  36% { opacity: 1; transform: translate(0, 0) scaleY(1); }
+  100% { opacity: 0; transform: translate(-90px, 120px) scaleY(0.12); }
+}
+
+@keyframes wastelandTransitionRight {
+  0% { opacity: 0; transform: translate(-100px, 16px) rotate(-12deg) scale(0.4); }
+  35% { opacity: 1; transform: translate(0, -4px) rotate(10deg) scale(1); }
+  100% { opacity: 0; transform: translate(130px, 26px) rotate(42deg) scale(0.18); }
+}
+
+@keyframes wastelandTransitionLeft {
+  0% { opacity: 0; transform: translate(100px, 16px) rotate(12deg) scale(0.4); }
+  35% { opacity: 1; transform: translate(0, -4px) rotate(-10deg) scale(1); }
+  100% { opacity: 0; transform: translate(-130px, 26px) rotate(-42deg) scale(0.18); }
+}
+
+@keyframes vigilanteTransitionRight {
+  0% { opacity: 0; transform: translateX(-110px) scaleX(0.25); }
+  36% { opacity: 1; transform: translateX(0) scaleX(1.1); }
+  100% { opacity: 0; transform: translateX(140px) scaleX(0.12); }
+}
+
+@keyframes vigilanteTransitionLeft {
+  0% { opacity: 0; transform: translateX(110px) scaleX(0.25); }
+  36% { opacity: 1; transform: translateX(0) scaleX(1.1); }
+  100% { opacity: 0; transform: translateX(-140px) scaleX(0.12); }
+}
+
+body[data-theme="theme-relic"] .checkpoint-splash::after,
+body[data-theme="theme-tamer"] .checkpoint-splash::after,
+body[data-theme="theme-matrix"] .checkpoint-splash::after,
+body[data-theme="theme-wasteland"] .checkpoint-splash::after,
+body[data-theme="theme-treasure"] .checkpoint-splash::after,
+body[data-theme="theme-vigilante"] .checkpoint-splash::after {
+  content: "";
+  display: block !important;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.15;
+  z-index: 1;
+}
+
+body[data-theme="theme-relic"] .checkpoint-splash::after {
+  background:
+    radial-gradient(circle at 50% 38%, transparent 0 18%, rgba(234, 179, 8, 0.2) 18% 19%, transparent 20%),
+    repeating-conic-gradient(from 24deg at 50% 40%, transparent 0deg 16deg, rgba(234, 179, 8, 0.08) 16deg 17deg);
+}
+
+body[data-theme="theme-tamer"] .checkpoint-splash::after {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(248, 250, 252, 0.22), transparent 12%),
+    linear-gradient(90deg, rgba(239, 68, 68, 0.16), transparent 45%, transparent 55%, rgba(59, 130, 246, 0.16));
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash::after {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 18px, rgba(34, 197, 94, 0.16) 18px 19px),
+    repeating-linear-gradient(180deg, transparent 0 24px, rgba(34, 197, 94, 0.08) 24px 25px);
+}
+
+body[data-theme="theme-wasteland"] .checkpoint-splash::after {
+  background:
+    repeating-linear-gradient(12deg, rgba(254, 215, 170, 0.06) 0 1px, transparent 1px 20px),
+    radial-gradient(circle at 50% 76%, rgba(251, 146, 60, 0.24), transparent 22%);
+}
+
+body[data-theme="theme-treasure"] .checkpoint-splash::after {
+  background:
+    radial-gradient(circle at 30% 28%, rgba(250, 204, 21, 0.22), transparent 12%),
+    repeating-conic-gradient(from 18deg at 50% 48%, transparent 0deg 20deg, rgba(45, 212, 191, 0.08) 20deg 21deg);
+}
+
+body[data-theme="theme-vigilante"] .checkpoint-splash::after {
+  background:
+    radial-gradient(ellipse at 50% 24%, rgba(250, 204, 21, 0.28), transparent 14%),
+    linear-gradient(180deg, transparent 0 58%, rgba(2, 6, 23, 0.72) 58% 100%);
+}
+
+body[data-theme="theme-relic"] .checkpoint-splash .splash-particles-premium span,
+body[data-theme="theme-treasure"] .checkpoint-splash .splash-particles-premium span {
+  border-radius: 50% !important;
+}
+
+body[data-theme="theme-tamer"] .checkpoint-splash .splash-particles-premium span {
+  border-radius: 999px !important;
+  background: linear-gradient(180deg, #ef4444 0 48%, #f8fafc 48% 54%, #3b82f6 54% 100%) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span {
+  width: 2px !important;
+  height: 12px !important;
+  border-radius: 999px !important;
+}
+
+body[data-theme="theme-wasteland"] .checkpoint-splash .splash-particles-premium span {
+  border-radius: 2px 10px 2px 10px !important;
+}
+
+body[data-theme="theme-vigilante"] .checkpoint-splash .splash-particles-premium span {
+  width: 12px !important;
+  height: 3px !important;
+  border-radius: 999px !important;
+}
+
 .checkpoint-splash {
   background: var(--checkpoint-splash-bg) !important;
 }
