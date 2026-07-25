@@ -23425,3 +23425,247 @@ textarea:focus-visible,
     font-size: 0.68rem !important;
   }
 }
+
+/* Premium pop culture themes: stronger visual signatures. */
+body[data-theme="theme-arcane"] {
+  --bg-main:
+    radial-gradient(circle at 18% 12%, rgba(249, 210, 91, 0.26), transparent 25%),
+    radial-gradient(circle at 82% 9%, rgba(112, 58, 179, 0.34), transparent 27%),
+    radial-gradient(circle at 50% 90%, rgba(55, 24, 85, 0.34), transparent 34%),
+    linear-gradient(180deg, #120515 0%, #26102f 46%, #07020a 100%) !important;
+  --panel-bg: rgba(34, 18, 43, 0.84) !important;
+  --surface-bg: rgba(54, 33, 67, 0.66) !important;
+  --accent: linear-gradient(135deg, #fff1a8 0%, #d7a83f 42%, #6f3ab3 100%) !important;
+  --accent-solid: #d7a83f !important;
+  --checkpoint-splash-primary: rgba(215, 168, 63, 0.96) !important;
+  --checkpoint-splash-secondary: rgba(255, 241, 168, 0.92) !important;
+  --checkpoint-splash-glow: rgba(215, 168, 63, 0.64) !important;
+  --checkpoint-splash-fill: linear-gradient(90deg, #fff1a8 0%, #d7a83f 45%, #6f3ab3 100%) !important;
+}
+
+body[data-theme="theme-stellar"] {
+  --bg-main:
+    radial-gradient(circle at 18% 14%, rgba(59, 130, 246, 0.26), transparent 25%),
+    radial-gradient(circle at 84% 12%, rgba(239, 68, 68, 0.22), transparent 25%),
+    radial-gradient(circle at 50% 84%, rgba(226, 232, 240, 0.08), transparent 36%),
+    linear-gradient(180deg, #010714 0%, #07152f 48%, #000207 100%) !important;
+  --panel-bg: rgba(9, 19, 43, 0.86) !important;
+  --surface-bg: rgba(18, 34, 67, 0.66) !important;
+  --accent: linear-gradient(135deg, #e0f2fe 0%, #38bdf8 36%, #ef4444 100%) !important;
+  --accent-solid: #38bdf8 !important;
+  --checkpoint-splash-primary: rgba(56, 189, 248, 0.96) !important;
+  --checkpoint-splash-secondary: rgba(239, 68, 68, 0.86) !important;
+  --checkpoint-splash-glow: rgba(56, 189, 248, 0.58) !important;
+  --checkpoint-splash-fill: linear-gradient(90deg, #38bdf8 0%, #e0f2fe 48%, #ef4444 100%) !important;
+}
+
+body[data-theme="theme-multiverse"] {
+  --bg-main:
+    radial-gradient(circle at 17% 10%, rgba(239, 68, 68, 0.34), transparent 26%),
+    radial-gradient(circle at 84% 11%, rgba(37, 99, 235, 0.28), transparent 26%),
+    radial-gradient(circle at 52% 88%, rgba(250, 204, 21, 0.16), transparent 31%),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0 2px, transparent 2px 18px),
+    linear-gradient(180deg, #17040a 0%, #240817 48%, #050105 100%) !important;
+  --panel-bg: rgba(43, 16, 29, 0.84) !important;
+  --surface-bg: rgba(60, 25, 42, 0.66) !important;
+  --accent: linear-gradient(135deg, #ef4444 0%, #2563eb 48%, #facc15 100%) !important;
+  --accent-solid: #ef4444 !important;
+  --checkpoint-splash-primary: rgba(239, 68, 68, 0.96) !important;
+  --checkpoint-splash-secondary: rgba(250, 204, 21, 0.92) !important;
+  --checkpoint-splash-glow: rgba(37, 99, 235, 0.48) !important;
+  --checkpoint-splash-fill: linear-gradient(90deg, #facc15 0%, #ef4444 44%, #2563eb 100%) !important;
+}
+
+body[data-theme="theme-relic"] {
+  --bg-main:
+    radial-gradient(circle at 18% 10%, rgba(250, 204, 21, 0.22), transparent 25%),
+    radial-gradient(circle at 82% 12%, rgba(34, 197, 94, 0.18), transparent 27%),
+    radial-gradient(circle at 50% 86%, rgba(21, 128, 61, 0.24), transparent 34%),
+    repeating-conic-gradient(from 45deg at 50% 50%, transparent 0deg 16deg, rgba(250, 204, 21, 0.035) 16deg 17deg),
+    linear-gradient(180deg, #071006 0%, #10200d 48%, #020502 100%) !important;
+  --panel-bg: rgba(18, 35, 17, 0.84) !important;
+  --surface-bg: rgba(28, 51, 25, 0.66) !important;
+  --accent: linear-gradient(135deg, #facc15 0%, #84cc16 42%, #166534 100%) !important;
+  --accent-solid: #facc15 !important;
+  --checkpoint-splash-primary: rgba(250, 204, 21, 0.96) !important;
+  --checkpoint-splash-secondary: rgba(190, 242, 100, 0.9) !important;
+  --checkpoint-splash-glow: rgba(250, 204, 21, 0.54) !important;
+}
+
+body[data-theme="theme-tamer"] {
+  --bg-main:
+    radial-gradient(circle at 20% 12%, rgba(239, 68, 68, 0.28), transparent 25%),
+    radial-gradient(circle at 80% 12%, rgba(59, 130, 246, 0.28), transparent 25%),
+    radial-gradient(circle at 50% 84%, rgba(250, 204, 21, 0.14), transparent 30%),
+    linear-gradient(180deg, #06131d 0%, #0b2639 48%, #02070b 100%) !important;
+  --panel-bg: rgba(12, 33, 52, 0.84) !important;
+  --surface-bg: rgba(20, 50, 72, 0.66) !important;
+  --accent: linear-gradient(135deg, #ef4444 0%, #f8fafc 48%, #3b82f6 100%) !important;
+  --accent-solid: #3b82f6 !important;
+  --checkpoint-splash-primary: rgba(59, 130, 246, 0.96) !important;
+  --checkpoint-splash-secondary: rgba(248, 250, 252, 0.92) !important;
+  --checkpoint-splash-glow: rgba(239, 68, 68, 0.48) !important;
+}
+
+body[data-theme="theme-matrix"] {
+  --bg-main:
+    repeating-linear-gradient(90deg, rgba(34, 197, 94, 0.05) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(180deg, rgba(34, 197, 94, 0.035) 0 1px, transparent 1px 28px),
+    radial-gradient(circle at 50% 24%, rgba(34, 197, 94, 0.18), transparent 30%),
+    linear-gradient(180deg, #010905 0%, #04150b 48%, #000201 100%) !important;
+  --panel-bg: rgba(4, 24, 12, 0.86) !important;
+  --surface-bg: rgba(9, 39, 21, 0.66) !important;
+  --accent: linear-gradient(135deg, #dcfce7 0%, #22c55e 46%, #064e3b 100%) !important;
+  --accent-solid: #22c55e !important;
+  --checkpoint-splash-primary: rgba(34, 197, 94, 0.96) !important;
+  --checkpoint-splash-secondary: rgba(220, 252, 231, 0.9) !important;
+  --checkpoint-splash-glow: rgba(34, 197, 94, 0.58) !important;
+}
+
+body[data-theme="theme-wasteland"] {
+  --bg-main:
+    radial-gradient(circle at 20% 12%, rgba(251, 146, 60, 0.24), transparent 26%),
+    radial-gradient(circle at 80% 10%, rgba(127, 29, 29, 0.24), transparent 28%),
+    radial-gradient(circle at 50% 88%, rgba(120, 53, 15, 0.3), transparent 34%),
+    repeating-linear-gradient(12deg, rgba(254, 215, 170, 0.045) 0 1px, transparent 1px 24px),
+    linear-gradient(180deg, #160b04 0%, #251206 48%, #060201 100%) !important;
+  --panel-bg: rgba(49, 27, 13, 0.86) !important;
+  --surface-bg: rgba(71, 42, 21, 0.66) !important;
+  --accent: linear-gradient(135deg, #fed7aa 0%, #fb923c 48%, #7f1d1d 100%) !important;
+  --accent-solid: #fb923c !important;
+  --checkpoint-splash-primary: rgba(251, 146, 60, 0.96) !important;
+  --checkpoint-splash-secondary: rgba(254, 215, 170, 0.9) !important;
+  --checkpoint-splash-glow: rgba(251, 146, 60, 0.54) !important;
+}
+
+body[data-theme="theme-treasure"] {
+  --bg-main:
+    radial-gradient(circle at 18% 12%, rgba(45, 212, 191, 0.24), transparent 26%),
+    radial-gradient(circle at 82% 10%, rgba(250, 204, 21, 0.18), transparent 26%),
+    radial-gradient(circle at 50% 86%, rgba(14, 165, 233, 0.22), transparent 34%),
+    repeating-conic-gradient(from 20deg at 50% 50%, transparent 0deg 18deg, rgba(250, 204, 21, 0.04) 18deg 19deg),
+    linear-gradient(180deg, #061722 0%, #0b2a3a 48%, #02080d 100%) !important;
+  --panel-bg: rgba(12, 42, 56, 0.84) !important;
+  --surface-bg: rgba(19, 59, 75, 0.66) !important;
+  --accent: linear-gradient(135deg, #2dd4bf 0%, #0ea5e9 48%, #facc15 100%) !important;
+  --accent-solid: #2dd4bf !important;
+  --checkpoint-splash-primary: rgba(45, 212, 191, 0.96) !important;
+  --checkpoint-splash-secondary: rgba(250, 204, 21, 0.88) !important;
+  --checkpoint-splash-glow: rgba(45, 212, 191, 0.54) !important;
+}
+
+body[data-theme="theme-vigilante"] {
+  --bg-main:
+    radial-gradient(ellipse at 50% 10%, rgba(250, 204, 21, 0.2), transparent 22%),
+    radial-gradient(circle at 78% 12%, rgba(59, 130, 246, 0.16), transparent 25%),
+    linear-gradient(180deg, #030510 0%, #080e1e 48%, #000105 100%) !important;
+  --panel-bg: rgba(11, 17, 32, 0.88) !important;
+  --surface-bg: rgba(19, 27, 45, 0.68) !important;
+  --accent: linear-gradient(135deg, #facc15 0%, #475569 48%, #3b82f6 100%) !important;
+  --accent-solid: #facc15 !important;
+  --checkpoint-splash-primary: rgba(250, 204, 21, 0.94) !important;
+  --checkpoint-splash-secondary: rgba(203, 213, 225, 0.88) !important;
+  --checkpoint-splash-glow: rgba(250, 204, 21, 0.48) !important;
+}
+
+body[data-theme="theme-arcane"] .app-shell::after {
+  background:
+    radial-gradient(circle at 30% 18%, rgba(249, 210, 91, 0.18), transparent 15%),
+    repeating-conic-gradient(from 10deg at 50% 42%, transparent 0deg 14deg, rgba(255, 241, 168, 0.045) 14deg 15deg),
+    var(--theme-aurora) !important;
+}
+
+body[data-theme="theme-stellar"] .app-shell::after {
+  background:
+    radial-gradient(circle at 22% 20%, rgba(56, 189, 248, 0.2), transparent 13%),
+    radial-gradient(circle at 82% 18%, rgba(239, 68, 68, 0.16), transparent 14%),
+    radial-gradient(circle at 30% 36%, rgba(255, 255, 255, 0.18) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 54%, rgba(255, 255, 255, 0.16) 0 1px, transparent 2px),
+    var(--theme-aurora) !important;
+  background-size: auto, auto, 92px 92px, 138px 138px, auto !important;
+}
+
+body[data-theme="theme-multiverse"] .app-shell::after {
+  background:
+    radial-gradient(circle at 22% 16%, rgba(239, 68, 68, 0.22), transparent 16%),
+    radial-gradient(circle at 82% 20%, rgba(37, 99, 235, 0.2), transparent 16%),
+    radial-gradient(circle at 52% 82%, rgba(250, 204, 21, 0.12), transparent 18%),
+    repeating-radial-gradient(circle at 82% 14%, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 8px),
+    var(--theme-aurora) !important;
+}
+
+body[data-theme="theme-matrix"] .app-shell::after {
+  background:
+    repeating-linear-gradient(90deg, rgba(34, 197, 94, 0.07) 0 1px, transparent 1px 32px),
+    repeating-linear-gradient(180deg, rgba(34, 197, 94, 0.045) 0 1px, transparent 1px 42px),
+    var(--theme-aurora) !important;
+}
+
+body[data-theme="theme-wasteland"] .app-shell::after {
+  background:
+    radial-gradient(circle at 20% 14%, rgba(251, 146, 60, 0.18), transparent 16%),
+    repeating-linear-gradient(10deg, rgba(254, 215, 170, 0.035) 0 1px, transparent 1px 28px),
+    var(--theme-aurora) !important;
+}
+
+body[data-theme="theme-vigilante"] .app-shell::after {
+  background:
+    radial-gradient(ellipse at 50% 6%, rgba(250, 204, 21, 0.22), transparent 18%),
+    linear-gradient(180deg, transparent 0 62%, rgba(0, 0, 0, 0.32) 62% 100%),
+    var(--theme-aurora) !important;
+}
+
+body[data-theme="theme-arcane"] .checkpoint-splash .splash-title::after,
+body[data-theme="theme-relic"] .checkpoint-splash .splash-title::after,
+body[data-theme="theme-treasure"] .checkpoint-splash .splash-title::after {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  bottom: -0.28em;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--checkpoint-splash-secondary), transparent);
+  box-shadow: 0 0 16px var(--checkpoint-splash-glow);
+}
+
+body[data-theme="theme-stellar"] .checkpoint-splash::before {
+  background:
+    linear-gradient(112deg, transparent 0 39%, rgba(56, 189, 248, 0.34) 40%, transparent 43% 57%, rgba(239, 68, 68, 0.28) 58%, transparent 61% 100%),
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.32) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 42%, rgba(255, 255, 255, 0.22) 0 1px, transparent 2px) !important;
+  background-size: auto, 86px 86px, 122px 122px !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash::before {
+  background:
+    repeating-linear-gradient(90deg, rgba(34, 197, 94, 0.12) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(180deg, rgba(34, 197, 94, 0.08) 0 1px, transparent 1px 18px) !important;
+  opacity: 0.24 !important;
+}
+
+body[data-theme="theme-vigilante"] .checkpoint-splash::before {
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(250, 204, 21, 0.36), transparent 18%),
+    linear-gradient(180deg, transparent 0 55%, rgba(0, 0, 0, 0.42) 55% 100%) !important;
+  opacity: 0.32 !important;
+}
+
+body[data-theme="theme-arcane"] .checkpoint-splash .splash-logo-mark,
+body[data-theme="theme-relic"] .checkpoint-splash .splash-logo-mark,
+body[data-theme="theme-treasure"] .checkpoint-splash .splash-logo-mark {
+  filter:
+    drop-shadow(0 0 18px var(--checkpoint-splash-glow))
+    drop-shadow(0 0 6px var(--checkpoint-splash-secondary)) !important;
+}
+
+body[data-theme="theme-stellar"] .checkpoint-splash .splash-logo-letter:first-child {
+  background: linear-gradient(180deg, #ffffff, #38bdf8 58%, #1d4ed8) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+body[data-theme="theme-stellar"] .checkpoint-splash .splash-logo-letter:last-child {
+  background: linear-gradient(180deg, #ffffff, #f87171 58%, #b91c1c) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
