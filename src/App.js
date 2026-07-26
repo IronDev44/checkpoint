@@ -5583,6 +5583,177 @@ function LibrarySection({
   );
 }
 
+function LibrarySmartPanel({
+  games = [],
+  collectionGames = [],
+  inProgressGames = [],
+  wishlistGames = [],
+  onOpenDetail,
+  onSetLibraryView,
+  onSetLibrarySearch,
+}) {
+  const ratedCollection = collectionGames
+    .map((game) => ({ ...game, checkpointRating: getGameRating(game) }))
+    .filter((game) => game.checkpointRating > 0)
+    .sort((a, b) => b.checkpointRating - a.checkpointRating);
+  const unfinishedCollection = collectionGames.filter(
+    (game) => !isGameFinishedStatus(game)
+  );
+  const continueGame = [...inProgressGames]
+    .map((game) => ({ ...game, checkpointRating: getGameRating(game) }))
+    .sort((a, b) => b.checkpointRating - a.checkpointRating)[0];
+  const launchCandidate =
+    unfinishedCollection
+      .map((game) => ({
+        ...game,
+        checkpointRating: getGameRating(game),
+      }))
+      .filter((game) => game.status !== "en cours")
+      .sort((a, b) => {
+        const ratingGap = b.checkpointRating - a.checkpointRating;
+        if (ratingGap !== 0) return ratingGap;
+        return String(b.released || "").localeCompare(String(a.released || ""));
+      })[0] || ratedCollection[0];
+  const unratedCandidate =
+    collectionGames.find((game) => getGameRating(game) <= 0) ||
+    games.find((game) => getGameRating(game) <= 0 && game.status !== "wishlist");
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const wishlistCandidate =
+    wishlistGames
+      .map((game) => ({
+        ...game,
+        releaseDate: game.released ? new Date(game.released) : null,
+      }))
+      .sort((a, b) => {
+        const futureA = a.releaseDate && a.releaseDate >= today;
+        const futureB = b.releaseDate && b.releaseDate >= today;
+        if (futureA && !futureB) return -1;
+        if (!futureA && futureB) return 1;
+        if (a.releaseDate && b.releaseDate) return a.releaseDate - b.releaseDate;
+        return 0;
+      })[0];
+  const ratedPercent = collectionGames.length
+    ? Math.round(
+        (collectionGames.filter((game) => getGameRating(game) > 0).length /
+          collectionGames.length) *
+          100
+      )
+    : 0;
+  const finishedPercent = collectionGames.length
+    ? Math.round(
+        (collectionGames.filter(isGameFinishedStatus).length /
+          collectionGames.length) *
+          100
+      )
+    : 0;
+  const libraryPulse = Math.min(
+    100,
+    Math.round(
+      ratedPercent * 0.42 +
+        finishedPercent * 0.38 +
+        Math.min(inProgressGames.length * 5, 12) +
+        Math.min(wishlistGames.length * 0.4, 8)
+    )
+  );
+  const smartCards = [
+    continueGame && {
+      label: "A reprendre",
+      title: continueGame.name,
+      detail: `${formatRating10(getGameRating(continueGame), "non note")} - en cours`,
+      action: "Ouvrir",
+      view: "en cours",
+      game: continueGame,
+    },
+    launchCandidate && {
+      label: "A lancer",
+      title: launchCandidate.name,
+      detail: `${formatRating10(getGameRating(launchCandidate), "non note")} - meilleur candidat`,
+      action: "Voir",
+      view: "collection",
+      game: launchCandidate,
+    },
+    unratedCandidate && {
+      label: "A noter",
+      title: unratedCandidate.name,
+      detail: "Une note rendra tes tops plus fiables.",
+      action: "Noter",
+      view: "collection",
+      game: unratedCandidate,
+    },
+    wishlistCandidate && {
+      label: "Wishlist",
+      title: wishlistCandidate.name,
+      detail: getReleaseCountdown(wishlistCandidate.released),
+      action: "Suivre",
+      view: "wishlist",
+      game: wishlistCandidate,
+    },
+  ].filter(Boolean);
+
+  if (!games.length) return null;
+
+  return (
+    <div className="search-panel library-smart-panel">
+      <div className="library-smart-head">
+        <div>
+          <span>Radar bibliotheque</span>
+          <h2>Ce qui merite ton attention</h2>
+          <p>
+            Checkpoint priorise les jeux a reprendre, a lancer, a noter et les sorties a surveiller.
+          </p>
+        </div>
+
+        <div className="library-smart-score">
+          <span>Clarte</span>
+          <strong>{libraryPulse}%</strong>
+        </div>
+      </div>
+
+      <div className="library-smart-metrics">
+        <div>
+          <strong>{collectionGames.length}</strong>
+          <span>collection</span>
+        </div>
+        <div>
+          <strong>{inProgressGames.length}</strong>
+          <span>en cours</span>
+        </div>
+        <div>
+          <strong>{ratedPercent}%</strong>
+          <span>notes</span>
+        </div>
+        <div>
+          <strong>{finishedPercent}%</strong>
+          <span>termines</span>
+        </div>
+      </div>
+
+      {smartCards.length > 0 && (
+        <div className="library-smart-grid">
+          {smartCards.map((card) => (
+            <button
+              key={`${card.label}-${card.game.id || card.title}`}
+              type="button"
+              className="library-smart-card"
+              onClick={() => {
+                onSetLibraryView?.(card.view);
+                onSetLibrarySearch?.("");
+                onOpenDetail?.(card.game, card.view === "wishlist" ? wishlistGames : games);
+              }}
+            >
+              <span>{card.label}</span>
+              <strong>{card.title}</strong>
+              <small>{card.detail}</small>
+              <em>{card.action}</em>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* -------------------- OPTIONS -------------------- */
 
 const FALLBACK_GAMING_EVENTS = [
@@ -15015,6 +15186,16 @@ const setPlayedPlatforms = async (id, platforms) => {
         </button>
       </div>
     </div>
+
+    <LibrarySmartPanel
+      games={filteredLibraryGames}
+      collectionGames={collectionGames}
+      inProgressGames={inProgressGames}
+      wishlistGames={wishlistGames}
+      onOpenDetail={openGameDetail}
+      onSetLibraryView={setLibraryView}
+      onSetLibrarySearch={setLibrarySearch}
+    />
 
     <div className="library-switch">
   <button
