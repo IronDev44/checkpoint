@@ -24215,3 +24215,37 @@ body[data-theme="theme-matrix"] .checkpoint-splash .splash-bg::after {
     transform: translateY(34%);
   }
 }
+
+/* Startup polish: keep the app background stable when the splash closes. */
+.app-shell,
+.app-hidden,
+.app-visible {
+  opacity: 1 !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+.app-visible {
+  transition: none !important;
+}
+
+/* Code vert tuning: slower, heavier rain. */
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span {
+  animation-duration: 5.2s !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(2n) {
+  animation-duration: 6.1s !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(3n) {
+  animation-duration: 4.7s !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(5n) {
+  animation-duration: 6.8s !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-bg::after {
+  animation-duration: 6.4s !important;
+}
