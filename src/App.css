@@ -8606,6 +8606,125 @@ body[data-ui="modern"] .chip.active {
   margin-bottom: 10px;
 }
 
+.progression-command-card {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  border: 1px solid color-mix(in srgb, var(--accent), transparent 72%);
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--accent), transparent 78%), transparent 42%),
+    rgba(255,255,255,0.055);
+}
+
+.progression-command-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.progression-command-head .home-card-title {
+  margin-bottom: 4px;
+}
+
+.progression-command-head p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.progression-command-score {
+  flex: 0 0 auto;
+  min-width: 82px;
+  padding: 9px 10px;
+  border-radius: 14px;
+  background: var(--accent);
+  color: white;
+  text-align: center;
+  box-shadow: var(--accent-shadow);
+}
+
+.progression-command-score span,
+.progression-command-score strong {
+  display: block;
+  line-height: 1.05;
+}
+
+.progression-command-score span {
+  font-size: 11px;
+  font-weight: 900;
+  opacity: 0.84;
+  text-transform: uppercase;
+}
+
+.progression-command-score strong {
+  margin-top: 4px;
+  font-size: 22px;
+  font-weight: 1000;
+}
+
+.progression-command-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.progression-command-item {
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  background: rgba(10, 18, 32, 0.34);
+}
+
+.progression-command-item span,
+.progression-command-item small,
+.progression-command-item strong {
+  display: block;
+}
+
+.progression-command-item span {
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.progression-command-item strong {
+  margin-top: 5px;
+  color: var(--text-main);
+  font-size: 16px;
+  font-weight: 1000;
+  line-height: 1.1;
+}
+
+.progression-command-item small {
+  min-height: 26px;
+  margin-top: 5px;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.progression-command-meter {
+  height: 5px;
+  margin-top: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.09);
+}
+
+.progression-command-meter > div {
+  height: 100%;
+  min-width: 8px;
+  border-radius: inherit;
+  background: var(--accent);
+  box-shadow: var(--accent-shadow);
+}
+
 .checkpoint-goals-card {
   display: flex;
   flex-direction: column;
@@ -8762,6 +8881,18 @@ body[data-ui="modern"] .chip.active {
 }
 
 @media (max-width: 560px) {
+  .progression-command-head {
+    flex-direction: column;
+  }
+
+  .progression-command-score {
+    width: 100%;
+  }
+
+  .progression-command-grid {
+    grid-template-columns: 1fr;
+  }
+
   .checkpoint-goals-head {
     flex-direction: column;
   }

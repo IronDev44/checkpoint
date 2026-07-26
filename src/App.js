@@ -6946,6 +6946,32 @@ function HomeTab({
     };
   };
 
+  const buildMilestoneGoal = ({
+    baseId,
+    title,
+    detail,
+    actionLabel,
+    tab,
+    current,
+    targets,
+    xpByTarget,
+  }) => {
+    const target =
+      targets.find((value) => !claimedGoalIds[`${baseId}-${value}`]) ||
+      targets[targets.length - 1];
+
+    return makeCheckpointGoal({
+      id: `${baseId}-${target}`,
+      title,
+      detail: typeof detail === "function" ? detail(target) : detail,
+      actionLabel,
+      tab,
+      current,
+      target,
+      xp: xpByTarget?.[target] || Math.round(target * 4),
+    });
+  };
+
   const measurableGoals = [
     makeCheckpointGoal({
       id: `quiz-${weeklyQuiz?.weekKey || "free"}`,
@@ -6957,35 +6983,48 @@ function HomeTab({
       target: 1,
       xp: 60,
     }),
-    makeCheckpointGoal({
-      id: "rated-games-25",
-      title: "Profil fiable",
-      detail: "Atteindre 25 jeux notes pour fiabiliser tes tops.",
-      actionLabel: "Valider",
+    buildMilestoneGoal({
+      baseId: "quiz-streak",
+      title: "Serie quiz",
+      detail: (target) => `Atteindre une serie de ${target} bonnes reponses.`,
+      actionLabel: "Quiz",
+      tab: "home",
+      current: Math.max(
+        weeklyQuizProgress.streak || 0,
+        weeklyQuizProgress.bestStreak || 0
+      ),
+      targets: [3, 7, 14, 30],
+      xpByTarget: { 3: 90, 7: 160, 14: 260, 30: 500 },
+    }),
+    buildMilestoneGoal({
+      baseId: "rated-games",
+      title: "Bibliotheque fiable",
+      detail: (target) => `Atteindre ${target} jeux notes pour rendre les tops plus precis.`,
+      actionLabel: "Bibliotheque",
       tab: "library",
       current: ratedGames.length,
-      target: 25,
-      xp: 120,
+      targets: [25, 50, 100, 200, 400],
+      xpByTarget: { 25: 120, 50: 220, 100: 420, 200: 800, 400: 1400 },
     }),
-    makeCheckpointGoal({
-      id: "rated-hardware-10",
+    buildMilestoneGoal({
+      baseId: "rated-hardware",
       title: "Materiel calibre",
-      detail: "Noter 10 materiels possedes pour solidifier le classement.",
-      actionLabel: "Valider",
+      detail: (target) => `Noter ${target} materiels possedes pour fiabiliser le classement.`,
+      actionLabel: "Materiel",
       tab: "hardware",
       current: ratedHardwareCount,
-      target: 10,
-      xp: 100,
+      targets: [10, 25, 50, 100],
+      xpByTarget: { 10: 100, 25: 220, 50: 420, 100: 760 },
     }),
-    makeCheckpointGoal({
-      id: "finished-games-25",
-      title: "Archive solide",
-      detail: "Valider 25 jeux termines dans ta collection.",
-      actionLabel: "Valider",
+    buildMilestoneGoal({
+      baseId: "finished-games",
+      title: "Archives de joueur",
+      detail: (target) => `Valider ${target} jeux termines dans ta collection.`,
+      actionLabel: "Bibliotheque",
       tab: "library",
       current: dashboardFinished,
-      target: 25,
-      xp: 150,
+      targets: [25, 50, 100, 250, 500],
+      xpByTarget: { 25: 150, 50: 280, 100: 520, 250: 1100, 500: 1900 },
     }),
   ].filter((goal) => !goal.claimed);
 
@@ -7025,10 +7064,72 @@ function HomeTab({
   const checkpointGoals = [
     ...measurableGoals.sort((a, b) => Number(b.claimable) - Number(a.claimable) || b.progress - a.progress),
     ...shortcutGoals,
-  ].slice(0, 3);
+  ].slice(0, 4);
 
   const claimedGoals = Object.values(claimedGoalIds);
   const claimedGoalsXP = checkpointGoalProgress.totalXP || 0;
+  const unlockedBadgeCount = badges.filter((badge) => badge.unlocked).length;
+  const badgeCompletionPercent = badges.length
+    ? Math.round((unlockedBadgeCount / badges.length) * 100)
+    : 0;
+  const nextRank = RANKS.find((rank) => rank.min > level);
+  const progressionMilestones = [
+    { level: 10, label: "Theme", reward: "Ecole des sorciers" },
+    { level: 15, label: "Theme", reward: "Guerre des etoiles" },
+    { level: 20, label: "Theme", reward: "Super-heros multivers" },
+    { level: 25, label: "Theme", reward: "Code vert" },
+    { level: 30, label: "Theme", reward: "Chevalier noir" },
+    { level: 40, label: "Profil", reward: "Badge mis en avant" },
+    { level: 60, label: "Theme", reward: "Carte au tresor" },
+    { level: 70, label: "Theme", reward: "Survie post-apo" },
+    { level: 80, label: "Theme", reward: "Quete de la relique" },
+    { level: 90, label: "Theme", reward: "Maitre des creatures" },
+    { level: 100, label: "Statut", reward: "Supreme" },
+  ];
+  const unlockedMilestones = progressionMilestones.filter((milestone) => level >= milestone.level);
+  const nextMilestone = progressionMilestones.find((milestone) => level < milestone.level);
+  const currentMilestone = unlockedMilestones[unlockedMilestones.length - 1] || progressionMilestones[0];
+  const nextMilestonePercent = nextMilestone
+    ? Math.min(100, Math.round((level / Math.max(nextMilestone.level, 1)) * 100))
+    : 100;
+  const nextRankPercent = nextRank
+    ? Math.min(100, Math.round((level / Math.max(nextRank.min, 1)) * 100))
+    : 100;
+  const weeklyMomentum = Math.min(
+    100,
+    Math.round(
+      (quizLocked ? 24 : 0) +
+        Math.min((weeklyQuizProgress.streak || 0) * 8, 32) +
+        Math.min(checkpointGoals.filter((goal) => goal.claimable).length * 18, 36) +
+        Math.min((ratedGames.length / Math.max(total, 1)) * 8, 8)
+    )
+  );
+  const progressionCards = [
+    {
+      label: nextMilestone ? "Prochaine recompense" : "Palier max",
+      value: nextMilestone ? `Niv. ${nextMilestone.level}` : "Complet",
+      detail: nextMilestone ? nextMilestone.reward : currentMilestone.reward,
+      progress: nextMilestonePercent,
+    },
+    {
+      label: "Rythme actuel",
+      value: `${weeklyMomentum}%`,
+      detail: quizLocked ? "Quiz valide" : "Quiz disponible",
+      progress: weeklyMomentum,
+    },
+    {
+      label: "Badges",
+      value: `${unlockedBadgeCount}/${badges.length || 0}`,
+      detail: nextBadge ? `Prochain : ${nextBadge.name}` : "Collection complete",
+      progress: badgeCompletionPercent,
+    },
+    {
+      label: "Prochain rang",
+      value: nextRank ? nextRank.title : "Supreme",
+      detail: nextRank ? `Niveau ${nextRank.min}` : "Rang maximum",
+      progress: nextRankPercent,
+    },
+  ];
 
   const upcomingEvents = getUpcomingEvents(gamingEvents);
   const nextEvent = upcomingEvents[0];
@@ -7301,11 +7402,40 @@ function HomeTab({
         </div>
       )}
 
+      <div className="home-card progression-command-card">
+        <div className="progression-command-head">
+          <div>
+            <div className="home-card-title">Progression personnelle</div>
+            <p>
+              Tes objectifs, ton rythme et les prochaines recompenses du hub au meme endroit.
+            </p>
+          </div>
+
+          <div className="progression-command-score">
+            <span>Saison</span>
+            <strong>{weeklyMomentum}%</strong>
+          </div>
+        </div>
+
+        <div className="progression-command-grid">
+          {progressionCards.map((card) => (
+            <div key={card.label} className="progression-command-item">
+              <span>{card.label}</span>
+              <strong>{card.value}</strong>
+              <small>{card.detail}</small>
+              <div className="progression-command-meter">
+                <div style={{ width: `${card.progress}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="home-card checkpoint-goals-card">
         <div className="checkpoint-goals-head">
           <div>
             <div className="home-card-title">Objectifs Checkpoint</div>
-            <p>Des objectifs utiles pour faire progresser ton hub sans remplir l'app de missions inutiles.</p>
+            <p>Des paliers utiles qui rapportent de l'XP sans remplir l'app de missions inutiles.</p>
           </div>
 
           <div className="checkpoint-goals-xp">
