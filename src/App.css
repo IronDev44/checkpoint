@@ -24090,3 +24090,128 @@ body[data-theme="theme-multiverse"] .pixel-transition.left span {
     transform: translateX(-150px) skewX(18deg) scaleX(0.14);
   }
 }
+
+/* Final pass: remove the stellar beam and make code rain feel alive. */
+body[data-theme="theme-stellar"] .pixel-transition::before {
+  display: none !important;
+  content: none !important;
+  animation: none !important;
+}
+
+body[data-theme="theme-stellar"] .pixel-transition.right span,
+body[data-theme="theme-stellar"] .pixel-transition.left span {
+  width: clamp(18px, calc(var(--size) * 3.1), 38px) !important;
+  height: clamp(2px, calc(var(--size) * 0.32), 4px) !important;
+  background: linear-gradient(90deg, transparent, rgba(224, 242, 254, 0.96), rgba(56, 189, 248, 0.95), transparent) !important;
+  border-radius: 999px !important;
+  box-shadow:
+    0 0 10px rgba(56, 189, 248, 0.68),
+    0 0 22px rgba(239, 68, 68, 0.24) !important;
+}
+
+body[data-theme="theme-stellar"] .pixel-transition.right span {
+  left: -42px !important;
+  animation-name: stellarParticleFromLeft !important;
+}
+
+body[data-theme="theme-stellar"] .pixel-transition.left span {
+  left: auto !important;
+  right: -42px !important;
+  animation-name: stellarParticleFromRight !important;
+}
+
+@keyframes stellarParticleFromLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(-22vw) scaleX(0.3);
+  }
+
+  24% {
+    opacity: 1;
+    transform: translateX(8vw) scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(116vw) scaleX(0.16);
+  }
+}
+
+@keyframes stellarParticleFromRight {
+  0% {
+    opacity: 0;
+    transform: translateX(22vw) scaleX(0.3);
+  }
+
+  24% {
+    opacity: 1;
+    transform: translateX(-8vw) scaleX(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-116vw) scaleX(0.16);
+  }
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span {
+  animation: matrixDigitDrop 2.8s linear infinite !important;
+  animation-delay: var(--matrix-delay, 0s) !important;
+  opacity: 0;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(2n) {
+  --matrix-delay: -0.7s;
+  animation-duration: 3.4s !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(3n) {
+  --matrix-delay: -1.3s;
+  animation-duration: 2.45s !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(5n) {
+  --matrix-delay: -2.1s;
+  animation-duration: 3.8s !important;
+}
+
+@keyframes matrixDigitDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-34vh) scale(0.88);
+  }
+
+  12% {
+    opacity: 0.82;
+  }
+
+  78% {
+    opacity: 0.56;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(118vh) scale(1);
+  }
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-bg::after {
+  color: rgba(134, 239, 172, 0.22) !important;
+  animation: matrixRainLayerAlive 2.7s linear infinite !important;
+}
+
+@keyframes matrixRainLayerAlive {
+  0% {
+    opacity: 0.24;
+    transform: translateY(-28%);
+  }
+
+  50% {
+    opacity: 0.48;
+  }
+
+  100% {
+    opacity: 0.18;
+    transform: translateY(34%);
+  }
+}
