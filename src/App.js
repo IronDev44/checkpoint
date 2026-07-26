@@ -5087,7 +5087,7 @@ function GameDetailModal({
 
 function LibraryShelf3D({ games, onOpenDetail }) {
   const displayedGames = games;
-  const gamesPerShelf = 12;
+  const gamesPerShelf = 28;
 
   const groupedByPlatform = displayedGames.reduce((acc, game) => {
     const platforms =
@@ -5150,13 +5150,14 @@ function LibraryShelf3D({ games, onOpenDetail }) {
                     <div className="shelf3d-level-back" />
 
                     <div className="shelf3d-level-games">
-                      {shelfGames.map((game) => (
+                      {shelfGames.map((game, gameIndex) => (
                         <button
                           key={`${platform}-${game.id}`}
                           type="button"
                           className="shelf3d-case"
                           style={{
                             "--cover": `url(${game.image || ""})`,
+                            "--case-offset": `${gameIndex % 5}`,
                           }}
                           onClick={() => onOpenDetail(game)}
                         >
