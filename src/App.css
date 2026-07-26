@@ -24249,3 +24249,83 @@ body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium spa
 body[data-theme="theme-matrix"] .checkpoint-splash .splash-bg::after {
   animation-duration: 6.4s !important;
 }
+
+/* Theme readability refinements. */
+body[data-theme="theme-tamer"] {
+  --bg-main:
+    radial-gradient(circle at 20% 12%, rgba(239, 68, 68, 0.18), transparent 25%),
+    radial-gradient(circle at 80% 12%, rgba(59, 130, 246, 0.24), transparent 25%),
+    radial-gradient(circle at 50% 84%, rgba(250, 204, 21, 0.08), transparent 30%),
+    linear-gradient(180deg, #06131d 0%, #0b2639 48%, #02070b 100%) !important;
+  --panel-bg: rgba(8, 28, 43, 0.88) !important;
+  --surface-bg: rgba(14, 39, 58, 0.72) !important;
+  --accent: linear-gradient(135deg, #ef4444 0%, #2563eb 58%, #0f172a 100%) !important;
+  --accent-solid: #2563eb !important;
+  --accent-shadow:
+    0 0 22px rgba(37, 99, 235, 0.26),
+    0 0 34px rgba(239, 68, 68, 0.16) !important;
+  --checkpoint-title-gradient: linear-gradient(180deg, #ffffff 0%, #fecaca 32%, #ef4444 52%, #60a5fa 100%) !important;
+  --checkpoint-splash-fill: linear-gradient(90deg, #ef4444 0%, #2563eb 58%, #0f172a 100%) !important;
+}
+
+body[data-theme="theme-tamer"] .option-pill.active,
+body[data-theme="theme-tamer"] .tab-btn.active,
+body[data-theme="theme-tamer"] .hardware-type-switch button.active,
+body[data-theme="theme-tamer"] .hardware-collection-filters button.active,
+body[data-theme="theme-tamer"] .hardware-catalog-toggle.active,
+body[data-theme="theme-tamer"] .hardware-rank-btn.active,
+body[data-theme="theme-tamer"] .hardware-status-action.active,
+body[data-theme="theme-tamer"] .status-btn.active,
+body[data-theme="theme-tamer"] .choice-pill.active {
+  color: #ffffff !important;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.6),
+    0 0 10px rgba(15, 23, 42, 0.42) !important;
+}
+
+body[data-theme="theme-tamer"] .checkpoint-card-rank,
+body[data-theme="theme-tamer"] .ranking-position,
+body[data-theme="theme-tamer"] .rank-badge {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #ef4444 0%, #2563eb 100%) !important;
+}
+
+body[data-theme="theme-vigilante"] {
+  --bg-main:
+    radial-gradient(ellipse at 50% 10%, rgba(96, 165, 250, 0.16), transparent 22%),
+    radial-gradient(circle at 78% 12%, rgba(148, 163, 184, 0.13), transparent 25%),
+    linear-gradient(180deg, #030510 0%, #080e1e 48%, #000105 100%) !important;
+  --panel-border: rgba(96, 165, 250, 0.18) !important;
+  --surface-border: rgba(148, 163, 184, 0.14) !important;
+  --accent: linear-gradient(135deg, #60a5fa 0%, #334155 62%, #d6a62d 100%) !important;
+  --accent-solid: #60a5fa !important;
+  --accent-shadow:
+    0 0 24px rgba(96, 165, 250, 0.24),
+    0 0 34px rgba(15, 23, 42, 0.2) !important;
+  --genre-color: #93c5fd !important;
+  --checkpoint-title-gradient: linear-gradient(180deg, #ffffff 0%, #dbeafe 35%, #60a5fa 62%, #d6a62d 100%) !important;
+  --checkpoint-title-glow: rgba(96, 165, 250, 0.28) !important;
+  --checkpoint-splash-primary: rgba(96, 165, 250, 0.9) !important;
+  --checkpoint-splash-secondary: rgba(203, 213, 225, 0.82) !important;
+  --checkpoint-splash-glow: rgba(96, 165, 250, 0.42) !important;
+  --checkpoint-splash-fill: linear-gradient(90deg, #60a5fa 0%, #334155 66%, #d6a62d 100%) !important;
+  --checkpoint-splash-bg-layer:
+    radial-gradient(ellipse at 50% 23%, rgba(96, 165, 250, 0.2), transparent 17%),
+    radial-gradient(ellipse at 50% 70%, rgba(148, 163, 184, 0.08), transparent 34%),
+    linear-gradient(180deg, #010208, #050b17 54%, #000104) !important;
+}
+
+body[data-theme="theme-vigilante"] .app-shell::after {
+  background:
+    radial-gradient(ellipse at 50% 6%, rgba(96, 165, 250, 0.16), transparent 18%),
+    linear-gradient(180deg, transparent 0 72%, rgba(0, 0, 0, 0.26) 100%),
+    var(--theme-aurora) !important;
+}
+
+body[data-theme="theme-vigilante"] .checkpoint-splash::before,
+body[data-theme="theme-vigilante"] .checkpoint-splash::after {
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(96, 165, 250, 0.2), transparent 17%),
+    radial-gradient(ellipse at 50% 76%, rgba(148, 163, 184, 0.08), transparent 28%) !important;
+  opacity: 0.2 !important;
+}
