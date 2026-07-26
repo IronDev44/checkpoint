@@ -13,6 +13,7 @@
   --accent: linear-gradient(135deg, #6d28d9, #2563eb);
   --accent-solid: #6366f1;
   --accent-shadow: 0 0 24px rgba(79, 70, 229, 0.32);
+  --interaction-ring: 0 0 0 3px color-mix(in srgb, var(--accent-solid), transparent 72%);
   --theme-aurora:
     radial-gradient(circle at 20% 18%, rgba(99, 102, 241, 0.26), transparent 31%),
     radial-gradient(circle at 82% 28%, rgba(34, 211, 238, 0.18), transparent 32%),
@@ -288,6 +289,32 @@ input,
 textarea {
   font: inherit;
   font-size: 16px !important;
+}
+
+button,
+[role="button"],
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+[role="button"]:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow:
+    var(--interaction-ring),
+    var(--accent-shadow);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none !important;
+  filter: grayscale(0.18);
 }
 
 /* =========================
@@ -8738,6 +8765,16 @@ body[data-ui="modern"] .chip.active {
   padding-bottom: 120px;
 }
 
+.grid-status.wishlist {
+  color: var(--accent-solid);
+}
+
+.grid-countdown {
+  background: color-mix(in srgb, var(--accent-solid), transparent 82%);
+  color: var(--text-main);
+  border-color: color-mix(in srgb, var(--accent-solid), transparent 68%);
+}
+
 .load-more-btn {
   width: 100%;
   margin: 18px 0 24px;
@@ -9384,6 +9421,22 @@ body,
   justify-content: flex-end;
   padding-right: 20px;
   background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+
+.hint-left {
+  color: color-mix(in srgb, var(--accent-solid), white 34%);
+}
+
+.swipe-bg-wishlist {
+  background: var(--accent);
+}
+
+.swipe-bg-collection {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, #22c55e, var(--accent-solid) 18%),
+    #16a34a
+  );
 }
 
 .swipe-bg.visible,
@@ -13073,10 +13126,10 @@ body {
   padding: 22px;
   border-radius: 30px;
   background:
-    radial-gradient(circle at 20% 0%, rgba(96, 165, 250, 0.14), transparent 34%),
-    radial-gradient(circle at 90% 20%, rgba(168, 85, 247, 0.12), transparent 32%),
+    radial-gradient(circle at 20% 0%, color-mix(in srgb, var(--accent-solid), transparent 82%), transparent 34%),
+    radial-gradient(circle at 90% 20%, color-mix(in srgb, var(--accent-solid), transparent 88%), transparent 32%),
     rgba(255, 255, 255, 0.045);
-  border: 1px solid rgba(255,255,255,0.09);
+  border: 1px solid color-mix(in srgb, var(--accent-solid), transparent 84%);
   box-shadow:
     0 24px 60px rgba(0,0,0,0.26),
     inset 0 1px 0 rgba(255,255,255,0.08);
@@ -13198,6 +13251,21 @@ body {
   color: white;
   text-align: left;
   cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.library-smart-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent-solid), transparent 58%);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.2);
+}
+
+.library-smart-card:active {
+  transform: translateY(0) scale(0.99);
 }
 
 .library-smart-card strong {
@@ -13283,10 +13351,10 @@ body {
 }
 
 .library-switch-btn.active {
-  background: linear-gradient(135deg, #5b8cff, #7c5cff);
+  background: var(--accent);
   color: white;
   box-shadow:
-    0 8px 24px rgba(91,140,255,0.35),
+    var(--accent-shadow),
     inset 0 1px 0 rgba(255,255,255,0.25);
 }
 
@@ -13310,9 +13378,9 @@ body {
 
 .sort-switch button.active,
 .library-sort-switch button.active {
-  background: linear-gradient(135deg, #5b8cff, #7c5cff);
+  background: var(--accent);
   color: white;
-  box-shadow: 0 8px 20px rgba(91,140,255,0.28);
+  box-shadow: var(--accent-shadow);
 }
 
 /* Étagère 3D propre, sans hover agressif */
@@ -13321,10 +13389,10 @@ body {
   padding: 30px 20px 44px;
   border-radius: 30px;
   background:
-    radial-gradient(circle at 35% 0%, rgba(125, 170, 255, 0.20), transparent 40%),
-    radial-gradient(circle at 75% 80%, rgba(168, 85, 247, 0.18), transparent 38%),
+    radial-gradient(circle at 35% 0%, color-mix(in srgb, var(--accent-solid), transparent 76%), transparent 40%),
+    radial-gradient(circle at 75% 80%, color-mix(in srgb, var(--accent-solid), transparent 84%), transparent 38%),
     linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025));
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid color-mix(in srgb, var(--accent-solid), transparent 86%);
   box-shadow:
     0 24px 60px rgba(0,0,0,0.30),
     inset 0 1px 0 rgba(255,255,255,0.08);
@@ -13378,7 +13446,7 @@ body {
   filter: brightness(1.08);
   box-shadow:
     0 16px 24px rgba(0,0,0,0.40),
-    0 0 18px rgba(96,165,250,0.25);
+    0 0 18px color-mix(in srgb, var(--accent-solid), transparent 72%);
 }
 
 .shelf3d-board {
