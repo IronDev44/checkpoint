@@ -23793,3 +23793,164 @@ body[data-theme="theme-vigilante"] .checkpoint-splash::after {
     linear-gradient(180deg, transparent 0 72%, rgba(0, 0, 0, 0.42) 100%) !important;
   opacity: 0.16 !important;
 }
+
+/* Stronger mobile-visible fixes for premium intros and transitions. */
+body[data-theme="theme-stellar"] .pixel-transition.right::before,
+body[data-theme="theme-stellar"] .pixel-transition.left::before {
+  content: "";
+  position: absolute;
+  top: -12vh;
+  width: 42vw;
+  height: 124vh;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(0.6px);
+  opacity: 0;
+  background:
+    linear-gradient(90deg, transparent, rgba(224, 242, 254, 0.82) 28%, rgba(56, 189, 248, 0.95) 50%, rgba(239, 68, 68, 0.72) 72%, transparent);
+  box-shadow:
+    0 0 28px rgba(56, 189, 248, 0.72),
+    0 0 58px rgba(239, 68, 68, 0.38);
+}
+
+body[data-theme="theme-stellar"] .pixel-transition.right::before {
+  left: -52vw;
+  transform: skewX(-17deg);
+  animation: stellarEdgeSweepRight 0.58s ease-out forwards;
+}
+
+body[data-theme="theme-stellar"] .pixel-transition.left::before {
+  right: -52vw;
+  transform: skewX(17deg);
+  animation: stellarEdgeSweepLeft 0.58s ease-out forwards;
+}
+
+@keyframes stellarEdgeSweepRight {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+  }
+
+  20% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 0;
+    translate: 160vw 0;
+  }
+}
+
+@keyframes stellarEdgeSweepLeft {
+  0% {
+    opacity: 0;
+    translate: 0 0;
+  }
+
+  20% {
+    opacity: 0.95;
+  }
+
+  100% {
+    opacity: 0;
+    translate: -160vw 0;
+  }
+}
+
+body[data-theme="theme-multiverse"] .checkpoint-splash::before {
+  background:
+    radial-gradient(circle at 50% 38%, rgba(239, 68, 68, 0.22), transparent 24%),
+    radial-gradient(circle at 22% 22%, rgba(250, 204, 21, 0.16), transparent 18%),
+    radial-gradient(circle at 78% 24%, rgba(37, 99, 235, 0.18), transparent 18%) !important;
+  opacity: 0.28 !important;
+}
+
+body[data-theme="theme-multiverse"] .checkpoint-splash::after {
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.28) 0 1px, transparent 2px),
+    radial-gradient(circle at 18% 18%, rgba(239, 68, 68, 0.16), transparent 18%),
+    radial-gradient(circle at 82% 20%, rgba(37, 99, 235, 0.14), transparent 18%) !important;
+  background-size: 18px 18px, 100% 100%, 100% 100% !important;
+  opacity: 0.13 !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: rgba(134, 239, 172, 0.74) !important;
+  font-family: "Courier New", monospace !important;
+  font-size: clamp(0.82rem, 2.7vw, 1.12rem) !important;
+  line-height: 1 !important;
+  text-shadow:
+    0 0 8px rgba(34, 197, 94, 0.82),
+    0 0 18px rgba(34, 197, 94, 0.38) !important;
+  filter: none !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span::before {
+  content: "0";
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(2n)::before {
+  content: "1";
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(3n)::before {
+  content: "01";
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(5n)::before {
+  content: "10";
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-bg::after {
+  content:
+    "101101001010101001011010100101101010010110101001011010\A"
+    "010011010101100101001011010010110101001010110100101101\A"
+    "110100101101010010101101001011010100101011010010110101\A"
+    "001011010100101101010010110101001011010100101101001011\A"
+    "101001011010010110101001010110100101101010010110101001";
+  position: absolute;
+  inset: -26% -18% 0;
+  display: block;
+  z-index: 1;
+  pointer-events: none;
+  white-space: pre;
+  color: rgba(134, 239, 172, 0.16);
+  font-family: "Courier New", monospace;
+  font-size: clamp(0.72rem, 2vw, 1rem);
+  line-height: 2.1;
+  letter-spacing: 0.24em;
+  text-align: center;
+  text-shadow: 0 0 14px rgba(34, 197, 94, 0.48);
+  animation: matrixRainLayer 3.8s linear infinite;
+}
+
+@keyframes matrixRainLayer {
+  0% {
+    transform: translateY(-12%);
+  }
+
+  100% {
+    transform: translateY(30%);
+  }
+}
+
+body[data-theme="theme-vigilante"] {
+  --checkpoint-splash-bg-layer:
+    radial-gradient(ellipse at 50% 23%, rgba(250, 204, 21, 0.28), transparent 17%),
+    radial-gradient(ellipse at 50% 70%, rgba(59, 130, 246, 0.1), transparent 34%),
+    linear-gradient(180deg, #010208, #050b17 54%, #000104) !important;
+}
+
+body[data-theme="theme-vigilante"] .checkpoint-splash::before,
+body[data-theme="theme-vigilante"] .checkpoint-splash::after {
+  background:
+    radial-gradient(ellipse at 50% 20%, rgba(250, 204, 21, 0.26), transparent 17%),
+    radial-gradient(ellipse at 50% 76%, rgba(59, 130, 246, 0.1), transparent 28%) !important;
+  opacity: 0.22 !important;
+}
