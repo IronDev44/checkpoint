@@ -8033,6 +8033,79 @@ function ProfileTab({
   const currentRank =
     [...RANKS].reverse().find((rank) => level >= rank.min) || RANKS[0];
   const completedCount = games.filter(isGameFinishedStatus).length;
+  const ratedGames = games
+    .map((game) => ({
+      ...game,
+      checkpointRating: getGameRating(game),
+    }))
+    .filter((game) => game.checkpointRating > 0)
+    .sort((a, b) => b.checkpointRating - a.checkpointRating);
+  const favoriteGames = games.filter((game) => game.favorite);
+  const identityGame = ratedGames[0] || favoriteGames[0] || games[0];
+  const currentHardware = hardware.filter((item) => {
+    const status = normalizeIdentityText(item.status || "");
+    return status.includes("poss") || status.includes("reparer");
+  });
+  const ratedHardware = currentHardware
+    .map((item) => ({
+      ...item,
+      average: getHardwareAverageRating(item),
+    }))
+    .filter((item) => item.average > 0)
+    .sort((a, b) => b.average - a.average);
+  const profilePowerScore = Math.min(
+    100,
+    Math.round(
+      profileInsights.completionRate * 0.35 +
+        profileInsights.badgeCompletion * 0.25 +
+        Math.min(ratedGames.length * 0.22, 18) +
+        Math.min(ratedHardware.length * 2, 12) +
+        Math.min(favoriteGames.length * 1.5, 10)
+    )
+  );
+  const profileLivingCards = [
+    {
+      label: "Jeu repere",
+      value: identityGame?.name || "A definir",
+      detail: identityGame
+        ? `${identityGame.released || "Annee inconnue"} - ${formatRating10(
+            getGameRating(identityGame),
+            "non note"
+          )}`
+        : "Ajoute quelques notes pour faire ressortir un jeu signature.",
+    },
+    {
+      label: "Plateforme dominante",
+      value: stats.topPlatforms[0]?.[0] || "Multi-plateforme",
+      detail: stats.topPlatforms[0]
+        ? `${stats.topPlatforms[0][1]} jeux lies a cette plateforme`
+        : "Tes plateformes ressortiront avec plus de jeux classes.",
+    },
+    {
+      label: "Setup repere",
+      value: ratedHardware[0]?.name || currentHardware[0]?.name || "A calibrer",
+      detail: ratedHardware[0]
+        ? `${formatRating10(ratedHardware[0].average, "-")} de moyenne materiel`
+        : `${currentHardware.length} materiels actuellement en possession`,
+    },
+  ];
+  const profileMission = nextBadges[0]
+    ? {
+        label: "Mission active",
+        title: nextBadges[0].name,
+        detail: nextBadges[0].desc,
+      }
+    : nextRank
+      ? {
+          label: "Mission active",
+          title: nextRank.title,
+          detail: `Atteindre le niveau ${nextRank.min} pour passer au rang suivant.`,
+        }
+      : {
+          label: "Mission active",
+          title: "Profil complet",
+          detail: "Ton profil a deja atteint les principaux paliers visibles.",
+        };
 
   return (
     <div className="progression-stack profile-tab">
@@ -8071,6 +8144,42 @@ function ProfileTab({
                 ? "Rang maximal atteint"
                 : `${progress.currentXP} / ${progress.xpToNext} XP avant le niveau suivant`}
             </small>
+          </div>
+        </div>
+      </div>
+
+      <div className="search-panel profile-living-panel">
+        <div className="profile-living-main">
+          <span>Identite active</span>
+          <strong>{profileInsights.headline}</strong>
+          <p>{profileInsights.summary}</p>
+
+          <div className="profile-living-meter">
+            <div>
+              <span>Puissance du profil</span>
+              <strong>{profilePowerScore}%</strong>
+            </div>
+            <div className="profile-living-bar">
+              <div style={{ width: `${profilePowerScore}%` }} />
+            </div>
+          </div>
+        </div>
+
+        <div className="profile-living-side">
+          <div className="profile-living-mission">
+            <span>{profileMission.label}</span>
+            <strong>{profileMission.title}</strong>
+            <small>{profileMission.detail}</small>
+          </div>
+
+          <div className="profile-living-cards">
+            {profileLivingCards.map((card) => (
+              <div key={card.label} className="profile-living-card">
+                <span>{card.label}</span>
+                <strong>{card.value}</strong>
+                <small>{card.detail}</small>
+              </div>
+            ))}
           </div>
         </div>
       </div>

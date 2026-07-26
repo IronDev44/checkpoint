@@ -6440,6 +6440,160 @@ body[data-ui="modern"] .chip.active {
   line-height: 1.25;
 }
 
+.profile-living-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+  gap: 14px;
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--accent), transparent 76%), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,0.072), rgba(255,255,255,0.032));
+}
+
+.profile-living-main,
+.profile-living-side,
+.profile-living-cards {
+  min-width: 0;
+}
+
+.profile-living-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 2px 0;
+}
+
+.profile-living-main > span,
+.profile-living-mission span,
+.profile-living-card span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.profile-living-main > strong {
+  display: block;
+  color: white;
+  font-size: clamp(1.35rem, 4vw, 2rem);
+  line-height: 1.04;
+}
+
+.profile-living-main p {
+  max-width: 680px;
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.92rem;
+  font-weight: 760;
+  line-height: 1.45;
+}
+
+.profile-living-meter {
+  display: grid;
+  gap: 8px;
+}
+
+.profile-living-meter > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-living-meter span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.profile-living-meter strong {
+  color: white;
+  font-size: 1rem;
+  font-weight: 1000;
+}
+
+.profile-living-bar {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.1);
+}
+
+.profile-living-bar > div {
+  height: 100%;
+  min-width: 10px;
+  border-radius: inherit;
+  background: var(--accent);
+  box-shadow: var(--accent-shadow);
+}
+
+.profile-living-side {
+  display: grid;
+  gap: 10px;
+}
+
+.profile-living-mission {
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--accent), transparent 56%);
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--accent), transparent 74%), transparent 48%),
+    rgba(10, 18, 32, 0.36);
+}
+
+.profile-living-mission strong {
+  display: block;
+  margin-top: 7px;
+  color: white;
+  font-size: 1.05rem;
+  font-weight: 1000;
+  line-height: 1.12;
+}
+
+.profile-living-mission small {
+  display: block;
+  margin-top: 7px;
+  color: var(--text-soft);
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.profile-living-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.profile-living-card {
+  min-width: 0;
+  padding: 11px;
+  border-radius: 16px;
+  border: 1px solid var(--surface-border);
+  background: rgba(255,255,255,0.052);
+}
+
+.profile-living-card strong {
+  display: block;
+  margin-top: 6px;
+  color: white;
+  font-size: 0.92rem;
+  font-weight: 1000;
+  line-height: 1.13;
+  overflow-wrap: anywhere;
+}
+
+.profile-living-card small {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-soft);
+  font-size: 0.72rem;
+  font-weight: 780;
+  line-height: 1.3;
+}
+
 .profile-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -6677,6 +6831,14 @@ body[data-ui="modern"] .chip.active {
 
   .profile-badge-count {
     width: 100%;
+  }
+
+  .profile-living-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-living-cards {
+    grid-template-columns: 1fr;
   }
 
   .profile-stats-grid {
