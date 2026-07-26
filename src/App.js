@@ -5087,7 +5087,7 @@ function GameDetailModal({
 
 function LibraryShelf3D({ games, onOpenDetail }) {
   const displayedGames = games;
-  const gamesPerShelf = 24;
+  const gamesPerShelf = 12;
 
   const groupedByPlatform = displayedGames.reduce((acc, game) => {
     const platforms =
@@ -5481,7 +5481,7 @@ function LibrarySection({
   };
 
   return (
-    <div className="library-section">
+    <div className={`library-section ${libraryCardMode === "shelf" ? "library-section-shelf" : ""}`}>
       <div className="section-header">
         <h2>{title}</h2>
         <span className="section-count">{games.length} jeux</span>
