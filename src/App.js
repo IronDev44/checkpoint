@@ -5087,7 +5087,7 @@ function GameDetailModal({
 
 function LibraryShelf3D({ games, onOpenDetail }) {
   const displayedGames = games;
-  const gamesPerShelf = 24;
+  const gamesPerShelf = 20;
 
   const groupedByPlatform = displayedGames.reduce((acc, game) => {
     const platforms =

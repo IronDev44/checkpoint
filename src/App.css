@@ -14652,7 +14652,7 @@ body {
   .library-section-shelf .shelf3d-case:nth-child(5n) {
     flex-basis: 18px !important;
     min-width: 16px !important;
-    max-width: 20px !important;
+    max-width: 18px !important;
     height: 118px;
   }
 
