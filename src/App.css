@@ -25692,7 +25692,6 @@ body[data-theme="theme-blueblur"] .pixel-transition span,
 body[data-theme="theme-ring"] .pixel-transition span {
   background: linear-gradient(135deg, #38bdf8, #1d4ed8 58%, #facc15) !important;
   border-radius: 999px !important;
-  transform: skewX(-12deg) !important;
 }
 
 body[data-theme="theme-blocks"] .pixel-transition span,
@@ -25705,4 +25704,259 @@ body[data-theme="theme-hunter"] .pixel-transition span,
 body[data-theme="theme-kart"] .pixel-transition span,
 body[data-theme="theme-crystal"] .pixel-transition span {
   background: var(--accent) !important;
+}
+
+/* Stronger game-theme behavior pass. */
+body[data-theme="theme-mushroom"] {
+  --bg-main:
+    radial-gradient(circle at 18% 16%, rgba(56, 189, 248, 0.2), transparent 24%),
+    radial-gradient(circle at 82% 18%, rgba(239, 68, 68, 0.2), transparent 20%),
+    radial-gradient(circle at 50% 88%, rgba(34, 197, 94, 0.2), transparent 24%),
+    linear-gradient(180deg, #06152b 0%, #0c3463 42%, #052a1a 100%) !important;
+  --panel-bg: rgba(6, 20, 40, 0.92) !important;
+  --surface-bg: rgba(11, 40, 73, 0.76) !important;
+  --accent: linear-gradient(135deg, #e11d48 0%, #f97316 38%, #facc15 64%, #16a34a 100%) !important;
+  --accent-solid: #ef4444 !important;
+  --checkpoint-title-gradient: linear-gradient(180deg, #ffffff 0%, #bfdbfe 24%, #38bdf8 38%, #ef4444 58%, #facc15 76%, #22c55e 100%) !important;
+  --checkpoint-splash-primary: rgba(239, 68, 68, 0.94) !important;
+  --checkpoint-splash-secondary: rgba(56, 189, 248, 0.9) !important;
+  --checkpoint-splash-glow: rgba(250, 204, 21, 0.42) !important;
+  --checkpoint-splash-fill: linear-gradient(90deg, #38bdf8 0%, #ef4444 42%, #facc15 72%, #22c55e 100%) !important;
+}
+
+body[data-theme="theme-mushroom"] .checkpoint-splash::after {
+  background:
+    radial-gradient(circle at 18% 22%, rgba(239, 68, 68, 0.18) 0 9px, transparent 10px),
+    radial-gradient(circle at 82% 30%, rgba(34, 197, 94, 0.14) 0 10px, transparent 11px),
+    linear-gradient(180deg, transparent 0 66%, rgba(34, 197, 94, 0.12) 100%) !important;
+  opacity: 0.7 !important;
+}
+
+body[data-theme="theme-blueblur"] .pixel-transition span {
+  width: 46px !important;
+  height: 10px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, transparent 0%, #38bdf8 24%, #1d4ed8 62%, #facc15 100%) !important;
+  animation-duration: 0.34s !important;
+  animation-timing-function: cubic-bezier(0.08, 0.72, 0.16, 1) !important;
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.58), 0 0 26px rgba(29, 78, 216, 0.36) !important;
+}
+
+body[data-theme="theme-blueblur"] .pixel-transition.right span {
+  animation-name: sonicDashRight !important;
+}
+
+body[data-theme="theme-blueblur"] .pixel-transition.left span {
+  animation-name: sonicDashLeft !important;
+}
+
+body[data-theme="theme-blueblur"] .pixel-transition span:nth-child(2n) {
+  animation-duration: 0.28s !important;
+}
+
+body[data-theme="theme-blueblur"] .pixel-transition span:nth-child(3n) {
+  animation-duration: 0.42s !important;
+}
+
+body[data-theme="theme-blocks"] .pixel-transition span {
+  width: clamp(18px, var(--size), 34px) !important;
+  height: clamp(18px, var(--size), 34px) !important;
+  border-radius: 4px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.42), transparent 38%),
+    linear-gradient(135deg, #ef4444 0%, #facc15 34%, #22c55e 58%, #38bdf8 78%, #a855f7 100%) !important;
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.22), 0 0 14px rgba(168, 85, 247, 0.38) !important;
+}
+
+body[data-theme="theme-blocks"] .pixel-transition.right span,
+body[data-theme="theme-blocks"] .pixel-transition.left span {
+  animation-name: tetrisDrop !important;
+  animation-duration: 0.62s !important;
+  animation-timing-function: cubic-bezier(0.22, 0.8, 0.24, 1) !important;
+}
+
+body[data-theme="theme-blocks"] .pixel-transition span:nth-child(2n) {
+  animation-delay: calc(var(--delay) + 0.06s) !important;
+}
+
+body[data-theme="theme-blocks"] .pixel-transition span:nth-child(3n) {
+  animation-delay: calc(var(--delay) + 0.12s) !important;
+}
+
+body[data-theme="theme-cubic"] .pixel-transition span {
+  border-radius: 3px !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.2), transparent 42%),
+    linear-gradient(135deg, #84cc16 0%, #22c55e 45%, #78716c 100%) !important;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.24), 0 0 12px rgba(132, 204, 22, 0.36) !important;
+}
+
+body[data-theme="theme-cubic"] .pixel-transition.right span,
+body[data-theme="theme-cubic"] .pixel-transition.left span {
+  animation-name: minecraftBreak !important;
+  animation-duration: 0.58s !important;
+  animation-timing-function: cubic-bezier(0.18, 0.78, 0.24, 1) !important;
+}
+
+body[data-theme="theme-ring"] {
+  --bg-main:
+    linear-gradient(90deg, rgba(250, 204, 21, 0.07) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(37, 99, 235, 0.07) 1px, transparent 1px),
+    radial-gradient(circle at 16% 18%, rgba(250, 204, 21, 0.22), transparent 20%),
+    radial-gradient(circle at 80% 76%, rgba(239, 68, 68, 0.2), transparent 24%),
+    linear-gradient(180deg, #050715 0%, #101144 50%, #03040b 100%) !important;
+  background-size: 36px 36px, 36px 36px, auto, auto, auto !important;
+  --panel-bg: rgba(5, 7, 21, 0.92) !important;
+  --surface-bg: rgba(16, 18, 58, 0.76) !important;
+  --panel-border: rgba(250, 204, 21, 0.28) !important;
+  --accent: linear-gradient(135deg, #facc15 0%, #fde047 52%, #ef4444 100%) !important;
+  --accent-solid: #facc15 !important;
+  --accent-shadow: 0 0 26px rgba(250, 204, 21, 0.3), 0 0 36px rgba(239, 68, 68, 0.18) !important;
+  --theme-aurora:
+    linear-gradient(90deg, rgba(250, 204, 21, 0.06) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(37, 99, 235, 0.06) 1px, transparent 1px),
+    linear-gradient(135deg, rgba(4, 5, 16, 0.98), rgba(15, 17, 70, 0.94)) !important;
+  --checkpoint-title-gradient: linear-gradient(180deg, #ffffff 0%, #fef08a 36%, #facc15 66%, #ef4444 100%) !important;
+  --checkpoint-splash-primary: rgba(250, 204, 21, 0.96) !important;
+  --checkpoint-splash-secondary: rgba(239, 68, 68, 0.9) !important;
+  --checkpoint-splash-glow: rgba(250, 204, 21, 0.48) !important;
+  --checkpoint-splash-fill: linear-gradient(90deg, #facc15 0%, #fde047 54%, #ef4444 100%) !important;
+}
+
+body[data-theme="theme-ring"] .checkpoint-splash::after {
+  background:
+    linear-gradient(90deg, rgba(250, 204, 21, 0.09) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(37, 99, 235, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at 18% 24%, rgba(250, 204, 21, 0.22) 0 6px, transparent 7px),
+    radial-gradient(circle at 82% 76%, rgba(239, 68, 68, 0.18) 0 9px, transparent 10px) !important;
+  background-size: 38px 38px, 38px 38px, auto, auto !important;
+  opacity: 0.62 !important;
+}
+
+body[data-theme="theme-ring"] .pixel-transition span {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 999px !important;
+  background: radial-gradient(circle, #fef08a 0 42%, #facc15 44% 58%, transparent 60%) !important;
+  box-shadow: 0 0 16px rgba(250, 204, 21, 0.52), 0 0 28px rgba(250, 204, 21, 0.25) !important;
+}
+
+body[data-theme="theme-ring"] .pixel-transition.right span {
+  animation-name: mazeChompRight !important;
+  animation-duration: 0.5s !important;
+}
+
+body[data-theme="theme-ring"] .pixel-transition.left span {
+  animation-name: mazeChompLeft !important;
+  animation-duration: 0.5s !important;
+}
+
+@keyframes sonicDashRight {
+  0% {
+    opacity: 0;
+    transform: translateX(-48vw) skewX(-16deg) scaleX(0.5);
+  }
+
+  22% {
+    opacity: 1;
+    transform: translateX(-6vw) skewX(-16deg) scaleX(1.4);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(64vw) skewX(-16deg) scaleX(0.2);
+  }
+}
+
+@keyframes sonicDashLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(48vw) skewX(16deg) scaleX(0.5);
+  }
+
+  22% {
+    opacity: 1;
+    transform: translateX(6vw) skewX(16deg) scaleX(1.4);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-64vw) skewX(16deg) scaleX(0.2);
+  }
+}
+
+@keyframes tetrisDrop {
+  0% {
+    opacity: 0;
+    transform: translateY(-64vh) translateX(-10px) rotate(0deg);
+  }
+
+  72% {
+    opacity: 1;
+    transform: translateY(0) translateX(0) rotate(0deg);
+  }
+
+  84% {
+    opacity: 1;
+    transform: translateY(-12px) translateX(0) rotate(0deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(18px) translateX(0) rotate(0deg);
+  }
+}
+
+@keyframes minecraftBreak {
+  0% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(1);
+    filter: saturate(1.1);
+  }
+
+  38% {
+    opacity: 1;
+    transform: translateX(0) translateY(0) scale(0.88);
+    filter: saturate(1.35) brightness(1.12);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(42px) translateY(-34px) scale(0.18) rotate(22deg);
+    filter: saturate(1.4);
+  }
+}
+
+@keyframes mazeChompRight {
+  0% {
+    opacity: 0;
+    transform: translateX(-42vw) scale(0.4);
+  }
+
+  36% {
+    opacity: 1;
+    transform: translateX(-4vw) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(48vw) scale(0.2);
+  }
+}
+
+@keyframes mazeChompLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(42vw) scale(0.4);
+  }
+
+  36% {
+    opacity: 1;
+    transform: translateX(4vw) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-48vw) scale(0.2);
+  }
 }
