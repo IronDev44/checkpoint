@@ -25960,3 +25960,22 @@ body[data-theme="theme-ring"] .pixel-transition.left span {
     transform: translateX(-48vw) scale(0.2);
   }
 }
+
+/* Splash isolation: keep the home screen mounted but invisible during startup. */
+.app-shell.app-hidden {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.app-shell.app-visible {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.checkpoint-splash {
+  z-index: 100000 !important;
+  opacity: 1 !important;
+  background-color: #050711 !important;
+  isolation: isolate !important;
+}
