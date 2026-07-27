@@ -14287,20 +14287,42 @@ body {
 }
 
 /* Rendu final : boites de jeux visibles sur la tranche */
+.library-section.library-section-shelf {
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent-solid), transparent 86%);
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 16% 0%, color-mix(in srgb, var(--accent-solid), transparent 86%), transparent 32%),
+    linear-gradient(180deg, rgba(255,255,255,0.045), rgba(255,255,255,0.02)),
+    rgba(255,255,255,0.025);
+  box-shadow:
+    0 20px 44px rgba(0,0,0,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.07);
+}
+
+.library-section.library-section-shelf > .section-header,
+.library-section.library-section-shelf > .library-view-toggle,
+.library-section.library-section-shelf > .library-sort {
+  margin-inline: 0;
+}
+
 .library-section-shelf .shelf3d-scene {
+  margin-inline: 0;
+  padding: 10px 0 18px;
   background:
     radial-gradient(circle at 16% 0%, color-mix(in srgb, var(--accent-solid), transparent 82%), transparent 30%),
     linear-gradient(180deg, rgba(255,255,255,0.025), transparent 18%);
 }
 
 .library-section-shelf .shelf3d-platform-header {
+  padding-inline: 2px;
   border-bottom-color: color-mix(in srgb, var(--accent-solid), transparent 86%);
 }
 
 .library-section-shelf .shelf3d-level {
-  min-height: 212px;
-  padding: 22px 12px 44px;
-  border-radius: 18px;
+  min-height: 196px;
+  padding: 20px 12px 38px;
+  border-radius: 20px;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.012)),
     rgba(3, 7, 18, 0.34);
@@ -14312,10 +14334,10 @@ body {
 }
 
 .library-section-shelf .shelf3d-level-back {
-  left: 8px;
-  right: 8px;
-  top: 18px;
-  bottom: 46px;
+  left: 10px;
+  right: 10px;
+  top: 16px;
+  bottom: 42px;
   border-radius: 16px;
   background:
     linear-gradient(90deg, rgba(255,255,255,0.035), transparent 18%, transparent 82%, rgba(255,255,255,0.03)),
@@ -14330,18 +14352,18 @@ body {
 .library-section-shelf .shelf3d-level-games {
   align-items: flex-end;
   gap: 3px;
-  min-height: 150px;
-  padding: 0 4px 6px;
+  min-height: 136px;
+  padding: 0 5px 4px;
 }
 
 .library-section-shelf .shelf3d-case {
   flex: 0 0 18px;
   min-width: 18px;
   max-width: 24px;
-  height: calc(132px + (var(--case-offset) * 3px));
+  height: 128px;
   display: block;
   border-radius: 5px 5px 3px 3px;
-  transform: translateY(calc(var(--case-offset) * -1px));
+  transform: none;
 }
 
 .library-section-shelf .shelf3d-case:nth-child(3n) {
@@ -14440,14 +14462,20 @@ body {
 }
 
 @media (max-width: 768px) {
+  .library-section.library-section-shelf {
+    margin-inline: 0;
+    padding: 12px;
+    border-radius: 24px;
+  }
+
   .library-section-shelf .shelf3d-level {
-    min-height: 202px;
-    padding: 20px 8px 42px;
+    min-height: 188px;
+    padding: 18px 8px 38px;
   }
 
   .library-section-shelf .shelf3d-level-games {
     gap: 3px;
-    min-height: 142px;
+    min-height: 128px;
     padding-inline: 3px;
   }
 
@@ -14455,7 +14483,7 @@ body {
     flex-basis: 17px !important;
     min-width: 17px !important;
     max-width: 22px !important;
-    height: calc(124px + (var(--case-offset) * 3px));
+    height: 120px;
   }
 
   .library-section-shelf .shelf3d-case:nth-child(3n) {
