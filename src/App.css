@@ -26223,3 +26223,223 @@ body[data-theme="theme-cubic"] .pixel-transition span:nth-child(5n) {
     transform: translate(8px, -58px) rotate(18deg) scale(0.16);
   }
 }
+
+/* Focused transition polish: Matrix rain, wizard sparks and smoother Sonic dash. */
+body[data-theme="theme-matrix"] .pixel-transition span {
+  width: auto !important;
+  min-width: 10px !important;
+  height: 24px !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #86efac !important;
+  font-family: "Courier New", monospace !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  text-shadow: 0 0 8px rgba(34, 197, 94, 0.75), 0 0 18px rgba(34, 197, 94, 0.42) !important;
+  animation-name: matrixNumberRain !important;
+  animation-duration: 0.72s !important;
+  animation-timing-function: cubic-bezier(0.16, 0.82, 0.22, 1) !important;
+}
+
+body[data-theme="theme-matrix"] .pixel-transition span::before {
+  content: "0";
+}
+
+body[data-theme="theme-matrix"] .pixel-transition span:nth-child(2n)::before {
+  content: "1";
+}
+
+body[data-theme="theme-matrix"] .pixel-transition span:nth-child(3n)::before {
+  content: "7";
+}
+
+body[data-theme="theme-matrix"] .pixel-transition span:nth-child(5n)::before {
+  content: "5";
+}
+
+body[data-theme="theme-matrix"] .pixel-transition span:nth-child(7n)::before {
+  content: "9";
+}
+
+body[data-theme="theme-matrix"] .pixel-transition span:nth-child(2n) {
+  animation-duration: 0.86s !important;
+}
+
+body[data-theme="theme-matrix"] .pixel-transition span:nth-child(3n) {
+  color: #dcfce7 !important;
+  animation-delay: calc(var(--delay) + 0.05s) !important;
+}
+
+body[data-theme="theme-arcane"] .pixel-transition span {
+  width: 34px !important;
+  height: 4px !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, transparent, #fff7c2 32%, #d7a83f 58%, transparent) !important;
+  box-shadow: 0 0 12px rgba(255, 241, 168, 0.75), 0 0 28px rgba(215, 168, 63, 0.42) !important;
+  animation-duration: 0.7s !important;
+  animation-timing-function: cubic-bezier(0.18, 0.74, 0.28, 1) !important;
+}
+
+body[data-theme="theme-arcane"] .pixel-transition.right span {
+  animation-name: arcaneSpellRight !important;
+}
+
+body[data-theme="theme-arcane"] .pixel-transition.left span {
+  animation-name: arcaneSpellLeft !important;
+}
+
+body[data-theme="theme-arcane"] .pixel-transition span:nth-child(3n) {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 999px !important;
+  background: radial-gradient(circle, #fff7c2 0 34%, #d7a83f 38% 56%, transparent 60%) !important;
+  box-shadow: 0 0 14px rgba(255, 241, 168, 0.82), 0 0 28px rgba(215, 168, 63, 0.5) !important;
+}
+
+body[data-theme="theme-arcane"] .pixel-transition span:nth-child(3n)::before,
+body[data-theme="theme-arcane"] .pixel-transition span:nth-child(3n)::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 15px;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 247, 194, 0.86));
+  transform: translateY(-50%) rotate(18deg);
+}
+
+body[data-theme="theme-arcane"] .pixel-transition span:nth-child(3n)::before {
+  right: 14px;
+}
+
+body[data-theme="theme-arcane"] .pixel-transition span:nth-child(3n)::after {
+  left: 14px;
+  transform: translateY(-50%) rotate(-18deg) scaleX(-1);
+}
+
+body[data-theme="theme-blueblur"] .pixel-transition span {
+  width: 18px !important;
+  height: 18px !important;
+  border-radius: 7px !important;
+  background: linear-gradient(135deg, #93c5fd 0%, #2563eb 66%, #facc15 100%) !important;
+  animation-duration: 0.54s !important;
+  animation-timing-function: cubic-bezier(0.12, 0.76, 0.18, 1) !important;
+  will-change: transform, opacity !important;
+  transform: translate3d(0, 0, 0);
+  box-shadow: 0 0 12px rgba(96, 165, 250, 0.5), 0 0 22px rgba(37, 99, 235, 0.28) !important;
+}
+
+body[data-theme="theme-blueblur"] .pixel-transition span:nth-child(2n) {
+  width: 30px !important;
+  height: 7px !important;
+  border-radius: 999px !important;
+}
+
+body[data-theme="theme-blueblur"] .pixel-transition.right span {
+  animation-name: sonicSmoothDashRight !important;
+}
+
+body[data-theme="theme-blueblur"] .pixel-transition.left span {
+  animation-name: sonicSmoothDashLeft !important;
+}
+
+@keyframes matrixNumberRain {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -62vh, 0) scaleY(1.2);
+  }
+
+  28% {
+    opacity: 1;
+  }
+
+  78% {
+    opacity: 1;
+    transform: translate3d(0, 18vh, 0) scaleY(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 56vh, 0) scaleY(0.8);
+  }
+}
+
+@keyframes arcaneSpellRight {
+  0% {
+    opacity: 0;
+    transform: translate3d(-36vw, 24px, 0) rotate(-18deg) scale(0.35);
+  }
+
+  35% {
+    opacity: 1;
+    transform: translate3d(-5vw, -8px, 0) rotate(-8deg) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(52vw, -54px, 0) rotate(16deg) scale(0.2);
+  }
+}
+
+@keyframes arcaneSpellLeft {
+  0% {
+    opacity: 0;
+    transform: translate3d(36vw, 24px, 0) rotate(18deg) scale(0.35);
+  }
+
+  35% {
+    opacity: 1;
+    transform: translate3d(5vw, -8px, 0) rotate(8deg) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(-52vw, -54px, 0) rotate(-16deg) scale(0.2);
+  }
+}
+
+@keyframes sonicSmoothDashRight {
+  0% {
+    opacity: 0;
+    transform: translate3d(-48vw, 0, 0) scale(0.7);
+  }
+
+  22% {
+    opacity: 1;
+    transform: translate3d(-40vw, 0, 0) scale(1);
+  }
+
+  38% {
+    opacity: 1;
+    transform: translate3d(-40vw, 0, 0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(78vw, 0, 0) scaleX(1.55) scaleY(0.78);
+  }
+}
+
+@keyframes sonicSmoothDashLeft {
+  0% {
+    opacity: 0;
+    transform: translate3d(48vw, 0, 0) scale(0.7);
+  }
+
+  22% {
+    opacity: 1;
+    transform: translate3d(40vw, 0, 0) scale(1);
+  }
+
+  38% {
+    opacity: 1;
+    transform: translate3d(40vw, 0, 0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(-78vw, 0, 0) scaleX(1.55) scaleY(0.78);
+  }
+}
