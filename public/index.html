@@ -23,6 +23,32 @@
         } catch (e) {}
       })();
     </script>
+    <style>
+      html,
+      body,
+      #root {
+        min-height: 100%;
+        margin: 0;
+      }
+
+      html[data-theme="theme-matrix"],
+      html[data-theme="theme-matrix"] body,
+      html[data-theme="theme-matrix"] #root {
+        min-height: 100dvh;
+        background:
+          linear-gradient(180deg, #000704 0%, #000604 54%, #000302 100%),
+          repeating-linear-gradient(0deg, rgba(134, 239, 172, 0.045) 0 1px, transparent 1px 28px);
+        background-color: #000604;
+      }
+
+      @supports (-webkit-touch-callout: none) {
+        html[data-theme="theme-matrix"],
+        html[data-theme="theme-matrix"] body,
+        html[data-theme="theme-matrix"] #root {
+          min-height: -webkit-fill-available;
+        }
+      }
+    </style>
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
