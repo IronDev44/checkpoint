@@ -2,6 +2,9 @@ import { useEffect, useMemo } from "react";
 
 export default function SplashScreen({ showSplash, progress = 0 }) {
   const safeProgress = Math.max(0, Math.min(100, Math.round(progress)));
+  const isMatrixSplash =
+    typeof document !== "undefined" &&
+    document.body?.getAttribute("data-theme") === "theme-matrix";
 
   const particles = useMemo(
     () =>
@@ -54,12 +57,24 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
       id: `matrix-${index}`,
       text: patterns[index % patterns.length].repeat(3),
       left: -3 + index * 1.42,
-      delay: -(index % 19) * 0.24,
-      duration: 5.2 + (index % 9) * 0.28,
+      delay: -(index % 19) * 0.38,
+      duration: 12 + (index % 5) * 0.8,
       size: 10 + (index % 6) * 1.7,
-      opacity: 0.34 + (index % 7) * 0.07,
+      opacity: 0.24 + (index % 5) * 0.035,
     }));
   }, []);
+
+  useEffect(() => {
+    if (!showSplash || !isMatrixSplash) return undefined;
+
+    document.documentElement.classList.add("matrix-splash-active");
+    document.body.classList.add("matrix-splash-active");
+
+    return () => {
+      document.documentElement.classList.remove("matrix-splash-active");
+      document.body.classList.remove("matrix-splash-active");
+    };
+  }, [isMatrixSplash, showSplash]);
 
   useEffect(() => {
     if (!showSplash) return;
@@ -109,7 +124,8 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
   if (!showSplash) return null;
 
   return (
-      <div className={`checkpoint-splash ${safeProgress >= 100 ? "complete" : ""}`}>
+      <div className={`checkpoint-splash ${isMatrixSplash ? "matrix-mode" : ""} ${safeProgress >= 100 ? "complete" : ""}`}>
+      <div className="splash-safe-area-fill" />
       <div className="splash-bg" />
       <div className="splash-vignette" />
 
