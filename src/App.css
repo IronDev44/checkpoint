@@ -27414,3 +27414,135 @@ body[data-theme="theme-blocks"] .checkpoint-splash .splash-particles-premium spa
     transform: translate3d(0, 62vh, 0) rotate(0deg);
   }
 }
+
+/* Matrix curtain and Tetris landing behavior. */
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-bg::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-bg::after {
+  content:
+    "01011010010110100101101001011010010110100101101001011010\A"
+    "10100101101001011010010110100101101001011010010110100101\A"
+    "00101101001011010010110100101101001011010010110100101101\A"
+    "11010010110100101101001011010010110100101101001011010010\A"
+    "01011010010110100101101001011010010110100101101001011010\A"
+    "10100101101001011010010110100101101001011010010110100101\A"
+    "00101101001011010010110100101101001011010010110100101101\A"
+    "11010010110100101101001011010010110100101101001011010010\A"
+    "01011010010110100101101001011010010110100101101001011010\A"
+    "10100101101001011010010110100101101001011010010110100101\A"
+    "00101101001011010010110100101101001011010010110100101101\A"
+    "11010010110100101101001011010010110100101101001011010010";
+  position: absolute !important;
+  inset: -34% -18% !important;
+  z-index: 2 !important;
+  color: rgba(134, 239, 172, 0.42) !important;
+  font-family: "Courier New", monospace !important;
+  font-size: clamp(13px, 3.8vw, 24px) !important;
+  font-weight: 700 !important;
+  line-height: 0.92 !important;
+  letter-spacing: 0.28em !important;
+  white-space: pre !important;
+  overflow: hidden !important;
+  text-shadow:
+    0 0 8px rgba(34, 197, 94, 0.55),
+    0 0 18px rgba(34, 197, 94, 0.28) !important;
+  pointer-events: none !important;
+  mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%) !important;
+  animation: matrixCurtainSheet 5.8s linear infinite !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-bg::after {
+  inset: -44% -24% !important;
+  z-index: 3 !important;
+  color: rgba(187, 247, 208, 0.22) !important;
+  font-size: clamp(10px, 2.8vw, 18px) !important;
+  letter-spacing: 0.54em !important;
+  line-height: 1.08 !important;
+  transform: translateX(12px) !important;
+  animation-duration: 8.2s !important;
+  animation-direction: reverse !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span {
+  opacity: 0.16 !important;
+  animation-duration: 9s !important;
+}
+
+body[data-theme="theme-blocks"] .checkpoint-splash::after {
+  background:
+    linear-gradient(90deg, #ef4444 0 9%, #38bdf8 9% 18%, #facc15 18% 27%, #22c55e 27% 36%, #a855f7 36% 45%, #f97316 45% 54%, #ef4444 54% 63%, #38bdf8 63% 72%, #22c55e 72% 81%, #facc15 81% 90%, #a855f7 90% 100%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.2), transparent 20%, transparent 80%, rgba(255, 255, 255, 0.18)) !important;
+  background-size: 82vw 26px, auto !important;
+  background-repeat: no-repeat !important;
+  background-position: 50% calc(100% - 96px), 0 0 !important;
+  clip-path: none !important;
+  opacity: 0.56 !important;
+  filter: saturate(1.2) drop-shadow(0 0 20px rgba(56, 189, 248, 0.22)) !important;
+}
+
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-pixel-wall span,
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-particles-premium span {
+  animation-name: tetrisFallToFloor !important;
+  animation-duration: 3.8s !important;
+  animation-timing-function: cubic-bezier(0.18, 0.68, 0.22, 1) !important;
+}
+
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-pixel-wall span:nth-child(2n),
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-particles-premium span:nth-child(2n) {
+  animation-duration: 4.4s !important;
+  animation-delay: -0.8s !important;
+}
+
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-pixel-wall span:nth-child(3n),
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-particles-premium span:nth-child(3n) {
+  animation-duration: 3.2s !important;
+  animation-delay: -1.4s !important;
+}
+
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-pixel-wall span:nth-child(5n),
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-particles-premium span:nth-child(5n) {
+  animation-duration: 4.9s !important;
+  animation-delay: -2.1s !important;
+}
+
+@keyframes matrixCurtainSheet {
+  0% {
+    opacity: 0.2;
+    transform: translate3d(0, -18%, 0);
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.72;
+    transform: translate3d(0, 18%, 0);
+  }
+}
+
+@keyframes tetrisFallToFloor {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -58vh, 0) rotate(0deg);
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  72% {
+    opacity: 1;
+    transform: translate3d(0, calc(100vh - 170px), 0) rotate(0deg);
+  }
+
+  86% {
+    opacity: 1;
+    transform: translate3d(0, calc(100vh - 154px), 0) rotate(0deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(0, calc(100vh - 154px), 0) rotate(0deg);
+  }
+}
