@@ -13687,6 +13687,9 @@ useEffect(() => {
   useEffect(() => {
     if (!showSplash) return;
 
+    splashClosingRef.current = false;
+    splashStartedAtRef.current = Date.now();
+
     const fallbackTimer = setTimeout(() => {
       setBootReady({
         events: true,
@@ -13703,24 +13706,20 @@ useEffect(() => {
     if (!showSplash) return;
 
     const progressTimers = [
-      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 42)), 180),
-      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 68)), 900),
-      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 92)), 1650),
+      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 34)), 160),
+      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 62)), 760),
+      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 88)), 1480),
+      setTimeout(() => setSplashTargetProgress(100), 2200),
     ];
 
     const closeTimer = setTimeout(() => {
       if (splashClosingRef.current) return;
       splashClosingRef.current = true;
       setSplashTargetProgress(100);
-
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          setSplashProgress(100);
-          setShowSplash(false);
-          sessionStorage.setItem("checkpoint-splash-seen", "true");
-        });
-      }, 760);
-    }, 4600);
+      setSplashProgress(100);
+      sessionStorage.setItem("checkpoint-splash-seen", "true");
+      setShowSplash(false);
+    }, 3400);
 
     return () => {
       progressTimers.forEach(clearTimeout);
@@ -13747,10 +13746,10 @@ useEffect(() => {
         if (current >= splashTargetProgress) return current;
 
         const gap = splashTargetProgress - current;
-        const step = Math.max(1, Math.min(5, Math.ceil(gap * 0.18)));
+        const step = Math.max(2, Math.min(8, Math.ceil(gap * 0.22)));
         return Math.min(splashTargetProgress, current + step);
       });
-    }, 90);
+    }, 80);
 
     return () => clearInterval(progressTimer);
   }, [showSplash, splashTargetProgress]);
@@ -13769,14 +13768,9 @@ useEffect(() => {
       if (splashClosingRef.current) return;
       splashClosingRef.current = true;
       setSplashTargetProgress(100);
-
-      closeTimer = setTimeout(() => {
-        requestAnimationFrame(() => {
-          setSplashProgress(100);
-          setShowSplash(false);
-          sessionStorage.setItem("checkpoint-splash-seen", "true");
-        });
-      }, 820);
+      setSplashProgress(100);
+      sessionStorage.setItem("checkpoint-splash-seen", "true");
+      setShowSplash(false);
     }, Math.max(0, minimumDuration - elapsed));
 
     return () => {

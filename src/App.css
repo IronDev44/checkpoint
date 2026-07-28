@@ -28533,12 +28533,15 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 /* Matrix boot screen: isolated from the legacy checkpoint splash rules. */
 .matrix-boot {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: calc(-1 * max(env(safe-area-inset-bottom), 42px));
+  left: 0;
   z-index: 9999;
   width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  min-height: 100vh;
+  height: calc(100vh + max(env(safe-area-inset-bottom), 42px));
+  height: calc(100dvh + max(env(safe-area-inset-bottom), 42px));
+  min-height: calc(100vh + max(env(safe-area-inset-bottom), 42px));
   overflow: hidden;
   isolation: isolate;
   background:
@@ -28547,12 +28550,13 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   color: #eafff0;
   font-synthesis: none;
   transform: translateZ(0);
+  contain: strict;
 }
 
 @supports (-webkit-touch-callout: none) {
   .matrix-boot {
-    height: 100vh;
-    min-height: -webkit-fill-available;
+    height: calc(100vh + max(env(safe-area-inset-bottom), 42px));
+    min-height: 100vh;
   }
 }
 
@@ -28658,6 +28662,7 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   position: relative;
   z-index: 12;
   width: min(90vw, 720px);
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -28667,7 +28672,7 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 
 .matrix-monogram,
 .matrix-title {
-  font-family: "Orbitron", "Arial Black", "Segoe UI", Arial, sans-serif;
+  font-family: "Arial Black", "Arial Rounded MT Bold", "Segoe UI", Arial, sans-serif;
   font-weight: 900;
   line-height: 0.9;
   font-synthesis: none;
@@ -28679,19 +28684,6 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
     0 0 18px rgba(0, 0, 0, 0.98),
     0 0 38px rgba(0, 0, 0, 0.9),
     0 0 22px rgba(34, 197, 94, 0.36);
-}
-
-.fonts-loading .matrix-monogram,
-.fonts-loading .matrix-title,
-.fonts-loading .matrix-subtitle,
-.fonts-loading .matrix-loading-label,
-.fonts-loading .matrix-loader strong,
-.fonts-loaded .matrix-monogram,
-.fonts-loaded .matrix-title,
-.fonts-loaded .matrix-subtitle,
-.fonts-loaded .matrix-loading-label,
-.fonts-loaded .matrix-loader strong {
-  font-family: "Orbitron", "Arial Black", "Segoe UI", Arial, sans-serif;
 }
 
 .matrix-monogram {
@@ -28710,7 +28702,7 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 .matrix-subtitle {
   margin: 24px 0 112px;
   color: rgba(236, 253, 245, 0.95);
-  font-family: "Orbitron", "Arial Black", "Segoe UI", Arial, sans-serif;
+  font-family: "Arial Black", "Arial Rounded MT Bold", "Segoe UI", Arial, sans-serif;
   font-size: clamp(0.94rem, 3vw, 1.55rem);
   font-weight: 800;
   letter-spacing: 0.22em;
@@ -28729,7 +28721,7 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 .matrix-loading-label,
 .matrix-loader strong {
   color: rgba(245, 255, 248, 0.95);
-  font-family: "Orbitron", "Arial Black", "Segoe UI", Arial, sans-serif;
+  font-family: "Arial Black", "Arial Rounded MT Bold", "Segoe UI", Arial, sans-serif;
   font-weight: 800;
   text-shadow:
     0 0 14px rgba(0, 0, 0, 0.98),
