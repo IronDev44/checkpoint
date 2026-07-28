@@ -50,14 +50,14 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
       "110100101101001011010010110100101101001011010010110100101101",
     ];
 
-    return Array.from({ length: 62 }).map((_, index) => ({
+    return Array.from({ length: 66 }).map((_, index) => ({
       id: `matrix-${index}`,
-      text: patterns[index % patterns.length].repeat(4),
-      left: -2 + index * 1.7,
-      delay: -(index % 17) * 0.42,
-      duration: 18 + (index % 6) * 1.4,
-      size: 10 + (index % 5) * 1.5,
-      opacity: 0.24 + (index % 4) * 0.045,
+      text: patterns[index % patterns.length].repeat(8),
+      left: -1.5 + index * 1.58,
+      delay: -(index % 19) * 0.46,
+      duration: 22 + (index % 6) * 1.6,
+      size: 9 + (index % 5) * 1.25,
+      opacity: 0.14 + (index % 4) * 0.028,
     }));
   }, []);
 
