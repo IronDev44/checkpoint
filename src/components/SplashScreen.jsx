@@ -2,6 +2,13 @@ import { useEffect, useMemo } from "react";
 
 export default function SplashScreen({ showSplash, progress = 0 }) {
   const safeProgress = Math.max(0, Math.min(100, Math.round(progress)));
+  const splashTheme = useMemo(() => {
+    try {
+      return localStorage.getItem("checkpoint-theme") || "theme-indigo";
+    } catch (error) {
+      return "theme-indigo";
+    }
+  }, []);
 
   const particles = useMemo(
     () =>
@@ -109,10 +116,13 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
   if (!showSplash) return null;
 
   return (
-      <div className={`checkpoint-splash ${safeProgress >= 100 ? "complete" : ""}`}>
+      <div
+        className={`checkpoint-splash ${splashTheme === "theme-matrix" ? "matrix-splash" : ""} ${
+          safeProgress >= 100 ? "complete" : ""
+        }`}
+      >
       <div className="splash-bg" />
       <div className="splash-vignette" />
-      <div className="splash-safe-area-fill" aria-hidden="true" />
 
       <div className="splash-matrix-curtain" aria-hidden="true">
         {matrixColumns.map((column) => (
