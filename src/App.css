@@ -28529,3 +28529,271 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
     transform: translate3d(0, 28vh, 0);
   }
 }
+
+/* Matrix boot screen: isolated from the legacy checkpoint splash rules. */
+.matrix-boot {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: -180px;
+  z-index: 9999;
+  width: 100vw;
+  height: calc(100dvh + 180px);
+  min-height: calc(100vh + 180px);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(20, 180, 95, 0.16), transparent 31%),
+    linear-gradient(180deg, #000905 0%, #000604 58%, #000302 100%);
+  color: #eafff0;
+  font-synthesis: none;
+  transform: translateZ(0);
+}
+
+@supports (-webkit-touch-callout: none) {
+  .matrix-boot {
+    height: calc(100vh + 180px);
+    min-height: -webkit-fill-available;
+  }
+}
+
+.matrix-boot-frame {
+  position: relative;
+  width: 100%;
+  height: 100dvh;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    repeating-linear-gradient(0deg, rgba(134, 239, 172, 0.035) 0 1px, transparent 1px 28px),
+    linear-gradient(180deg, rgba(0, 12, 6, 0.24), rgba(0, 3, 2, 0.08));
+}
+
+@supports (-webkit-touch-callout: none) {
+  .matrix-boot-frame {
+    height: 100vh;
+    min-height: -webkit-fill-available;
+  }
+}
+
+.matrix-boot-frame::before,
+.matrix-boot-frame::after,
+.matrix-focus {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.matrix-boot-frame::before {
+  z-index: 4;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(0, 0, 0, 0.28), rgba(0, 0, 0, 0.18) 34%, transparent 61%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.22), transparent 18%, transparent 82%, rgba(0, 0, 0, 0.22));
+}
+
+.matrix-boot-frame::after {
+  z-index: 9;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.14), transparent 22%, rgba(0, 0, 0, 0.22) 100%),
+    radial-gradient(ellipse at center, transparent 54%, rgba(0, 0, 0, 0.42) 100%);
+}
+
+.matrix-focus {
+  z-index: 5;
+  background:
+    radial-gradient(ellipse at 50% 39%, rgba(0, 0, 0, 0.46), rgba(0, 0, 0, 0.34) 21%, transparent 48%),
+    radial-gradient(ellipse at 50% 62%, rgba(0, 0, 0, 0.34), transparent 28%);
+}
+
+.matrix-rain {
+  position: fixed;
+  inset: -26vh -2vw -74vh -2vw;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.72;
+  filter: saturate(0.92) brightness(0.88);
+  mix-blend-mode: screen;
+  mask-image: linear-gradient(90deg, transparent 0%, black 4%, black 96%, transparent 100%);
+}
+
+.matrix-rain span {
+  position: absolute;
+  top: -145vh;
+  width: 1ch;
+  min-width: 1ch;
+  max-width: 1ch;
+  display: block;
+  color: rgba(130, 255, 180, 0.62);
+  font-family: Consolas, "Lucida Console", "Courier New", monospace;
+  font-weight: 700;
+  line-height: 0.82;
+  letter-spacing: 0;
+  white-space: normal;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  text-align: center;
+  text-shadow:
+    0 0 4px rgba(134, 239, 172, 0.5),
+    0 0 11px rgba(34, 197, 94, 0.24);
+  animation: matrixBootRain linear infinite;
+  will-change: transform;
+}
+
+.matrix-rain span:nth-child(3n) {
+  color: rgba(190, 255, 210, 0.48);
+}
+
+.matrix-rain span:nth-child(4n) {
+  color: rgba(74, 222, 128, 0.44);
+}
+
+.matrix-rain span:nth-child(7n) {
+  opacity: 0.28 !important;
+}
+
+.matrix-stage {
+  position: relative;
+  z-index: 12;
+  width: min(90vw, 720px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transform: translateZ(0);
+}
+
+.matrix-monogram,
+.matrix-title {
+  font-family: var(--checkpoint-brand-font, "Orbitron", "Arial Black", "Segoe UI", Arial, sans-serif);
+  font-weight: 900;
+  line-height: 0.9;
+  font-synthesis: none;
+  background: linear-gradient(180deg, #f2fff5 0%, #a7f3d0 38%, #16a34a 66%, #dcfce7 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow:
+    0 0 18px rgba(0, 0, 0, 0.98),
+    0 0 38px rgba(0, 0, 0, 0.9),
+    0 0 22px rgba(34, 197, 94, 0.36);
+}
+
+.matrix-monogram {
+  margin-bottom: 40px;
+  font-size: clamp(3.2rem, 13vw, 5.2rem);
+  letter-spacing: 0.02em;
+}
+
+.matrix-title {
+  margin: 0;
+  font-size: clamp(2.55rem, 9.8vw, 5.8rem);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.matrix-subtitle {
+  margin: 24px 0 112px;
+  color: rgba(236, 253, 245, 0.95);
+  font-family: var(--checkpoint-brand-font, "Orbitron", "Arial Black", "Segoe UI", Arial, sans-serif);
+  font-size: clamp(0.94rem, 3vw, 1.55rem);
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-shadow:
+    0 0 16px rgba(0, 0, 0, 0.96),
+    0 0 24px rgba(34, 197, 94, 0.3);
+}
+
+.matrix-loader {
+  width: min(84vw, 520px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.matrix-loading-label,
+.matrix-loader strong {
+  color: rgba(245, 255, 248, 0.95);
+  font-family: var(--checkpoint-brand-font, "Orbitron", "Arial Black", "Segoe UI", Arial, sans-serif);
+  font-weight: 800;
+  text-shadow:
+    0 0 14px rgba(0, 0, 0, 0.98),
+    0 0 24px rgba(34, 197, 94, 0.35);
+}
+
+.matrix-loading-label {
+  margin-bottom: 22px;
+  font-size: clamp(0.88rem, 2.9vw, 1.25rem);
+}
+
+.matrix-loader-bar {
+  width: 100%;
+  height: 11px;
+  padding: 2px;
+  border: 2px solid rgba(230, 255, 236, 0.92);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.72);
+  box-shadow:
+    0 0 18px rgba(34, 197, 94, 0.38),
+    inset 0 0 10px rgba(255, 255, 255, 0.12);
+}
+
+.matrix-loader-fill {
+  height: 100%;
+  min-width: 8px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #052e16, #22c55e, #eafff0);
+  box-shadow:
+    0 0 14px rgba(34, 197, 94, 0.85),
+    0 0 28px rgba(134, 239, 172, 0.34);
+  transition: width 140ms linear;
+}
+
+.matrix-loader strong {
+  margin-top: 22px;
+  font-size: clamp(1.15rem, 4vw, 1.75rem);
+  letter-spacing: 0.08em;
+}
+
+.matrix-boot.complete,
+.matrix-boot.complete .matrix-stage {
+  opacity: 1;
+  transform: translateZ(0);
+  filter: none;
+  transition: none;
+  animation: none;
+}
+
+@keyframes matrixBootRain {
+  0% {
+    transform: translate3d(0, -3vh, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 24vh, 0);
+  }
+}
+
+@media (max-width: 520px) {
+  .matrix-stage {
+    width: min(88vw, 420px);
+  }
+
+  .matrix-monogram {
+    margin-bottom: 34px;
+    font-size: clamp(3rem, 14vw, 4.6rem);
+  }
+
+  .matrix-title {
+    font-size: clamp(3rem, 12vw, 4.2rem);
+  }
+
+  .matrix-subtitle {
+    margin-bottom: 96px;
+    font-size: clamp(0.8rem, 2.8vw, 1rem);
+    letter-spacing: 0.2em;
+  }
+}

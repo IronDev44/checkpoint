@@ -57,14 +57,14 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
       "110100101101001011010010110100101101001011010010110100101101",
     ];
 
-    return Array.from({ length: 96 }).map((_, index) => ({
+    return Array.from({ length: 76 }).map((_, index) => ({
       id: `matrix-${index}`,
       text: patterns[index % patterns.length].repeat(10),
-      left: -2.5 + index * 1.1,
-      delay: -(index % 32) * 0.28,
-      duration: 20 + (index % 7) * 1.2,
-      size: 13 + (index % 5) * 1.15,
-      opacity: 0.4 + (index % 4) * 0.045,
+      left: -2 + index * 1.38,
+      delay: -(index % 28) * 0.3,
+      duration: 20 + (index % 7) * 1.35,
+      size: 12 + (index % 5) * 1.05,
+      opacity: 0.28 + (index % 4) * 0.035,
     }));
   }, []);
 
@@ -114,6 +114,47 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
   }, [showSplash]);
 
   if (!showSplash) return null;
+
+  if (splashTheme === "theme-matrix") {
+    return (
+      <div className={`matrix-boot ${safeProgress >= 100 ? "complete" : ""}`}>
+        <div className="matrix-boot-frame">
+          <div className="matrix-rain" aria-hidden="true">
+            {matrixColumns.map((column) => (
+              <span
+                key={column.id}
+                style={{
+                  left: `${column.left}%`,
+                  animationDelay: `${column.delay}s`,
+                  animationDuration: `${column.duration}s`,
+                  fontSize: `${column.size}px`,
+                  opacity: column.opacity,
+                }}
+              >
+                {column.text}
+              </span>
+            ))}
+          </div>
+
+          <div className="matrix-focus" />
+
+          <div className="matrix-stage">
+            <div className="matrix-monogram">CP</div>
+            <h1 className="matrix-title">CHECKPOINT</h1>
+            <p className="matrix-subtitle">Votre univers gaming</p>
+
+            <div className="matrix-loader">
+              <div className="matrix-loading-label">Chargement en cours...</div>
+              <div className="matrix-loader-bar">
+                <div className="matrix-loader-fill" style={{ width: `${safeProgress}%` }} />
+              </div>
+              <strong>{safeProgress}%</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
       <div
