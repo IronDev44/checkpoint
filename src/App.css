@@ -28229,6 +28229,15 @@ body[data-theme="theme-matrix"] .checkpoint-splash {
     linear-gradient(180deg, #000704 0%, #000604 54%, #000302 100%) !important;
 }
 
+html[data-theme="theme-matrix"],
+html[data-theme="theme-matrix"] body,
+body[data-theme="theme-matrix"] {
+  background:
+    linear-gradient(180deg, #000704 0%, #000604 54%, #000302 100%),
+    repeating-linear-gradient(0deg, rgba(134, 239, 172, 0.04) 0 1px, transparent 1px 28px) !important;
+  background-color: #000604 !important;
+}
+
 body[data-theme="theme-matrix"] .checkpoint-splash .splash-bg {
   inset: 0 0 -220px 0 !important;
   background:
@@ -28249,14 +28258,15 @@ body[data-theme="theme-matrix"] .checkpoint-splash .splash-safe-area-fill {
   position: fixed !important;
   left: 0 !important;
   right: 0 !important;
-  bottom: -260px !important;
-  height: 360px !important;
+  bottom: 0 !important;
+  height: max(170px, calc(env(safe-area-inset-bottom) + 150px)) !important;
   z-index: 2 !important;
   display: block !important;
   pointer-events: none !important;
   background:
-    linear-gradient(180deg, rgba(0, 7, 4, 0), rgba(0, 6, 3, 0.96) 18%, #000302 100%),
-    repeating-linear-gradient(90deg, rgba(134, 239, 172, 0.1) 0 1px, transparent 1px 9px) !important;
+    linear-gradient(180deg, rgba(0, 7, 4, 0), rgba(0, 7, 4, 0.68) 18%, rgba(0, 6, 3, 0.88) 100%),
+    repeating-linear-gradient(0deg, rgba(134, 239, 172, 0.05) 0 1px, transparent 1px 28px),
+    repeating-linear-gradient(90deg, rgba(134, 239, 172, 0.08) 0 1px, transparent 1px 12px) !important;
 }
 
 body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span {
@@ -28301,6 +28311,32 @@ body[data-theme="theme-matrix"] .checkpoint-splash .splash-stage {
   top: 48dvh !important;
   width: min(92vw, 760px) !important;
   transform: translate3d(-50%, -50%, 0) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash.complete {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash.complete .splash-stage {
+  opacity: 1 !important;
+  transform: translate3d(-50%, -50%, 0) !important;
+  filter: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash.complete .splash-cube,
+body[data-theme="theme-matrix"] .checkpoint-splash.complete .splash-logo-mark,
+body[data-theme="theme-matrix"] .checkpoint-splash.complete .splash-title-wrap,
+body[data-theme="theme-matrix"] .checkpoint-splash.complete .splash-subtitle,
+body[data-theme="theme-matrix"] .checkpoint-splash.complete .splash-loader {
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
 }
 
 body[data-theme="theme-matrix"] .checkpoint-splash .splash-stage::before {
