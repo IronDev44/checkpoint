@@ -27275,3 +27275,142 @@ body[data-theme="theme-kart"] .checkpoint-splash .splash-particles-premium span:
     transform: translate3d(0, 30vh, 0) scale(1.15);
   }
 }
+
+/* Matrix density and Tetris continuous fall polish. */
+body[data-theme="theme-matrix"] .checkpoint-splash::before {
+  background:
+    repeating-linear-gradient(90deg, transparent 0 18px, rgba(34, 197, 94, 0.08) 19px 20px, transparent 21px 38px),
+    repeating-linear-gradient(0deg, transparent 0 32px, rgba(134, 239, 172, 0.05) 33px 34px, transparent 35px 64px),
+    radial-gradient(circle at 50% 34%, rgba(34, 197, 94, 0.18), transparent 24%) !important;
+  opacity: 0.72 !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span {
+  min-width: 8px !important;
+  height: 22px !important;
+  color: rgba(134, 239, 172, 0.92) !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  text-shadow:
+    0 24px 0 rgba(134, 239, 172, 0.74),
+    0 48px 0 rgba(74, 222, 128, 0.52),
+    0 72px 0 rgba(34, 197, 94, 0.34),
+    18px 12px 0 rgba(134, 239, 172, 0.48),
+    18px 36px 0 rgba(74, 222, 128, 0.38),
+    -16px 20px 0 rgba(187, 247, 208, 0.36),
+    -16px 56px 0 rgba(34, 197, 94, 0.3),
+    30px 44px 0 rgba(134, 239, 172, 0.24) !important;
+  animation-name: matrixDenseRain !important;
+  animation-duration: 6.2s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span:nth-child(3n),
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(3n) {
+  font-size: 13px !important;
+  opacity: 0.78 !important;
+  animation-duration: 7.4s !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span:nth-child(4n),
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(4n) {
+  font-size: 22px !important;
+  opacity: 0.96 !important;
+  animation-duration: 5.2s !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span:nth-child(6n),
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(6n) {
+  font-size: 15px !important;
+  opacity: 0.6 !important;
+  animation-duration: 8.1s !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span::before {
+  content: "0" !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span:nth-child(2n)::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(2n)::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span:nth-child(5n)::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(5n)::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span:nth-child(7n)::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(7n)::before {
+  content: "1" !important;
+}
+
+body[data-theme="theme-blocks"] .checkpoint-splash::before {
+  animation: tetrisContinuousField 5s linear infinite !important;
+}
+
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-pixel-wall span,
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-particles-premium span {
+  animation-name: tetrisContinuousDrop !important;
+  animation-duration: 3.6s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+  transform-origin: center !important;
+}
+
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-pixel-wall span:nth-child(2n),
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-particles-premium span:nth-child(2n) {
+  animation-duration: 4.2s !important;
+}
+
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-pixel-wall span:nth-child(3n),
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-particles-premium span:nth-child(3n) {
+  animation-duration: 3.1s !important;
+}
+
+@keyframes matrixDenseRain {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -62vh, 0);
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  92% {
+    opacity: 0.84;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 72vh, 0);
+  }
+}
+
+@keyframes tetrisContinuousField {
+  0% {
+    background-position: 0 -360px, 0 -440px, 0 -520px;
+  }
+
+  100% {
+    background-position: 0 360px, 0 280px, 0 200px;
+  }
+}
+
+@keyframes tetrisContinuousDrop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -58vh, 0) rotate(0deg);
+  }
+
+  8% {
+    opacity: 1;
+  }
+
+  92% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 62vh, 0) rotate(0deg);
+  }
+}
