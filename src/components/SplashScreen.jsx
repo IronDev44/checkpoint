@@ -112,6 +112,7 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
       <div className={`checkpoint-splash ${safeProgress >= 100 ? "complete" : ""}`}>
       <div className="splash-bg" />
       <div className="splash-vignette" />
+      <div className="splash-safe-area-fill" aria-hidden="true" />
 
       <div className="splash-matrix-curtain" aria-hidden="true">
         {matrixColumns.map((column) => (
