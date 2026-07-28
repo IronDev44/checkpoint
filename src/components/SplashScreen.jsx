@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from "react";
 
-export default function SplashScreen({ showSplash, progress = 0 }) {
+export default function SplashScreen({ showSplash, progress = 0, onRequestClose }) {
   const safeProgress = Math.max(0, Math.min(100, Math.round(progress)));
   const splashTheme = useMemo(() => {
     try {
@@ -112,6 +112,16 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
       console.warn("Boot sound ignoré :", e);
     }
   }, [showSplash]);
+
+  useEffect(() => {
+    if (!showSplash || typeof onRequestClose !== "function") return;
+
+    const safetyTimer = setTimeout(() => {
+      onRequestClose();
+    }, 4400);
+
+    return () => clearTimeout(safetyTimer);
+  }, [onRequestClose, showSplash]);
 
   if (!showSplash) return null;
 

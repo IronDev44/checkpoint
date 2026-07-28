@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect, useMemo, useRef } from "react";
+import { Fragment, useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import "./App.css";
 import { db } from "./firebase";
@@ -64,6 +64,23 @@ const API_KEY = "d7b763a492c745cd82217c285f897e08";
 
 const WEEKLY_QUIZ_STORAGE_KEY = "checkpoint-weekly-quiz";
 const CHECKPOINT_GOALS_STORAGE_KEY = "checkpoint-goals";
+const SPLASH_SEEN_STORAGE_KEY = "checkpoint-splash-seen";
+
+const hasSeenSplash = () => {
+  try {
+    return sessionStorage.getItem(SPLASH_SEEN_STORAGE_KEY) === "true";
+  } catch (error) {
+    return false;
+  }
+};
+
+const markSplashSeen = () => {
+  try {
+    sessionStorage.setItem(SPLASH_SEEN_STORAGE_KEY, "true");
+  } catch (error) {
+    // The splash must never block the app if browser storage is unavailable.
+  }
+};
 
 const DEFAULT_WEEKLY_QUIZ_PROGRESS = {
   answers: {},
@@ -12714,10 +12731,10 @@ export default function App() {
       : localStorage.getItem("checkpoint-ui-mode") || "modern"
   );
   const [showSplash, setShowSplash] = useState(() => {
-    return sessionStorage.getItem("checkpoint-splash-seen") !== "true";
+    return !hasSeenSplash();
   });
   const [splashProgress, setSplashProgress] = useState(() =>
-    sessionStorage.getItem("checkpoint-splash-seen") === "true" ? 100 : 8
+    hasSeenSplash() ? 100 : 8
   );
   const [bootReady, setBootReady] = useState({
     events: false,
@@ -12726,10 +12743,18 @@ export default function App() {
     games: false,
   });
   const [splashTargetProgress, setSplashTargetProgress] = useState(() =>
-    sessionStorage.getItem("checkpoint-splash-seen") === "true" ? 100 : 92
+    hasSeenSplash() ? 100 : 92
   );
   const splashStartedAtRef = useRef(Date.now());
   const splashClosingRef = useRef(false);
+  const closeSplash = useCallback(() => {
+    if (splashClosingRef.current) return;
+    splashClosingRef.current = true;
+    setSplashTargetProgress(100);
+    setSplashProgress(100);
+    setShowSplash(false);
+    markSplashSeen();
+  }, []);
 
   const [yearFilter, setYearFilter] = useState("");
   const [platformFilter, setPlatformFilter] = useState("");
@@ -13713,19 +13738,14 @@ useEffect(() => {
     ];
 
     const closeTimer = setTimeout(() => {
-      if (splashClosingRef.current) return;
-      splashClosingRef.current = true;
-      setSplashTargetProgress(100);
-      setSplashProgress(100);
-      sessionStorage.setItem("checkpoint-splash-seen", "true");
-      setShowSplash(false);
+      closeSplash();
     }, 3400);
 
     return () => {
       progressTimers.forEach(clearTimeout);
       clearTimeout(closeTimer);
     };
-  }, [showSplash]);
+  }, [closeSplash, showSplash]);
 
   useEffect(() => {
     if (!showSplash) return;
@@ -13763,21 +13783,14 @@ useEffect(() => {
 
     if (!allReady) return;
 
-    let closeTimer;
     const timer = setTimeout(() => {
-      if (splashClosingRef.current) return;
-      splashClosingRef.current = true;
-      setSplashTargetProgress(100);
-      setSplashProgress(100);
-      sessionStorage.setItem("checkpoint-splash-seen", "true");
-      setShowSplash(false);
+      closeSplash();
     }, Math.max(0, minimumDuration - elapsed));
 
     return () => {
       clearTimeout(timer);
-      clearTimeout(closeTimer);
     };
-  }, [bootReady, showSplash]);
+  }, [bootReady, closeSplash, showSplash]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "games"), (snapshot) => {
@@ -14875,7 +14888,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
           <Toast message={toast} />
           <BadgeUnlockToast badge={newUnlockedBadge} />
-{ <SplashScreen showSplash={showSplash} progress={splashProgress} /> }
+{ <SplashScreen showSplash={showSplash} progress={splashProgress} onRequestClose={closeSplash} /> }
       <div className={`app-shell ${showSplash ? "app-hidden" : "app-visible"}`}>
         <div className="container">
           <h1 className="title" data-title="Checkpoint">Checkpoint</h1>
