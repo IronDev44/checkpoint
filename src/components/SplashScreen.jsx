@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from "react";
 
 export default function SplashScreen({ showSplash, progress = 0 }) {
+  const safeProgress = Math.max(0, Math.min(100, Math.round(progress)));
+
   const particles = useMemo(
     () =>
       Array.from({ length: 44 }).map((_, index) => ({
@@ -42,20 +44,20 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
 
   const matrixColumns = useMemo(() => {
     const patterns = [
-      "010110100101101001011010010110100101101001011010010110100101",
-      "101001011010010110100101101001011010010110100101101001011010",
-      "001011010010110100101101001011010010110100101101001011010010",
-      "110100101101001011010010110100101101001011010010110100101101",
+      "010110100101101001011010010110100101101001011010010110100101101001011010010110100101101001",
+      "101001011010010110100101101001011010010110100101101001011010010110100101101001011010010110",
+      "001011010010110100101101001011010010110100101101001011010010110100101101001011010010110100",
+      "110100101101001011010010110100101101001011010010110100101101001011010010110100101101001011",
     ];
 
-    return Array.from({ length: 46 }).map((_, index) => ({
+    return Array.from({ length: 76 }).map((_, index) => ({
       id: `matrix-${index}`,
       text: patterns[index % patterns.length],
-      left: -4 + index * 2.45,
-      delay: -(index % 13) * 0.34,
-      duration: 3.9 + (index % 7) * 0.36,
-      size: 12 + (index % 5) * 2,
-      opacity: 0.32 + (index % 6) * 0.08,
+      left: -3 + index * 1.42,
+      delay: -(index % 19) * 0.24,
+      duration: 5.2 + (index % 9) * 0.28,
+      size: 10 + (index % 6) * 1.7,
+      opacity: 0.34 + (index % 7) * 0.07,
     }));
   }, []);
 
@@ -107,7 +109,7 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
   if (!showSplash) return null;
 
   return (
-      <div className={`checkpoint-splash ${progress >= 100 ? "complete" : ""}`}>
+      <div className={`checkpoint-splash ${safeProgress >= 100 ? "complete" : ""}`}>
       <div className="splash-bg" />
       <div className="splash-vignette" />
 
@@ -201,11 +203,11 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
         <div className="splash-loader">
           <div className="splash-loading-label">Chargement en cours...</div>
           <div className="splash-loader-top">
-            <strong>{progress}%</strong>
+            <strong>{safeProgress}%</strong>
           </div>
 
           <div className="loader-bar">
-            <div className="loader-fill" style={{ width: `${progress}%` }} />
+            <div className="loader-fill" style={{ width: `${safeProgress}%` }} />
           </div>
         </div>
       </div>

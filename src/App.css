@@ -27617,3 +27617,69 @@ body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium {
     transform: translate3d(0, 118%, 0);
   }
 }
+
+/* Matrix boot fix: no purple flash, no column pop. */
+body[data-theme="theme-matrix"] .checkpoint-splash {
+  background:
+    radial-gradient(circle at 50% 35%, rgba(16, 185, 129, 0.2), transparent 25%),
+    linear-gradient(180deg, #000905 0%, #010f08 48%, #000302 100%) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-bg {
+  background:
+    radial-gradient(circle at 50% 36%, rgba(34, 197, 94, 0.22), transparent 24%),
+    linear-gradient(180deg, #000905 0%, #010f08 54%, #000302 100%) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash::after {
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.34), transparent 22%, rgba(0, 0, 0, 0.4) 100%),
+    radial-gradient(ellipse at center, transparent 38%, rgba(0, 0, 0, 0.68) 100%) !important;
+  opacity: 1 !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain {
+  inset: -36% -10% !important;
+  z-index: 5 !important;
+  opacity: 1 !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span {
+  top: -22% !important;
+  line-height: 0.82 !important;
+  opacity: var(--matrix-column-opacity, 0.72) !important;
+  animation-name: matrixSeamlessCurtain !important;
+  text-shadow:
+    0 0 6px rgba(134, 239, 172, 0.9),
+    0 0 14px rgba(34, 197, 94, 0.56) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span:nth-child(2n) {
+  transform: translateY(-18%) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span:nth-child(3n) {
+  filter: brightness(1.28) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span:nth-child(4n) {
+  filter: brightness(0.72) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span:nth-child(5n) {
+  animation-duration: 7.6s !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span:nth-child(7n) {
+  animation-duration: 4.8s !important;
+}
+
+@keyframes matrixSeamlessCurtain {
+  0% {
+    transform: translate3d(0, -28%, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 28%, 0);
+  }
+}
