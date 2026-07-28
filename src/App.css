@@ -27048,3 +27048,230 @@ body[data-theme="theme-arcane"] .checkpoint-splash .splash-particles-premium spa
     transform: translate3d(32vw, -28px, 0) rotate(14deg) scale(1.12);
   }
 }
+
+/* Theme motion refinement: clearer references, less popping. */
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span {
+  animation-duration: 5.4s !important;
+  animation-timing-function: linear !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span:nth-child(3n)::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(3n)::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span:nth-child(5n)::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(5n)::before {
+  content: "0";
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span:nth-child(2n)::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(2n)::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall span:nth-child(7n)::before,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium span:nth-child(7n)::before {
+  content: "1";
+}
+
+body[data-theme="theme-blueblur"] .checkpoint-splash::before {
+  background:
+    repeating-linear-gradient(0deg, transparent 0 34px, rgba(56, 189, 248, 0.12) 35px 39px, transparent 40px 74px),
+    repeating-linear-gradient(-8deg, transparent 0 46px, rgba(96, 165, 250, 0.32) 47px 53px, transparent 54px 102px),
+    repeating-linear-gradient(-8deg, transparent 0 92px, rgba(250, 204, 21, 0.3) 93px 98px, transparent 99px 160px),
+    radial-gradient(ellipse at 50% 55%, rgba(37, 99, 235, 0.38), transparent 38%) !important;
+  background-size: auto, 260px 100%, 340px 100%, auto !important;
+  opacity: 0.86 !important;
+  animation: sonicContinuousField 0.72s linear infinite !important;
+}
+
+body[data-theme="theme-blueblur"] .checkpoint-splash .splash-pixel-wall span,
+body[data-theme="theme-blueblur"] .checkpoint-splash .splash-particles-premium span {
+  width: 52px !important;
+  height: 3px !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.96) 42%, rgba(250, 204, 21, 0.8), transparent) !important;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.7) !important;
+  animation-name: sonicContinuousParticle !important;
+  animation-duration: 1.85s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+}
+
+body[data-theme="theme-blueblur"] .checkpoint-splash .splash-pixel-wall span:nth-child(3n),
+body[data-theme="theme-blueblur"] .checkpoint-splash .splash-particles-premium span:nth-child(3n) {
+  width: 22px !important;
+  height: 22px !important;
+  border: 3px solid rgba(250, 204, 21, 0.92) !important;
+  background: transparent !important;
+  animation-name: sonicContinuousRing !important;
+  animation-duration: 2.2s !important;
+}
+
+body[data-theme="theme-blocks"] .checkpoint-splash::before {
+  background:
+    linear-gradient(90deg, #ef4444 0 12%, transparent 12% 18%, #38bdf8 18% 30%, transparent 30% 42%, #facc15 42% 54%, transparent 54% 100%),
+    linear-gradient(90deg, transparent 0 44%, #22c55e 44% 56%, transparent 56% 62%, #a855f7 62% 74%, transparent 74% 100%),
+    linear-gradient(90deg, transparent 0 12%, #f97316 12% 24%, transparent 24% 70%, #e879f9 70% 82%, transparent 82% 100%) !important;
+  background-size: 138px 138px, 178px 178px, 220px 220px !important;
+  opacity: 0.5 !important;
+  animation: tetrisStraightField 4.4s steps(8) infinite !important;
+}
+
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-pixel-wall span,
+body[data-theme="theme-blocks"] .checkpoint-splash .splash-particles-premium span {
+  animation-name: tetrisStraightDrop !important;
+  animation-duration: 4.2s !important;
+  animation-timing-function: steps(8) !important;
+  animation-iteration-count: infinite !important;
+  transform-origin: center !important;
+}
+
+body[data-theme="theme-kart"] .checkpoint-splash::before {
+  inset: 0 !important;
+  background:
+    linear-gradient(90deg, #ef4444 0 14%, #f97316 14% 28%, #facc15 28% 42%, #22c55e 42% 56%, #38bdf8 56% 70%, #6366f1 70% 84%, #f472b6 84% 100%) !important;
+  clip-path: polygon(7% 100%, 93% 100%, 58% 42%, 42% 42%) !important;
+  opacity: 0.62 !important;
+  filter: saturate(1.35) brightness(1.08) drop-shadow(0 0 34px rgba(56, 189, 248, 0.28)) !important;
+  transform-origin: 50% 100% !important;
+  animation: rainbowRoadPerspective 1.45s linear infinite !important;
+}
+
+body[data-theme="theme-kart"] .checkpoint-splash::after {
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.78) 0 12px, rgba(8, 8, 24, 0.82) 12px 24px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.2), transparent 12%, transparent 88%, rgba(255, 255, 255, 0.2)),
+    radial-gradient(ellipse at 50% 100%, rgba(255, 255, 255, 0.14), transparent 38%) !important;
+  background-size: 96px 14px, auto, auto !important;
+  background-position: 50% 72%, 0 0, 0 0 !important;
+  background-repeat: repeat-x, no-repeat, no-repeat !important;
+  clip-path: none !important;
+  opacity: 0.34 !important;
+}
+
+body[data-theme="theme-kart"] .checkpoint-splash .splash-pixel-wall span,
+body[data-theme="theme-kart"] .checkpoint-splash .splash-particles-premium span {
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 999px !important;
+  background: #facc15 !important;
+  box-shadow: 0 0 18px rgba(250, 204, 21, 0.6) !important;
+  animation-name: kartTrackLight !important;
+  animation-duration: 2.2s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+}
+
+body[data-theme="theme-kart"] .checkpoint-splash .splash-pixel-wall span:nth-child(2n),
+body[data-theme="theme-kart"] .checkpoint-splash .splash-particles-premium span:nth-child(2n) {
+  background: #38bdf8 !important;
+}
+
+body[data-theme="theme-kart"] .checkpoint-splash .splash-pixel-wall span:nth-child(3n),
+body[data-theme="theme-kart"] .checkpoint-splash .splash-particles-premium span:nth-child(3n) {
+  background: #f472b6 !important;
+}
+
+body[data-theme="theme-kart"] .checkpoint-splash .splash-pixel-wall span:nth-child(5n),
+body[data-theme="theme-kart"] .checkpoint-splash .splash-particles-premium span:nth-child(5n) {
+  background: #22c55e !important;
+}
+
+@keyframes sonicContinuousField {
+  0% {
+    background-position: 0 0, -260px 0, -340px 0, 0 0;
+  }
+
+  100% {
+    background-position: 0 0, 0 0, 0 0, 0 0;
+  }
+}
+
+@keyframes sonicContinuousParticle {
+  0% {
+    opacity: 0;
+    transform: translate3d(-58vw, 0, 0) scaleX(0.9);
+  }
+
+  10%,
+  88% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(72vw, 0, 0) scaleX(1.35);
+  }
+}
+
+@keyframes sonicContinuousRing {
+  0% {
+    opacity: 0;
+    transform: translate3d(-62vw, 0, 0) scale(0.75);
+  }
+
+  14%,
+  82% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(68vw, 0, 0) scale(1.05);
+  }
+}
+
+@keyframes tetrisStraightField {
+  0% {
+    background-position: 0 -260px, 0 -320px, 0 -380px;
+  }
+
+  100% {
+    background-position: 0 260px, 0 190px, 0 120px;
+  }
+}
+
+@keyframes tetrisStraightDrop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -42vh, 0) rotate(0deg);
+  }
+
+  12%,
+  88% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 42vh, 0) rotate(0deg);
+  }
+}
+
+@keyframes rainbowRoadPerspective {
+  0% {
+    background-position: 0 0;
+    transform: translateY(0) scaleY(1);
+  }
+
+  100% {
+    background-position: 96px 0;
+    transform: translateY(2%) scaleY(1.03);
+  }
+}
+
+@keyframes kartTrackLight {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -18vh, 0) scale(0.8);
+  }
+
+  18%,
+  78% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 30vh, 0) scale(1.15);
+  }
+}
