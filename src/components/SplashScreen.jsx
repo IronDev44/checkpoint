@@ -42,6 +42,25 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
     []
   );
 
+  const matrixColumns = useMemo(() => {
+    const patterns = [
+      "010110100101101001011010010110100101101001011010010110100101",
+      "101001011010010110100101101001011010010110100101101001011010",
+      "001011010010110100101101001011010010110100101101001011010010",
+      "110100101101001011010010110100101101001011010010110100101101",
+    ];
+
+    return Array.from({ length: 62 }).map((_, index) => ({
+      id: `matrix-${index}`,
+      text: patterns[index % patterns.length].repeat(4),
+      left: -2 + index * 1.7,
+      delay: -(index % 17) * 0.42,
+      duration: 18 + (index % 6) * 1.4,
+      size: 10 + (index % 5) * 1.5,
+      opacity: 0.24 + (index % 4) * 0.045,
+    }));
+  }, []);
+
   useEffect(() => {
     if (!showSplash) return;
 
@@ -93,6 +112,23 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
       <div className={`checkpoint-splash ${safeProgress >= 100 ? "complete" : ""}`}>
       <div className="splash-bg" />
       <div className="splash-vignette" />
+
+      <div className="splash-matrix-curtain" aria-hidden="true">
+        {matrixColumns.map((column) => (
+          <span
+            key={column.id}
+            style={{
+              left: `${column.left}%`,
+              animationDelay: `${column.delay}s`,
+              animationDuration: `${column.duration}s`,
+              fontSize: `${column.size}px`,
+              opacity: column.opacity,
+            }}
+          >
+            {column.text}
+          </span>
+        ))}
+      </div>
 
       <div className="splash-particles-premium">
         {particles.map((particle) => (
