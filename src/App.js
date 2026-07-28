@@ -12717,7 +12717,7 @@ export default function App() {
     return sessionStorage.getItem("checkpoint-splash-seen") !== "true";
   });
   const [splashProgress, setSplashProgress] = useState(() =>
-    sessionStorage.getItem("checkpoint-splash-seen") === "true" ? 100 : 4
+    sessionStorage.getItem("checkpoint-splash-seen") === "true" ? 100 : 8
   );
   const [bootReady, setBootReady] = useState({
     events: false,
@@ -12726,9 +12726,10 @@ export default function App() {
     games: false,
   });
   const [splashTargetProgress, setSplashTargetProgress] = useState(() =>
-    sessionStorage.getItem("checkpoint-splash-seen") === "true" ? 100 : 18
+    sessionStorage.getItem("checkpoint-splash-seen") === "true" ? 100 : 92
   );
   const splashStartedAtRef = useRef(Date.now());
+  const splashClosingRef = useRef(false);
 
   const [yearFilter, setYearFilter] = useState("");
   const [platformFilter, setPlatformFilter] = useState("");
@@ -13693,9 +13694,38 @@ useEffect(() => {
         hardware: true,
         games: true,
       });
-    }, 6500);
+    }, 3600);
 
     return () => clearTimeout(fallbackTimer);
+  }, [showSplash]);
+
+  useEffect(() => {
+    if (!showSplash) return;
+
+    const progressTimers = [
+      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 42)), 180),
+      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 68)), 900),
+      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 92)), 1650),
+    ];
+
+    const closeTimer = setTimeout(() => {
+      if (splashClosingRef.current) return;
+      splashClosingRef.current = true;
+      setSplashTargetProgress(100);
+
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          setSplashProgress(100);
+          setShowSplash(false);
+          sessionStorage.setItem("checkpoint-splash-seen", "true");
+        });
+      }, 760);
+    }, 4600);
+
+    return () => {
+      progressTimers.forEach(clearTimeout);
+      clearTimeout(closeTimer);
+    };
   }, [showSplash]);
 
   useEffect(() => {
@@ -13736,10 +13766,13 @@ useEffect(() => {
 
     let closeTimer;
     const timer = setTimeout(() => {
+      if (splashClosingRef.current) return;
+      splashClosingRef.current = true;
       setSplashTargetProgress(100);
 
       closeTimer = setTimeout(() => {
         requestAnimationFrame(() => {
+          setSplashProgress(100);
           setShowSplash(false);
           sessionStorage.setItem("checkpoint-splash-seen", "true");
         });
