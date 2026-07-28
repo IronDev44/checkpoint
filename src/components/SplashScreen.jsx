@@ -140,7 +140,7 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
 
           <div className="matrix-stage">
             <div className="matrix-monogram">CP</div>
-            <h1 className="matrix-title">CHECKPOINT</h1>
+            <h1 className="matrix-title" data-title="Checkpoint">Checkpoint</h1>
             <p className="matrix-subtitle">Votre univers gaming</p>
 
             <div className="matrix-loader">

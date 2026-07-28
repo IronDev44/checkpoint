@@ -28702,9 +28702,9 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 
 .matrix-title {
   margin: 0;
-  font-size: clamp(2.55rem, 9.8vw, 5.8rem);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  font-size: clamp(2.85rem, 13.8vw, 5.8rem);
+  letter-spacing: 0.03em;
+  text-transform: none;
 }
 
 .matrix-subtitle {

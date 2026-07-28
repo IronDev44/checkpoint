@@ -18,6 +18,32 @@ function jsonResponse(body, init = {}) {
   });
 }
 
+async function assetResponse(request, env) {
+  const response = await env.ASSETS.fetch(request);
+  const url = new URL(request.url);
+  const headers = new Headers(response.headers);
+  const pathname = url.pathname;
+  const isAppShell =
+    pathname === "/" ||
+    pathname.endsWith(".html") ||
+    pathname === "/manifest.json" ||
+    pathname === "/asset-manifest.json";
+
+  if (isAppShell) {
+    headers.set("cache-control", "no-store, no-cache, max-age=0, must-revalidate");
+    headers.set("pragma", "no-cache");
+    headers.set("expires", "0");
+  } else if (pathname.startsWith("/static/")) {
+    headers.set("cache-control", "public, max-age=31536000, immutable");
+  }
+
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
 async function fetchJson(url, timeout = 9000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort("timeout"), timeout);
@@ -212,6 +238,6 @@ export default {
       }
     }
 
-    return env.ASSETS.fetch(request);
+    return assetResponse(request, env);
   },
 };
