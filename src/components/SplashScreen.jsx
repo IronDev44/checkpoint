@@ -52,7 +52,7 @@ export default function SplashScreen({ showSplash, progress = 0 }) {
 
     return Array.from({ length: 76 }).map((_, index) => ({
       id: `matrix-${index}`,
-      text: patterns[index % patterns.length],
+      text: patterns[index % patterns.length].repeat(3),
       left: -3 + index * 1.42,
       delay: -(index % 19) * 0.24,
       duration: 5.2 + (index % 9) * 0.28,

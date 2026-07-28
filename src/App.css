@@ -27683,3 +27683,83 @@ body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span:n
     transform: translate3d(0, 28%, 0);
   }
 }
+
+/* Matrix visual cleanup: safe-area background, calmer opacity, continuous columns. */
+body[data-theme="theme-matrix"],
+body[data-theme="theme-matrix"] #root,
+body[data-theme="theme-matrix"] .app-shell {
+  background: #000302 !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash {
+  inset: 0 0 calc(-1 * max(72px, env(safe-area-inset-bottom, 0px))) 0 !important;
+  min-height: calc(100dvh + max(72px, env(safe-area-inset-bottom, 0px))) !important;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(16, 185, 129, 0.16), transparent 25%),
+    linear-gradient(180deg, #000704 0%, #000c06 50%, #000302 100%) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-bg {
+  inset: 0 0 calc(-1 * max(72px, env(safe-area-inset-bottom, 0px))) 0 !important;
+  background:
+    radial-gradient(circle at 50% 36%, rgba(34, 197, 94, 0.16), transparent 24%),
+    linear-gradient(180deg, #000704 0%, #000c06 55%, #000302 100%) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-stage {
+  animation: none !important;
+  opacity: 1 !important;
+  z-index: 9 !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-title-wrap,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-subtitle,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-loader,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-cube-wrap,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-logo-mark {
+  animation-delay: 0s !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain {
+  inset: -54% -12% -44% -12% !important;
+  z-index: 4 !important;
+  opacity: 0.56 !important;
+  mask-image:
+    linear-gradient(180deg, black 0%, black 86%, transparent 100%),
+    linear-gradient(90deg, transparent 0%, black 7%, black 93%, transparent 100%) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span {
+  top: -18% !important;
+  color: rgba(134, 239, 172, 0.76) !important;
+  line-height: 0.78 !important;
+  opacity: 0.62 !important;
+  text-shadow:
+    0 0 5px rgba(134, 239, 172, 0.56),
+    0 0 11px rgba(34, 197, 94, 0.28) !important;
+  animation-name: matrixLongCurtain !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span:nth-child(3n) {
+  color: rgba(187, 247, 208, 0.62) !important;
+  opacity: 0.48 !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span:nth-child(4n) {
+  color: rgba(74, 222, 128, 0.42) !important;
+  opacity: 0.38 !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span:nth-child(7n) {
+  opacity: 0.34 !important;
+}
+
+@keyframes matrixLongCurtain {
+  0% {
+    transform: translate3d(0, -14%, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 14%, 0);
+  }
+}
