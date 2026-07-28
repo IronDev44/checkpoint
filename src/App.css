@@ -27546,3 +27546,74 @@ body[data-theme="theme-blocks"] .checkpoint-splash .splash-particles-premium spa
     transform: translate3d(0, calc(100vh - 154px), 0) rotate(0deg);
   }
 }
+
+.splash-matrix-curtain {
+  display: none;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain {
+  position: absolute !important;
+  inset: -16% -8% !important;
+  z-index: 4 !important;
+  display: block !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  mix-blend-mode: screen !important;
+  opacity: 0.95 !important;
+  mask-image: linear-gradient(180deg, transparent 0%, black 10%, black 88%, transparent 100%) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span {
+  position: absolute !important;
+  top: -120% !important;
+  bottom: auto !important;
+  width: 1ch !important;
+  max-width: 1ch !important;
+  min-width: 1ch !important;
+  height: auto !important;
+  display: block !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-all !important;
+  white-space: normal !important;
+  color: rgba(134, 239, 172, 0.96) !important;
+  font-family: "Courier New", monospace !important;
+  font-weight: 800 !important;
+  line-height: 0.9 !important;
+  letter-spacing: 0 !important;
+  text-align: center !important;
+  text-shadow:
+    0 0 7px rgba(134, 239, 172, 0.86),
+    0 0 16px rgba(34, 197, 94, 0.56),
+    0 0 30px rgba(21, 128, 61, 0.34) !important;
+  animation-name: matrixTrueCurtain !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span:nth-child(3n) {
+  color: rgba(187, 247, 208, 0.82) !important;
+  filter: brightness(1.22) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span:nth-child(4n) {
+  color: rgba(74, 222, 128, 0.58) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-matrix-curtain span:nth-child(7n) {
+  filter: blur(0.2px) brightness(0.78) !important;
+}
+
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-pixel-wall,
+body[data-theme="theme-matrix"] .checkpoint-splash .splash-particles-premium {
+  opacity: 0.08 !important;
+}
+
+@keyframes matrixTrueCurtain {
+  0% {
+    transform: translate3d(0, -18%, 0);
+  }
+
+  100% {
+    transform: translate3d(0, 118%, 0);
+  }
+}
