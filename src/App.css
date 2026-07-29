@@ -28946,7 +28946,7 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 .basic-splash {
   --basic-splash-a: #67e8f9;
   --basic-splash-b: #8b5cf6;
-  --basic-splash-display-font: "Avenir Next Condensed", "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  --basic-splash-display-font: Copperplate, "Copperplate Gothic Light", "Avenir Next Condensed", "Arial Black", sans-serif;
   --basic-splash-text-font: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
   position: fixed;
   inset: 0;
@@ -29033,7 +29033,7 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   font-size: clamp(1.8rem, 7vw, 2.6rem);
   font-weight: 900;
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
@@ -29042,10 +29042,10 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   max-width: 100%;
   font-family: var(--basic-splash-display-font);
   color: #fff;
-  font-size: clamp(2.5rem, 10.5vw, 4.8rem);
+  font-size: clamp(2.2rem, 8.8vw, 4.25rem);
   font-weight: 900;
   line-height: 0.92;
-  letter-spacing: 0.015em;
+  letter-spacing: 0.085em;
   text-transform: uppercase;
   text-shadow:
     0 0 24px rgba(0, 0, 0, 0.72),
@@ -29116,8 +29116,8 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   }
 
   .basic-splash h1 {
-    font-size: clamp(2.45rem, 11.2vw, 3.35rem);
-    letter-spacing: 0.01em;
+    font-size: clamp(2.05rem, 9.6vw, 2.9rem);
+    letter-spacing: 0.075em;
   }
 
   .basic-splash p {
