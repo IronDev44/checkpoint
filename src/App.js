@@ -12734,7 +12734,7 @@ export default function App() {
     return !hasSeenSplash();
   });
   const [splashProgress, setSplashProgress] = useState(() =>
-    hasSeenSplash() ? 100 : 8
+    hasSeenSplash() ? 100 : 2
   );
   const [bootReady, setBootReady] = useState({
     events: false,
@@ -12743,7 +12743,7 @@ export default function App() {
     games: false,
   });
   const [splashTargetProgress, setSplashTargetProgress] = useState(() =>
-    hasSeenSplash() ? 100 : 92
+    hasSeenSplash() ? 100 : 18
   );
   const splashStartedAtRef = useRef(Date.now());
   const splashClosingRef = useRef(false);
@@ -13731,15 +13731,17 @@ useEffect(() => {
     if (!showSplash) return;
 
     const progressTimers = [
-      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 34)), 160),
-      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 62)), 760),
-      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 88)), 1480),
-      setTimeout(() => setSplashTargetProgress(100), 2200),
+      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 22)), 180),
+      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 38)), 760),
+      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 54)), 1340),
+      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 72)), 1960),
+      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 90)), 2620),
+      setTimeout(() => setSplashTargetProgress(100), 3180),
     ];
 
     const closeTimer = setTimeout(() => {
       closeSplash();
-    }, 3400);
+    }, 3800);
 
     return () => {
       progressTimers.forEach(clearTimeout);
@@ -13751,7 +13753,7 @@ useEffect(() => {
     if (!showSplash) return;
 
     const readyCount = Object.values(bootReady).filter(Boolean).length;
-    const targetProgress = Math.min(92, 18 + readyCount * 16);
+    const targetProgress = Math.min(72, 12 + readyCount * 12);
 
     setSplashTargetProgress((current) =>
       current < targetProgress ? targetProgress : current
@@ -13766,10 +13768,10 @@ useEffect(() => {
         if (current >= splashTargetProgress) return current;
 
         const gap = splashTargetProgress - current;
-        const step = Math.max(2, Math.min(8, Math.ceil(gap * 0.22)));
+        const step = Math.max(1, Math.min(3, Math.ceil(gap * 0.08)));
         return Math.min(splashTargetProgress, current + step);
       });
-    }, 80);
+    }, 90);
 
     return () => clearInterval(progressTimer);
   }, [showSplash, splashTargetProgress]);
