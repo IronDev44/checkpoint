@@ -26,6 +26,7 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose 
       opacity: 0.2 + (index % 5) * 0.035,
     }));
   }, []);
+  const isMatrixTheme = splashTheme === "theme-matrix";
 
   useEffect(() => {
     if (!showSplash || typeof onRequestClose !== "function") return;
@@ -42,21 +43,23 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose 
   return (
     <div className={`basic-splash ${splashTheme}`}>
       <div className="basic-splash-backdrop" />
-      <div className="basic-splash-binary-curtain" aria-hidden="true">
-        {binaryColumns.map((column) => (
-          <span
-            key={column.id}
-            style={{
-              left: column.left,
-              animationDelay: column.delay,
-              animationDuration: column.duration,
-              opacity: column.opacity,
-            }}
-          >
-            {column.text}
-          </span>
-        ))}
-      </div>
+      {isMatrixTheme && (
+        <div className="basic-splash-binary-curtain" aria-hidden="true">
+          {binaryColumns.map((column) => (
+            <span
+              key={column.id}
+              style={{
+                left: column.left,
+                animationDelay: column.delay,
+                animationDuration: column.duration,
+                opacity: column.opacity,
+              }}
+            >
+              {column.text}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="basic-splash-content">
         <div className="basic-splash-logo" aria-label="Checkpoint">

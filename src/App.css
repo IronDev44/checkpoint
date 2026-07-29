@@ -29368,6 +29368,10 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
     linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
 }
 
+.basic-splash:not(.theme-matrix) .basic-splash-binary-curtain {
+  display: none !important;
+}
+
 .basic-splash-binary-curtain span {
   position: absolute;
   top: -100vh;
