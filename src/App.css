@@ -28946,8 +28946,8 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 .basic-splash {
   --basic-splash-a: #67e8f9;
   --basic-splash-b: #8b5cf6;
-  --basic-splash-display-font: Copperplate, "Copperplate Gothic Light", "Avenir Next Condensed", "Arial Black", sans-serif;
-  --basic-splash-text-font: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+  --basic-splash-display-font: "Courier New", "Lucida Console", Monaco, monospace;
+  --basic-splash-text-font: "Courier New", "Lucida Console", Monaco, monospace;
   position: fixed;
   inset: 0;
   z-index: 9999;
@@ -29030,11 +29030,14 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
     inset 0 1px 0 rgba(255, 255, 255, 0.34);
   color: white;
   font-family: var(--basic-splash-display-font);
-  font-size: clamp(1.8rem, 7vw, 2.6rem);
+  font-size: clamp(1.72rem, 6.8vw, 2.5rem);
   font-weight: 900;
   line-height: 1;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
+  text-shadow:
+    0 0 10px rgba(255, 255, 255, 0.45),
+    0 0 22px color-mix(in srgb, var(--basic-splash-a), transparent 44%);
 }
 
 .basic-splash h1 {
@@ -29042,14 +29045,16 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   max-width: 100%;
   font-family: var(--basic-splash-display-font);
   color: #fff;
-  font-size: clamp(2.2rem, 8.8vw, 4.25rem);
+  font-size: clamp(2rem, 8.1vw, 4rem);
   font-weight: 900;
-  line-height: 0.92;
-  letter-spacing: 0.085em;
+  line-height: 0.96;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
   text-shadow:
-    0 0 24px rgba(0, 0, 0, 0.72),
-    0 0 28px color-mix(in srgb, var(--basic-splash-a), transparent 72%);
+    0 2px 0 rgba(0, 0, 0, 0.65),
+    0 0 12px rgba(255, 255, 255, 0.32),
+    0 0 28px color-mix(in srgb, var(--basic-splash-a), transparent 58%),
+    0 0 44px color-mix(in srgb, var(--basic-splash-b), transparent 74%);
 }
 
 .basic-splash p {
@@ -29057,8 +29062,8 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   color: rgba(248, 251, 255, 0.78);
   font-family: var(--basic-splash-text-font);
   font-size: clamp(0.95rem, 3vw, 1.15rem);
-  font-weight: 800;
-  letter-spacing: 0.16em;
+  font-weight: 700;
+  letter-spacing: 0.12em;
 }
 
 .basic-splash-loader {
@@ -29116,8 +29121,8 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   }
 
   .basic-splash h1 {
-    font-size: clamp(2.05rem, 9.6vw, 2.9rem);
-    letter-spacing: 0.075em;
+    font-size: clamp(1.8rem, 8.3vw, 2.55rem);
+    letter-spacing: 0.02em;
   }
 
   .basic-splash p {
