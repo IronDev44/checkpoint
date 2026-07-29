@@ -70,7 +70,9 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose 
         <div className="basic-splash-loader">
           <span>Chargement en cours...</span>
           <div className="basic-splash-bar" aria-hidden="true">
-            <div style={{ width: `${safeProgress}%` }} />
+            <div className="basic-splash-bar-fill" style={{ width: `${safeProgress}%` }}>
+              <i />
+            </div>
           </div>
           <strong>{safeProgress}%</strong>
         </div>
