@@ -8926,13 +8926,61 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
     const baseSeries = getDetectedGameSeries(games);
 
     setEnrichedSeries(
-      baseSeries.map((series) => ({
-        ...series,
-        apiTotal: series.total,
-        missing: 0,
-      }))
+      baseSeries
+        .map((series) => {
+          const ratedGames = series.games.filter((game) => getGameRating(game) > 0);
+          const averageRating = ratedGames.length
+            ? ratedGames.reduce((sum, game) => sum + getGameRating(game), 0) / ratedGames.length
+            : 0;
+          const unfinished = series.games.filter((game) => !isGameFinishedStatus(game));
+          const wishlist = series.games.filter((game) => game.status === "wishlist");
+          const latestGame = [...series.games].sort((a, b) =>
+            String(b.released || "").localeCompare(String(a.released || ""))
+          )[0];
+
+          return {
+            ...series,
+            apiTotal: series.total,
+            missing: 0,
+            averageRating,
+            unfinished,
+            wishlist,
+            nextGame: unfinished[0] || series.games[0],
+            cover: latestGame?.image || series.games.find((game) => game.image)?.image || "",
+            mood:
+              series.percent >= 100
+                ? "Saga maîtrisée"
+                : series.percent >= 70
+                ? "Presque au bout"
+                : series.percent >= 35
+                ? "Belle lancée"
+                : "À explorer",
+          };
+        })
+        .sort((a, b) => b.percent - a.percent || b.total - a.total || a.name.localeCompare(b.name))
     );
   }, [games]);
+
+  const seriesStats = useMemo(() => {
+    const totalSeries = enrichedSeries.length;
+    const completedSeries = enrichedSeries.filter((series) => series.percent >= 100).length;
+    const nearComplete = enrichedSeries.filter(
+      (series) => series.percent >= 60 && series.percent < 100
+    ).length;
+    const totalGamesInSeries = enrichedSeries.reduce((sum, series) => sum + series.total, 0);
+    const nextSeriesToContinue =
+      enrichedSeries.find((series) => series.percent < 100 && series.unfinished.length > 0) ||
+      enrichedSeries.find((series) => series.percent < 100) ||
+      null;
+
+    return {
+      totalSeries,
+      completedSeries,
+      nearComplete,
+      totalGamesInSeries,
+      nextSeriesToContinue,
+    };
+  }, [enrichedSeries]);
 
   if (selectedSeries) {
     return (
@@ -8955,6 +9003,21 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
           </button>
 
           <h2 className="panel-title">{selectedSeries.name}</h2>
+
+          <div className="series-detail-summary">
+            <div>
+              <strong>{selectedSeries.percent}%</strong>
+              <span>complétion</span>
+            </div>
+            <div>
+              <strong>{selectedSeries.finished}/{selectedSeries.total}</strong>
+              <span>terminés</span>
+            </div>
+            <div>
+              <strong>{formatRating10(selectedSeries.averageRating, "—")}</strong>
+              <span>note moy.</span>
+            </div>
+          </div>
 
           {seriesView === "owned" && (
             <>
@@ -9084,7 +9147,55 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
   }
 
   return (
-  <div className="progression-stack">
+  <div className="progression-stack series-page">
+    <div className="series-hub-hero">
+      <div>
+        <span className="home-kicker">Sagas et licences</span>
+        <h2>Tes séries de jeux</h2>
+        <p>
+          Retrouve les licences que tu suis, celles presque terminées et les
+          prochains épisodes à ajouter.
+        </p>
+      </div>
+
+      <div className="series-hero-orb">
+        <Puzzle size={28} />
+      </div>
+    </div>
+
+    <div className="series-stats-grid">
+      <div>
+        <strong>{seriesStats.totalSeries}</strong>
+        <span>séries</span>
+      </div>
+      <div>
+        <strong>{seriesStats.completedSeries}</strong>
+        <span>complètes</span>
+      </div>
+      <div>
+        <strong>{seriesStats.nearComplete}</strong>
+        <span>à finir</span>
+      </div>
+      <div>
+        <strong>{seriesStats.totalGamesInSeries}</strong>
+        <span>jeux liés</span>
+      </div>
+    </div>
+
+    {seriesStats.nextSeriesToContinue && (
+      <button
+        type="button"
+        className="series-next-card"
+        onClick={() => openSeries(seriesStats.nextSeriesToContinue)}
+      >
+        <span className="home-kicker">À reprendre</span>
+        <strong>{seriesStats.nextSeriesToContinue.name}</strong>
+        <small>
+          {seriesStats.nextSeriesToContinue.nextGame?.name || "Un épisode t’attend"} ·{" "}
+          {seriesStats.nextSeriesToContinue.percent}% complété
+        </small>
+      </button>
+    )}
     <div className="search-panel">
       <div className="section-header">
         <h2>Séries détectées</h2>
@@ -9123,9 +9234,24 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
               className="series-card compact-series-card"
               onClick={() => openSeries(series)}
             >
+              <div
+                className="series-showcase-cover"
+                style={{ "--series-cover": `url(${series.cover || ""})` }}
+              >
+                {!series.cover && <Puzzle size={24} />}
+              </div>
+
               <div className="series-card-top">
-                <strong>{series.name}</strong>
-                <span>{series.percent}%</span>
+                <div>
+                  <span className="series-card-mood">{series.mood}</span>
+                  <strong>{series.name}</strong>
+                </div>
+                <span
+                  className="series-ring"
+                  style={{ "--series-percent": `${series.percent}%` }}
+                >
+                  <em>{series.percent}%</em>
+                </span>
               </div>
 
               <div className="progress-bar">
