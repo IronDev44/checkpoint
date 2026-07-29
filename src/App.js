@@ -2339,7 +2339,7 @@ function Loader({ text = "Chargement..." }) {
   );
 }
 
-function EmptyState({ title, subtitle }) {
+function EmptyState({ title, subtitle, icon = "✦" }) {
   return (
     <div className="empty-state">
       <div className="empty-state-icon">✦</div>
@@ -5129,8 +5129,8 @@ function LibraryShelf3D({ games, onOpenDetail }) {
   if (!displayedGames.length) {
     return (
       <EmptyState
-        title="Aucun jeu à afficher"
-        subtitle="Ajoute des jeux à ta collection pour remplir l’étagère."
+        title="Tes étagères attendent leurs premiers jeux"
+        subtitle="Ajoute quelques titres à ta bibliothèque et cette vue prendra vie."
       />
     );
   }
@@ -5566,8 +5566,8 @@ function LibrarySection({
 
       {games.length === 0 ? (
         <EmptyState
-          title="Aucun jeu ici"
-          subtitle="Ajoute des jeux ou change leur statut pour remplir cette section."
+          title="Cette section est encore calme"
+          subtitle="Ajoute un jeu, change un statut ou lance une recherche pour lui donner du relief."
         />
       ) : libraryCardMode === "shelf" ? (
         <LibraryShelf3D
@@ -7046,24 +7046,31 @@ function HomeTab({
     });
 
   const nextPlayCandidate = inProgressGames[0] || backlogCandidates[0] || null;
+  const homeGreeting =
+    inProgressGames.length > 0
+      ? "Content de te revoir"
+      : total > 0
+      ? "Ton univers prend forme"
+      : "Bienvenue dans ton hub";
+
   const dashboardAction = !quizLocked
     ? {
-        label: "Repondre",
-        title: "Quiz disponible",
-        detail: `+${WEEKLY_QUIZ_XP.correct} XP a prendre maintenant.`,
+        label: "Jouer",
+        title: "Question du moment",
+        detail: `Un petit quiz gaming pour garder le rythme. +${WEEKLY_QUIZ_XP.correct} XP à prendre.`,
         tab: "home",
       }
     : nextPlayCandidate
     ? {
-        label: nextPlayCandidate.status === "en cours" ? "Continuer" : "Voir le jeu",
-        title: nextPlayCandidate.status === "en cours" ? "Reprendre ta partie" : "Prochain jeu conseille",
-        detail: `${nextPlayCandidate.name} - ${formatRating10(getGameRating(nextPlayCandidate), "non note")}`,
+        label: nextPlayCandidate.status === "en cours" ? "Reprendre" : "Voir la fiche",
+        title: nextPlayCandidate.status === "en cours" ? "Ta partie t’attend" : "Une bonne pioche pour la suite",
+        detail: `${nextPlayCandidate.name} · ${formatRating10(getGameRating(nextPlayCandidate), "pas encore noté")}`,
         game: nextPlayCandidate,
       }
     : {
         label: "Ajouter",
-        title: "Construire ta collection",
-        detail: "Ajoute quelques jeux pour lancer les recommandations.",
+        title: "Commencer ton univers",
+        detail: "Ajoute quelques jeux et Checkpoint pourra te proposer de vraies pistes.",
         tab: "search",
       };
 
@@ -7436,7 +7443,7 @@ function HomeTab({
     <div className="home-page">
       <div className="home-hero">
         <div>
-          <div className="home-kicker">Bienvenue sur Checkpoint</div>
+          <div className="home-kicker">{homeGreeting}</div>
           <h2>{profile.title}</h2>
           <p>{profile.subtitle}</p>
         </div>
@@ -7457,7 +7464,7 @@ function HomeTab({
       <div className="home-dashboard-panel">
         <div className="home-focus-card">
           <div className="home-focus-content">
-            <span className="home-kicker">Checkpoint du jour</span>
+            <span className="home-kicker">Ton checkpoint du jour</span>
             <h3>{dashboardAction.title}</h3>
             <p>{dashboardAction.detail}</p>
           </div>
@@ -10576,33 +10583,33 @@ function HardwareTab({
 
   const emptyTitle =
     hardwareCategory === "controller"
-      ? "Aucune manette ajoutée"
+      ? "Aucune manette dans ton setup"
       : hardwareCategory === "audio"
-      ? "Aucun casque ajouté"
+      ? "Aucun casque dans ton setup"
       : hardwareCategory === "speaker"
-      ? "Aucune enceinte ajoutée"
+      ? "Aucune enceinte dans ton setup"
       : hardwareCategory === "vr"
-      ? "Aucun casque VR ajouté"
+      ? "Aucun casque VR dans ton setup"
       : hardwareCategory === "mouse"
-      ? "Aucune souris ajoutée"
+      ? "Aucune souris dans ton setup"
       : hardwareCategory === "keyboard"
-      ? "Aucun clavier ajouté"
-      : "Aucun matériel ajouté";
+      ? "Aucun clavier dans ton setup"
+      : "Ton setup attend sa première pièce";
 
   const emptySubtitle =
     hardwareCategory === "controller"
-      ? "Ajoute une manette depuis le catalogue."
+      ? "Pioche dans le catalogue pour retrouver tes manettes préférées."
       : hardwareCategory === "audio"
-      ? "Ajoute ton premier casque depuis le catalogue."
+      ? "Ajoute le casque qui accompagne tes sessions."
       : hardwareCategory === "speaker"
-      ? "Ajoute tes premières enceintes gaming depuis le catalogue."
+      ? "Ajoute les enceintes qui donnent du coffre à ton coin gaming."
       : hardwareCategory === "vr"
-      ? "Ajoute ton premier casque VR gaming depuis le catalogue."
+      ? "Ajoute ton casque VR pour compléter l’espace immersif."
       : hardwareCategory === "mouse"
-      ? "Ajoute ta première souris gaming depuis le catalogue."
+      ? "Ajoute ta souris principale et garde une trace de ton ressenti."
       : hardwareCategory === "keyboard"
-      ? "Ajoute ton premier clavier gaming depuis le catalogue."
-      : "Ajoute ta première console depuis le catalogue.";
+      ? "Ajoute ton clavier et commence à noter ton confort de jeu."
+      : "Ajoute ta première console depuis le catalogue pour construire ton historique.";
 
   return (
     <div className="progression-stack">
@@ -12869,7 +12876,7 @@ const updateAppOption = (key, value) => {
 const resetAppOptions = () => {
   setAppOptions(DEFAULT_APP_OPTIONS);
   localStorage.setItem("checkpoint-app-options", JSON.stringify(DEFAULT_APP_OPTIONS));
-  showToast("Options remises par defaut.");
+  showToast("Options remises au propre.");
 };
 
 const exportCheckpointBackup = () => {
@@ -12894,7 +12901,7 @@ const exportCheckpointBackup = () => {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
-  showToast("Sauvegarde exportee.");
+  showToast("Sauvegarde prête.");
 };
 
 const importCheckpointBackup = async (event) => {
@@ -12939,10 +12946,10 @@ const importCheckpointBackup = async (event) => {
       localStorage.setItem("checkpoint-social-friends", JSON.stringify(payload.socialFriends));
     }
 
-    showToast("Sauvegarde importee.");
+    showToast("Sauvegarde restaurée.");
   } catch (error) {
     console.error("Erreur import sauvegarde :", error);
-    showToast("Sauvegarde illisible.");
+    showToast("Impossible de lire cette sauvegarde.");
   }
 };
 
@@ -13032,12 +13039,12 @@ const badgeToastInitializedRef = useRef(false);
 const addHardware = async (item) => {
   try {
     await addDoc(collection(db, "hardware"), item);
-    showToast("Matériel ajouté !");
+    showToast("Belle prise ajoutée à ton setup.");
     playSound("success", soundStyle);
   } catch (error) {
     if (isAbortError(error)) return;
     console.error("Erreur ajout matériel :", error);
-    showToast("Erreur lors de l’ajout du matériel.");
+    showToast("Impossible d’ajouter ce matériel pour le moment.");
   }
 };
 
@@ -13052,12 +13059,12 @@ const deleteHardware = async (id) => {
 
   try {
     await deleteDoc(doc(db, "hardware", id));
-    showToast("Matériel supprimé.");
+    showToast("Matériel retiré du setup.");
     playSound("delete", soundStyle);
   } catch (error) {
     if (isAbortError(error)) return;
     console.error("Erreur suppression matériel :", error);
-    showToast("Erreur lors de la suppression.");
+    showToast("Impossible de supprimer pour le moment.");
   }
 };
 
@@ -13132,7 +13139,7 @@ const handleWeeklyQuizAnswer = (answerIndex, options = {}) => {
   setWeeklyQuizProgress(nextProgress);
   storeWeeklyQuizProgress(nextProgress);
   playSound(correct ? "success" : "click", soundStyle);
-  showToast(correct ? `Bonne réponse ! +${earnedXP} XP` : `Participation validée. +${earnedXP} XP`);
+  showToast(correct ? `Bien joué ! +${earnedXP} XP` : `Tentative validée. +${earnedXP} XP`);
 };
 
 const handleClaimCheckpointGoal = (goal) => {
@@ -13155,7 +13162,7 @@ const handleClaimCheckpointGoal = (goal) => {
   setCheckpointGoalProgress(nextProgress);
   storeCheckpointGoalProgress(nextProgress);
   playSound("success", soundStyle);
-  showToast(`${goal.title} valide. +${earnedXP} XP`);
+  showToast(`${goal.title} validé. +${earnedXP} XP`);
 };
 const updateSocialProfile = (field, value) => {
   const nextProfile = {
@@ -13368,12 +13375,12 @@ const setSocialProfileVisibility = async (visibility) => {
         { merge: true }
       );
 
-      showToast("Profil passé en public.");
+    showToast("Profil public activé.");
       return { ok: true, message: "Profil public. Tes amis peuvent te trouver." };
     }
 
     await deleteDoc(doc(db, "publicProfiles", handle));
-    showToast("Profil passé en privé.");
+    showToast("Profil repassé en privé.");
     return { ok: true, message: "Profil privé. Il n'est plus trouvable." };
   } catch (error) {
     console.error("Erreur visibilité profil :", error);
@@ -13407,7 +13414,7 @@ const copySocialProfileLink = async () => {
 
     const shareUrl = getProfileShareUrl(handle);
     await navigator.clipboard.writeText(shareUrl);
-    showToast("Lien du profil copié.");
+    showToast("Lien du profil prêt à partager.");
     return { ok: true, message: "Lien copié dans le presse-papiers." };
   } catch (error) {
     console.error("Erreur copie profil :", error);
@@ -13454,7 +13461,7 @@ const addSocialFriend = async (handleValue) => {
       return nextFriends;
     });
 
-    showToast("Ami ajouté.");
+    showToast("Nouvel ami ajouté.");
     return { ok: true, message: `${friend.displayName} a été ajouté.` };
   } catch (error) {
     console.error("Erreur ajout ami :", error);
@@ -13550,33 +13557,33 @@ useEffect(() => {
 const updateHardwareStatus = async (id, status) => {
   try {
     await updateDoc(doc(db, "hardware", id), { status });
-    setToast("Statut matériel mis à jour");
+    setToast("Statut du matériel enregistré.");
   } catch (error) {
     if (isAbortError(error)) return;
     console.error("Erreur statut matériel :", error);
-    setToast("Erreur lors de la mise à jour.");
+    setToast("Impossible de mettre à jour pour le moment.");
   }
 };
 
 const updateHardwareCondition = async (id, condition) => {
   try {
     await updateDoc(doc(db, "hardware", id), { condition });
-    setToast("État matériel mis à jour");
+    setToast("État du matériel enregistré.");
   } catch (error) {
     if (isAbortError(error)) return;
     console.error("Erreur état matériel :", error);
-    setToast("Erreur lors de la mise à jour.");
+    setToast("Impossible de mettre à jour pour le moment.");
   }
 };
 
 const updateHardwareDisplaySize = async (id, displaySize) => {
   try {
     await updateDoc(doc(db, "hardware", id), { displaySize });
-    setToast("Taille d'ecran mise a jour");
+    setToast("Taille d’écran enregistrée.");
   } catch (error) {
     if (isAbortError(error)) return;
     console.error("Erreur taille ecran :", error);
-    setToast("Erreur lors de la mise a jour.");
+    setToast("Impossible de mettre à jour la taille.");
   }
 };
 
@@ -14135,7 +14142,7 @@ useEffect(() => {
   const addGameToFirebase = async (game) => {
     try {
       if (gameExists(game.name)) {
-        setToast("Ce jeu est déjà dans ta liste.");
+        setToast("Ce jeu fait déjà partie de ton univers.");
         return false;
       }
 
@@ -14182,7 +14189,7 @@ useEffect(() => {
       return true;
     } catch (e) {
       console.error("Erreur ajout Firebase :", e);
-      setToast("Erreur lors de l’ajout.");
+      setToast("Impossible d’ajouter ce jeu pour le moment.");
       return false;
     }
   };
@@ -14205,11 +14212,11 @@ useEffect(() => {
       { merge: true }
     );
 
-    setToast("Ajouté à la série");
+    setToast("Ajouté à la série.");
   } catch (e) {
     if (isAbortError(e)) return;
     console.error(e);
-    setToast("Erreur série");
+    setToast("Impossible de mettre à jour la série.");
   }
 };
 
@@ -14218,7 +14225,7 @@ useEffect(() => {
 
     if (ok) {
       playSound("success", soundStyle);
-      setToast("Ajouté à Terminé");
+      setToast("Ajouté à tes jeux terminés.");
     }
   };
 
@@ -14227,7 +14234,7 @@ useEffect(() => {
 
       if (ok) {
         playSound("success", soundStyle);
-        setToast("Ajouté à Wishlist");
+        setToast("Ajouté à ta wishlist.");
       }
     };
 
@@ -14376,7 +14383,7 @@ useEffect(() => {
   } catch (e) {
     if (isAbortError(e)) return;
     console.error("Erreur recherche RAWG :", e);
-    setToast("Erreur pendant la recherche.");
+    setToast("La recherche n’a pas répondu correctement.");
   } finally {
     setIsSearching(false);
   }
@@ -14403,14 +14410,14 @@ useEffect(() => {
 
     playSound("delete", soundStyle); // 🔊 AJOUT
 
-    setToast("Jeu supprimé");
+    setToast("Jeu retiré de ta bibliothèque.");
 
     if (selectedGame?.id === id) {
       setSelectedGame(null);
     }
   } catch (e) {
     console.error("Erreur suppression Firebase :", e);
-    setToast("Erreur lors de la suppression.");
+    setToast("Impossible de supprimer ce jeu pour le moment.");
   }
 };
 
@@ -14579,7 +14586,7 @@ const setRating = (id, rating) => {
       }));
     }
 
-    setToast(`Progression : ${getProgressLabel(progressStatus)}`);
+    setToast(`Progression mise à jour : ${getProgressLabel(progressStatus)}`);
   } catch (e) {
     console.error("Erreur progression :", e);
     }
@@ -14621,10 +14628,10 @@ const setRating = (id, rating) => {
           })
         )
       );
-      setToast(isAlreadySelected ? "GOTY retiré" : `GOTY ${numericYear} sélectionné`);
+      setToast(isAlreadySelected ? "GOTY retiré." : `Ton GOTY ${numericYear} est enregistré.`);
     } catch (e) {
       console.error("Erreur Game of the Year :", e);
-      setToast("Erreur lors de la sélection GOTY.");
+      setToast("Impossible d’enregistrer ce GOTY.");
     }
   };
 
@@ -14641,7 +14648,7 @@ const setRating = (id, rating) => {
       }));
     }
 
-    setToast(`Temps joué : ${getPlaytimeRangeLabel(playtimeRange)}`);
+    setToast(`Temps de jeu noté : ${getPlaytimeRangeLabel(playtimeRange)}`);
   } catch (e) {
     console.error("Erreur temps joué :", e);
   }
@@ -14660,7 +14667,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       }));
     }
 
-    setToast("Plateforme utilisée mise à jour");
+    setToast("Plateforme utilisée enregistrée.");
   } catch (error) {
     if (isAbortError(error)) return;
     console.error("Erreur plateformes jouées :", error);
@@ -14671,7 +14678,7 @@ const setPlayedPlatforms = async (id, platforms) => {
     const issues = providedIssues || getGameDataIntegrityIssues(games);
 
     if (!issues.length) {
-      showToast("Bibliothèque déjà cohérente.");
+      showToast("Bibliothèque déjà bien rangée.");
       return;
     }
 
@@ -14693,7 +14700,7 @@ const setPlayedPlatforms = async (id, platforms) => {
         return issue ? { ...prev, ...issue.patch } : prev;
       });
 
-      showToast(`${issues.length} fiche${issues.length > 1 ? "s" : ""} synchronisée${issues.length > 1 ? "s" : ""}`);
+      showToast(`${issues.length} fiche${issues.length > 1 ? "s" : ""} remise${issues.length > 1 ? "s" : ""} au propre.`);
     } catch (error) {
       console.error("Erreur diagnostic bibliothèque :", error);
       showToast("Impossible de réparer les données pour le moment.");
@@ -14725,7 +14732,7 @@ const setPlayedPlatforms = async (id, platforms) => {
         }));
       }
 
-      setToast(!currentValue ? "Jeu marqué comme terminé" : "Jeu marqué comme non terminé");
+      setToast(!currentValue ? "Jeu validé comme terminé." : "Jeu remis dans la pile à suivre.");
     } catch (e) {
       console.error("Erreur mise à jour terminé :", e);
     }
@@ -14737,7 +14744,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       if (selectedGame?.id === id) {
         setSelectedGame((prev) => ({ ...prev, difficulty }));
       }
-      setToast("Difficulté mise à jour");
+      setToast("Difficulté enregistrée.");
     } catch (e) {
       console.error("Erreur mise à jour difficulté :", e);
     }
@@ -14749,7 +14756,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       if (selectedGame?.id === id) {
         setSelectedGame((prev) => ({ ...prev, review }));
       }
-      setToast("Avis enregistré");
+      setToast("Avis enregistré dans ta fiche.");
     } catch (e) {
       console.error("Erreur mise à jour avis :", e);
     }
@@ -14770,7 +14777,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       if (selectedGame?.id === id) {
         setSelectedGame((prev) => ({ ...prev, ...payload }));
       }
-      setToast("OST enregistrée");
+      setToast("OST enregistrée dans ta mémoire de joueur.");
     } catch (e) {
       console.error("Erreur mise à jour OST :", e);
       setToast("Erreur lors de l'enregistrement OST.");
@@ -14788,7 +14795,7 @@ const setPlayedPlatforms = async (id, platforms) => {
         }));
       }
 
-      setToast("DLC mis à jour");
+      setToast("DLC mis à jour.");
     } catch (e) {
       console.error("Erreur mise à jour DLC :", e);
     }
