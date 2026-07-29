@@ -10,267 +10,33 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose 
     }
   }, []);
 
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 44 }).map((_, index) => ({
-        id: index,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        delay: Math.random() * 3,
-        duration: 4 + Math.random() * 3,
-        size: 1 + Math.random() * 2.2,
-      })),
-    []
-  );
-
-  const pixelWalls = useMemo(
-    () => ({
-      left: Array.from({ length: 52 }).map((_, index) => ({
-        id: `left-${index}`,
-        x: 4 + Math.pow(index / 52, 1.2) * 34 + (Math.random() - 0.5) * 7,
-        y: 13 + Math.random() * 58,
-        endX: 42 + Math.random() * 7,
-        endY: 55 + Math.random() * 9,
-        size: 2 + Math.random() * 7,
-        delay: Math.random() * 2.4,
-        opacity: 0.2 + Math.random() * 0.34,
-      })),
-      right: Array.from({ length: 52 }).map((_, index) => ({
-        id: `right-${index}`,
-        x: 96 - Math.pow(index / 52, 1.2) * 34 + (Math.random() - 0.5) * 7,
-        y: 13 + Math.random() * 58,
-        endX: 51 + Math.random() * 7,
-        endY: 55 + Math.random() * 9,
-        size: 2 + Math.random() * 7,
-        delay: Math.random() * 2.4,
-        opacity: 0.2 + Math.random() * 0.34,
-      })),
-    }),
-    []
-  );
-
-  const matrixColumns = useMemo(() => {
-    const patterns = [
-      "010110100101101001011010010110100101101001011010010110100101",
-      "101001011010010110100101101001011010010110100101101001011010",
-      "001011010010110100101101001011010010110100101101001011010010",
-      "110100101101001011010010110100101101001011010010110100101101",
-    ];
-
-    return Array.from({ length: 76 }).map((_, index) => ({
-      id: `matrix-${index}`,
-      text: patterns[index % patterns.length].repeat(10),
-      left: -2 + index * 1.38,
-      delay: -(index % 28) * 0.3,
-      duration: 20 + (index % 7) * 1.35,
-      size: 12 + (index % 5) * 1.05,
-      opacity: 0.28 + (index % 4) * 0.035,
-    }));
-  }, []);
-
-  useEffect(() => {
-    if (!showSplash) return;
-
-    try {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) return;
-
-      const ctx = new AudioContextClass();
-      const master = ctx.createGain();
-      master.gain.value = 0.055;
-      master.connect(ctx.destination);
-
-      const now = ctx.currentTime;
-
-      const playNote = (freq, start, duration, type = "sine") => {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, now + start);
-
-        gain.gain.setValueAtTime(0.0001, now + start);
-        gain.gain.exponentialRampToValueAtTime(0.22, now + start + 0.08);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + start + duration);
-
-        osc.connect(gain);
-        gain.connect(master);
-
-        osc.start(now + start);
-        osc.stop(now + start + duration);
-      };
-
-      playNote(196, 0, 0.65, "sine");
-      playNote(293.66, 0.14, 0.85, "triangle");
-      playNote(392, 0.42, 1.1, "sine");
-      playNote(587.33, 0.9, 1.3, "triangle");
-
-      setTimeout(() => {
-        ctx.close().catch(() => {});
-      }, 2800);
-    } catch (e) {
-      console.warn("Boot sound ignoré :", e);
-    }
-  }, [showSplash]);
-
   useEffect(() => {
     if (!showSplash || typeof onRequestClose !== "function") return;
 
     const safetyTimer = setTimeout(() => {
       onRequestClose();
-    }, 4400);
+    }, 4200);
 
     return () => clearTimeout(safetyTimer);
   }, [onRequestClose, showSplash]);
 
   if (!showSplash) return null;
 
-  if (splashTheme === "theme-matrix") {
-    return (
-      <div className={`matrix-boot ${safeProgress >= 100 ? "complete" : ""}`}>
-        <div className="matrix-boot-frame">
-          <div className="matrix-rain" aria-hidden="true">
-            {matrixColumns.map((column) => (
-              <span
-                key={column.id}
-                style={{
-                  left: `${column.left}%`,
-                  animationDelay: `${column.delay}s`,
-                  animationDuration: `${column.duration}s`,
-                  fontSize: `${column.size}px`,
-                  opacity: column.opacity,
-                }}
-              >
-                {column.text}
-              </span>
-            ))}
-          </div>
-
-          <div className="matrix-focus" />
-
-          <div className="matrix-stage">
-            <div className="matrix-monogram">CP</div>
-            <h1 className="matrix-title" data-title="Checkpoint">Checkpoint</h1>
-            <p className="matrix-subtitle">Votre univers gaming</p>
-
-            <div className="matrix-loader">
-              <div className="matrix-loading-label">Chargement en cours...</div>
-              <div className="matrix-loader-bar">
-                <div className="matrix-loader-fill" style={{ width: `${safeProgress}%` }} />
-              </div>
-              <strong>{safeProgress}%</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-      <div
-        className={`checkpoint-splash ${splashTheme === "theme-matrix" ? "matrix-splash" : ""} ${
-          safeProgress >= 100 ? "complete" : ""
-        }`}
-      >
-      <div className="splash-bg" />
-      <div className="splash-vignette" />
+    <div className={`basic-splash ${splashTheme}`}>
+      <div className="basic-splash-backdrop" />
 
-      <div className="splash-matrix-curtain" aria-hidden="true">
-        {matrixColumns.map((column) => (
-          <span
-            key={column.id}
-            style={{
-              left: `${column.left}%`,
-              animationDelay: `${column.delay}s`,
-              animationDuration: `${column.duration}s`,
-              fontSize: `${column.size}px`,
-              opacity: column.opacity,
-            }}
-          >
-            {column.text}
-          </span>
-        ))}
-      </div>
+      <div className="basic-splash-content">
+        <div className="basic-splash-logo">CP</div>
+        <h1>Checkpoint</h1>
+        <p>Votre univers gaming</p>
 
-      <div className="splash-particles-premium">
-        {particles.map((particle) => (
-          <span
-            key={particle.id}
-            style={{
-              left: `${particle.x}%`,
-              top: `${particle.y}%`,
-              width: `${particle.size}px`,
-              height: `${particle.size}px`,
-              animationDelay: `${particle.delay}s`,
-              animationDuration: `${particle.duration}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="splash-pixel-wall splash-pixel-wall-left">
-        {pixelWalls.left.map((pixel) => (
-          <span
-            key={pixel.id}
-            style={{
-              left: `${pixel.x}%`,
-              top: `${pixel.y}%`,
-              width: `${pixel.size}px`,
-              height: `${pixel.size}px`,
-              opacity: pixel.opacity,
-              animationDelay: `${pixel.delay}s`,
-              "--end-x": `${pixel.endX - pixel.x}vw`,
-              "--end-y": `${pixel.endY - pixel.y}vh`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="splash-pixel-wall splash-pixel-wall-right">
-        {pixelWalls.right.map((pixel) => (
-          <span
-            key={pixel.id}
-            style={{
-              left: `${pixel.x}%`,
-              top: `${pixel.y}%`,
-              width: `${pixel.size}px`,
-              height: `${pixel.size}px`,
-              opacity: pixel.opacity,
-              animationDelay: `${pixel.delay}s`,
-              "--end-x": `${pixel.endX - pixel.x}vw`,
-              "--end-y": `${pixel.endY - pixel.y}vh`,
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="splash-stage">
-        <div className="splash-cube-wrap">
-          <div className="splash-cube">
-            <div className="splash-logo-mark" aria-label="Checkpoint">
-              <span className="splash-logo-letter">C</span>
-              <span className="splash-logo-divider" />
-              <span className="splash-logo-letter">P</span>
-            </div>
+        <div className="basic-splash-loader">
+          <span>Chargement en cours...</span>
+          <div className="basic-splash-bar" aria-hidden="true">
+            <div style={{ width: `${safeProgress}%` }} />
           </div>
-        </div>
-
-        <div className="splash-title-wrap">
-          <h1 className="splash-title">Checkpoint</h1>
-          <div className="splash-title-reflect">Checkpoint</div>
-        </div>
-
-        <p className="splash-subtitle">Votre univers gaming</p>
-
-        <div className="splash-loader">
-          <div className="splash-loading-label">Chargement en cours...</div>
-          <div className="splash-loader-top">
-            <strong>{safeProgress}%</strong>
-          </div>
-
-          <div className="loader-bar">
-            <div className="loader-fill" style={{ width: `${safeProgress}%` }} />
-          </div>
+          <strong>{safeProgress}%</strong>
         </div>
       </div>
     </div>
