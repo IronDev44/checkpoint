@@ -28964,6 +28964,19 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   font-family: var(--basic-splash-text-font);
 }
 
+.basic-splash::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  height: max(20vh, calc(env(safe-area-inset-bottom) + 150px));
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.36) 44%, #000 100%);
+}
+
 .basic-splash.theme-playstation,
 .basic-splash.theme-blueblur {
   --basic-splash-a: #60a5fa;
@@ -29220,6 +29233,12 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 @media (max-width: 520px) {
   .basic-splash {
     padding-inline: 20px;
+  }
+
+  .basic-splash::after {
+    height: max(24vh, calc(env(safe-area-inset-bottom) + 132px));
+    background:
+      linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.42) 42%, #000 100%);
   }
 
   .basic-splash-binary-curtain {
