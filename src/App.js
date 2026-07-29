@@ -8809,6 +8809,35 @@ function detectSeriesName(gameName) {
     { key: "lord of the rings", label: "The Lord of the Rings" },
     { key: "the lord", label: "The Lord of the Rings" },
     { key: "resident evil", label: "Resident Evil" },
+    { key: "call of duty", label: "Call of Duty" },
+    { key: "shadow of mordor", label: "Middle-earth" },
+    { key: "shadow of war", label: "Middle-earth" },
+    { key: "middle earth", label: "Middle-earth" },
+    { key: "middle-earth", label: "Middle-earth" },
+    { key: "marvel spider", label: "Marvel's Spider-Man" },
+    { key: "marvels spider", label: "Marvel's Spider-Man" },
+    { key: "spider-man", label: "Marvel's Spider-Man" },
+    { key: "spiderman", label: "Marvel's Spider-Man" },
+    { key: "batman arkham", label: "Batman Arkham" },
+    { key: "need for speed", label: "Need for Speed" },
+    { key: "final fantasy", label: "Final Fantasy" },
+    { key: "dragon ball", label: "Dragon Ball" },
+    { key: "dragon age", label: "Dragon Age" },
+    { key: "mass effect", label: "Mass Effect" },
+    { key: "red dead", label: "Red Dead Redemption" },
+    { key: "watch dogs", label: "Watch Dogs" },
+    { key: "far cry", label: "Far Cry" },
+    { key: "bioshock", label: "BioShock" },
+    { key: "borderlands", label: "Borderlands" },
+    { key: "hitman", label: "Hitman" },
+    { key: "halo", label: "Halo" },
+    { key: "gears of war", label: "Gears of War" },
+    { key: "forza horizon", label: "Forza Horizon" },
+    { key: "forza motorsport", label: "Forza Motorsport" },
+    { key: "pokemon", label: "Pokemon" },
+    { key: "pokémon", label: "Pokemon" },
+    { key: "kirby", label: "Kirby" },
+    { key: "metroid", label: "Metroid" },
     { key: "assassin", label: "Assassin’s Creed" },
     { key: "grand theft", label: "Grand Theft Auto" },
     { key: "gta", label: "Grand Theft Auto" },
@@ -8838,8 +8867,11 @@ function detectSeriesName(gameName) {
   const words = name.split(" ").filter(Boolean);
   if (words.length < 2) return null;
 
+  const connectorWords = new Set(["of", "the", "and", "de", "du", "des", "la", "le", "les"]);
+  const fallbackLength = connectorWords.has(words[1]) && words.length >= 3 ? 3 : 2;
+
   return words
-    .slice(0, 2)
+    .slice(0, fallbackLength)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 }
