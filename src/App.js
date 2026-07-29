@@ -8949,7 +8949,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
             cover: latestGame?.image || series.games.find((game) => game.image)?.image || "",
             mood:
               series.percent >= 100
-                ? "Saga maîtrisée"
+                ? "À jour dans ta biblio"
                 : series.percent >= 70
                 ? "Presque au bout"
                 : series.percent >= 35
@@ -8984,11 +8984,11 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
 
   if (selectedSeries) {
     return (
-      <div className="progression-stack">
+      <div className="progression-stack series-detail-page">
         <div className="search-panel">
           <button
             type="button"
-            className="back-btn"
+            className="back-btn series-back-btn"
             onClick={() => {
               if (seriesView === "suggestions") {
                 setSeriesView("owned");
@@ -9006,12 +9006,12 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
 
           <div className="series-detail-summary">
             <div>
-              <strong>{selectedSeries.percent}%</strong>
-              <span>complétion</span>
+              <strong>{selectedSeries.finished}/{selectedSeries.total}</strong>
+              <span>terminés biblio</span>
             </div>
             <div>
-              <strong>{selectedSeries.finished}/{selectedSeries.total}</strong>
-              <span>terminés</span>
+              <strong>{selectedSeries.unfinished.length}</strong>
+              <span>à suivre</span>
             </div>
             <div>
               <strong>{formatRating10(selectedSeries.averageRating, "—")}</strong>
@@ -9170,7 +9170,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
       </div>
       <div>
         <strong>{seriesStats.completedSeries}</strong>
-        <span>complètes</span>
+        <span>à jour</span>
       </div>
       <div>
         <strong>{seriesStats.nearComplete}</strong>
@@ -9192,15 +9192,19 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
         <strong>{seriesStats.nextSeriesToContinue.name}</strong>
         <small>
           {seriesStats.nextSeriesToContinue.nextGame?.name || "Un épisode t’attend"} ·{" "}
-          {seriesStats.nextSeriesToContinue.percent}% complété
+          {seriesStats.nextSeriesToContinue.finished}/{seriesStats.nextSeriesToContinue.total} terminés dans ta biblio
         </small>
       </button>
     )}
-    <div className="search-panel">
+    <div className="search-panel series-main-panel">
       <div className="section-header">
         <h2>Séries détectées</h2>
         <span className="section-count">{enrichedSeries.length}</span>
       </div>
+
+      <p className="series-scope-note">
+        Progression calculée avec les épisodes présents dans ta bibliothèque.
+      </p>
 
       <div className="library-view-toggle">
         <button
@@ -9250,7 +9254,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
                   className="series-ring"
                   style={{ "--series-percent": `${series.percent}%` }}
                 >
-                  <em>{series.percent}%</em>
+                  <em>{series.finished}/{series.total}</em>
                 </span>
               </div>
 
@@ -9259,7 +9263,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
               </div>
 
               <div className="series-card-meta">
-                {series.finished} / {series.total} jeux terminés
+                {series.finished} / {series.total} terminés dans ta biblio
               </div>
             </button>
           ))}
@@ -9276,11 +9280,11 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
                 <div>
                   <div className="series-title">{series.name}</div>
                   <div className="hardware-meta">
-                    {series.finished} / {series.total} jeux terminés
+                    {series.finished} / {series.total} terminés dans ta biblio
                   </div>
                 </div>
 
-                <div className="series-percent">{series.percent}%</div>
+                <div className="series-percent">{series.finished}/{series.total}</div>
               </div>
 
               <div className="xp-bar">

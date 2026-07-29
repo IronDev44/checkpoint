@@ -29693,8 +29693,48 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 }
 
 /* Final series overrides */
+.series-page,
+.series-detail-page {
+  gap: 20px !important;
+}
+
+.series-page > .series-hub-hero,
+.series-page > .series-stats-grid,
+.series-page > .series-next-card,
+.series-page > .series-main-panel,
+.series-detail-page > .search-panel {
+  margin-bottom: 6px;
+}
+
+.series-detail-page .search-panel {
+  padding-top: 16px;
+}
+
+.series-back-btn {
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: max-content;
+  min-height: 40px;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 13px !important;
+  margin-bottom: 14px;
+  border-radius: 999px !important;
+  line-height: 1;
+}
+
 .series-page .search-panel.series-main-panel {
-  padding: 16px;
+  padding: 18px;
+  margin-top: 2px;
+}
+
+.series-scope-note {
+  margin: -2px 0 14px;
+  color: var(--text-soft);
+  font-size: 0.82rem;
+  line-height: 1.35;
 }
 
 .series-page .series-filter-tabs {
