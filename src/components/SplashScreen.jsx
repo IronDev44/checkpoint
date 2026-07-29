@@ -27,7 +27,11 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose 
       <div className="basic-splash-backdrop" />
 
       <div className="basic-splash-content">
-        <div className="basic-splash-logo">CP</div>
+        <div className="basic-splash-logo" aria-label="Checkpoint">
+          <span className="basic-splash-logo-c">C</span>
+          <span className="basic-splash-logo-cut" />
+          <span className="basic-splash-logo-p">P</span>
+        </div>
         <h1>Checkpoint</h1>
         <p>Votre univers gaming</p>
 

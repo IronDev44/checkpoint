@@ -29016,28 +29016,83 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 }
 
 .basic-splash-logo {
-  width: clamp(78px, 18vw, 112px);
-  height: clamp(78px, 18vw, 112px);
-  display: grid;
-  place-items: center;
+  position: relative;
+  width: clamp(132px, 30vw, 184px);
+  height: clamp(72px, 15vw, 96px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(3px, 1vw, 8px);
   margin-bottom: 32px;
-  border: 1px solid color-mix(in srgb, var(--basic-splash-a), white 24%);
-  border-radius: 28px;
+  border: 1px solid color-mix(in srgb, var(--basic-splash-a), transparent 18%);
+  border-radius: 18px;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--basic-splash-a), transparent 8%), color-mix(in srgb, var(--basic-splash-b), transparent 10%));
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12), transparent 28%),
+    radial-gradient(circle at 28% 42%, color-mix(in srgb, var(--basic-splash-a), transparent 72%), transparent 34%),
+    linear-gradient(135deg, rgba(10, 16, 28, 0.74), rgba(3, 6, 14, 0.9));
   box-shadow:
-    0 0 32px color-mix(in srgb, var(--basic-splash-a), transparent 72%),
-    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+    0 0 34px color-mix(in srgb, var(--basic-splash-a), transparent 74%),
+    0 18px 44px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.26),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08);
   color: white;
   font-family: var(--basic-splash-display-font);
-  font-size: clamp(1.72rem, 6.8vw, 2.5rem);
+  font-size: clamp(2.75rem, 9.5vw, 4.3rem);
   font-weight: 900;
-  line-height: 1;
-  letter-spacing: 0.02em;
+  line-height: 0.82;
+  letter-spacing: -0.08em;
   text-transform: uppercase;
   text-shadow:
     0 0 10px rgba(255, 255, 255, 0.45),
     0 0 22px color-mix(in srgb, var(--basic-splash-a), transparent 44%);
+}
+
+.basic-splash-logo::before,
+.basic-splash-logo::after {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border-color: color-mix(in srgb, var(--basic-splash-b), white 18%);
+  pointer-events: none;
+}
+
+.basic-splash-logo::before {
+  top: 9px;
+  left: 9px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+  border-radius: 10px 0 0 0;
+}
+
+.basic-splash-logo::after {
+  right: 9px;
+  bottom: 9px;
+  border-right: 2px solid;
+  border-bottom: 2px solid;
+  border-radius: 0 0 10px 0;
+}
+
+.basic-splash-logo-c,
+.basic-splash-logo-p {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  background: linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, var(--basic-splash-a), white 12%) 42%, var(--basic-splash-b) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.basic-splash-logo-cut {
+  position: relative;
+  z-index: 1;
+  width: clamp(4px, 1vw, 7px);
+  height: 62%;
+  border-radius: 999px;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.76), transparent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--basic-splash-a), transparent 35%);
+  transform: skewX(-10deg);
 }
 
 .basic-splash h1 {
@@ -29117,7 +29172,10 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 
   .basic-splash-logo {
     margin-bottom: 28px;
-    border-radius: 24px;
+    width: clamp(124px, 34vw, 150px);
+    height: 72px;
+    border-radius: 16px;
+    font-size: clamp(2.7rem, 11vw, 3.35rem);
   }
 
   .basic-splash h1 {
