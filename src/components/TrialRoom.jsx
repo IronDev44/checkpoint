@@ -13,6 +13,8 @@ import {
 } from "lucide-react";
 import { getCheckpointTrial } from "../data/checkpointTrials";
 
+const PRESTIGE_PARTICLE_COUNT = 54;
+
 function getShuffledAnswers(question) {
   return question.answers
     .map((answer, originalIndex) => ({
@@ -48,6 +50,17 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
     : 0;
   const remaining = Math.max(0, questions.length - currentIndex - 1);
   const phaseClass = `phase-${phase}`;
+  const prestigeParticles = useMemo(
+    () =>
+      Array.from({ length: PRESTIGE_PARTICLE_COUNT }, (_, index) => ({
+        id: index,
+        angle: (360 / PRESTIGE_PARTICLE_COUNT) * index,
+        distance: 120 + (index % 8) * 22,
+        size: 3 + (index % 5),
+        delay: (index % 9) * 0.045,
+      })),
+    []
+  );
 
   if (!trial) return null;
 
@@ -87,6 +100,19 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
         <span />
         <div className="trial-room-grid" />
         <div className="trial-room-scan" />
+        <div className="trial-prestige-burst">
+          {prestigeParticles.map((particle) => (
+            <i
+              key={particle.id}
+              style={{
+                "--angle": `${particle.angle}deg`,
+                "--distance": `${particle.distance}px`,
+                "--particle-size": `${particle.size}px`,
+                "--particle-delay": `${particle.delay}s`,
+              }}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="trial-room-frame">
@@ -215,6 +241,12 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
         {phase === "result" && (
           <section className={`trial-result ${passed ? "passed" : "failed"}`}>
             <div className="trial-result-aura" aria-hidden="true" />
+            {passed && (
+              <div className="trial-prestige-title" aria-hidden="true">
+                <span>PRESTIGE</span>
+                <strong>CHECKPOINT UNLOCKED</strong>
+              </div>
+            )}
             <div className="trial-result-icon">
               {passed ? <Crown size={52} /> : <Lock size={52} />}
             </div>
