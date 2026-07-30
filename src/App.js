@@ -12687,12 +12687,25 @@ const DEAL_SOURCES = [
   { id: "psn", label: "PSN" },
 ];
 
-const PSN_DEALS_URL = "https://store.playstation.com/fr-fr/pages/deals";
 const DEAL_REGION_CONFIG = {
   FR: { country: "FR", locale: "fr-FR", steamLang: "french", currency: "EUR", psn: "fr-fr" },
   EU: { country: "DE", locale: "fr-FR", steamLang: "french", currency: "EUR", psn: "fr-fr" },
   US: { country: "US", locale: "en-US", steamLang: "english", currency: "USD", psn: "en-us" },
 };
+
+const DEAL_SORT_OPTIONS = [
+  { id: "smart", label: "Pertinence" },
+  { id: "discount", label: "Remise" },
+  { id: "price", label: "Prix" },
+  { id: "ending", label: "Fin proche" },
+];
+
+const DEAL_LIBRARY_FILTERS = [
+  { id: "all", label: "Toutes" },
+  { id: "wishlist", label: "Wishlist" },
+  { id: "missing", label: "Pas dans ma bibliothèque" },
+  { id: "owned", label: "Déjà possédées" },
+];
 
 function formatSteamPrice(value, currency = "EUR") {
   if (typeof value !== "number") return "";
@@ -12719,6 +12732,57 @@ function getEpicDealUrl(item) {
   const slug = productSlug || mappingSlug || item.urlSlug;
 
   return slug ? `https://store.epicgames.com/fr/p/${slug}` : "https://store.epicgames.com/fr/free-games";
+}
+
+function normalizeDealTitle(value = "") {
+  return String(value)
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function parseDealPrice(value = "") {
+  if (!value || /gratuit|free/i.test(value)) return 0;
+  const normalized = String(value)
+    .replace(/[^\d,.-]/g, "")
+    .replace(",", ".");
+  const parsed = Number.parseFloat(normalized);
+  return Number.isFinite(parsed) ? parsed : Number.POSITIVE_INFINITY;
+}
+
+function getDealEndTime(deal) {
+  const timestamp = deal.endsAt ? new Date(deal.endsAt).getTime() : Number.POSITIVE_INFINITY;
+  return Number.isFinite(timestamp) ? timestamp : Number.POSITIVE_INFINITY;
+}
+
+function enrichDealsWithLibrary(deals, games = []) {
+  const gameIndex = games.map((game) => ({
+    game,
+    key: normalizeDealTitle(game.name),
+  }));
+
+  return deals.map((deal) => {
+    const dealKey = normalizeDealTitle(deal.title);
+    const match = gameIndex.find(({ key }) => {
+      if (!key || !dealKey) return false;
+      return key === dealKey || key.includes(dealKey) || dealKey.includes(key);
+    });
+    const libraryStatus = match
+      ? match.game.status === "wishlist"
+        ? "wishlist"
+        : "owned"
+      : "missing";
+
+    return {
+      ...deal,
+      libraryStatus,
+      matchedGameId: match?.game?.id || null,
+      priceValue: parseDealPrice(deal.salePrice),
+      endsAtTime: getDealEndTime(deal),
+    };
+  });
 }
 
 function normalizeSteamDeals(data) {
@@ -12772,7 +12836,7 @@ function normalizeEpicDeals(data) {
     });
 }
 
-function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS }) {
+function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
   const sourcePreferences = {
     ...DEFAULT_APP_OPTIONS.dealSources,
     ...(dealPreferences.dealSources || {}),
@@ -12785,6 +12849,10 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS }) {
   const [deals, setDeals] = useState([]);
   const [sourceStatus, setSourceStatus] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [dealSearch, setDealSearch] = useState("");
+  const [sortMode, setSortMode] = useState("smart");
+  const [libraryFilter, setLibraryFilter] = useState("all");
+  const [lastUpdatedAt, setLastUpdatedAt] = useState("");
 
   const loadDeals = async () => {
     setIsLoading(true);
@@ -12802,12 +12870,15 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS }) {
     };
 
     try {
-      const apiResponse = await fetchWithTimeout("/api/deals");
+      const apiResponse = await fetchWithTimeout(
+        `/api/deals?cc=${region.country}&locale=${region.locale}&lang=${region.steamLang}`
+      );
       const contentType = apiResponse.headers.get("content-type") || "";
 
       if (apiResponse.ok && contentType.includes("application/json")) {
         const payload = await apiResponse.json();
         setDeals(payload.deals || []);
+        setLastUpdatedAt(payload.updatedAt || new Date().toISOString());
         setSourceStatus(
           payload.status || {
             steam: "Source indisponible pour le moment.",
@@ -12866,6 +12937,7 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS }) {
 
     setDeals(nextDeals);
     setSourceStatus(nextStatus);
+    setLastUpdatedAt(new Date().toISOString());
     setIsLoading(false);
   };
 
@@ -12879,21 +12951,119 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS }) {
     loadDeals();
   }, [dealPreferences.dealRegion, dealPreferences.dealSources]);
 
-  const visibleDeals =
-    activeSource === "all"
-      ? deals
-      : deals.filter((deal) => deal.store === activeSource);
+  const enrichedDeals = useMemo(
+    () => enrichDealsWithLibrary(deals, games),
+    [deals, games]
+  );
+  const visibleDeals = useMemo(() => {
+    const searchKey = normalizeDealTitle(dealSearch);
+
+    return enrichedDeals
+      .filter((deal) => activeSource === "all" || deal.store === activeSource)
+      .filter((deal) => libraryFilter === "all" || deal.libraryStatus === libraryFilter)
+      .filter((deal) => !searchKey || normalizeDealTitle(deal.title).includes(searchKey))
+      .sort((a, b) => {
+        if (sortMode === "discount") return (b.discount || 0) - (a.discount || 0);
+        if (sortMode === "price") return a.priceValue - b.priceValue;
+        if (sortMode === "ending") return a.endsAtTime - b.endsAtTime;
+
+        const libraryScore = { wishlist: 0, missing: 1, owned: 2 };
+        const statusDelta =
+          (libraryScore[a.libraryStatus] ?? 3) - (libraryScore[b.libraryStatus] ?? 3);
+        if (statusDelta !== 0) return statusDelta;
+        return (b.discount || 0) - (a.discount || 0);
+      });
+  }, [activeSource, dealSearch, enrichedDeals, libraryFilter, sortMode]);
+  const bestDeal = visibleDeals[0] || enrichedDeals.find((deal) => deal.discount >= 75) || enrichedDeals[0];
+  const freeCount = enrichedDeals.filter((deal) => deal.priceValue === 0).length;
+  const wishlistDealCount = enrichedDeals.filter((deal) => deal.libraryStatus === "wishlist").length;
+  const averageDiscount = enrichedDeals.length
+    ? Math.round(
+        enrichedDeals.reduce((sum, deal) => sum + (deal.discount || 0), 0) /
+          enrichedDeals.length
+      )
+    : 0;
 
   return (
     <div className="deals-page">
       <div className="section-header deals-header">
         <div>
           <h2>Promos du moment</h2>
-          <p>Les offres PC sont chargees en direct, en euros quand la boutique le permet.</p>
+          <p>Steam et Epic sont chargés en direct. Les offres proches de ta wishlist remontent en priorité.</p>
         </div>
         <button type="button" className="deals-refresh-btn" onClick={loadDeals} disabled={isLoading}>
           {isLoading ? "Actualisation..." : "Actualiser"}
         </button>
+      </div>
+
+      <div className="deals-dashboard">
+        <div className="deals-spotlight">
+          <span className="deals-spotlight-kicker">Offre à surveiller</span>
+          {bestDeal ? (
+            <a href={bestDeal.url} target="_blank" rel="noreferrer">
+              <div>
+                <strong>{bestDeal.title}</strong>
+                <span>
+                  {bestDeal.storeLabel} · -{bestDeal.discount || 0}% · {bestDeal.salePrice || "Prix indisponible"}
+                </span>
+              </div>
+              <b>Voir</b>
+            </a>
+          ) : (
+            <p>Aucune offre chargée pour le moment.</p>
+          )}
+        </div>
+
+        <div className="deals-stat-grid">
+          <div>
+            <strong>{enrichedDeals.length}</strong>
+            <span>offres</span>
+          </div>
+          <div>
+            <strong>{wishlistDealCount}</strong>
+            <span>wishlist</span>
+          </div>
+          <div>
+            <strong>{freeCount}</strong>
+            <span>gratuites</span>
+          </div>
+          <div>
+            <strong>{averageDiscount}%</strong>
+            <span>remise moy.</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="deals-tools">
+        <input
+          value={dealSearch}
+          onChange={(event) => setDealSearch(event.target.value)}
+          placeholder="Rechercher dans les promos..."
+        />
+        <div className="deals-tool-row">
+          {DEAL_SORT_OPTIONS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              className={sortMode === option.id ? "active" : ""}
+              onClick={() => setSortMode(option.id)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+        <div className="deals-tool-row secondary">
+          {DEAL_LIBRARY_FILTERS.map((option) => (
+            <button
+              key={option.id}
+              type="button"
+              className={libraryFilter === option.id ? "active" : ""}
+              onClick={() => setLibraryFilter(option.id)}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="deals-source-tabs">
@@ -12923,6 +13093,9 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS }) {
       )}
 
       <div className="deals-status-row">
+        {lastUpdatedAt && (
+          <span className="deals-status-pill ok">Mis à jour {formatFullDate(lastUpdatedAt)}</span>
+        )}
         {["steam", "epic", "psn"].filter((source) => sourcePreferences[source]).map((source) => (
           <span key={source} className={`deals-status-pill ${sourceStatus[source] === "OK" ? "ok" : ""}`}>
             {source.toUpperCase()} - {sourceStatus[source] || "Chargement"}
@@ -12948,6 +13121,11 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS }) {
                   <div className="deal-image-placeholder">{deal.storeLabel}</div>
                 )}
                 {deal.discount > 0 && <span className="deal-discount">-{deal.discount}%</span>}
+                {deal.libraryStatus !== "missing" && (
+                  <span className={`deal-library-badge ${deal.libraryStatus}`}>
+                    {deal.libraryStatus === "wishlist" ? "Wishlist" : "Déjà possédé"}
+                  </span>
+                )}
               </div>
 
               <div className="deal-content">
@@ -15394,7 +15572,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 )}
 
 {activeTab === "deals" && (
-  <DealsTab dealPreferences={appOptions} />
+  <DealsTab dealPreferences={appOptions} games={games} />
 )}
 
           {activeTab === "search" && (

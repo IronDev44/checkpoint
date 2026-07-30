@@ -22596,6 +22596,159 @@ body[data-theme="theme-steamdeck"] {
   line-height: 1.4;
 }
 
+.deals-dashboard {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.9fr);
+  gap: 14px;
+  margin: 12px 0 14px;
+}
+
+.deals-spotlight,
+.deals-stat-grid > div,
+.deals-tools {
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.105), rgba(255, 255, 255, 0.045)),
+    rgba(17, 25, 48, 0.8);
+  border-radius: 20px;
+}
+
+.deals-spotlight {
+  min-height: 132px;
+  display: grid;
+  align-content: center;
+  gap: 10px;
+  padding: 18px;
+  overflow: hidden;
+  position: relative;
+}
+
+.deals-spotlight::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent-solid) 28%, transparent), transparent 44%);
+  opacity: 0.75;
+}
+
+.deals-spotlight > * {
+  position: relative;
+}
+
+.deals-spotlight-kicker {
+  color: color-mix(in srgb, var(--accent-solid) 62%, white);
+  font-size: 0.78rem;
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.deals-spotlight a {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  color: white;
+  text-decoration: none;
+}
+
+.deals-spotlight strong {
+  display: block;
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  line-height: 1.05;
+}
+
+.deals-spotlight span {
+  display: block;
+  margin-top: 7px;
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 800;
+}
+
+.deals-spotlight b {
+  flex: 0 0 auto;
+  padding: 10px 13px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: white;
+}
+
+.deals-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.deals-stat-grid > div {
+  min-height: 61px;
+  display: grid;
+  align-content: center;
+  padding: 13px;
+}
+
+.deals-stat-grid strong {
+  color: white;
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.deals-stat-grid span {
+  margin-top: 5px;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.deals-tools {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  margin: 0 0 12px;
+}
+
+.deals-tools input {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  padding: 0 14px;
+  background: rgba(0, 0, 0, 0.18);
+  color: white;
+  font: inherit;
+  font-weight: 800;
+}
+
+.deals-tool-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 1px;
+}
+
+.deals-tool-row button {
+  min-height: 36px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 0 12px;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.76);
+  background: rgba(255, 255, 255, 0.075);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.deals-tool-row button.active {
+  color: white;
+  background: var(--accent);
+  box-shadow: var(--accent-shadow);
+}
+
+.deals-tool-row.secondary button {
+  min-height: 34px;
+  font-size: 0.78rem;
+}
+
 .deals-refresh-btn,
 .deals-source-tabs button {
   border: 1px solid rgba(255, 255, 255, 0.11);
@@ -22735,6 +22888,32 @@ body[data-theme="theme-steamdeck"] {
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
 }
 
+.deal-library-badge {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  color: white;
+  font-size: 0.74rem;
+  font-weight: 950;
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(12px);
+}
+
+.deal-library-badge.wishlist {
+  background: rgba(255, 88, 173, 0.28);
+  box-shadow: 0 0 18px rgba(255, 88, 173, 0.24);
+}
+
+.deal-library-badge.owned {
+  background: rgba(78, 205, 117, 0.24);
+  box-shadow: 0 0 18px rgba(78, 205, 117, 0.18);
+}
+
 .deal-content {
   display: grid;
   gap: 9px;
@@ -22796,6 +22975,29 @@ body[data-theme="theme-steamdeck"] {
 @media (max-width: 680px) {
   .deals-page {
     padding-inline: 0;
+  }
+
+  .deals-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .deals-stat-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .deals-stat-grid > div {
+    min-height: 58px;
+    padding: 10px 7px;
+    text-align: center;
+  }
+
+  .deals-stat-grid strong {
+    font-size: 1.05rem;
+  }
+
+  .deals-stat-grid span {
+    font-size: 0.66rem;
   }
 
   .deals-header {

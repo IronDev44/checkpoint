@@ -1,7 +1,8 @@
-const STEAM_DEALS_URL =
-  "https://store.steampowered.com/api/featuredcategories?cc=FR&l=french";
-const EPIC_DEALS_URL =
-  "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=fr-FR&country=FR&allowCountries=FR";
+const DEFAULT_DEAL_REGION = {
+  country: "FR",
+  locale: "fr-FR",
+  steamLang: "french",
+};
 
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
@@ -157,18 +158,39 @@ function normalizeEpicDeals(data) {
     });
 }
 
-async function getDeals() {
+function getDealRegion(requestUrl) {
+  const url = new URL(requestUrl);
+  const country = (url.searchParams.get("cc") || DEFAULT_DEAL_REGION.country)
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "")
+    .slice(0, 2);
+  const locale = (url.searchParams.get("locale") || DEFAULT_DEAL_REGION.locale)
+    .replace(/[^a-zA-Z-]/g, "")
+    .slice(0, 12);
+  const steamLang = (url.searchParams.get("lang") || DEFAULT_DEAL_REGION.steamLang)
+    .replace(/[^a-zA-Z-]/g, "")
+    .slice(0, 24);
+
+  return {
+    country: country || DEFAULT_DEAL_REGION.country,
+    locale: locale || DEFAULT_DEAL_REGION.locale,
+    steamLang: steamLang || DEFAULT_DEAL_REGION.steamLang,
+  };
+}
+
+async function getDeals(requestUrl) {
+  const region = getDealRegion(requestUrl);
   const sources = [
     {
       id: "steam",
       label: "Steam",
-      url: STEAM_DEALS_URL,
+      url: `https://store.steampowered.com/api/featuredcategories?cc=${region.country}&l=${region.steamLang}`,
       normalize: normalizeSteamDeals,
     },
     {
       id: "epic",
       label: "Epic",
-      url: EPIC_DEALS_URL,
+      url: `https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=${region.locale}&country=${region.country}&allowCountries=${region.country}`,
       normalize: normalizeEpicDeals,
     },
   ];
@@ -203,6 +225,7 @@ async function getDeals() {
   return {
     deals,
     status,
+    region,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -221,7 +244,7 @@ export default {
       }
 
       try {
-        return jsonResponse(await getDeals());
+        return jsonResponse(await getDeals(request.url));
       } catch (error) {
         return jsonResponse(
           {
