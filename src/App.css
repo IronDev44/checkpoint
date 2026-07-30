@@ -29856,3 +29856,427 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
     display: none;
   }
 }
+
+/* ==================== CHECKPOINT TRIAL ROOM ==================== */
+
+.checkpoint-gate-overlay,
+.trial-room-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  display: grid;
+  place-items: center;
+  padding: max(18px, env(safe-area-inset-top)) 18px max(24px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--accent-solid) 28%, transparent), transparent 32%),
+    rgba(3, 6, 14, 0.88);
+  backdrop-filter: blur(18px);
+}
+
+.checkpoint-gate-card {
+  width: min(520px, 100%);
+  border-radius: 30px;
+  padding: 28px;
+  border: 1px solid color-mix(in srgb, var(--accent-solid) 42%, rgba(255,255,255,0.16));
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.13), rgba(255,255,255,0.035)),
+    rgba(10, 16, 32, 0.92);
+  box-shadow:
+    0 24px 90px rgba(0,0,0,0.62),
+    0 0 60px color-mix(in srgb, var(--accent-solid) 26%, transparent);
+  animation: checkpointGateIn 420ms cubic-bezier(.2,.9,.2,1) both;
+}
+
+.checkpoint-gate-orb,
+.trial-guardian-orb,
+.trial-result-icon {
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  color: white;
+  background: var(--accent-gradient);
+  box-shadow: 0 0 34px color-mix(in srgb, var(--accent-solid) 48%, transparent);
+}
+
+.checkpoint-gate-kicker,
+.trial-kicker,
+.trial-question-kicker {
+  display: inline-flex;
+  color: color-mix(in srgb, var(--accent-solid) 70%, white);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.checkpoint-gate-card h2,
+.trial-intro h1,
+.trial-result h1 {
+  margin: 16px 0 10px;
+  color: white;
+  font-size: clamp(28px, 7vw, 46px);
+  line-height: 1.02;
+}
+
+.checkpoint-gate-card p,
+.trial-intro p,
+.trial-result p {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.checkpoint-gate-meta,
+.trial-intro-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 22px 0;
+}
+
+.checkpoint-gate-meta div,
+.trial-intro-grid div,
+.trial-score-card {
+  border-radius: 18px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.07);
+}
+
+.checkpoint-gate-meta span,
+.trial-intro-grid span,
+.trial-score-card span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.checkpoint-gate-meta strong,
+.trial-intro-grid strong,
+.trial-score-card strong {
+  display: block;
+  margin-top: 4px;
+  color: white;
+  font-size: 17px;
+}
+
+.checkpoint-gate-actions,
+.trial-result-actions {
+  display: grid;
+  gap: 10px;
+}
+
+.trial-room-shell {
+  z-index: 9999;
+  align-items: stretch;
+  overflow-y: auto;
+}
+
+.trial-room-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.trial-room-bg::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background:
+    linear-gradient(120deg, transparent 0 28%, rgba(255,255,255,0.05) 29% 30%, transparent 31% 100%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.055) 0 1px, transparent 1px 88px);
+  opacity: 0.45;
+  animation: trialGridDrift 12s linear infinite;
+}
+
+.trial-room-bg span {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent-solid) 30%, transparent);
+  filter: blur(42px);
+  opacity: 0.55;
+  animation: trialPulse 4s ease-in-out infinite alternate;
+}
+
+.trial-room-bg span:nth-child(1) {
+  left: 6%;
+  top: 12%;
+}
+
+.trial-room-bg span:nth-child(2) {
+  right: 0;
+  top: 34%;
+  animation-delay: 600ms;
+}
+
+.trial-room-bg span:nth-child(3) {
+  left: 34%;
+  bottom: 4%;
+  animation-delay: 1100ms;
+}
+
+.trial-room-frame {
+  position: relative;
+  width: min(880px, 100%);
+  min-height: min(760px, calc(100vh - 36px));
+  margin: auto;
+  border-radius: 34px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--accent-solid) 34%, rgba(255,255,255,0.14));
+  background:
+    linear-gradient(155deg, rgba(255,255,255,0.12), rgba(255,255,255,0.035)),
+    rgba(6, 10, 22, 0.9);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 28px 110px rgba(0,0,0,0.72);
+  animation: trialRoomIn 480ms cubic-bezier(.2,.9,.2,1) both;
+}
+
+.trial-room-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.trial-ghost-btn,
+.trial-primary-btn,
+.trial-secondary-btn {
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 900;
+}
+
+.trial-ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  border-radius: 16px;
+  padding: 10px 14px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.trial-room-status {
+  text-align: right;
+}
+
+.trial-room-status span,
+.trial-progress-line span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.trial-room-status strong,
+.trial-progress-line strong {
+  color: white;
+}
+
+.trial-intro,
+.trial-question-panel,
+.trial-result {
+  padding: clamp(22px, 5vw, 46px);
+}
+
+.trial-guardian-orb {
+  margin-bottom: 22px;
+}
+
+.trial-intro-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.trial-primary-btn,
+.trial-secondary-btn {
+  min-height: 54px;
+  border-radius: 18px;
+  padding: 0 18px;
+}
+
+.trial-primary-btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  background: var(--accent-gradient);
+  box-shadow: 0 16px 34px color-mix(in srgb, var(--accent-solid) 30%, transparent);
+}
+
+.trial-primary-btn:disabled {
+  cursor: default;
+  opacity: 0.48;
+  box-shadow: none;
+}
+
+.trial-secondary-btn {
+  color: white;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.13);
+}
+
+.trial-progress-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.trial-question-card {
+  border-radius: 26px;
+  padding: clamp(18px, 4vw, 28px);
+  margin-bottom: 18px;
+  border: 1px solid rgba(255,255,255,0.13);
+  background: rgba(255,255,255,0.065);
+}
+
+.trial-question-card h2 {
+  margin: 12px 0 22px;
+  color: white;
+  font-size: clamp(22px, 5vw, 34px);
+  line-height: 1.14;
+}
+
+.trial-answer-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.trial-answer-btn {
+  min-height: 68px;
+  border-radius: 18px;
+  padding: 14px 16px;
+  color: white;
+  text-align: left;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.07);
+}
+
+.trial-answer-btn.selected {
+  border-color: color-mix(in srgb, var(--accent-solid) 74%, white);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent-solid) 30%, transparent), rgba(255,255,255,0.11));
+  box-shadow: 0 0 26px color-mix(in srgb, var(--accent-solid) 30%, transparent);
+}
+
+.trial-result {
+  min-height: 520px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+}
+
+.trial-result-icon {
+  margin-bottom: 18px;
+}
+
+.trial-result.failed .trial-result-icon {
+  background: linear-gradient(135deg, #323946, #10131d);
+  box-shadow: 0 0 26px rgba(255,255,255,0.12);
+}
+
+.trial-score-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.trial-dev-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@keyframes checkpointGateIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes trialRoomIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes trialGridDrift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(88px, 0, 0);
+  }
+}
+
+@keyframes trialPulse {
+  from {
+    transform: scale(0.94);
+    opacity: 0.42;
+  }
+  to {
+    transform: scale(1.08);
+    opacity: 0.7;
+  }
+}
+
+@media (max-width: 620px) {
+  .checkpoint-gate-overlay,
+  .trial-room-shell {
+    padding: max(12px, env(safe-area-inset-top)) 12px max(18px, env(safe-area-inset-bottom));
+  }
+
+  .checkpoint-gate-card,
+  .trial-room-frame {
+    border-radius: 26px;
+  }
+
+  .checkpoint-gate-card {
+    padding: 22px;
+  }
+
+  .checkpoint-gate-meta,
+  .trial-intro-grid,
+  .trial-answer-grid,
+  .trial-dev-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .trial-room-frame {
+    min-height: calc(100vh - 24px);
+    padding: 12px;
+  }
+
+  .trial-intro,
+  .trial-question-panel,
+  .trial-result {
+    padding: 22px 10px;
+  }
+}

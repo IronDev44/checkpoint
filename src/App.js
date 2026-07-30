@@ -5,7 +5,9 @@ import { db } from "./firebase";
 import { HARDWARE_CATALOG } from "./data/hardware";
 import { PC_COMPONENT_FIELDS, getPcComponentOptions } from "./data/pcComponents";
 import { WEEKLY_QUIZ_QUESTIONS, WEEKLY_QUIZ_XP } from "./data/weeklyQuiz";
+import { CHECKPOINT_LEVELS, getCheckpointTrial } from "./data/checkpointTrials";
 import SplashScreen from "./components/SplashScreen";
+import TrialRoom from "./components/TrialRoom";
 import {
   collection,
   addDoc,
@@ -64,6 +66,7 @@ const API_KEY = "d7b763a492c745cd82217c285f897e08";
 
 const WEEKLY_QUIZ_STORAGE_KEY = "checkpoint-weekly-quiz";
 const CHECKPOINT_GOALS_STORAGE_KEY = "checkpoint-goals";
+const CHECKPOINT_TRIAL_STORAGE_KEY = "checkpoint-trial-progress";
 const SPLASH_SEEN_STORAGE_KEY = "checkpoint-splash-seen";
 
 const hasSeenSplash = () => {
@@ -2221,6 +2224,75 @@ function getProgress(totalXP) {
     xpToNext: xpNeeded,
     percent: Math.floor((xp / xpNeeded) * 100),
   };
+}
+
+const DEFAULT_CHECKPOINT_TRIAL_PROGRESS = {
+  completed: {},
+  attempts: {},
+  lastUnlockedLevel: null,
+};
+
+function getXPForLevel(targetLevel) {
+  let xp = 0;
+  let xpNeeded = 180;
+
+  for (let level = 1; level < targetLevel && level < 100; level++) {
+    xp += xpNeeded;
+    xpNeeded = Math.floor(xpNeeded * 1.08);
+  }
+
+  return xp;
+}
+
+function getStoredCheckpointTrialProgress() {
+  try {
+    const raw = localStorage.getItem(CHECKPOINT_TRIAL_STORAGE_KEY);
+    if (!raw) return DEFAULT_CHECKPOINT_TRIAL_PROGRESS;
+    const parsed = JSON.parse(raw);
+
+    return {
+      ...DEFAULT_CHECKPOINT_TRIAL_PROGRESS,
+      ...parsed,
+      completed: {
+        ...DEFAULT_CHECKPOINT_TRIAL_PROGRESS.completed,
+        ...(parsed.completed || {}),
+      },
+      attempts: {
+        ...DEFAULT_CHECKPOINT_TRIAL_PROGRESS.attempts,
+        ...(parsed.attempts || {}),
+      },
+    };
+  } catch (error) {
+    console.error("Erreur lecture progression Salle des Epreuves :", error);
+    return DEFAULT_CHECKPOINT_TRIAL_PROGRESS;
+  }
+}
+
+function storeCheckpointTrialProgress(progress) {
+  try {
+    localStorage.setItem(CHECKPOINT_TRIAL_STORAGE_KEY, JSON.stringify(progress));
+  } catch (error) {
+    console.error("Erreur sauvegarde progression Salle des Epreuves :", error);
+  }
+}
+
+function getPendingCheckpoint(rawXP, completed = {}) {
+  const rawLevel = getLevel(rawXP);
+
+  return (
+    CHECKPOINT_LEVELS.find(
+      (checkpointLevel) =>
+        rawLevel >= checkpointLevel && !completed[String(checkpointLevel)]
+    ) || null
+  );
+}
+
+function getEffectiveXP(rawXP, completed = {}) {
+  const pendingCheckpoint = getPendingCheckpoint(rawXP, completed);
+
+  if (!pendingCheckpoint) return rawXP;
+
+  return getXPForLevel(pendingCheckpoint);
 }
 
 function getRankTitle(level) {
@@ -11620,6 +11692,8 @@ function OptionsTab({
   onResetOptions,
   games = [],
   onRepairGameData,
+  onOpenTrial,
+  checkpointTrialProgress = DEFAULT_CHECKPOINT_TRIAL_PROGRESS,
 }) {
   const [helpTopic, setHelpTopic] = useState(null);
   const [isRepairingGameData, setIsRepairingGameData] = useState(false);
@@ -12181,6 +12255,38 @@ function OptionsTab({
                     onClick={() => updateDealSource(id, !dealSources[id])}
                   >
                     {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="options-group">
+          <div className="options-group-head">
+            <span>Développement</span>
+            <p>Accès internes pour tester les grands systèmes sans attendre le bon niveau.</p>
+          </div>
+
+          <div className="option-section">
+            <div className="option-setting-card option-setting-card-featured">
+              <div>
+                <strong>Salle des Épreuves (Test)</strong>
+                <span>
+                  Lance directement un checkpoint. Les questions utilisent une base séparée du Quiz.
+                </span>
+              </div>
+              <div className="option-pill-grid trial-dev-grid">
+                {CHECKPOINT_LEVELS.map((checkpointLevel) => (
+                  <button
+                    key={checkpointLevel}
+                    type="button"
+                    className={`option-pill ${
+                      checkpointTrialProgress.completed?.[String(checkpointLevel)] ? "active" : ""
+                    }`}
+                    onClick={() => onOpenTrial?.(checkpointLevel)}
+                  >
+                    Checkpoint {checkpointLevel}
                   </button>
                 ))}
               </div>
@@ -12863,6 +12969,49 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS }) {
   );
 }
 
+function CheckpointReachedOverlay({ checkpointLevel, onEnter, onClose }) {
+  const trial = getCheckpointTrial(checkpointLevel);
+
+  if (!trial) return null;
+
+  return (
+    <div className="checkpoint-gate-overlay">
+      <div className="checkpoint-gate-card">
+        <div className="checkpoint-gate-orb">
+          <Crown size={34} />
+        </div>
+        <span className="checkpoint-gate-kicker">Nouveau Checkpoint atteint.</span>
+        <h2>Le Gardien du Checkpoint vous attend.</h2>
+        <p>
+          Ton XP est securisee, mais le prochain rang reste verrouille tant que
+          l'epreuve du niveau {checkpointLevel} n'est pas reussie.
+        </p>
+
+        <div className="checkpoint-gate-meta">
+          <div>
+            <span>Epreuve</span>
+            <strong>{trial.title}</strong>
+          </div>
+          <div>
+            <span>Rang a reveler</span>
+            <strong>{trial.rewardRank}</strong>
+          </div>
+        </div>
+
+        <div className="checkpoint-gate-actions">
+          <button type="button" className="trial-primary-btn" onClick={onEnter}>
+            Entrer dans la Salle des Epreuves
+            <Sparkles size={18} />
+          </button>
+          <button type="button" className="trial-secondary-btn" onClick={onClose}>
+            Plus tard
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* -------------------- MAIN APP -------------------- */
 
 /* ==================== APP PRINCIPALE ==================== */
@@ -12879,6 +13028,11 @@ export default function App() {
   const [checkpointGoalProgress, setCheckpointGoalProgress] = useState(() =>
     getStoredCheckpointGoalProgress()
   );
+  const [checkpointTrialProgress, setCheckpointTrialProgress] = useState(() =>
+    getStoredCheckpointTrialProgress()
+  );
+  const [activeTrialLevel, setActiveTrialLevel] = useState(null);
+  const [dismissedCheckpointLevel, setDismissedCheckpointLevel] = useState(null);
   const [appOptions, setAppOptions] = useState(() => getStoredAppOptions());
   const [activeTab, setActiveTab] = useState(() => {
     const savedOptions = getStoredAppOptions();
@@ -13245,6 +13399,92 @@ const showToast = (message, duration = 2000) => {
   setToast(message);
   setTimeout(() => setToast(""), duration);
 };
+
+const openTrialRoom = (checkpointLevel) => {
+  setDismissedCheckpointLevel(null);
+  setActiveTrialLevel(Number(checkpointLevel));
+  playSound("click", soundStyle);
+};
+
+const closeTrialRoom = () => {
+  setActiveTrialLevel(null);
+};
+
+const completeCheckpointTrial = async (trial) => {
+  const key = String(trial.level);
+  const nextProgress = {
+    ...checkpointTrialProgress,
+    completed: {
+      ...(checkpointTrialProgress.completed || {}),
+      [key]: {
+        completedAt: new Date().toISOString(),
+        rewardRank: trial.rewardRank,
+      },
+    },
+    attempts: {
+      ...(checkpointTrialProgress.attempts || {}),
+      [key]: (checkpointTrialProgress.attempts?.[key] || 0) + 1,
+    },
+    lastUnlockedLevel: trial.level,
+  };
+
+  setCheckpointTrialProgress(nextProgress);
+  storeCheckpointTrialProgress(nextProgress);
+  setActiveTrialLevel(null);
+  setDismissedCheckpointLevel(null);
+  playSound("levelup", soundStyle);
+  showToast(`${trial.rewardRank} debloque.`, 2800);
+
+  try {
+    await setDoc(
+      doc(db, "playerProgress", "checkpointTrials"),
+      {
+        ...nextProgress,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  } catch (error) {
+    console.error("Erreur sync Salle des Epreuves :", error);
+    showToast("Rang debloque localement. Sync Firebase a revoir.", 3200);
+  }
+};
+
+useEffect(() => {
+  let cancelled = false;
+
+  const loadCheckpointTrials = async () => {
+    try {
+      const snap = await getDoc(doc(db, "playerProgress", "checkpointTrials"));
+      if (cancelled || !snap.exists()) return;
+
+      const remote = snap.data();
+      const nextProgress = {
+        ...DEFAULT_CHECKPOINT_TRIAL_PROGRESS,
+        ...remote,
+        completed: {
+          ...DEFAULT_CHECKPOINT_TRIAL_PROGRESS.completed,
+          ...(remote.completed || {}),
+        },
+        attempts: {
+          ...DEFAULT_CHECKPOINT_TRIAL_PROGRESS.attempts,
+          ...(remote.attempts || {}),
+        },
+      };
+
+      setCheckpointTrialProgress(nextProgress);
+      storeCheckpointTrialProgress(nextProgress);
+    } catch (error) {
+      console.error("Erreur chargement Salle des Epreuves :", error);
+    }
+  };
+
+  loadCheckpointTrials();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
 
 const weeklyQuiz = useMemo(() => {
   const weekKey = getWeeklyQuizKey();
@@ -14045,7 +14285,7 @@ const url = `https://api.rawg.io/api/games?key=${API_KEY}&dates=${startDate},${e
     return () => clearTimeout(timer);
   }, [search]);
 
-  const totalXP = useMemo(() => {
+  const rawTotalXP = useMemo(() => {
     const gamesXP = games
       .filter((g) => g.status !== "wishlist")
       .reduce((sum, g) => sum + calculateXP(g), 0);
@@ -14053,9 +14293,19 @@ const url = `https://api.rawg.io/api/games?key=${API_KEY}&dates=${startDate},${e
     return gamesXP + (weeklyQuizProgress.totalXP || 0) + (checkpointGoalProgress.totalXP || 0);
   }, [games, weeklyQuizProgress.totalXP, checkpointGoalProgress.totalXP]);
 
+  const pendingCheckpointLevel = useMemo(
+    () => getPendingCheckpoint(rawTotalXP, checkpointTrialProgress.completed),
+    [rawTotalXP, checkpointTrialProgress.completed]
+  );
+  const totalXP = useMemo(
+    () => getEffectiveXP(rawTotalXP, checkpointTrialProgress.completed),
+    [rawTotalXP, checkpointTrialProgress.completed]
+  );
   const level = getLevel(totalXP);
   const progress = getProgress(totalXP);
-  const title = getRankTitle(level);
+  const title = pendingCheckpointLevel
+    ? `Checkpoint ${pendingCheckpointLevel}`
+    : getRankTitle(level);
 
   const [prevLevel, setPrevLevel] = useState(1);
 
@@ -15060,6 +15310,24 @@ const setPlayedPlatforms = async (id, platforms) => {
           <Toast message={toast} />
           <BadgeUnlockToast badge={newUnlockedBadge} />
 { <SplashScreen showSplash={showSplash} progress={splashProgress} onRequestClose={closeSplash} /> }
+          {pendingCheckpointLevel &&
+            dismissedCheckpointLevel !== pendingCheckpointLevel &&
+            !activeTrialLevel &&
+            !showSplash && (
+              <CheckpointReachedOverlay
+                checkpointLevel={pendingCheckpointLevel}
+                onEnter={() => openTrialRoom(pendingCheckpointLevel)}
+                onClose={() => setDismissedCheckpointLevel(pendingCheckpointLevel)}
+              />
+            )}
+          {activeTrialLevel && (
+            <TrialRoom
+              checkpointLevel={activeTrialLevel}
+              rawXP={rawTotalXP}
+              onClose={closeTrialRoom}
+              onComplete={completeCheckpointTrial}
+            />
+          )}
       <div className={`app-shell ${showSplash ? "app-hidden" : "app-visible"}`}>
         <div className="container">
           <h1 className="title" data-title="Checkpoint">Checkpoint</h1>
@@ -15623,6 +15891,8 @@ const setPlayedPlatforms = async (id, platforms) => {
                 onResetOptions={resetAppOptions}
                 games={games}
                 onRepairGameData={repairGameDataIntegrity}
+                onOpenTrial={openTrialRoom}
+                checkpointTrialProgress={checkpointTrialProgress}
               />
 
               <AdminPanel events={gamingEvents} onImportNews={importNewsFromRSS} />
