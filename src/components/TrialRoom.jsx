@@ -1,17 +1,30 @@
 import { useMemo, useState } from "react";
-import { ArrowLeft, CheckCircle2, Crown, Lock, Shield, Sparkles, XCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Crown,
+  Lock,
+  ScanLine,
+  Shield,
+  Sparkles,
+  Swords,
+  XCircle,
+  Zap,
+} from "lucide-react";
 import { getCheckpointTrial } from "../data/checkpointTrials";
 
 function getShuffledAnswers(question) {
-  return question.answers.map((answer, originalIndex) => ({
-    answer,
-    originalIndex,
-    sortKey: Math.abs(
-      String(`${question.id}-${answer}-${originalIndex}`)
-        .split("")
-        .reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0)
-    ),
-  })).sort((a, b) => a.sortKey - b.sortKey);
+  return question.answers
+    .map((answer, originalIndex) => ({
+      answer,
+      originalIndex,
+      sortKey: Math.abs(
+        String(`${question.id}-${answer}-${originalIndex}`)
+          .split("")
+          .reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0)
+      ),
+    }))
+    .sort((a, b) => a.sortKey - b.sortKey);
 }
 
 export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete }) {
@@ -20,6 +33,7 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(null);
 
   const questions = trial?.questions || [];
   const currentQuestion = questions[currentIndex];
@@ -29,7 +43,11 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
   );
   const score = answers.filter(Boolean).length;
   const passed = trial ? score >= trial.passScore : false;
+  const progressPercent = questions.length
+    ? Math.round(((currentIndex + (phase === "result" ? 1 : 0)) / questions.length) * 100)
+    : 0;
   const remaining = Math.max(0, questions.length - currentIndex - 1);
+  const phaseClass = `phase-${phase}`;
 
   if (!trial) return null;
 
@@ -38,15 +56,19 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
 
     const isCorrect = selectedAnswer === currentQuestion.correctIndex;
     const nextAnswers = [...answers, isCorrect];
+
     setAnswers(nextAnswers);
+    setLastAnswerCorrect(isCorrect);
     setSelectedAnswer(null);
 
-    if (currentIndex >= questions.length - 1) {
-      setPhase("result");
-      return;
-    }
-
-    setCurrentIndex((value) => value + 1);
+    window.setTimeout(() => {
+      setLastAnswerCorrect(null);
+      if (currentIndex >= questions.length - 1) {
+        setPhase("result");
+        return;
+      }
+      setCurrentIndex((value) => value + 1);
+    }, 420);
   };
 
   const resetTrial = () => {
@@ -54,14 +76,17 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
     setCurrentIndex(0);
     setAnswers([]);
     setSelectedAnswer(null);
+    setLastAnswerCorrect(null);
   };
 
   return (
-    <div className="trial-room-shell">
+    <div className={`trial-room-shell ${phaseClass}`}>
       <div className="trial-room-bg" aria-hidden="true">
         <span />
         <span />
         <span />
+        <div className="trial-room-grid" />
+        <div className="trial-room-scan" />
       </div>
 
       <div className="trial-room-frame">
@@ -77,10 +102,18 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
           </div>
         </header>
 
+        <div className="trial-topline" aria-hidden="true">
+          <span style={{ width: `${Math.min(progressPercent, 100)}%` }} />
+        </div>
+
         {phase === "intro" && (
           <section className="trial-intro">
-            <div className="trial-guardian-orb">
-              <Shield size={44} />
+            <div className="trial-gate-stage">
+              <div className="trial-gate-ring" />
+              <div className="trial-guardian-orb">
+                <Shield size={48} />
+              </div>
+              <div className="trial-gate-beam" />
             </div>
 
             <div className="trial-kicker">Nouveau Checkpoint atteint</div>
@@ -89,7 +122,7 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
 
             <div className="trial-intro-grid">
               <div>
-                <span>XP détectée</span>
+                <span>XP verrouillée</span>
                 <strong>{rawXP} XP</strong>
               </div>
               <div>
@@ -97,14 +130,19 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
                 <strong>{trial.passScore}/{questions.length}</strong>
               </div>
               <div>
-                <span>Rang verrouillé</span>
+                <span>Rang scellé</span>
                 <strong>{trial.rewardRank}</strong>
               </div>
             </div>
 
-            <button type="button" className="trial-primary-btn" onClick={() => setPhase("questions")}>
+            <div className="trial-guardian-message">
+              <ScanLine size={18} />
+              <span>{trial.guardian} analyse ton profil. Une seule règle : franchir le seuil.</span>
+            </div>
+
+            <button type="button" className="trial-primary-btn trial-enter-btn" onClick={() => setPhase("questions")}>
               Entrer dans la Salle des Épreuves
-              <Sparkles size={18} />
+              <Swords size={18} />
             </button>
           </section>
         )}
@@ -116,41 +154,69 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
               <strong>{remaining} restantes</strong>
             </div>
 
-            <div className="trial-question-card">
-              <div className="trial-question-kicker">{trial.guardian}</div>
-              <h2>{currentQuestion.prompt}</h2>
+            <div className="trial-arena">
+              <aside className="trial-guardian-panel">
+                <div className="trial-guardian-avatar">
+                  <Shield size={28} />
+                </div>
+                <span>Gardien actif</span>
+                <strong>{trial.guardian}</strong>
+                <small>Score actuel : {score}/{questions.length}</small>
+              </aside>
 
-              <div className="trial-answer-grid">
-                {currentChoices.map((choice) => (
-                  <button
-                    key={`${currentQuestion.id}-${choice.originalIndex}`}
-                    type="button"
-                    className={`trial-answer-btn ${
-                      selectedAnswer === choice.originalIndex ? "selected" : ""
-                    }`}
-                    onClick={() => setSelectedAnswer(choice.originalIndex)}
-                  >
-                    <span>{choice.answer}</span>
-                  </button>
-                ))}
+              <div className="trial-question-card">
+                <div className="trial-question-kicker">
+                  <Zap size={15} />
+                  Verrou de connaissance
+                </div>
+                <h2>{currentQuestion.prompt}</h2>
+
+                <div className="trial-answer-grid">
+                  {currentChoices.map((choice, index) => {
+                    const isSelected = selectedAnswer === choice.originalIndex;
+                    const revealState =
+                      lastAnswerCorrect === null
+                        ? ""
+                        : choice.originalIndex === currentQuestion.correctIndex
+                          ? "correct"
+                          : isSelected
+                            ? "wrong"
+                            : "";
+
+                    return (
+                      <button
+                        key={`${currentQuestion.id}-${choice.originalIndex}`}
+                        type="button"
+                        className={`trial-answer-btn ${isSelected ? "selected" : ""} ${revealState}`}
+                        onClick={() => setSelectedAnswer(choice.originalIndex)}
+                        disabled={lastAnswerCorrect !== null}
+                      >
+                        <b>{String.fromCharCode(65 + index)}</b>
+                        <span>{choice.answer}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
 
             <button
               type="button"
               className="trial-primary-btn"
-              disabled={selectedAnswer === null}
+              disabled={selectedAnswer === null || lastAnswerCorrect !== null}
               onClick={validateAnswer}
             >
-              Valider la réponse
+              Verrouiller la réponse
+              <Sparkles size={18} />
             </button>
           </section>
         )}
 
         {phase === "result" && (
           <section className={`trial-result ${passed ? "passed" : "failed"}`}>
+            <div className="trial-result-aura" aria-hidden="true" />
             <div className="trial-result-icon">
-              {passed ? <Crown size={48} /> : <Lock size={48} />}
+              {passed ? <Crown size={52} /> : <Lock size={52} />}
             </div>
 
             <div className="trial-kicker">
@@ -159,8 +225,8 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
             <h1>{passed ? trial.rewardRank : "Rang toujours verrouillé"}</h1>
             <p>
               {passed
-                ? "Le seuil est franchi. La progression reprend et le nouveau rang est sauvegardé."
-                : "Le Gardien referme la porte. Tu pourras retenter l'épreuve plus tard."}
+                ? "Le sceau s'ouvre. Le rang est révélé, la progression reprend et Firebase reçoit la validation."
+                : "Le Gardien referme la porte. Le rang reste verrouillé, mais l'épreuve pourra être retentée."}
             </p>
 
             <div className="trial-score-card">
@@ -171,7 +237,7 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
 
             <div className="trial-result-actions">
               {passed ? (
-                <button type="button" className="trial-primary-btn" onClick={() => onComplete(trial)}>
+                <button type="button" className="trial-primary-btn trial-reveal-btn" onClick={() => onComplete(trial)}>
                   Révéler le rang
                   <Sparkles size={18} />
                 </button>
