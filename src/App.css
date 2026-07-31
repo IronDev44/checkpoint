@@ -12874,6 +12874,98 @@ html body[data-theme="theme-indigo"] {
   line-height: 1.35;
 }
 
+.xbox-connect-card {
+  margin-top: 12px;
+  background:
+    radial-gradient(circle at 88% 8%, rgba(72, 208, 88, 0.18), transparent 34%),
+    radial-gradient(circle at 12% 92%, color-mix(in srgb, var(--accent), transparent 82%), transparent 36%),
+    rgba(255, 255, 255, 0.055);
+}
+
+.xbox-sync-hints span:first-child {
+  border-color: rgba(82, 220, 96, 0.22);
+  color: color-mix(in srgb, #7dff8d, var(--text-main) 16%);
+}
+
+.xbox-profile-card {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid rgba(125, 255, 141, 0.18);
+  border-radius: 17px;
+  background:
+    linear-gradient(135deg, rgba(16, 124, 16, 0.22), rgba(255, 255, 255, 0.045)),
+    rgba(0, 0, 0, 0.18);
+}
+
+.xbox-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
+}
+
+.xbox-avatar-fallback {
+  display: grid;
+  place-items: center;
+  color: #caffcf;
+  font-weight: 950;
+  background: linear-gradient(135deg, #107c10, #52ff68);
+}
+
+.xbox-profile-card strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-main);
+  font-size: 1.05rem;
+}
+
+.xbox-profile-card span,
+.xbox-status-note span {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.35;
+}
+
+.xbox-status-note {
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.xbox-status-note.subtle {
+  border-color: color-mix(in srgb, var(--genre-color), transparent 70%);
+  background: color-mix(in srgb, var(--genre-color), transparent 90%);
+}
+
+.xbox-status-note strong {
+  color: var(--text-main);
+}
+
+.xbox-connect-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.xbox-connect-action {
+  min-width: 180px;
+}
+
+.xbox-disconnect-action {
+  border-color: rgba(255, 118, 118, 0.26);
+  color: #ffd1d8;
+}
+
 .data-health-card.clean {
   border-color: rgba(79, 220, 143, 0.38);
 }

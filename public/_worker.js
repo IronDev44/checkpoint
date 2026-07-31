@@ -86,6 +86,327 @@ async function fetchJson(url, timeout = 9000) {
   }
 }
 
+function encodeBase64Url(value) {
+  const bytes = value instanceof Uint8Array ? value : new TextEncoder().encode(String(value));
+  let binary = "";
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte);
+  });
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function decodeBase64Url(value = "") {
+  const base64 = String(value).replace(/-/g, "+").replace(/_/g, "/");
+  const padded = base64.padEnd(Math.ceil(base64.length / 4) * 4, "=");
+  const binary = atob(padded);
+  return Uint8Array.from(binary, (char) => char.charCodeAt(0));
+}
+
+function randomToken(size = 32) {
+  const bytes = new Uint8Array(size);
+  crypto.getRandomValues(bytes);
+  return encodeBase64Url(bytes);
+}
+
+function getCookie(request, name) {
+  const cookieHeader = request.headers.get("cookie") || "";
+  const cookies = cookieHeader.split(";").map((cookie) => cookie.trim());
+  const match = cookies.find((cookie) => cookie.startsWith(`${name}=`));
+  return match ? decodeURIComponent(match.slice(name.length + 1)) : "";
+}
+
+function buildCookie(name, value, requestUrl, options = {}) {
+  const url = new URL(requestUrl);
+  const parts = [
+    `${name}=${encodeURIComponent(value)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${options.maxAge ?? 900}`,
+  ];
+
+  if (url.protocol === "https:") {
+    parts.push("Secure");
+  }
+
+  return parts.join("; ");
+}
+
+function clearCookie(name, requestUrl) {
+  return buildCookie(name, "", requestUrl, { maxAge: 0 });
+}
+
+async function getXboxCookieKey(env) {
+  const secret = env.XBOX_COOKIE_SECRET || env.XBOX_CLIENT_SECRET || "";
+  if (!secret || secret.length < 16) {
+    throw new Error("XBOX_COOKIE_SECRET manquante ou trop courte dans Cloudflare Pages.");
+  }
+
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret));
+  return crypto.subtle.importKey("raw", digest, "AES-GCM", false, ["encrypt", "decrypt"]);
+}
+
+async function encryptXboxSession(session, env) {
+  const key = await getXboxCookieKey(env);
+  const iv = new Uint8Array(12);
+  crypto.getRandomValues(iv);
+  const data = new TextEncoder().encode(JSON.stringify(session));
+  const encrypted = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, data);
+  const payload = new Uint8Array(iv.length + encrypted.byteLength);
+  payload.set(iv, 0);
+  payload.set(new Uint8Array(encrypted), iv.length);
+  return encodeBase64Url(payload);
+}
+
+async function decryptXboxSession(value, env) {
+  if (!value) return null;
+
+  try {
+    const payload = decodeBase64Url(value);
+    const iv = payload.slice(0, 12);
+    const encrypted = payload.slice(12);
+    const key = await getXboxCookieKey(env);
+    const decrypted = await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, encrypted);
+    return JSON.parse(new TextDecoder().decode(decrypted));
+  } catch (error) {
+    return null;
+  }
+}
+
+function getXboxRedirectUri(request, env) {
+  if (env.XBOX_REDIRECT_URI) return env.XBOX_REDIRECT_URI;
+  const url = new URL(request.url);
+  return `${url.origin}/api/xbox/auth/callback`;
+}
+
+async function postXboxJson(url, body, headers = {}) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      ...headers,
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data?.XErr || data?.error_description || data?.error || `Xbox HTTP ${response.status}`);
+  }
+
+  return data;
+}
+
+async function startXboxAuth(request, env) {
+  if (!env.XBOX_CLIENT_ID || !env.XBOX_CLIENT_SECRET) {
+    return privateJsonResponse(
+      {
+        error: "Configuration Xbox manquante. Ajoute XBOX_CLIENT_ID et XBOX_CLIENT_SECRET dans Cloudflare Pages.",
+        setupRequired: true,
+      },
+      { status: 501 }
+    );
+  }
+
+  const state = randomToken(32);
+  const authUrl = new URL("https://login.live.com/oauth20_authorize.srf");
+  authUrl.searchParams.set("client_id", env.XBOX_CLIENT_ID);
+  authUrl.searchParams.set("response_type", "code");
+  authUrl.searchParams.set("redirect_uri", getXboxRedirectUri(request, env));
+  authUrl.searchParams.set("scope", "XboxLive.signin XboxLive.offline_access");
+  authUrl.searchParams.set("state", state);
+
+  return new Response(null, {
+    status: 302,
+    headers: {
+      location: authUrl.toString(),
+      "set-cookie": buildCookie("checkpoint_xbox_state", state, request.url, { maxAge: 900 }),
+      ...PRIVATE_JSON_HEADERS,
+    },
+  });
+}
+
+async function exchangeXboxCode(request, env) {
+  const url = new URL(request.url);
+  const code = url.searchParams.get("code") || "";
+  const state = url.searchParams.get("state") || "";
+  const expectedState = getCookie(request, "checkpoint_xbox_state");
+  const redirectHome = new URL("/", url.origin);
+
+  if (!code || !state || !expectedState || state !== expectedState) {
+    redirectHome.searchParams.set("xbox", "error");
+    return new Response(null, {
+      status: 302,
+      headers: {
+        location: redirectHome.toString(),
+        "set-cookie": clearCookie("checkpoint_xbox_state", request.url),
+      },
+    });
+  }
+
+  try {
+    const tokenResponse = await fetch("https://login.live.com/oauth20_token.srf", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        client_id: env.XBOX_CLIENT_ID,
+        client_secret: env.XBOX_CLIENT_SECRET,
+        code,
+        grant_type: "authorization_code",
+        redirect_uri: getXboxRedirectUri(request, env),
+      }),
+    });
+    const tokenData = await tokenResponse.json().catch(() => ({}));
+
+    if (!tokenResponse.ok) {
+      throw new Error(tokenData?.error_description || tokenData?.error || "Connexion Microsoft refusee.");
+    }
+
+    const xbl = await postXboxJson("https://user.auth.xboxlive.com/user/authenticate", {
+      Properties: {
+        AuthMethod: "RPS",
+        SiteName: "user.auth.xboxlive.com",
+        RpsTicket: `d=${tokenData.access_token}`,
+      },
+      RelyingParty: "http://auth.xboxlive.com",
+      TokenType: "JWT",
+    });
+
+    const xsts = await postXboxJson("https://xsts.auth.xboxlive.com/xsts/authorize", {
+      Properties: {
+        SandboxId: "RETAIL",
+        UserTokens: [xbl.Token],
+      },
+      RelyingParty: "http://xboxlive.com",
+      TokenType: "JWT",
+    });
+
+    const claim = xsts?.DisplayClaims?.xui?.[0] || {};
+    const uhs = claim.uhs || "";
+    const xuid = claim.xid || "";
+    let profile = {
+      xuid,
+      gamertag: claim.gtg || "Profil Xbox",
+      avatar: "",
+    };
+
+    if (xuid && uhs && xsts.Token) {
+      const profileUrl = `https://profile.xboxlive.com/users/xuid(${xuid})/profile/settings?settings=Gamertag,GameDisplayPicRaw`;
+      const profileResponse = await fetch(profileUrl, {
+        headers: {
+          accept: "application/json",
+          authorization: `XBL3.0 x=${uhs};${xsts.Token}`,
+          "x-xbl-contract-version": "2",
+        },
+      });
+      const profileData = await profileResponse.json().catch(() => ({}));
+      const settings = profileData?.profileUsers?.[0]?.settings || [];
+      const findSetting = (id) => settings.find((setting) => setting.id === id)?.value || "";
+      profile = {
+        xuid,
+        gamertag: findSetting("Gamertag") || profile.gamertag,
+        avatar: findSetting("GameDisplayPicRaw") || "",
+      };
+    }
+
+    const now = Date.now();
+    const session = {
+      profile,
+      refreshToken: tokenData.refresh_token || "",
+      accessToken: tokenData.access_token || "",
+      accessExpiresAt: now + Number(tokenData.expires_in || 3600) * 1000,
+      uhs,
+      xstsToken: xsts.Token || "",
+      xstsExpiresAt: Date.parse(xsts.NotAfter || "") || now + 2 * 60 * 60 * 1000,
+      connectedAt: new Date().toISOString(),
+    };
+    const encryptedSession = await encryptXboxSession(session, env);
+
+    redirectHome.searchParams.set("xbox", "connected");
+    const headers = new Headers({ location: redirectHome.toString() });
+    headers.append("set-cookie", clearCookie("checkpoint_xbox_state", request.url));
+    headers.append(
+      "set-cookie",
+      buildCookie("checkpoint_xbox_session", encryptedSession, request.url, {
+        maxAge: 60 * 60 * 24 * 30,
+      })
+    );
+
+    return new Response(null, {
+      status: 302,
+      headers,
+    });
+  } catch (error) {
+    redirectHome.searchParams.set("xbox", "error");
+    redirectHome.searchParams.set("message", String(error?.message || error).slice(0, 120));
+    return new Response(null, {
+      status: 302,
+      headers: {
+        location: redirectHome.toString(),
+        "set-cookie": clearCookie("checkpoint_xbox_state", request.url),
+      },
+    });
+  }
+}
+
+async function getXboxSession(request, env) {
+  const session = await decryptXboxSession(getCookie(request, "checkpoint_xbox_session"), env);
+
+  if (!session?.profile?.xuid) {
+    return privateJsonResponse({
+      connected: false,
+      setupRequired: !env.XBOX_CLIENT_ID || !env.XBOX_CLIENT_SECRET || !env.XBOX_COOKIE_SECRET,
+    });
+  }
+
+  return privateJsonResponse({
+    connected: true,
+    profile: session.profile,
+    connectedAt: session.connectedAt || "",
+    capabilities: {
+      profile: true,
+      library: false,
+    },
+    message:
+      "Compte Xbox connecte. La synchronisation complete de la bibliotheque Xbox attend une source Microsoft fiable et autorisee.",
+  });
+}
+
+async function logoutXbox(request) {
+  return privateJsonResponse(
+    { connected: false },
+    {
+      headers: {
+        "set-cookie": clearCookie("checkpoint_xbox_session", request.url),
+      },
+    }
+  );
+}
+
+async function getXboxLibrary(request, env) {
+  const session = await decryptXboxSession(getCookie(request, "checkpoint_xbox_session"), env);
+
+  if (!session?.profile?.xuid) {
+    return privateJsonResponse({ games: [], error: "Compte Xbox non connecte." }, { status: 401 });
+  }
+
+  return privateJsonResponse(
+    {
+      games: [],
+      connected: true,
+      profile: session.profile,
+      libraryAvailable: false,
+      error:
+        "Microsoft ne fournit pas de flux web public stable pour importer toute la bibliotheque Xbox d'un joueur. La connexion est prete, la source bibliotheque sera branchee des qu'elle est fiable.",
+    },
+    { status: 501 }
+  );
+}
+
 function extractSteamProfileInput(value = "") {
   const input = String(value || "").trim();
   const decodedInput = decodeURIComponent(input);
@@ -493,6 +814,58 @@ export default {
           { status: 502 }
         );
       }
+    }
+
+    if (url.pathname === "/api/xbox/auth/start") {
+      if (request.method !== "GET") {
+        return privateJsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      return startXboxAuth(request, env);
+    }
+
+    if (url.pathname === "/api/xbox/auth/callback") {
+      if (request.method !== "GET") {
+        return privateJsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      return exchangeXboxCode(request, env);
+    }
+
+    if (url.pathname === "/api/xbox/session") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, { headers: PRIVATE_JSON_HEADERS });
+      }
+
+      if (request.method !== "GET") {
+        return privateJsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      return getXboxSession(request, env);
+    }
+
+    if (url.pathname === "/api/xbox/logout") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, { headers: PRIVATE_JSON_HEADERS });
+      }
+
+      if (request.method !== "POST") {
+        return privateJsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      return logoutXbox(request);
+    }
+
+    if (url.pathname === "/api/xbox/library") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, { headers: PRIVATE_JSON_HEADERS });
+      }
+
+      if (request.method !== "GET") {
+        return privateJsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      return getXboxLibrary(request, env);
     }
 
     return assetResponse(request, env);

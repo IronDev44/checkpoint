@@ -261,6 +261,14 @@ const DEFAULT_APP_OPTIONS = {
     lastGameCount: 0,
     lastImportedCount: 0,
   },
+  xboxProfile: {
+    connected: false,
+    gamertag: "",
+    xuid: "",
+    avatar: "",
+    connectedAt: "",
+    lastCheckedAt: "",
+  },
 };
 
 const GAME_RATING_KEYS = [
@@ -311,6 +319,10 @@ function getStoredAppOptions() {
       steamProfile: {
         ...DEFAULT_APP_OPTIONS.steamProfile,
         ...(saved.steamProfile || {}),
+      },
+      xboxProfile: {
+        ...DEFAULT_APP_OPTIONS.xboxProfile,
+        ...(saved.xboxProfile || {}),
       },
     };
   } catch (error) {
@@ -11700,6 +11712,9 @@ function OptionsTab({
   const [steamError, setSteamError] = useState("");
   const [isSteamLoading, setIsSteamLoading] = useState(false);
   const [isSteamImporting, setIsSteamImporting] = useState(false);
+  const [xboxSession, setXboxSession] = useState(null);
+  const [xboxError, setXboxError] = useState("");
+  const [isXboxLoading, setIsXboxLoading] = useState(false);
   const themes = [
   { id: "theme-indigo", label: "Aurora Neon" },
   { id: "theme-playstation", label: "PS5 Premium" },
@@ -11752,6 +11767,10 @@ function OptionsTab({
     ...DEFAULT_APP_OPTIONS.steamProfile,
     ...(appOptions.steamProfile || {}),
   };
+  const xboxProfile = {
+    ...DEFAULT_APP_OPTIONS.xboxProfile,
+    ...(appOptions.xboxProfile || {}),
+  };
   const steamExistingStats = useMemo(() => {
     const steamIds = new Set(games.map(getSteamGameKey).filter(Boolean));
     const names = new Set(
@@ -11797,6 +11816,12 @@ function OptionsTab({
   const updateSteamProfile = (patch) => {
     onOptionChange("steamProfile", {
       ...steamProfile,
+      ...patch,
+    });
+  };
+  const updateXboxProfile = (patch) => {
+    onOptionChange("xboxProfile", {
+      ...xboxProfile,
       ...patch,
     });
   };
@@ -11866,12 +11891,80 @@ function OptionsTab({
       setIsSteamImporting(false);
     }
   };
+  const refreshXboxSession = async () => {
+    setIsXboxLoading(true);
+    setXboxError("");
+
+    try {
+      const response = await fetch("/api/xbox/session");
+      const contentType = response.headers.get("content-type") || "";
+
+      if (!contentType.includes("application/json")) {
+        throw new Error("API Xbox non disponible sur ce serveur. Teste via le deploy Cloudflare.");
+      }
+
+      const data = await response.json();
+      setXboxSession(data);
+
+      if (data.connected && data.profile) {
+        updateXboxProfile({
+          connected: true,
+          gamertag: data.profile.gamertag || "",
+          xuid: data.profile.xuid || "",
+          avatar: data.profile.avatar || "",
+          connectedAt: data.connectedAt || xboxProfile.connectedAt || new Date().toISOString(),
+          lastCheckedAt: new Date().toISOString(),
+        });
+      } else if (!data.connected && xboxProfile.connected) {
+        updateXboxProfile({
+          connected: false,
+          gamertag: "",
+          xuid: "",
+          avatar: "",
+          connectedAt: "",
+          lastCheckedAt: new Date().toISOString(),
+        });
+      }
+    } catch (error) {
+      setXboxError(String(error?.message || error));
+    } finally {
+      setIsXboxLoading(false);
+    }
+  };
+  const connectXbox = () => {
+    window.location.href = "/api/xbox/auth/start";
+  };
+  const disconnectXbox = async () => {
+    setIsXboxLoading(true);
+    setXboxError("");
+
+    try {
+      await fetch("/api/xbox/logout", { method: "POST" });
+      setXboxSession({ connected: false });
+      updateXboxProfile({
+        connected: false,
+        gamertag: "",
+        xuid: "",
+        avatar: "",
+        connectedAt: "",
+        lastCheckedAt: new Date().toISOString(),
+      });
+    } catch (error) {
+      setXboxError(String(error?.message || error));
+    } finally {
+      setIsXboxLoading(false);
+    }
+  };
   const updatePublicSection = (section, enabled) => {
     onProfileChange("publicSections", {
       ...publicSections,
       [section]: enabled,
     });
   };
+  useEffect(() => {
+    refreshXboxSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     if (!helpTopic) return undefined;
 
@@ -11948,6 +12041,15 @@ function OptionsTab({
         "Colle l'URL complete de ton profil Steam ou ton SteamID64.",
         "Ton profil et les details de jeux doivent etre visibles publiquement dans Steam.",
         "Checkpoint ajoute les jeux manquants et synchronise ceux deja presents sans demander ton mot de passe.",
+      ],
+    },
+    xbox: {
+      title: "Connexion Xbox",
+      lead: "Relie ton compte Microsoft/Xbox sans confier ton mot de passe a Checkpoint.",
+      bullets: [
+        "La connexion passe par la page Microsoft officielle et revient ensuite dans l'app.",
+        "Checkpoint recupere uniquement ton profil Xbox utile : gamertag, avatar et identifiant Xbox.",
+        "La bibliotheque Xbox complete n'a pas de flux web public fiable comme Steam. On prepare donc la connexion proprement avant de brancher l'import quand la source est sure.",
       ],
     },
     data: {
@@ -12488,6 +12590,94 @@ function OptionsTab({
                   </button>
                 </>
               )}
+            </div>
+
+            <div className="option-setting-card option-setting-card-featured xbox-connect-card">
+              <div>
+                <SectionTitle title="Connexion Xbox" help="xbox" />
+                <span>
+                  Relie ton profil Xbox pour preparer une synchro propre avec l'ecosysteme Microsoft.
+                </span>
+              </div>
+
+              <div className="steam-sync-hints xbox-sync-hints">
+                <span>Connexion Microsoft officielle</span>
+                <span>Profil Xbox detecte</span>
+                <span>Bibliotheque en attente d'une source fiable</span>
+              </div>
+
+              {(xboxSession?.connected || xboxProfile.connected) ? (
+                <div className="xbox-profile-card">
+                  {xboxSession?.profile?.avatar || xboxProfile.avatar ? (
+                    <img
+                      src={xboxSession?.profile?.avatar || xboxProfile.avatar}
+                      alt=""
+                      className="xbox-avatar"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="xbox-avatar xbox-avatar-fallback">XB</div>
+                  )}
+                  <div>
+                    <strong>{xboxSession?.profile?.gamertag || xboxProfile.gamertag || "Profil Xbox"}</strong>
+                    <span>{xboxSession?.profile?.xuid || xboxProfile.xuid || "XUID connecte"}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="xbox-status-note">
+                  <strong>Aucun compte Xbox connecte</strong>
+                  <span>Connecte Microsoft pour autoriser Checkpoint a reconnaitre ton profil Xbox.</span>
+                </div>
+              )}
+
+              {xboxSession?.message && (
+                <div className="xbox-status-note subtle">
+                  <strong>Etat de la synchro</strong>
+                  <span>{xboxSession.message}</span>
+                </div>
+              )}
+
+              {xboxError && (
+                <div className="steam-sync-error">
+                  {xboxError}
+                  <small>
+                    Si tu testes en local, utilise le deploy Cloudflare : le callback Microsoft doit
+                    pointer vers une URL publique.
+                  </small>
+                </div>
+              )}
+
+              <div className="xbox-connect-actions">
+                {(xboxSession?.connected || xboxProfile.connected) ? (
+                  <>
+                    <button
+                      type="button"
+                      className="option-pill"
+                      onClick={refreshXboxSession}
+                      disabled={isXboxLoading}
+                    >
+                      {isXboxLoading ? "Verification..." : "Actualiser"}
+                    </button>
+                    <button
+                      type="button"
+                      className="option-pill xbox-disconnect-action"
+                      onClick={disconnectXbox}
+                      disabled={isXboxLoading}
+                    >
+                      Deconnecter
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className="option-pill steam-sync-primary xbox-connect-action"
+                    onClick={connectXbox}
+                    disabled={isXboxLoading}
+                  >
+                    {isXboxLoading ? "Verification..." : "Connecter Xbox"}
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -13946,6 +14136,14 @@ const importCheckpointBackup = async (event) => {
           ...DEFAULT_APP_OPTIONS.dealSources,
           ...(payload.options.dealSources || {}),
         },
+        steamProfile: {
+          ...DEFAULT_APP_OPTIONS.steamProfile,
+          ...(payload.options.steamProfile || {}),
+        },
+        xboxProfile: {
+          ...DEFAULT_APP_OPTIONS.xboxProfile,
+          ...(payload.options.xboxProfile || {}),
+        },
       };
       setAppOptions(nextOptions);
       localStorage.setItem("checkpoint-app-options", JSON.stringify(nextOptions));
@@ -14107,6 +14305,24 @@ const showToast = (message, duration = 2000) => {
   setToast(message);
   setTimeout(() => setToast(""), duration);
 };
+
+useEffect(() => {
+  const url = new URL(window.location.href);
+  const xboxStatus = url.searchParams.get("xbox");
+
+  if (!xboxStatus) return;
+
+  if (xboxStatus === "connected") {
+    showToast("Compte Xbox connecte.");
+  } else if (xboxStatus === "error") {
+    showToast(url.searchParams.get("message") || "Connexion Xbox annulee.");
+  }
+
+  url.searchParams.delete("xbox");
+  url.searchParams.delete("message");
+  window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 
 const openTrialRoom = (checkpointLevel) => {
   setDismissedCheckpointLevel(null);
