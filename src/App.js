@@ -7062,6 +7062,7 @@ function HomeTab({
   level,
   totalXP,
   progress,
+  dealPreferences = DEFAULT_APP_OPTIONS,
   setActiveTab,
   onOpenDetail,
   gamingEvents = [],
@@ -7569,6 +7570,12 @@ function HomeTab({
         </div>
       </div>
 
+      <HomeDealsPreview
+        dealPreferences={dealPreferences}
+        games={games}
+        onOpenDeals={() => setActiveTab("deals")}
+      />
+
       {quizQuestion && (
         <div className="weekly-quiz-card">
           <div className="weekly-quiz-top">
@@ -7771,16 +7778,30 @@ function HomeTab({
         )}
       </div>
 
+      <div className="home-actions-grid home-main-actions">
+        <button type="button" onClick={() => setActiveTab("search")}>
+          Ajouter un jeu
+        </button>
+
+        <button type="button" onClick={() => setActiveTab("deals")}>
+          Promos
+        </button>
+
+        <button type="button" onClick={() => setActiveTab("top5")}>
+          Top 5
+        </button>
+      </div>
+
       <div className="home-actions-grid">
         <button type="button" onClick={() => setActiveTab("search")}>
           🔎 Ajouter un jeu
         </button>
 
-        <button type="button" onClick={() => setActiveTab("library")}>
+        <button type="button" onClick={() => setActiveTab("deals")}>
           📚 Bibliothèque
         </button>
 
-        <button type="button" onClick={() => setActiveTab("profile")}>
+        <button type="button" onClick={() => setActiveTab("top5")}>
           🏅 Profil
         </button>
       </div>
@@ -12932,6 +12953,202 @@ function normalizeEpicDeals(data, currency = "USD", usdRate = 1) {
     });
 }
 
+function HomeDealsPreview({
+  dealPreferences = DEFAULT_APP_OPTIONS,
+  games = [],
+  onOpenDeals,
+}) {
+  const sourcePreferences = useMemo(
+    () => ({
+      ...DEFAULT_APP_OPTIONS.dealSources,
+      ...(dealPreferences.dealSources || {}),
+    }),
+    [dealPreferences.dealSources]
+  );
+  const region = DEAL_REGION_CONFIG[dealPreferences.dealRegion] || DEAL_REGION_CONFIG.FR;
+  const [deals, setDeals] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+
+  const enabledSourceKey = useMemo(
+    () =>
+      Object.entries(sourcePreferences)
+        .filter(([, enabled]) => enabled)
+        .map(([source]) => source)
+        .sort()
+        .join(","),
+    [sourcePreferences]
+  );
+
+  const loadHomeDeals = useCallback(async () => {
+    setIsLoading(true);
+    setHasError(false);
+
+    const fetchWithTimeout = async (url, timeout = 8000) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      try {
+        return await fetch(url, { signal: controller.signal });
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    };
+
+    try {
+      const apiResponse = await fetchWithTimeout(
+        `/api/deals?cc=${region.country}&locale=${region.locale}&lang=${region.steamLang}&currency=${region.currency}`
+      );
+      const contentType = apiResponse.headers.get("content-type") || "";
+
+      if (apiResponse.ok && contentType.includes("application/json")) {
+        const payload = await apiResponse.json();
+        setDeals(
+          (payload.deals || []).filter((deal) => sourcePreferences[deal.store])
+        );
+        setIsLoading(false);
+        return;
+      }
+    } catch (error) {
+      console.warn("Apercu promos indisponible via proxy :", error);
+    }
+
+    try {
+      const requests = [
+        {
+          id: "steam",
+          url: `https://store.steampowered.com/api/featuredcategories?cc=${region.country}&l=${region.steamLang}`,
+          normalize: normalizeSteamDeals,
+        },
+        {
+          id: "epic",
+          url: "https://www.cheapshark.com/api/1.0/deals?storeID=25&onSale=1&pageSize=60&sortBy=Savings&desc=1",
+          normalize: (data) =>
+            normalizeEpicDeals(
+              data,
+              region.currency,
+              region.currency === "USD" ? 1 : 0.92
+            ),
+        },
+      ].filter((source) => sourcePreferences[source.id]);
+
+      const results = await Promise.allSettled(
+        requests.map(async (source) => {
+          const response = await fetchWithTimeout(source.url);
+          if (!response.ok) throw new Error(`${source.id}: ${response.status}`);
+          return source.normalize(await response.json());
+        })
+      );
+
+      setDeals(
+        results
+          .filter((result) => result.status === "fulfilled")
+          .flatMap((result) => result.value)
+      );
+    } catch (error) {
+      setHasError(true);
+      setDeals([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    region.country,
+    region.currency,
+    region.locale,
+    region.steamLang,
+    sourcePreferences,
+  ]);
+
+  useEffect(() => {
+    loadHomeDeals();
+  }, [loadHomeDeals, enabledSourceKey]);
+
+  const previewDeals = useMemo(() => {
+    const enrichedDeals = enrichDealsWithLibrary(deals, games).filter(
+      (deal) => !deal.isStoreHub
+    );
+
+    return enrichedDeals
+      .sort((a, b) => {
+        const wishlistDelta =
+          Number(b.libraryStatus === "wishlist") - Number(a.libraryStatus === "wishlist");
+        if (wishlistDelta !== 0) return wishlistDelta;
+        const discountDelta = (b.discount || 0) - (a.discount || 0);
+        if (discountDelta !== 0) return discountDelta;
+        return a.priceValue - b.priceValue;
+      })
+      .slice(0, 3);
+  }, [deals, games]);
+
+  const wishlistCount = previewDeals.filter(
+    (deal) => deal.libraryStatus === "wishlist"
+  ).length;
+  const bestDiscount = previewDeals.reduce(
+    (max, deal) => Math.max(max, deal.discount || 0),
+    0
+  );
+
+  return (
+    <section className="home-deals-card">
+      <div className="home-section-head">
+        <div>
+          <div className="home-card-title">Bonnes affaires</div>
+          <p>Les promos les plus interessantes remontent ici sans ouvrir l'onglet complet.</p>
+        </div>
+
+        <button type="button" onClick={onOpenDeals}>
+          Tout voir
+        </button>
+      </div>
+
+      <div className="home-deals-summary">
+        <span>{previewDeals.length || (isLoading ? "..." : 0)} offres</span>
+        <span>{wishlistCount} wishlist</span>
+        <span>{bestDiscount ? `-${bestDiscount}% max` : "Steam / Epic / consoles"}</span>
+      </div>
+
+      {isLoading && previewDeals.length === 0 ? (
+        <div className="home-deals-empty">Recherche des meilleures offres...</div>
+      ) : hasError && previewDeals.length === 0 ? (
+        <div className="home-deals-empty">Les promos seront rechargees depuis l'onglet dedie.</div>
+      ) : previewDeals.length > 0 ? (
+        <div className="home-deals-list">
+          {previewDeals.map((deal) => (
+            <a
+              key={deal.id}
+              className="home-deal-row"
+              href={deal.url}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {deal.image ? (
+                <img src={deal.image} alt={deal.title} />
+              ) : (
+                <div className="home-deal-placeholder">{deal.storeLabel}</div>
+              )}
+
+              <div className="home-deal-main">
+                <span className={`deal-store deal-store-${deal.store}`}>
+                  {deal.storeLabel}
+                </span>
+                <strong>{deal.title}</strong>
+                <small>{deal.salePrice || "Prix indisponible"}</small>
+              </div>
+
+              <div className="home-deal-side">
+                {deal.discount > 0 && <b>-{deal.discount}%</b>}
+                {deal.libraryStatus === "wishlist" && <em>Wishlist</em>}
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div className="home-deals-empty">Aucune promo forte pour le moment.</div>
+      )}
+    </section>
+  );
+}
+
 function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
   const sourcePreferences = {
     ...DEFAULT_APP_OPTIONS.dealSources,
@@ -15682,6 +15899,7 @@ const setPlayedPlatforms = async (id, platforms) => {
   level={level}
   totalXP={totalXP}
   progress={progress}
+  dealPreferences={appOptions}
   setActiveTab={changeTab}
   onOpenDetail={(game) => openGameDetail(game, games)}
   gamingEvents={gamingEvents}
