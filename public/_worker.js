@@ -12,11 +12,26 @@ const JSON_HEADERS = {
   "cache-control": "public, max-age=300, s-maxage=900",
 };
 
+const PRIVATE_JSON_HEADERS = {
+  "content-type": "application/json; charset=utf-8",
+  "cache-control": "no-store, no-cache, max-age=0, must-revalidate",
+};
+
 function jsonResponse(body, init = {}) {
   return new Response(JSON.stringify(body), {
     ...init,
     headers: {
       ...JSON_HEADERS,
+      ...(init.headers || {}),
+    },
+  });
+}
+
+function privateJsonResponse(body, init = {}) {
+  return new Response(JSON.stringify(body), {
+    ...init,
+    headers: {
+      ...PRIVATE_JSON_HEADERS,
       ...(init.headers || {}),
     },
   });
@@ -69,6 +84,118 @@ async function fetchJson(url, timeout = 9000) {
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+function extractSteamProfileInput(value = "") {
+  const input = String(value || "").trim();
+  const decodedInput = decodeURIComponent(input);
+  const profileMatch = decodedInput.match(/steamcommunity\.com\/profiles\/(\d{17})/i);
+  const vanityMatch = decodedInput.match(/steamcommunity\.com\/id\/([^/?#]+)/i);
+
+  if (/^\d{17}$/.test(input)) {
+    return { type: "steamid", value: input };
+  }
+
+  if (profileMatch?.[1]) {
+    return { type: "steamid", value: profileMatch[1] };
+  }
+
+  if (vanityMatch?.[1]) {
+    return { type: "vanity", value: vanityMatch[1] };
+  }
+
+  if (/^[a-zA-Z0-9_-]{2,64}$/.test(input)) {
+    return { type: "vanity", value: input };
+  }
+
+  return { type: "invalid", value: input };
+}
+
+async function resolveSteamId(profileInput, env) {
+  const parsed = extractSteamProfileInput(profileInput);
+
+  if (parsed.type === "steamid") {
+    return parsed.value;
+  }
+
+  if (parsed.type !== "vanity") {
+    throw new Error("Profil Steam invalide. Utilise un SteamID64 ou une URL de profil Steam.");
+  }
+
+  const vanityUrl = new URL("https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/");
+  vanityUrl.searchParams.set("key", env.STEAM_API_KEY);
+  vanityUrl.searchParams.set("vanityurl", parsed.value);
+  vanityUrl.searchParams.set("format", "json");
+
+  const data = await fetchJson(vanityUrl.toString(), 9000);
+  const response = data?.response || {};
+
+  if (response.success !== 1 || !response.steamid) {
+    throw new Error("Impossible de trouver ce profil Steam public.");
+  }
+
+  return response.steamid;
+}
+
+function normalizeSteamLibraryGame(game) {
+  const appId = Number(game?.appid);
+
+  return {
+    steamAppId: appId,
+    name: game?.name || `Steam App ${appId}`,
+    image: appId
+      ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/header.jpg`
+      : "",
+    icon:
+      appId && game?.img_icon_url
+        ? `https://media.steampowered.com/steamcommunity/public/images/apps/${appId}/${game.img_icon_url}.jpg`
+        : "",
+    playtimeForever: Number(game?.playtime_forever || 0),
+    playtimeWindowsForever: Number(game?.playtime_windows_forever || 0),
+    playtimeMacForever: Number(game?.playtime_mac_forever || 0),
+    playtimeLinuxForever: Number(game?.playtime_linux_forever || 0),
+  };
+}
+
+async function getSteamOwnedGames(requestUrl, env) {
+  if (!env.STEAM_API_KEY) {
+    return privateJsonResponse(
+      {
+        games: [],
+        error: "STEAM_API_KEY manquante dans Cloudflare Pages.",
+        setupRequired: true,
+      },
+      { status: 501 }
+    );
+  }
+
+  const url = new URL(requestUrl);
+  const profileInput =
+    url.searchParams.get("profile") ||
+    url.searchParams.get("steamid") ||
+    "";
+  const steamId = await resolveSteamId(profileInput, env);
+  const ownedGamesUrl = new URL("https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/");
+
+  ownedGamesUrl.searchParams.set("key", env.STEAM_API_KEY);
+  ownedGamesUrl.searchParams.set("steamid", steamId);
+  ownedGamesUrl.searchParams.set("include_appinfo", "true");
+  ownedGamesUrl.searchParams.set("include_played_free_games", "true");
+  ownedGamesUrl.searchParams.set("format", "json");
+
+  const data = await fetchJson(ownedGamesUrl.toString(), 14000);
+  const response = data?.response || {};
+  const games = (response.games || [])
+    .map(normalizeSteamLibraryGame)
+    .filter((game) => game.steamAppId && game.name)
+    .sort((a, b) => b.playtimeForever - a.playtimeForever || a.name.localeCompare(b.name));
+
+  return privateJsonResponse({
+    steamId,
+    total: Number(response.game_count || games.length),
+    games,
+    updatedAt: new Date().toISOString(),
+  });
 }
 
 function formatStorePrice(value, currency = "EUR") {
@@ -330,6 +457,28 @@ export default {
               psn: "Lien officiel disponible.",
               xbox: "Lien officiel disponible.",
             },
+            error: String(error?.message || error),
+          },
+          { status: 502 }
+        );
+      }
+    }
+
+    if (url.pathname === "/api/steam/owned-games") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, { headers: PRIVATE_JSON_HEADERS });
+      }
+
+      if (request.method !== "GET") {
+        return privateJsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      try {
+        return await getSteamOwnedGames(request.url, env);
+      } catch (error) {
+        return privateJsonResponse(
+          {
+            games: [],
             error: String(error?.message || error),
           },
           { status: 502 }

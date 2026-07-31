@@ -254,6 +254,13 @@ const DEFAULT_APP_OPTIONS = {
     psn: true,
     xbox: true,
   },
+  steamProfile: {
+    profileInput: "",
+    steamId: "",
+    lastSyncedAt: "",
+    lastGameCount: 0,
+    lastImportedCount: 0,
+  },
 };
 
 const GAME_RATING_KEYS = [
@@ -300,6 +307,10 @@ function getStoredAppOptions() {
       dealSources: {
         ...DEFAULT_APP_OPTIONS.dealSources,
         ...(saved.dealSources || {}),
+      },
+      steamProfile: {
+        ...DEFAULT_APP_OPTIONS.steamProfile,
+        ...(saved.steamProfile || {}),
       },
     };
   } catch (error) {
@@ -8707,6 +8718,18 @@ function normalizeSearchText(value = "") {
     .trim();
 }
 
+function getSteamGameKey(game) {
+  return game?.steamAppId ? String(game.steamAppId) : "";
+}
+
+function formatSteamPlaytime(minutes = 0) {
+  const safeMinutes = Number(minutes) || 0;
+  if (safeMinutes < 60) return `${safeMinutes} min`;
+
+  const hours = Math.round((safeMinutes / 60) * 10) / 10;
+  return `${hours} h`;
+}
+
 function getSearchRelevanceScore(game, query) {
   const normalizedQuery = normalizeSearchText(query);
   const normalizedName = normalizeSearchText(game?.name || "");
@@ -11665,10 +11688,18 @@ function OptionsTab({
   onRepairGameData,
   onOpenTrial,
   checkpointTrialProgress = DEFAULT_CHECKPOINT_TRIAL_PROGRESS,
+  onImportSteamGames,
 }) {
   const [helpTopic, setHelpTopic] = useState(null);
   const [isRepairingGameData, setIsRepairingGameData] = useState(false);
   const [showIntegrityDetails, setShowIntegrityDetails] = useState(false);
+  const [steamInput, setSteamInput] = useState(
+    appOptions.steamProfile?.profileInput || ""
+  );
+  const [steamLibrary, setSteamLibrary] = useState(null);
+  const [steamError, setSteamError] = useState("");
+  const [isSteamLoading, setIsSteamLoading] = useState(false);
+  const [isSteamImporting, setIsSteamImporting] = useState(false);
   const themes = [
   { id: "theme-indigo", label: "Aurora Neon" },
   { id: "theme-playstation", label: "PS5 Premium" },
@@ -11717,6 +11748,27 @@ function OptionsTab({
     ...DEFAULT_APP_OPTIONS.dealSources,
     ...(appOptions.dealSources || {}),
   };
+  const steamProfile = {
+    ...DEFAULT_APP_OPTIONS.steamProfile,
+    ...(appOptions.steamProfile || {}),
+  };
+  const steamExistingStats = useMemo(() => {
+    const steamIds = new Set(games.map(getSteamGameKey).filter(Boolean));
+    const names = new Set(
+      games.map((game) => normalizeSearchText(game.name || "")).filter(Boolean)
+    );
+    const libraryGames = steamLibrary?.games || [];
+    const alreadyPresent = libraryGames.filter((game) => {
+      const steamKey = getSteamGameKey(game);
+      const nameKey = normalizeSearchText(game.name || "");
+      return (steamKey && steamIds.has(steamKey)) || (nameKey && names.has(nameKey));
+    }).length;
+
+    return {
+      alreadyPresent,
+      missing: Math.max(0, libraryGames.length - alreadyPresent),
+    };
+  }, [games, steamLibrary]);
   const gameIntegrityIssues = useMemo(
     () => getGameDataIntegrityIssues(games),
     [games]
@@ -11741,6 +11793,78 @@ function OptionsTab({
       ...dealSources,
       [source]: enabled,
     });
+  };
+  const updateSteamProfile = (patch) => {
+    onOptionChange("steamProfile", {
+      ...steamProfile,
+      ...patch,
+    });
+  };
+  const fetchSteamLibrary = async () => {
+    const profileInput = steamInput.trim();
+
+    if (!profileInput) {
+      setSteamError("Ajoute ton SteamID64 ou ton URL de profil Steam.");
+      return;
+    }
+
+    setSteamError("");
+    setIsSteamLoading(true);
+
+    try {
+      const response = await fetch(
+        `/api/steam/owned-games?profile=${encodeURIComponent(profileInput)}`
+      );
+      const contentType = response.headers.get("content-type") || "";
+
+      if (!contentType.includes("application/json")) {
+        throw new Error(
+          "API Steam non disponible sur ce serveur. Teste via le deploy Cloudflare."
+        );
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Connexion Steam indisponible.");
+      }
+
+      setSteamLibrary(data);
+      updateSteamProfile({
+        profileInput,
+        steamId: data.steamId || "",
+        lastSyncedAt: data.updatedAt || new Date().toISOString(),
+        lastGameCount: data.total || data.games?.length || 0,
+      });
+    } catch (error) {
+      setSteamLibrary(null);
+      setSteamError(String(error?.message || error));
+    } finally {
+      setIsSteamLoading(false);
+    }
+  };
+  const importSteamLibrary = async () => {
+    if (!steamLibrary?.games?.length || !onImportSteamGames) return;
+
+    setIsSteamImporting(true);
+    setSteamError("");
+
+    try {
+      const result = await onImportSteamGames(steamLibrary.games, {
+        steamId: steamLibrary.steamId,
+      });
+      updateSteamProfile({
+        profileInput: steamInput.trim(),
+        steamId: steamLibrary.steamId || steamProfile.steamId,
+        lastSyncedAt: new Date().toISOString(),
+        lastGameCount: steamLibrary.total || steamLibrary.games.length,
+        lastImportedCount: result?.imported || 0,
+      });
+    } catch (error) {
+      setSteamError(String(error?.message || error));
+    } finally {
+      setIsSteamImporting(false);
+    }
   };
   const updatePublicSection = (section, enabled) => {
     onProfileChange("publicSections", {
@@ -11806,6 +11930,15 @@ function OptionsTab({
         "Steam et Epic peuvent être chargés automatiquement quand leurs sources répondent.",
         "PlayStation et Xbox ouvrent des vitrines officielles propres en attendant une API fiable.",
         "La région change les prix ou les pages quand la boutique le permet.",
+      ],
+    },
+    steam: {
+      title: "Synchro Steam",
+      lead: "Connecte une bibliotheque Steam publique sans exposer la cle API dans l'app.",
+      bullets: [
+        "Tu peux utiliser un SteamID64, une URL /profiles/... ou une URL /id/...",
+        "Cloudflare doit avoir une variable STEAM_API_KEY pour lire la bibliotheque.",
+        "L'import evite les doublons avec les jeux deja presents dans Checkpoint.",
       ],
     },
     data: {
@@ -12230,6 +12363,82 @@ function OptionsTab({
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+
+          <div className="option-section">
+            <div className="option-setting-card option-setting-card-featured steam-sync-card">
+              <div>
+                <SectionTitle title="Synchronisation Steam" help="steam" />
+                <span>
+                  Relie ton profil Steam public pour importer tes jeux PC dans la bibliotheque.
+                </span>
+              </div>
+
+              <div className="steam-sync-form">
+                <input
+                  type="text"
+                  value={steamInput}
+                  onChange={(event) => setSteamInput(event.target.value)}
+                  placeholder="SteamID64 ou URL du profil Steam"
+                />
+                <button
+                  type="button"
+                  className="option-pill steam-sync-primary"
+                  onClick={fetchSteamLibrary}
+                  disabled={isSteamLoading}
+                >
+                  {isSteamLoading ? "Analyse..." : "Analyser"}
+                </button>
+              </div>
+
+              {steamError && <div className="steam-sync-error">{steamError}</div>}
+
+              {(steamLibrary || steamProfile.steamId) && (
+                <div className="steam-sync-status">
+                  <div>
+                    <strong>{steamLibrary?.total || steamProfile.lastGameCount || 0}</strong>
+                    <span>jeux Steam trouves</span>
+                  </div>
+                  <div>
+                    <strong>{steamExistingStats.alreadyPresent}</strong>
+                    <span>deja dans Checkpoint</span>
+                  </div>
+                  <div>
+                    <strong>{steamExistingStats.missing}</strong>
+                    <span>a importer</span>
+                  </div>
+                </div>
+              )}
+
+              {steamLibrary?.games?.length > 0 && (
+                <>
+                  <div className="steam-preview-list">
+                    {steamLibrary.games.slice(0, 5).map((game) => (
+                      <div key={game.steamAppId} className="steam-preview-row">
+                        <img src={game.image} alt="" loading="lazy" />
+                        <div>
+                          <strong>{game.name}</strong>
+                          <span>{formatSteamPlaytime(game.playtimeForever)} sur Steam</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="option-pill steam-import-action"
+                    onClick={importSteamLibrary}
+                    disabled={isSteamImporting || !steamExistingStats.missing}
+                  >
+                    {isSteamImporting
+                      ? "Import en cours..."
+                      : steamExistingStats.missing
+                        ? `Importer ${steamExistingStats.missing} jeu${steamExistingStats.missing > 1 ? "x" : ""}`
+                        : "Bibliotheque deja synchronisee"}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -15077,6 +15286,90 @@ useEffect(() => {
     }
   };
 
+  const importSteamGamesToLibrary = async (steamGames = [], meta = {}) => {
+    const existingBySteamId = new Map(
+      games
+        .filter((game) => getSteamGameKey(game))
+        .map((game) => [getSteamGameKey(game), game])
+    );
+    const existingByName = new Map(
+      games.map((game) => [normalizeSearchText(game.name || ""), game])
+    );
+    let imported = 0;
+    let updated = 0;
+    let skipped = 0;
+
+    for (const steamGame of steamGames) {
+      const steamKey = getSteamGameKey(steamGame);
+      const nameKey = normalizeSearchText(steamGame.name || "");
+      const existingGame =
+        (steamKey && existingBySteamId.get(steamKey)) ||
+        (nameKey && existingByName.get(nameKey));
+
+      const steamPatch = {
+        steamAppId: steamGame.steamAppId,
+        steamProfileId: meta.steamId || "",
+        steamPlaytimeForever: steamGame.playtimeForever || 0,
+        steamLastSyncedAt: new Date(),
+        source: existingGame?.source || "steam",
+      };
+
+      if (existingGame?.id) {
+        await updateDoc(doc(db, "games", existingGame.id), {
+          ...steamPatch,
+          image: existingGame.image || steamGame.image || "",
+          platformNames: Array.from(
+            new Set([...(existingGame.platformNames || []), "PC"])
+          ),
+        });
+        updated++;
+        continue;
+      }
+
+      if (!steamGame.name) {
+        skipped++;
+        continue;
+      }
+
+      const newGame = {
+        rawgId: null,
+        name: steamGame.name,
+        completed: false,
+        rating: 0,
+        favorite: false,
+        image: steamGame.image || "",
+        status: "collection",
+        released: "",
+        platformNames: ["PC"],
+        genreNames: [],
+        playtime: steamGame.playtimeForever || null,
+        difficulty: "normal",
+        review: "",
+        ostRating: 0,
+        ostTrack: "",
+        ostLink: "",
+        ratingGraphics: 0,
+        ratingGameplay: 0,
+        ratingStory: 0,
+        ratingSound: 0,
+        ratingLongevity: 0,
+        ...steamPatch,
+        createdAt: new Date(),
+      };
+
+      await addDoc(collection(db, "games"), newGame);
+      existingBySteamId.set(steamKey, newGame);
+      existingByName.set(nameKey, newGame);
+      imported++;
+    }
+
+    setToast(
+      `${imported} jeu${imported > 1 ? "x" : ""} importes, ${updated} synchronises.`
+    );
+
+    return { imported, updated, skipped };
+  };
+
   const addGameToSeries = async (seriesName, game) => {
   try {
     const ref = doc(db, "gameCollections", seriesName);
@@ -16365,6 +16658,7 @@ const setPlayedPlatforms = async (id, platforms) => {
                 onRepairGameData={repairGameDataIntegrity}
                 onOpenTrial={openTrialRoom}
                 checkpointTrialProgress={checkpointTrialProgress}
+                onImportSteamGames={importSteamGamesToLibrary}
               />
 
               <AdminPanel events={gamingEvents} onImportNews={importNewsFromRSS} />

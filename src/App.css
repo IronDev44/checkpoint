@@ -12749,6 +12749,105 @@ html body[data-theme="theme-indigo"] {
   background: rgba(255, 255, 255, 0.055);
 }
 
+.steam-sync-card {
+  overflow: hidden;
+}
+
+.steam-sync-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.steam-sync-form input {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid var(--surface-border);
+  border-radius: 15px;
+  padding: 0 14px;
+  background: rgba(3, 8, 18, 0.42);
+  color: var(--text-main);
+  font: inherit;
+  font-weight: 800;
+  outline: none;
+}
+
+.steam-sync-form input:focus {
+  border-color: color-mix(in srgb, var(--accent), white 16%);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 76%);
+}
+
+.steam-sync-primary,
+.steam-import-action {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent), white 10%), var(--genre-color)),
+    rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.steam-sync-status {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.steam-sync-status div {
+  padding: 12px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.steam-sync-status strong {
+  font-size: 1.3rem;
+}
+
+.steam-sync-status span,
+.steam-preview-row span {
+  color: var(--text-muted);
+}
+
+.steam-preview-list {
+  display: grid;
+  gap: 8px;
+}
+
+.steam-preview-row {
+  display: grid;
+  grid-template-columns: 86px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 15px;
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.steam-preview-row img {
+  width: 86px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.steam-preview-row strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.steam-sync-error {
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 118, 118, 0.24);
+  border-radius: 14px;
+  background: rgba(255, 70, 90, 0.12);
+  color: #ffd1d8;
+  font-weight: 800;
+}
+
 .data-health-card.clean {
   border-color: rgba(79, 220, 143, 0.38);
 }
@@ -13079,6 +13178,23 @@ body[data-background-motion="off"] .background-particles span {
 
   .options-tab .option-pill-grid.deal-region-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .steam-sync-form {
+    grid-template-columns: 1fr;
+  }
+
+  .steam-sync-status {
+    grid-template-columns: 1fr;
+  }
+
+  .steam-preview-row {
+    grid-template-columns: 74px minmax(0, 1fr);
+  }
+
+  .steam-preview-row img {
+    width: 74px;
+    height: 34px;
   }
 }
 
