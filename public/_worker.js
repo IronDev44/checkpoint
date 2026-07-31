@@ -2,6 +2,7 @@ const DEFAULT_DEAL_REGION = {
   country: "FR",
   locale: "fr-FR",
   steamLang: "french",
+  currency: "EUR",
 };
 
 const DEAL_RESULT_LIMIT = 60;
@@ -79,15 +80,16 @@ function formatStorePrice(value, currency = "EUR") {
   }).format(value / 100);
 }
 
-function formatDealDollarPrice(value) {
+function formatDealPrice(value, currency = "USD", usdRate = 1) {
   const price = Number.parseFloat(value);
   if (!Number.isFinite(price)) return "";
   if (price <= 0) return "Gratuit";
+  const convertedPrice = currency === "USD" ? price : price * usdRate;
 
   return new Intl.NumberFormat("fr-FR", {
     style: "currency",
-    currency: "USD",
-  }).format(price);
+    currency,
+  }).format(convertedPrice);
 }
 
 function getEpicImage(images = []) {
@@ -152,7 +154,22 @@ function normalizeSteamDeals(data) {
     }));
 }
 
-function normalizeEpicDeals(data) {
+async function getUsdCurrencyRate(currency = "USD") {
+  if (currency === "USD") return 1;
+
+  try {
+    const data = await fetchJson(
+      `https://api.frankfurter.app/latest?from=USD&to=${currency}`,
+      5000
+    );
+    const rate = Number(data?.rates?.[currency]);
+    return Number.isFinite(rate) && rate > 0 ? rate : 0.92;
+  } catch (error) {
+    return 0.92;
+  }
+}
+
+function normalizeEpicDeals(data, currency = "USD", usdRate = 1) {
   if (Array.isArray(data)) {
     return data
       .filter((item) => item.isOnSale === "1" && Number.parseFloat(item.savings || "0") > 0)
@@ -165,8 +182,8 @@ function normalizeEpicDeals(data) {
         title: item.title,
         image: item.thumb || "",
         discount: Math.round(Number.parseFloat(item.savings || "0")),
-        normalPrice: formatDealDollarPrice(item.normalPrice),
-        salePrice: formatDealDollarPrice(item.salePrice),
+        normalPrice: formatDealPrice(item.normalPrice, currency, usdRate),
+        salePrice: formatDealPrice(item.salePrice, currency, usdRate),
         url: `https://www.cheapshark.com/redirect?dealID=${encodeURIComponent(item.dealID)}`,
         endsAt: "",
       }));
@@ -221,16 +238,22 @@ function getDealRegion(requestUrl) {
   const steamLang = (url.searchParams.get("lang") || DEFAULT_DEAL_REGION.steamLang)
     .replace(/[^a-zA-Z-]/g, "")
     .slice(0, 24);
+  const currency = (url.searchParams.get("currency") || (country === "US" ? "USD" : "EUR"))
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "")
+    .slice(0, 3);
 
   return {
     country: country || DEFAULT_DEAL_REGION.country,
     locale: locale || DEFAULT_DEAL_REGION.locale,
     steamLang: steamLang || DEFAULT_DEAL_REGION.steamLang,
+    currency: currency || DEFAULT_DEAL_REGION.currency,
   };
 }
 
 async function getDeals(requestUrl) {
   const region = getDealRegion(requestUrl);
+  const usdRate = await getUsdCurrencyRate(region.currency);
   const sources = [
     {
       id: "steam",
@@ -242,7 +265,7 @@ async function getDeals(requestUrl) {
       id: "epic",
       label: "Epic",
       url: "https://www.cheapshark.com/api/1.0/deals?storeID=25&onSale=1&pageSize=60&sortBy=Savings&desc=1",
-      normalize: normalizeEpicDeals,
+      normalize: (data) => normalizeEpicDeals(data, region.currency, usdRate),
     },
   ];
 

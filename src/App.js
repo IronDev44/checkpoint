@@ -12721,15 +12721,16 @@ function formatSteamPrice(value, currency = "EUR") {
   }).format(value / 100);
 }
 
-function formatDealDollarPrice(value) {
+function formatDealPrice(value, currency = "USD", usdRate = 1) {
   const price = Number.parseFloat(value);
   if (!Number.isFinite(price)) return "";
   if (price <= 0) return "Gratuit";
+  const convertedPrice = currency === "USD" ? price : price * usdRate;
 
   return new Intl.NumberFormat("fr-FR", {
     style: "currency",
-    currency: "USD",
-  }).format(price);
+    currency,
+  }).format(convertedPrice);
 }
 
 function getEpicImage(images = []) {
@@ -12879,7 +12880,7 @@ function normalizeSteamDeals(data) {
     }));
 }
 
-function normalizeEpicDeals(data) {
+function normalizeEpicDeals(data, currency = "USD", usdRate = 1) {
   if (Array.isArray(data)) {
     return data
       .filter((item) => item.isOnSale === "1" && Number.parseFloat(item.savings || "0") > 0)
@@ -12892,8 +12893,8 @@ function normalizeEpicDeals(data) {
         title: item.title,
         image: item.thumb || "",
         discount: Math.round(Number.parseFloat(item.savings || "0")),
-        normalPrice: formatDealDollarPrice(item.normalPrice),
-        salePrice: formatDealDollarPrice(item.salePrice),
+        normalPrice: formatDealPrice(item.normalPrice, currency, usdRate),
+        salePrice: formatDealPrice(item.salePrice, currency, usdRate),
         url: `https://www.cheapshark.com/redirect?dealID=${encodeURIComponent(item.dealID)}`,
         endsAt: "",
       }));
@@ -12966,7 +12967,7 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
 
     try {
       const apiResponse = await fetchWithTimeout(
-        `/api/deals?cc=${region.country}&locale=${region.locale}&lang=${region.steamLang}`
+        `/api/deals?cc=${region.country}&locale=${region.locale}&lang=${region.steamLang}&currency=${region.currency}`
       );
       const contentType = apiResponse.headers.get("content-type") || "";
 
@@ -13004,7 +13005,7 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
         id: "epic",
         label: "Epic",
         url: "https://www.cheapshark.com/api/1.0/deals?storeID=25&onSale=1&pageSize=60&sortBy=Savings&desc=1",
-        normalize: normalizeEpicDeals,
+        normalize: (data) => normalizeEpicDeals(data, region.currency, region.currency === "USD" ? 1 : 0.92),
       },
     ].filter((source) => sourcePreferences[source.id]);
 
