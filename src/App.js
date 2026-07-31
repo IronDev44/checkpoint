@@ -12721,6 +12721,17 @@ function formatSteamPrice(value, currency = "EUR") {
   }).format(value / 100);
 }
 
+function formatDealDollarPrice(value) {
+  const price = Number.parseFloat(value);
+  if (!Number.isFinite(price)) return "";
+  if (price <= 0) return "Gratuit";
+
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "USD",
+  }).format(price);
+}
+
 function getEpicImage(images = []) {
   const preferred =
     images.find((image) => image.type === "OfferImageWide") ||
@@ -12869,6 +12880,25 @@ function normalizeSteamDeals(data) {
 }
 
 function normalizeEpicDeals(data) {
+  if (Array.isArray(data)) {
+    return data
+      .filter((item) => item.isOnSale === "1" && Number.parseFloat(item.savings || "0") > 0)
+      .sort((a, b) => Number.parseFloat(b.savings || "0") - Number.parseFloat(a.savings || "0"))
+      .slice(0, DEAL_RESULT_LIMIT)
+      .map((item) => ({
+        id: `epic-${item.dealID || item.gameID}`,
+        store: "epic",
+        storeLabel: "Epic",
+        title: item.title,
+        image: item.thumb || "",
+        discount: Math.round(Number.parseFloat(item.savings || "0")),
+        normalPrice: formatDealDollarPrice(item.normalPrice),
+        salePrice: formatDealDollarPrice(item.salePrice),
+        url: `https://www.cheapshark.com/redirect?dealID=${encodeURIComponent(item.dealID)}`,
+        endsAt: "",
+      }));
+  }
+
   return (data?.data?.Catalog?.searchStore?.elements || [])
     .filter((item) => {
       const currentPromos = item.promotions?.promotionalOffers || [];
@@ -12973,7 +13003,7 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
       {
         id: "epic",
         label: "Epic",
-        url: `https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=${region.locale}&country=${region.country}&allowCountries=${region.country}`,
+        url: "https://www.cheapshark.com/api/1.0/deals?storeID=25&onSale=1&pageSize=60&sortBy=Savings&desc=1",
         normalize: normalizeEpicDeals,
       },
     ].filter((source) => sourcePreferences[source.id]);
