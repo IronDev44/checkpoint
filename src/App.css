@@ -13049,14 +13049,18 @@ html body[data-theme="theme-indigo"] {
   z-index: 100000;
   display: grid;
   place-items: center;
-  padding: 18px;
+  min-height: 100dvh;
+  padding: max(18px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
   background: rgba(3, 5, 18, 0.68);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  overflow: auto;
 }
 
 .option-help-modal {
   width: min(460px, 100%);
+  max-height: calc(100dvh - 36px);
+  overflow: auto;
   border: 1px solid var(--surface-border);
   border-radius: 22px;
   background:

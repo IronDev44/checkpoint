@@ -11872,6 +11872,15 @@ function OptionsTab({
       [section]: enabled,
     });
   };
+  useEffect(() => {
+    if (!helpTopic) return undefined;
+
+    document.body.classList.add("modal-open");
+
+    return () => {
+      document.body.classList.remove("modal-open");
+    };
+  }, [helpTopic]);
   const helpTopics = {
     icon: {
       title: "Icône de l'app",
@@ -11967,6 +11976,32 @@ function OptionsTab({
       )}
     </div>
   );
+  const helpModal = helpTopic
+    ? createPortal(
+        <div className="option-help-backdrop" onClick={() => setHelpTopic(null)}>
+          <div className="option-help-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="option-help-modal-head">
+              <h3>{helpTopic.title}</h3>
+              <button type="button" onClick={() => setHelpTopic(null)}>
+                Fermer
+              </button>
+            </div>
+            <p className="option-help-lead">{helpTopic.lead}</p>
+            {helpTopic.bullets?.length > 0 && (
+              <div className="option-help-points">
+                {helpTopic.bullets.map((item) => (
+                  <div key={item} className="option-help-point">
+                    <span />
+                    <p>{item}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>,
+        document.body
+      )
+    : null;
 
   return (
     <div className="progression-stack options-tab">
@@ -12615,29 +12650,7 @@ function OptionsTab({
         </div>
       </div>
 
-      {helpTopic && (
-        <div className="option-help-backdrop" onClick={() => setHelpTopic(null)}>
-          <div className="option-help-modal" onClick={(event) => event.stopPropagation()}>
-            <div className="option-help-modal-head">
-              <h3>{helpTopic.title}</h3>
-              <button type="button" onClick={() => setHelpTopic(null)}>
-                Fermer
-              </button>
-            </div>
-            <p className="option-help-lead">{helpTopic.lead}</p>
-            {helpTopic.bullets?.length > 0 && (
-              <div className="option-help-points">
-                {helpTopic.bullets.map((item) => (
-                  <div key={item} className="option-help-point">
-                    <span />
-                    <p>{item}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      {helpModal}
     </div>
   );
 }
