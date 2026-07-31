@@ -7683,6 +7683,35 @@ function HomeTab({
         </div>
       )}
 
+      <div className="home-card progression-command-card">
+        <div className="progression-command-head">
+          <div>
+            <div className="home-card-title">Progression personnelle</div>
+            <p>
+              Tes objectifs, ton rythme et les prochaines recompenses du hub au meme endroit.
+            </p>
+          </div>
+
+          <div className="progression-command-score">
+            <span>Saison</span>
+            <strong>{weeklyMomentum}%</strong>
+          </div>
+        </div>
+
+        <div className="progression-command-grid">
+          {progressionCards.map((card) => (
+            <div key={card.label} className="progression-command-item">
+              <span>{card.label}</span>
+              <strong>{card.value}</strong>
+              <small>{card.detail}</small>
+              <div className="progression-command-meter">
+                <div style={{ width: `${card.progress}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <div className="home-card checkpoint-goals-card">
         <div className="checkpoint-goals-head">
           <div>
