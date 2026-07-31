@@ -22888,6 +22888,22 @@ body[data-theme="theme-steamdeck"] {
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
 }
 
+.deal-hub-badge {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--theme-accent), var(--theme-accent-2));
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 950;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
+}
+
 .deal-library-badge {
   position: absolute;
   left: 10px;
@@ -22941,6 +22957,16 @@ body[data-theme="theme-steamdeck"] {
 .deal-store-epic {
   color: #f4f4f4;
   background: rgba(255, 255, 255, 0.16);
+}
+
+.deal-store-psn {
+  color: #dce7ff;
+  background: rgba(49, 92, 255, 0.22);
+}
+
+.deal-store-xbox {
+  color: #ddffe6;
+  background: rgba(36, 191, 82, 0.2);
 }
 
 .deal-content h3 {

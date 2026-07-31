@@ -252,6 +252,7 @@ const DEFAULT_APP_OPTIONS = {
     steam: true,
     epic: true,
     psn: true,
+    xbox: true,
   },
 };
 
@@ -11833,7 +11834,7 @@ function OptionsTab({
       lead: "Filtre les boutiques et la région utilisées pour les promotions.",
       bullets: [
         "Steam et Epic peuvent être chargés automatiquement quand leurs sources répondent.",
-        "PSN reste un lien public, car Sony ne fournit pas de flux stable équivalent.",
+        "PlayStation et Xbox ouvrent des vitrines officielles propres en attendant une API fiable.",
         "La région change les prix ou les pages quand la boutique le permet.",
       ],
     },
@@ -12246,7 +12247,8 @@ function OptionsTab({
                 {[
                   ["steam", "Steam"],
                   ["epic", "Epic"],
-                  ["psn", "PSN"],
+                  ["psn", "PlayStation"],
+                  ["xbox", "Xbox"],
                 ].map(([id, label]) => (
                   <button
                     key={id}
@@ -12684,13 +12686,14 @@ const DEAL_SOURCES = [
   { id: "all", label: "Tout" },
   { id: "steam", label: "Steam" },
   { id: "epic", label: "Epic" },
-  { id: "psn", label: "PSN" },
+  { id: "psn", label: "PlayStation" },
+  { id: "xbox", label: "Xbox" },
 ];
 
 const DEAL_REGION_CONFIG = {
-  FR: { country: "FR", locale: "fr-FR", steamLang: "french", currency: "EUR", psn: "fr-fr" },
-  EU: { country: "DE", locale: "fr-FR", steamLang: "french", currency: "EUR", psn: "fr-fr" },
-  US: { country: "US", locale: "en-US", steamLang: "english", currency: "USD", psn: "en-us" },
+  FR: { country: "FR", locale: "fr-FR", steamLang: "french", currency: "EUR", psn: "fr-fr", xbox: "fr-fr" },
+  EU: { country: "DE", locale: "fr-FR", steamLang: "french", currency: "EUR", psn: "fr-fr", xbox: "fr-fr" },
+  US: { country: "US", locale: "en-US", steamLang: "english", currency: "USD", psn: "en-us", xbox: "en-us" },
 };
 
 const DEAL_SORT_OPTIONS = [
@@ -12757,6 +12760,37 @@ function getDealEndTime(deal) {
   return Number.isFinite(timestamp) ? timestamp : Number.POSITIVE_INFINITY;
 }
 
+function getOfficialStoreDealHubs(region) {
+  return [
+    {
+      id: "psn-official-deals",
+      store: "psn",
+      storeLabel: "PlayStation",
+      title: "Promos PlayStation Store",
+      image: "",
+      discount: 0,
+      normalPrice: "",
+      salePrice: "Voir les offres",
+      url: `https://store.playstation.com/${region.psn}/pages/deals`,
+      endsAt: "",
+      isStoreHub: true,
+    },
+    {
+      id: "xbox-official-deals",
+      store: "xbox",
+      storeLabel: "Xbox",
+      title: "Promos Xbox Store",
+      image: "",
+      discount: 0,
+      normalPrice: "",
+      salePrice: "Voir les offres",
+      url: `https://www.xbox.com/${region.xbox}/games/all-games?cat=onsale`,
+      endsAt: "",
+      isStoreHub: true,
+    },
+  ];
+}
+
 function enrichDealsWithLibrary(deals, games = []) {
   const gameIndex = games.map((game) => ({
     game,
@@ -12764,6 +12798,16 @@ function enrichDealsWithLibrary(deals, games = []) {
   }));
 
   return deals.map((deal) => {
+    if (deal.isStoreHub) {
+      return {
+        ...deal,
+        libraryStatus: "missing",
+        matchedGameId: null,
+        priceValue: Number.POSITIVE_INFINITY,
+        endsAtTime: Number.POSITIVE_INFINITY,
+      };
+    }
+
     const dealKey = normalizeDealTitle(deal.title);
     const match = gameIndex.find(({ key }) => {
       if (!key || !dealKey) return false;
@@ -12877,13 +12921,18 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
 
       if (apiResponse.ok && contentType.includes("application/json")) {
         const payload = await apiResponse.json();
-        setDeals(payload.deals || []);
+        const storeHubs = getOfficialStoreDealHubs(region).filter(
+          (hub) => sourcePreferences[hub.store]
+        );
+        setDeals([...(payload.deals || []), ...storeHubs]);
         setLastUpdatedAt(payload.updatedAt || new Date().toISOString());
         setSourceStatus(
-          payload.status || {
+          {
             steam: "Source indisponible pour le moment.",
             epic: "Source indisponible pour le moment.",
-            psn: "PSN demande une source serveur fiable avant affichage automatique.",
+            ...(payload.status || {}),
+            ...(sourcePreferences.psn ? { psn: "Lien officiel disponible." } : {}),
+            ...(sourcePreferences.xbox ? { xbox: "Lien officiel disponible." } : {}),
           }
         );
         setIsLoading(false);
@@ -12921,7 +12970,11 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
     const nextStatus = {};
 
     if (sourcePreferences.psn) {
-      nextStatus.psn = "PSN demande une source serveur fiable avant affichage automatique.";
+      nextStatus.psn = "Lien officiel disponible.";
+    }
+
+    if (sourcePreferences.xbox) {
+      nextStatus.xbox = "Lien officiel disponible.";
     }
 
     results.forEach((result, index) => {
@@ -12935,7 +12988,10 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
       }
     });
 
-    setDeals(nextDeals);
+    setDeals([
+      ...nextDeals,
+      ...getOfficialStoreDealHubs(region).filter((hub) => sourcePreferences[hub.store]),
+    ]);
     setSourceStatus(nextStatus);
     setLastUpdatedAt(new Date().toISOString());
     setIsLoading(false);
@@ -12989,7 +13045,7 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
       <div className="section-header deals-header">
         <div>
           <h2>Promos du moment</h2>
-          <p>Steam et Epic sont chargés en direct. Les offres proches de ta wishlist remontent en priorité.</p>
+          <p>Steam et Epic sont chargés en direct. PlayStation et Xbox ouvrent leurs vitrines officielles.</p>
         </div>
         <button type="button" className="deals-refresh-btn" onClick={loadDeals} disabled={isLoading}>
           {isLoading ? "Actualisation..." : "Actualiser"}
@@ -13081,13 +13137,26 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
 
       {activeSource === "psn" && (
         <div className="deals-source-note">
-          <strong>PSN</strong>
+          <strong>PlayStation Store</strong>
           <span>
-            Sony n'expose pas un flux public stable comme Steam. Pour une vraie synchro propre, on passera
-            par une petite fonction serveur qui cache les offres.
+            Sony ne fournit pas de flux public stable équivalent à Steam. Le bouton ouvre donc la page
+            officielle des promotions PlayStation.
           </span>
           <a href={`https://store.playstation.com/${region.psn}/pages/deals`} target="_blank" rel="noreferrer">
             Voir les promos PlayStation
+          </a>
+        </div>
+      )}
+
+      {activeSource === "xbox" && (
+        <div className="deals-source-note xbox-note">
+          <strong>Xbox Store</strong>
+          <span>
+            Microsoft expose surtout ses offres via le Store web. Pour l'instant, Checkpoint te renvoie vers
+            la liste officielle filtrée sur les jeux en promotion.
+          </span>
+          <a href={`https://www.xbox.com/${region.xbox}/games/all-games?cat=onsale`} target="_blank" rel="noreferrer">
+            Voir les promos Xbox
           </a>
         </div>
       )}
@@ -13096,8 +13165,13 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
         {lastUpdatedAt && (
           <span className="deals-status-pill ok">Mis à jour {formatFullDate(lastUpdatedAt)}</span>
         )}
-        {["steam", "epic", "psn"].filter((source) => sourcePreferences[source]).map((source) => (
-          <span key={source} className={`deals-status-pill ${sourceStatus[source] === "OK" ? "ok" : ""}`}>
+        {["steam", "epic", "psn", "xbox"].filter((source) => sourcePreferences[source]).map((source) => (
+          <span
+            key={source}
+            className={`deals-status-pill ${
+              sourceStatus[source] === "OK" || sourceStatus[source]?.startsWith("Lien officiel") ? "ok" : ""
+            }`}
+          >
             {source.toUpperCase()} - {sourceStatus[source] || "Chargement"}
           </span>
         ))}
@@ -13120,6 +13194,7 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
                 ) : (
                   <div className="deal-image-placeholder">{deal.storeLabel}</div>
                 )}
+                {deal.isStoreHub && <span className="deal-hub-badge">Officiel</span>}
                 {deal.discount > 0 && <span className="deal-discount">-{deal.discount}%</span>}
                 {deal.libraryStatus !== "missing" && (
                   <span className={`deal-library-badge ${deal.libraryStatus}`}>

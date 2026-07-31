@@ -207,7 +207,8 @@ async function getDeals(requestUrl) {
 
   const deals = [];
   const status = {
-    psn: "PSN demande une source serveur dediee avant synchro automatique.",
+    psn: "Lien officiel disponible.",
+    xbox: "Lien officiel disponible.",
   };
 
   results.forEach((result, index) => {
@@ -252,7 +253,8 @@ export default {
             status: {
               steam: "Source indisponible pour le moment.",
               epic: "Source indisponible pour le moment.",
-              psn: "PSN demande une source serveur dediee avant synchro automatique.",
+              psn: "Lien officiel disponible.",
+              xbox: "Lien officiel disponible.",
             },
             error: String(error?.message || error),
           },
