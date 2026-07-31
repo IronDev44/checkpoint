@@ -12848,6 +12848,14 @@ html body[data-theme="theme-indigo"] {
   font-weight: 800;
 }
 
+.steam-sync-error small {
+  display: block;
+  margin-top: 6px;
+  color: rgba(255, 230, 235, 0.78);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
 .data-health-card.clean {
   border-color: rgba(79, 220, 143, 0.38);
 }

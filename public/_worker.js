@@ -91,6 +91,11 @@ function extractSteamProfileInput(value = "") {
   const decodedInput = decodeURIComponent(input);
   const profileMatch = decodedInput.match(/steamcommunity\.com\/profiles\/(\d{17})/i);
   const vanityMatch = decodedInput.match(/steamcommunity\.com\/id\/([^/?#]+)/i);
+  const cleanVanity = (candidate = "") =>
+    String(candidate)
+      .trim()
+      .replace(/^@/, "")
+      .replace(/\/+$/, "");
 
   if (/^\d{17}$/.test(input)) {
     return { type: "steamid", value: input };
@@ -101,11 +106,13 @@ function extractSteamProfileInput(value = "") {
   }
 
   if (vanityMatch?.[1]) {
-    return { type: "vanity", value: vanityMatch[1] };
+    return { type: "vanity", value: cleanVanity(vanityMatch[1]) };
   }
 
-  if (/^[a-zA-Z0-9_-]{2,64}$/.test(input)) {
-    return { type: "vanity", value: input };
+  const vanityCandidate = cleanVanity(input);
+
+  if (/^[a-zA-Z0-9_-]{2,64}$/.test(vanityCandidate)) {
+    return { type: "vanity", value: vanityCandidate };
   }
 
   return { type: "invalid", value: input };
@@ -130,8 +137,10 @@ async function resolveSteamId(profileInput, env) {
   const data = await fetchJson(vanityUrl.toString(), 9000);
   const response = data?.response || {};
 
-  if (response.success !== 1 || !response.steamid) {
-    throw new Error("Impossible de trouver ce profil Steam public.");
+  if (String(response.success) !== "1" || !response.steamid) {
+    throw new Error(
+      "Impossible de trouver ce profil Steam. Utilise l'URL complete de ton profil ou ton SteamID64, pas seulement le pseudo affiche."
+    );
   }
 
   return response.steamid;

@@ -12380,7 +12380,7 @@ function OptionsTab({
                   type="text"
                   value={steamInput}
                   onChange={(event) => setSteamInput(event.target.value)}
-                  placeholder="SteamID64 ou URL du profil Steam"
+                  placeholder="URL Steam complete ou SteamID64"
                 />
                 <button
                   type="button"
@@ -12392,7 +12392,15 @@ function OptionsTab({
                 </button>
               </div>
 
-              {steamError && <div className="steam-sync-error">{steamError}</div>}
+              {steamError && (
+                <div className="steam-sync-error">
+                  {steamError}
+                  <small>
+                    Astuce : le pseudo Steam visible ne suffit pas toujours. Le plus fiable est
+                    l'URL de ton profil Steam ou le SteamID64.
+                  </small>
+                </div>
+              )}
 
               {(steamLibrary || steamProfile.steamId) && (
                 <div className="steam-sync-status">
