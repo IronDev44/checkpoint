@@ -8777,14 +8777,6 @@ body[data-ui="modern"] .chip.active {
   font-weight: 800;
 }
 
-.home-actions-grid + .home-card {
-  display: none !important;
-}
-
-.home-main-actions + .home-actions-grid {
-  display: none !important;
-}
-
 .weekly-quiz-card {
   padding: 16px;
   border-radius: var(--ui-radius-xl);
@@ -9026,6 +9018,88 @@ body[data-ui="modern"] .chip.active {
   font-size: 12px;
 }
 
+.home-section-subtitle {
+  margin: 5px 0 0;
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.home-recommendations-panel {
+  overflow: hidden;
+}
+
+.home-recommendation-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.home-recommendation-card {
+  min-width: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--ui-radius-lg);
+  overflow: hidden;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.035)),
+    var(--surface-bg);
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-recommendation-card img,
+.home-recommendation-card .home-game-placeholder {
+  width: 100%;
+  height: 96px;
+  display: block;
+  border-radius: 0;
+  object-fit: cover;
+}
+
+.home-recommendation-card > div:last-child {
+  display: grid;
+  gap: 6px;
+  padding: 11px;
+}
+
+.home-recommendation-kicker {
+  color: color-mix(in srgb, var(--accent-solid) 54%, var(--text-soft));
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.home-recommendation-card strong {
+  display: -webkit-box;
+  min-height: 36px;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 15px;
+  line-height: 1.16;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.home-recommendation-card small {
+  min-height: 30px;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.home-recommendation-card em {
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.075);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
 .home-goal-card {
   display: flex;
   gap: 12px;
@@ -9115,6 +9189,30 @@ body[data-ui="modern"] .chip.active {
     grid-column: 1 / -1;
     display: flex;
     justify-content: flex-start;
+  }
+
+  .home-recommendation-list {
+    grid-template-columns: 1fr;
+  }
+
+  .home-recommendation-card {
+    display: grid;
+    grid-template-columns: 82px minmax(0, 1fr);
+  }
+
+  .home-recommendation-card img,
+  .home-recommendation-card .home-game-placeholder {
+    width: 82px;
+    height: 100%;
+    min-height: 116px;
+  }
+
+  .home-recommendation-card strong {
+    min-height: 0;
+  }
+
+  .home-recommendation-card small {
+    min-height: 0;
   }
 }
 

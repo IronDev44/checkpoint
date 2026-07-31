@@ -7093,11 +7093,9 @@ function HomeTab({
     String(item.status || "").toLowerCase().includes("poss");
 
   const total = games.length;
-  const finished = games.filter(isFinishedGame).length;
   const inProgressCount = games.filter((g) => g.status === "en cours").length;
   const wishlistCount = games.filter((g) => g.status === "wishlist").length;
 
-  const completion = total ? Math.round((finished / total) * 100) : 0;
   const dashboardFinished = games.filter(isFinishedGame).length;
   const ownedHardwareCount = hardware.filter(isOwnedHardware).length;
   const ratedGames = games.filter((game) => getGameRating(game) > 0);
@@ -7471,6 +7469,7 @@ function HomeTab({
           })
           .map((rawgGame) => {
             let score = 0;
+            const reasons = [];
 
             const rawgGenres = rawgGame.genres?.map((g) => g.name) || [];
             const rawgPlatforms =
@@ -7480,11 +7479,17 @@ function HomeTab({
             score += Math.min(rawgGame.ratings_count || 0, 8000) / 120;
 
             favoriteGenres.forEach((genre) => {
-              if (rawgGenres.includes(genre)) score += 40;
+              if (rawgGenres.includes(genre)) {
+                score += 40;
+                reasons.push(genre);
+              }
             });
 
             favoritePlatforms.forEach((platform) => {
-              if (rawgPlatforms.includes(platform)) score += 25;
+              if (rawgPlatforms.includes(platform)) {
+                score += 25;
+                reasons.push(platform);
+              }
             });
 
             const year = Number(rawgGame.released?.split("-")[0]);
@@ -7497,11 +7502,12 @@ function HomeTab({
             return {
               ...rawgGame,
               recommendationScore: score,
+              recommendationReasons: [...new Set(reasons)].slice(0, 2),
             };
           })
           .sort((a, b) => b.recommendationScore - a.recommendationScore);
 
-        setRecommendations(scored.slice(0, 5));
+        setRecommendations(scored.slice(0, 3));
       } catch (e) {
         if (isAbortError(e)) return;
         console.warn("Erreur recommandations ignorée :", e);
@@ -7792,38 +7798,6 @@ function HomeTab({
         </button>
       </div>
 
-      <div className="home-actions-grid">
-        <button type="button" onClick={() => setActiveTab("search")}>
-          🔎 Ajouter un jeu
-        </button>
-
-        <button type="button" onClick={() => setActiveTab("deals")}>
-          📚 Bibliothèque
-        </button>
-
-        <button type="button" onClick={() => setActiveTab("top5")}>
-          🏅 Profil
-        </button>
-      </div>
-
-      <div className="home-card">
-        <div className="home-card-title">📊 Progression</div>
-
-        <div className="home-stats">
-          <div>🎮 {total}</div>
-          <div>✅ {finished}</div>
-          <div>▶️ {inProgressCount}</div>
-          <div>📋 {wishlistCount}</div>
-        </div>
-
-        <div className="progress-bar">
-          <div
-            className="progress-fill"
-            style={{ width: `${completion}%` }}
-          />
-        </div>
-      </div>
-
       <div className="search-panel">
         <div className="home-section-head">
           <h2 className="panel-title">Activité récente</h2>
@@ -7875,8 +7849,19 @@ function HomeTab({
         )}
       </div>
 
-      <div className="search-panel">
-        <h2 className="panel-title">Recommandations</h2>
+      <div className="search-panel home-recommendations-panel">
+        <div className="home-section-head">
+          <div>
+            <h2 className="panel-title">À découvrir ensuite</h2>
+            <p className="home-section-subtitle">
+              Une sélection courte basée sur tes favoris, tes notes et tes plateformes.
+            </p>
+          </div>
+
+          <button type="button" onClick={() => setActiveTab("search")}>
+            Explorer
+          </button>
+        </div>
 
         {loadingRecommendations ? (
           <div className="empty-small">Chargement des suggestions...</div>
@@ -7885,75 +7870,39 @@ function HomeTab({
             Ajoute plus de jeux pour obtenir des suggestions personnalisées.
           </div>
         ) : (
-          <div className="home-game-list">
-            {recommendations.map((game) => (
+          <div className="home-recommendation-list">
+            {recommendations.map((game, index) => (
               <button
                 key={game.id}
                 type="button"
-                className="home-game-row improved"
+                className="home-recommendation-card"
+                onClick={() => setActiveTab("search")}
               >
                 {game.background_image ? (
                   <img src={game.background_image} alt={game.name} />
                 ) : (
-                  <div className="home-game-placeholder">🎮</div>
+                  <div className="home-game-placeholder">CP</div>
                 )}
 
                 <div>
-                  <strong>{game.name}</strong>
-                  <span>
-                    {game.released?.split("-")[0] || "Année inconnue"} • ⭐{" "}
-                    {game.rating || "-"}
+                  <span className="home-recommendation-kicker">
+                    Suggestion {index + 1}
                   </span>
+                  <strong>{game.name}</strong>
+                  <small>
+                    {(game.recommendationReasons || []).length
+                      ? `Pour ton affinité ${game.recommendationReasons.join(" / ")}`
+                      : "Bonne piste à comparer à ta bibliothèque"}
+                  </small>
+                  <em>
+                    {game.released?.split("-")[0] || "Année inconnue"} - {formatRating10(game.rating || 0, "Non noté")}
+                  </em>
                 </div>
               </button>
             ))}
           </div>
         )}
       </div>
-
-      <div className="search-panel">
-        <h2 className="panel-title">Prochain objectif</h2>
-
-        {nextBadge ? (
-          <div className="home-goal-card">
-            <div className="badge-icon">
-              <BadgeVisualIcon badge={nextBadge} />
-            </div>
-
-            <div className="home-goal-main">
-              <div className="badge-name">{nextBadge.name}</div>
-              <div className="badge-desc">{nextBadge.desc}</div>
-
-              {nextBadge.progressData && (
-                <div className="badge-progress">
-                  {nextBadge.progressData.current} /{" "}
-                  {nextBadge.progressData.target}
-
-                  <div className="badge-progress-bar">
-                    <div
-                      className="badge-progress-fill"
-                      style={{
-                        width: `${Math.min(
-                          (nextBadge.progressData.current /
-                            nextBadge.progressData.target) *
-                            100,
-                          100
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        ) : (
-          <EmptyState
-            title="Tous les badges sont débloqués"
-            subtitle="Tu as explosé le système."
-          />
-        )}
-      </div>
-
       <div className="search-panel live-event-card">
         <div className="home-section-head">
           <h2 className="panel-title">Événements à venir</h2>
