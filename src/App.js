@@ -8730,55 +8730,6 @@ function formatSteamPlaytime(minutes = 0) {
   return `${hours} h`;
 }
 
-function parseEpicLibraryText(value = "") {
-  const ignoredLines = new Set([
-    "library",
-    "bibliotheque",
-    "store",
-    "magasin",
-    "unreal engine",
-    "downloads",
-    "telechargements",
-    "installed",
-    "installe",
-    "install",
-    "launch",
-    "lancer",
-    "update",
-    "mettre a jour",
-    "favorites",
-    "favoris",
-    "all",
-    "tout",
-    "owned",
-    "possede",
-  ]);
-  const seen = new Set();
-
-  return String(value || "")
-    .split(/\r?\n|;|\t/)
-    .map((line) =>
-      line
-        .replace(/\s+/g, " ")
-        .replace(/^(jeu|game)\s*:\s*/i, "")
-        .replace(/\s+\b(installed|install|launch|update|free|gratuit|installe|lancer)\b$/i, "")
-        .trim()
-    )
-    .filter((line) => {
-      if (line.length < 2 || line.length > 120) return false;
-      const key = normalizeSearchText(line);
-      if (!key || ignoredLines.has(key) || seen.has(key)) return false;
-      if (/^\d+$/.test(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .map((name, index) => ({
-      epicImportId: `epic-manual-${index}-${normalizeSearchText(name)}`,
-      name,
-      source: "epic",
-    }));
-}
-
 function getSearchRelevanceScore(game, query) {
   const normalizedQuery = normalizeSearchText(query);
   const normalizedName = normalizeSearchText(game?.name || "");
@@ -11738,7 +11689,6 @@ function OptionsTab({
   onOpenTrial,
   checkpointTrialProgress = DEFAULT_CHECKPOINT_TRIAL_PROGRESS,
   onImportSteamGames,
-  onImportEpicGames,
 }) {
   const [helpTopic, setHelpTopic] = useState(null);
   const [isRepairingGameData, setIsRepairingGameData] = useState(false);
@@ -11750,9 +11700,6 @@ function OptionsTab({
   const [steamError, setSteamError] = useState("");
   const [isSteamLoading, setIsSteamLoading] = useState(false);
   const [isSteamImporting, setIsSteamImporting] = useState(false);
-  const [epicImportText, setEpicImportText] = useState("");
-  const [epicImportError, setEpicImportError] = useState("");
-  const [isEpicImporting, setIsEpicImporting] = useState(false);
   const themes = [
   { id: "theme-indigo", label: "Aurora Neon" },
   { id: "theme-playstation", label: "PS5 Premium" },
@@ -11822,24 +11769,6 @@ function OptionsTab({
       missing: Math.max(0, libraryGames.length - alreadyPresent),
     };
   }, [games, steamLibrary]);
-  const epicParsedGames = useMemo(
-    () => parseEpicLibraryText(epicImportText),
-    [epicImportText]
-  );
-  const epicImportStats = useMemo(() => {
-    const names = new Set(
-      games.map((game) => normalizeSearchText(game.name || "")).filter(Boolean)
-    );
-    const alreadyPresent = epicParsedGames.filter((game) =>
-      names.has(normalizeSearchText(game.name || ""))
-    ).length;
-
-    return {
-      detected: epicParsedGames.length,
-      alreadyPresent,
-      missing: Math.max(0, epicParsedGames.length - alreadyPresent),
-    };
-  }, [epicParsedGames, games]);
   const gameIntegrityIssues = useMemo(
     () => getGameDataIntegrityIssues(games),
     [games]
@@ -11937,26 +11866,6 @@ function OptionsTab({
       setIsSteamImporting(false);
     }
   };
-  const importEpicLibrary = async () => {
-    if (!epicParsedGames.length || !onImportEpicGames) {
-      setEpicImportError("Colle au moins un nom de jeu Epic.");
-      return;
-    }
-
-    setEpicImportError("");
-    setIsEpicImporting(true);
-
-    try {
-      const result = await onImportEpicGames(epicParsedGames);
-      if (!result?.imported && !result?.updated) {
-        setEpicImportError("Aucun nouveau jeu Epic a importer.");
-      }
-    } catch (error) {
-      setEpicImportError(String(error?.message || error));
-    } finally {
-      setIsEpicImporting(false);
-    }
-  };
   const updatePublicSection = (section, enabled) => {
     onProfileChange("publicSections", {
       ...publicSections,
@@ -12039,15 +11948,6 @@ function OptionsTab({
         "Colle l'URL complete de ton profil Steam ou ton SteamID64.",
         "Ton profil et les details de jeux doivent etre visibles publiquement dans Steam.",
         "Checkpoint ajoute les jeux manquants et synchronise ceux deja presents sans demander ton mot de passe.",
-      ],
-    },
-    epicImport: {
-      title: "Import Epic",
-      lead: "Epic ne propose pas de synchro complete publique comme Steam. Checkpoint utilise donc un import assiste.",
-      bullets: [
-        "Copie les noms de jeux depuis ta bibliotheque Epic puis colle-les ici.",
-        "L'app nettoie la liste, retire les doublons et ignore les lignes parasites.",
-        "Les jeux importes sont ajoutes en PC avec la source Epic, sans ecraser ta bibliotheque existante.",
       ],
     },
     data: {
@@ -12591,83 +12491,6 @@ function OptionsTab({
             </div>
           </div>
 
-          <div className="option-section">
-            <div className="option-setting-card option-setting-card-featured epic-import-card">
-              <div>
-                <SectionTitle title="Import Epic Games" help="epicImport" />
-                <span>
-                  Colle une liste de jeux Epic pour les ajouter proprement a ta bibliotheque.
-                </span>
-              </div>
-
-              <div className="steam-sync-hints epic-import-hints">
-                <span>Import assiste</span>
-                <span>Anti-doublons</span>
-                <span>Source Epic</span>
-              </div>
-
-              <textarea
-                className="epic-import-textarea"
-                value={epicImportText}
-                onChange={(event) => {
-                  setEpicImportText(event.target.value);
-                  setEpicImportError("");
-                }}
-                placeholder={"Colle ici tes jeux Epic, un par ligne...\nAlan Wake 2\nControl\nDeath Stranding"}
-              />
-
-              <div className="steam-sync-status epic-import-status">
-                <div>
-                  <strong>{epicImportStats.detected}</strong>
-                  <span>titres detectes</span>
-                </div>
-                <div>
-                  <strong>{epicImportStats.alreadyPresent}</strong>
-                  <span>deja presents</span>
-                </div>
-                <div>
-                  <strong>{epicImportStats.missing}</strong>
-                  <span>a importer</span>
-                </div>
-              </div>
-
-              {epicImportError && (
-                <div className="steam-sync-error">{epicImportError}</div>
-              )}
-
-              {epicParsedGames.length > 0 && (
-                <div className="steam-preview-list epic-preview-list">
-                  {epicParsedGames.slice(0, 6).map((game) => (
-                    <div key={game.epicImportId} className="epic-preview-row">
-                      <strong>{game.name}</strong>
-                      <span>
-                        {games.some(
-                          (currentGame) =>
-                            normalizeSearchText(currentGame.name || "") ===
-                            normalizeSearchText(game.name || "")
-                        )
-                          ? "deja dans Checkpoint"
-                          : "pret a importer"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <button
-                type="button"
-                className="option-pill steam-import-action epic-import-action"
-                onClick={importEpicLibrary}
-                disabled={isEpicImporting || !epicImportStats.missing}
-              >
-                {isEpicImporting
-                  ? "Import en cours..."
-                  : epicImportStats.missing
-                    ? `Importer ${epicImportStats.missing} jeu${epicImportStats.missing > 1 ? "x" : ""}`
-                    : "Aucun nouveau jeu"}
-              </button>
-            </div>
-          </div>
         </div>
 
         <div className="options-group">
@@ -15575,78 +15398,6 @@ useEffect(() => {
     return { imported, updated, skipped };
   };
 
-  const importEpicGamesToLibrary = async (epicGames = []) => {
-    const existingByName = new Map(
-      games.map((game) => [normalizeSearchText(game.name || ""), game])
-    );
-    let imported = 0;
-    let updated = 0;
-    let skipped = 0;
-
-    for (const epicGame of epicGames) {
-      const name = String(epicGame.name || "").trim();
-      const nameKey = normalizeSearchText(name);
-
-      if (!name || !nameKey) {
-        skipped++;
-        continue;
-      }
-
-      const existingGame = existingByName.get(nameKey);
-
-      if (existingGame?.id) {
-        await updateDoc(doc(db, "games", existingGame.id), {
-          source: existingGame.source || "epic",
-          epicImported: true,
-          epicLastSyncedAt: new Date(),
-          platformNames: Array.from(
-            new Set([...(existingGame.platformNames || []), "PC"])
-          ),
-        });
-        updated++;
-        continue;
-      }
-
-      const newGame = {
-        rawgId: null,
-        name,
-        completed: false,
-        rating: 0,
-        favorite: false,
-        image: "",
-        status: "collection",
-        released: "",
-        platformNames: ["PC"],
-        genreNames: [],
-        playtime: null,
-        difficulty: "normal",
-        review: "",
-        ostRating: 0,
-        ostTrack: "",
-        ostLink: "",
-        ratingGraphics: 0,
-        ratingGameplay: 0,
-        ratingStory: 0,
-        ratingSound: 0,
-        ratingLongevity: 0,
-        source: "epic",
-        epicImported: true,
-        epicLastSyncedAt: new Date(),
-        createdAt: new Date(),
-      };
-
-      await addDoc(collection(db, "games"), newGame);
-      existingByName.set(nameKey, newGame);
-      imported++;
-    }
-
-    setToast(
-      `${imported} jeu${imported > 1 ? "x" : ""} Epic importes, ${updated} synchronises.`
-    );
-
-    return { imported, updated, skipped };
-  };
-
   const addGameToSeries = async (seriesName, game) => {
   try {
     const ref = doc(db, "gameCollections", seriesName);
@@ -16936,7 +16687,6 @@ const setPlayedPlatforms = async (id, platforms) => {
                 onOpenTrial={openTrialRoom}
                 checkpointTrialProgress={checkpointTrialProgress}
                 onImportSteamGames={importSteamGamesToLibrary}
-                onImportEpicGames={importEpicGamesToLibrary}
               />
 
               <AdminPanel events={gamingEvents} onImportNews={importNewsFromRSS} />

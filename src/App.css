@@ -12874,59 +12874,6 @@ html body[data-theme="theme-indigo"] {
   line-height: 1.35;
 }
 
-.epic-import-card {
-  background:
-    radial-gradient(circle at 8% 0%, rgba(87, 92, 255, 0.2), transparent 34%),
-    radial-gradient(circle at 95% 12%, color-mix(in srgb, var(--genre-color), transparent 78%), transparent 36%),
-    rgba(0, 0, 0, 0.13);
-}
-
-.epic-import-textarea {
-  width: 100%;
-  min-height: 138px;
-  resize: vertical;
-  border: 1px solid var(--surface-border);
-  border-radius: 17px;
-  padding: 13px 14px;
-  background: rgba(3, 8, 18, 0.42);
-  color: var(--text-main);
-  font: inherit;
-  font-weight: 760;
-  line-height: 1.45;
-  outline: none;
-}
-
-.epic-import-textarea:focus {
-  border-color: color-mix(in srgb, var(--accent), white 16%);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 78%);
-}
-
-.epic-preview-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
-  align-items: center;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  background: rgba(0, 0, 0, 0.14);
-}
-
-.epic-preview-row strong {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--text-main);
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.epic-preview-row span {
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  font-weight: 850;
-  text-align: right;
-}
-
 .data-health-card.clean {
   border-color: rgba(79, 220, 143, 0.38);
 }
@@ -13280,14 +13227,6 @@ body[data-background-motion="off"] .background-particles span {
     height: 34px;
   }
 
-  .epic-preview-row {
-    grid-template-columns: 1fr;
-    gap: 4px;
-  }
-
-  .epic-preview-row span {
-    text-align: left;
-  }
 }
 
 .option-pill.theme-steam.active {
