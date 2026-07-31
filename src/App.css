@@ -12760,6 +12760,24 @@ html body[data-theme="theme-indigo"] {
   align-items: stretch;
 }
 
+.steam-sync-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.steam-sync-hints span {
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-soft);
+  font-size: 0.76rem;
+  font-weight: 900;
+  line-height: 1;
+}
+
 .steam-sync-form input {
   width: 100%;
   min-height: 46px;

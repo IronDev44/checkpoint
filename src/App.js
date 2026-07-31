@@ -11934,11 +11934,11 @@ function OptionsTab({
     },
     steam: {
       title: "Synchro Steam",
-      lead: "Connecte une bibliotheque Steam publique sans exposer la cle API dans l'app.",
+      lead: "Importe tes jeux Steam dans Checkpoint a partir de ton profil public.",
       bullets: [
-        "Tu peux utiliser un SteamID64, une URL /profiles/... ou une URL /id/...",
-        "Cloudflare doit avoir une variable STEAM_API_KEY pour lire la bibliotheque.",
-        "L'import evite les doublons avec les jeux deja presents dans Checkpoint.",
+        "Colle l'URL complete de ton profil Steam ou ton SteamID64.",
+        "Ton profil et les details de jeux doivent etre visibles publiquement dans Steam.",
+        "Checkpoint ajoute les jeux manquants et synchronise ceux deja presents sans demander ton mot de passe.",
       ],
     },
     data: {
@@ -12373,6 +12373,12 @@ function OptionsTab({
                 <span>
                   Relie ton profil Steam public pour importer tes jeux PC dans la bibliotheque.
                 </span>
+              </div>
+
+              <div className="steam-sync-hints">
+                <span>Profil public requis</span>
+                <span>Mot de passe jamais demande</span>
+                <span>Anti-doublons automatique</span>
               </div>
 
               <div className="steam-sync-form">
