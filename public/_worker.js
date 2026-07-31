@@ -4,6 +4,8 @@ const DEFAULT_DEAL_REGION = {
   steamLang: "french",
 };
 
+const DEAL_RESULT_LIMIT = 60;
+
 const JSON_HEADERS = {
   "content-type": "application/json; charset=utf-8",
   "cache-control": "public, max-age=300, s-maxage=900",
@@ -97,10 +99,29 @@ function getEpicDealUrl(item) {
     : "https://store.epicgames.com/fr/free-games";
 }
 
+function uniqueDealItems(items = [], getKey = (item) => item?.id) {
+  const seen = new Set();
+
+  return items.filter((item) => {
+    const key = getKey(item);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 function normalizeSteamDeals(data) {
-  return (data?.specials?.items || [])
+  const candidates = [
+    ...(data?.specials?.items || []),
+    ...(data?.top_sellers?.items || []),
+    ...(data?.new_releases?.items || []),
+    ...(data?.dailydeal?.items || []),
+  ];
+
+  return uniqueDealItems(candidates, (item) => item?.id)
     .filter((item) => item.discounted && item.discount_percent > 0)
-    .slice(0, 24)
+    .sort((a, b) => (b.discount_percent || 0) - (a.discount_percent || 0))
+    .slice(0, DEAL_RESULT_LIMIT)
     .map((item) => ({
       id: `steam-${item.id}`,
       store: "steam",
@@ -133,7 +154,7 @@ function normalizeEpicDeals(data) {
 
       return hasFreePromo || (price && price.discount > 0);
     })
-    .slice(0, 24)
+    .slice(0, DEAL_RESULT_LIMIT)
     .map((item) => {
       const price = item.price?.totalPrice;
       const promo =
