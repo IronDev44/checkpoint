@@ -313,16 +313,10 @@ async function exchangeXboxCode(request, env) {
       };
     }
 
-    const now = Date.now();
     const session = {
       profile,
-      refreshToken: tokenData.refresh_token || "",
-      accessToken: tokenData.access_token || "",
-      accessExpiresAt: now + Number(tokenData.expires_in || 3600) * 1000,
-      uhs,
-      xstsToken: xsts.Token || "",
-      xstsExpiresAt: Date.parse(xsts.NotAfter || "") || now + 2 * 60 * 60 * 1000,
       connectedAt: new Date().toISOString(),
+      sessionVersion: 2,
     };
     const encryptedSession = await encryptXboxSession(session, env);
 
@@ -367,6 +361,7 @@ async function getXboxSession(request, env) {
     connected: true,
     profile: session.profile,
     connectedAt: session.connectedAt || "",
+    sessionVersion: session.sessionVersion || 1,
     capabilities: {
       profile: true,
       library: false,

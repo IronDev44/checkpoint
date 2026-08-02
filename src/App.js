@@ -11966,6 +11966,15 @@ function OptionsTab({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
+    const handleFocus = () => {
+      refreshXboxSession();
+    };
+
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
     if (!helpTopic) return undefined;
 
     document.body.classList.add("modal-open");
