@@ -11726,6 +11726,7 @@ function OptionsTab({
   const [isXboxLoading, setIsXboxLoading] = useState(false);
   const [isXboxSyncing, setIsXboxSyncing] = useState(false);
   const [isXboxImporting, setIsXboxImporting] = useState(false);
+  const [connectedServicesExpanded, setConnectedServicesExpanded] = useState(false);
   const themes = [
   { id: "theme-indigo", label: "Aurora Neon" },
   { id: "theme-playstation", label: "PS5 Premium" },
@@ -12146,6 +12147,15 @@ function OptionsTab({
         "La connexion passe par la page Microsoft officielle et revient ensuite dans l'app.",
         "Checkpoint recupere uniquement ton profil Xbox utile : gamertag, avatar et identifiant Xbox.",
         "La bibliotheque Xbox complete n'a pas de flux web public fiable comme Steam. On prepare donc la connexion proprement avant de brancher l'import quand la source est sure.",
+      ],
+    },
+    psn: {
+      title: "Connexion PSN",
+      lead: "PlayStation ne propose pas d'equivalent public simple et officiel pour importer une bibliotheque PSN.",
+      bullets: [
+        "Les solutions visibles en ligne utilisent souvent des API non officielles ou des cookies de session PSN.",
+        "Checkpoint garde donc PSN en attente plutot que de te demander une manipulation fragile.",
+        "On pourra brancher PlayStation proprement si Sony ouvre une source autorisee ou si on trouve une integration partenaire stable.",
       ],
     },
     data: {
@@ -12600,6 +12610,46 @@ function OptionsTab({
           </div>
 
           <div className="option-section">
+            <div className="option-setting-card connected-services-summary">
+              <div>
+                <SectionTitle title="Services connectes" />
+                <span>
+                  Steam, Xbox et les futures connexions restent accessibles sans encombrer les Options.
+                </span>
+              </div>
+              <div className="connected-services-grid">
+                <div className="connected-service-pill">
+                  <strong>Steam</strong>
+                  <span>
+                    {steamProfile.steamId
+                      ? `${steamProfile.lastGameCount || 0} jeux suivis`
+                      : "Non configure"}
+                  </span>
+                </div>
+                <div className="connected-service-pill">
+                  <strong>Xbox</strong>
+                  <span>
+                    {xboxProfile.connected
+                      ? xboxProfile.gamertag || "Connecte"
+                      : "Non connecte"}
+                  </span>
+                </div>
+                <div className="connected-service-pill disabled">
+                  <strong>PSN</strong>
+                  <span>A l'etude</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="option-pill connected-services-toggle"
+                onClick={() => setConnectedServicesExpanded((value) => !value)}
+              >
+                {connectedServicesExpanded ? "Masquer les services" : "Gerer les services"}
+              </button>
+            </div>
+
+            {connectedServicesExpanded && (
+              <>
             <div className="option-setting-card option-setting-card-featured steam-sync-card">
               <div>
                 <SectionTitle title="Synchronisation Steam" help="steam" />
@@ -12843,6 +12893,25 @@ function OptionsTab({
                 )}
               </div>
             </div>
+
+            <div className="option-setting-card psn-connect-card">
+              <div>
+                <SectionTitle title="Connexion PSN" help="psn" />
+                <span>
+                  PlayStation reste volontairement en attente tant qu'on n'a pas de source officielle
+                  fiable pour la bibliotheque.
+                </span>
+              </div>
+              <div className="xbox-status-note subtle">
+                <strong>Pas de connexion fragile</strong>
+                <span>
+                  Les methodes actuelles demandent souvent un cookie PSN ou une API non documentee.
+                  On garde l'emplacement pret, mais on ne met pas ton compte dans un flux douteux.
+                </span>
+              </div>
+            </div>
+              </>
+            )}
           </div>
 
         </div>
