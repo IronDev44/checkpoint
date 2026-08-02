@@ -12966,6 +12966,20 @@ html body[data-theme="theme-indigo"] {
   color: #ffd1d8;
 }
 
+.xbox-preview-fallback {
+  display: grid;
+  place-items: center;
+  width: 86px;
+  height: 40px;
+  border-radius: 9px;
+  background:
+    linear-gradient(135deg, rgba(16, 124, 16, 0.65), rgba(82, 255, 104, 0.34)),
+    rgba(255, 255, 255, 0.06);
+  color: #dcffe0;
+  font-size: 0.78rem;
+  font-weight: 950;
+}
+
 .data-health-card.clean {
   border-color: rgba(79, 220, 143, 0.38);
 }

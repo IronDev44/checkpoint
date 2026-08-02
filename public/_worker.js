@@ -198,6 +198,105 @@ async function postXboxJson(url, body, headers = {}) {
   return data;
 }
 
+async function getXboxTokensFromMicrosoftAccessToken(accessToken) {
+  const xbl = await postXboxJson("https://user.auth.xboxlive.com/user/authenticate", {
+    Properties: {
+      AuthMethod: "RPS",
+      SiteName: "user.auth.xboxlive.com",
+      RpsTicket: `d=${accessToken}`,
+    },
+    RelyingParty: "http://auth.xboxlive.com",
+    TokenType: "JWT",
+  });
+
+  const xsts = await postXboxJson("https://xsts.auth.xboxlive.com/xsts/authorize", {
+    Properties: {
+      SandboxId: "RETAIL",
+      UserTokens: [xbl.Token],
+    },
+    RelyingParty: "http://xboxlive.com",
+    TokenType: "JWT",
+  });
+
+  const claim = xsts?.DisplayClaims?.xui?.[0] || {};
+
+  return {
+    uhs: claim.uhs || "",
+    xuid: claim.xid || "",
+    gamertag: claim.gtg || "",
+    xstsToken: xsts.Token || "",
+  };
+}
+
+async function refreshMicrosoftXboxToken(session, env) {
+  if (!session?.refreshToken) {
+    throw new Error("Reconnecte ton compte Xbox pour activer la synchronisation des titres.");
+  }
+
+  const response = await fetch("https://login.live.com/oauth20_token.srf", {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/x-www-form-urlencoded",
+    },
+    body: new URLSearchParams({
+      client_id: env.XBOX_CLIENT_ID,
+      client_secret: env.XBOX_CLIENT_SECRET,
+      refresh_token: session.refreshToken,
+      grant_type: "refresh_token",
+      scope: "XboxLive.signin XboxLive.offline_access",
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data?.error_description || data?.error || "Session Xbox expiree. Reconnecte ton compte.");
+  }
+
+  return data;
+}
+
+function normalizeXboxTitle(title = {}) {
+  const titleId =
+    title.titleId ||
+    title.id ||
+    title.pfn ||
+    title.scid ||
+    "";
+  const name =
+    title.name ||
+    title.titleName ||
+    title.displayName ||
+    title.title ||
+    "";
+  const achievement = title.achievement || title.achievements || {};
+  const image =
+    title.displayImage ||
+    title.image ||
+    title.titleImageUrl ||
+    title.tileImage ||
+    title?.images?.[0]?.url ||
+    title?.assets?.[0]?.url ||
+    "";
+
+  return {
+    xboxTitleId: String(titleId || name || "").trim(),
+    name: String(name || "").trim(),
+    image,
+    xboxLastPlayedAt:
+      title.lastTimePlayed ||
+      title.lastPlayed ||
+      title.lastUnlock ||
+      title.lastUnlockTime ||
+      "",
+    xboxCurrentGamerscore: Number(achievement.currentGamerscore || title.currentGamerscore || 0),
+    xboxMaxGamerscore: Number(achievement.totalGamerscore || achievement.maxGamerscore || title.maxGamerscore || 0),
+    xboxCurrentAchievements: Number(achievement.currentAchievements || title.currentAchievements || 0),
+    xboxTotalAchievements: Number(achievement.totalAchievements || title.totalAchievements || 0),
+    platformNames: ["Xbox"],
+  };
+}
+
 async function startXboxAuth(request, env) {
   if (!env.XBOX_CLIENT_ID || !env.XBOX_CLIENT_SECRET) {
     return privateJsonResponse(
@@ -266,40 +365,21 @@ async function exchangeXboxCode(request, env) {
       throw new Error(tokenData?.error_description || tokenData?.error || "Connexion Microsoft refusee.");
     }
 
-    const xbl = await postXboxJson("https://user.auth.xboxlive.com/user/authenticate", {
-      Properties: {
-        AuthMethod: "RPS",
-        SiteName: "user.auth.xboxlive.com",
-        RpsTicket: `d=${tokenData.access_token}`,
-      },
-      RelyingParty: "http://auth.xboxlive.com",
-      TokenType: "JWT",
-    });
-
-    const xsts = await postXboxJson("https://xsts.auth.xboxlive.com/xsts/authorize", {
-      Properties: {
-        SandboxId: "RETAIL",
-        UserTokens: [xbl.Token],
-      },
-      RelyingParty: "http://xboxlive.com",
-      TokenType: "JWT",
-    });
-
-    const claim = xsts?.DisplayClaims?.xui?.[0] || {};
-    const uhs = claim.uhs || "";
-    const xuid = claim.xid || "";
+    const xboxTokens = await getXboxTokensFromMicrosoftAccessToken(tokenData.access_token);
+    const uhs = xboxTokens.uhs;
+    const xuid = xboxTokens.xuid;
     let profile = {
       xuid,
-      gamertag: claim.gtg || "Profil Xbox",
+      gamertag: xboxTokens.gamertag || "Profil Xbox",
       avatar: "",
     };
 
-    if (xuid && uhs && xsts.Token) {
+    if (xuid && uhs && xboxTokens.xstsToken) {
       const profileUrl = `https://profile.xboxlive.com/users/xuid(${xuid})/profile/settings?settings=Gamertag,GameDisplayPicRaw`;
       const profileResponse = await fetch(profileUrl, {
         headers: {
           accept: "application/json",
-          authorization: `XBL3.0 x=${uhs};${xsts.Token}`,
+          authorization: `XBL3.0 x=${uhs};${xboxTokens.xstsToken}`,
           "x-xbl-contract-version": "2",
         },
       });
@@ -315,8 +395,9 @@ async function exchangeXboxCode(request, env) {
 
     const session = {
       profile,
+      refreshToken: tokenData.refresh_token || "",
       connectedAt: new Date().toISOString(),
-      sessionVersion: 2,
+      sessionVersion: 3,
     };
     const encryptedSession = await encryptXboxSession(session, env);
 
@@ -364,10 +445,12 @@ async function getXboxSession(request, env) {
     sessionVersion: session.sessionVersion || 1,
     capabilities: {
       profile: true,
-      library: false,
+      library: Boolean(session.refreshToken),
     },
     message:
-      "Compte Xbox connecte. La synchronisation complete de la bibliotheque Xbox attend une source Microsoft fiable et autorisee.",
+      session.refreshToken
+        ? "Compte Xbox connecte. Checkpoint peut maintenant tenter une synchronisation des titres Xbox detectes officiellement."
+        : "Compte Xbox connecte. Reconnecte une fois pour activer la synchronisation des titres Xbox.",
   });
 }
 
@@ -389,16 +472,74 @@ async function getXboxLibrary(request, env) {
     return privateJsonResponse({ games: [], error: "Compte Xbox non connecte." }, { status: 401 });
   }
 
+  if (!session.refreshToken) {
+    return privateJsonResponse(
+      {
+        games: [],
+        connected: true,
+        reconnectRequired: true,
+        profile: session.profile,
+        error: "Reconnecte ton compte Xbox pour autoriser la synchronisation des titres.",
+      },
+      { status: 409 }
+    );
+  }
+
+  const tokenData = await refreshMicrosoftXboxToken(session, env);
+  const xboxTokens = await getXboxTokensFromMicrosoftAccessToken(tokenData.access_token);
+  const xuid = session.profile.xuid || xboxTokens.xuid;
+  const titleHistoryUrl = new URL(`https://achievements.xboxlive.com/users/xuid(${xuid})/history/titles`);
+  titleHistoryUrl.searchParams.set("maxItems", "200");
+
+  const response = await fetch(titleHistoryUrl.toString(), {
+    headers: {
+      accept: "application/json",
+      authorization: `XBL3.0 x=${xboxTokens.uhs};${xboxTokens.xstsToken}`,
+      "x-xbl-contract-version": "2",
+    },
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data?.message || data?.error || `Xbox titles HTTP ${response.status}`);
+  }
+
+  const rawTitles = data.titles || data.titleHistory || data.items || [];
+  const games = rawTitles
+    .map(normalizeXboxTitle)
+    .filter((game) => game.name && game.xboxTitleId)
+    .sort((a, b) => String(b.xboxLastPlayedAt).localeCompare(String(a.xboxLastPlayedAt)));
+  const nextSession = {
+    ...session,
+    refreshToken: tokenData.refresh_token || session.refreshToken,
+    profile: {
+      ...session.profile,
+      xuid,
+      gamertag: session.profile.gamertag || xboxTokens.gamertag,
+    },
+    sessionVersion: 3,
+  };
+  const encryptedSession = await encryptXboxSession(nextSession, env);
+
   return privateJsonResponse(
     {
-      games: [],
+      games,
+      total: Number(data.pagingInfo?.totalItems || data.totalItems || games.length),
       connected: true,
-      profile: session.profile,
-      libraryAvailable: false,
-      error:
-        "Microsoft ne fournit pas de flux web public stable pour importer toute la bibliotheque Xbox d'un joueur. La connexion est prete, la source bibliotheque sera branchee des qu'elle est fiable.",
+      profile: nextSession.profile,
+      libraryAvailable: true,
+      source: "xbox-title-history",
+      note:
+        "Xbox ne fournit pas forcement toute la bibliotheque achetee. Cette synchronisation importe les titres officiellement detectes dans ton historique Xbox.",
+      updatedAt: new Date().toISOString(),
     },
-    { status: 501 }
+    {
+      headers: {
+        "set-cookie": buildCookie("checkpoint_xbox_session", encryptedSession, request.url, {
+          maxAge: 60 * 60 * 24 * 30,
+        }),
+      },
+    }
   );
 }
 
@@ -860,7 +1001,19 @@ export default {
         return privateJsonResponse({ error: "Method not allowed" }, { status: 405 });
       }
 
-      return getXboxLibrary(request, env);
+      try {
+        return await getXboxLibrary(request, env);
+      } catch (error) {
+        return privateJsonResponse(
+          {
+            games: [],
+            connected: true,
+            libraryAvailable: false,
+            error: String(error?.message || error),
+          },
+          { status: 502 }
+        );
+      }
     }
 
     return assetResponse(request, env);

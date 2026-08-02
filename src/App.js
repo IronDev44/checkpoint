@@ -268,6 +268,9 @@ const DEFAULT_APP_OPTIONS = {
     avatar: "",
     connectedAt: "",
     lastCheckedAt: "",
+    lastSyncedAt: "",
+    lastGameCount: 0,
+    lastImportedCount: 0,
   },
 };
 
@@ -8734,6 +8737,10 @@ function getSteamGameKey(game) {
   return game?.steamAppId ? String(game.steamAppId) : "";
 }
 
+function getXboxGameKey(game) {
+  return game?.xboxTitleId ? String(game.xboxTitleId) : "";
+}
+
 function formatSteamPlaytime(minutes = 0) {
   const safeMinutes = Number(minutes) || 0;
   if (safeMinutes < 60) return `${safeMinutes} min`;
@@ -11701,6 +11708,7 @@ function OptionsTab({
   onOpenTrial,
   checkpointTrialProgress = DEFAULT_CHECKPOINT_TRIAL_PROGRESS,
   onImportSteamGames,
+  onImportXboxGames,
 }) {
   const [helpTopic, setHelpTopic] = useState(null);
   const [isRepairingGameData, setIsRepairingGameData] = useState(false);
@@ -11713,8 +11721,11 @@ function OptionsTab({
   const [isSteamLoading, setIsSteamLoading] = useState(false);
   const [isSteamImporting, setIsSteamImporting] = useState(false);
   const [xboxSession, setXboxSession] = useState(null);
+  const [xboxLibrary, setXboxLibrary] = useState(null);
   const [xboxError, setXboxError] = useState("");
   const [isXboxLoading, setIsXboxLoading] = useState(false);
+  const [isXboxSyncing, setIsXboxSyncing] = useState(false);
+  const [isXboxImporting, setIsXboxImporting] = useState(false);
   const themes = [
   { id: "theme-indigo", label: "Aurora Neon" },
   { id: "theme-playstation", label: "PS5 Premium" },
@@ -11788,6 +11799,23 @@ function OptionsTab({
       missing: Math.max(0, libraryGames.length - alreadyPresent),
     };
   }, [games, steamLibrary]);
+  const xboxExistingStats = useMemo(() => {
+    const xboxIds = new Set(games.map(getXboxGameKey).filter(Boolean));
+    const names = new Set(
+      games.map((game) => normalizeSearchText(game.name || "")).filter(Boolean)
+    );
+    const libraryGames = xboxLibrary?.games || [];
+    const alreadyPresent = libraryGames.filter((game) => {
+      const xboxKey = getXboxGameKey(game);
+      const nameKey = normalizeSearchText(game.name || "");
+      return (xboxKey && xboxIds.has(xboxKey)) || (nameKey && names.has(nameKey));
+    }).length;
+
+    return {
+      alreadyPresent,
+      missing: Math.max(0, libraryGames.length - alreadyPresent),
+    };
+  }, [games, xboxLibrary]);
   const gameIntegrityIssues = useMemo(
     () => getGameDataIntegrityIssues(games),
     [games]
@@ -11953,6 +11981,65 @@ function OptionsTab({
       setXboxError(String(error?.message || error));
     } finally {
       setIsXboxLoading(false);
+    }
+  };
+  const fetchXboxLibrary = async () => {
+    setIsXboxSyncing(true);
+    setXboxError("");
+
+    try {
+      const response = await fetch("/api/xbox/library");
+      const contentType = response.headers.get("content-type") || "";
+
+      if (!contentType.includes("application/json")) {
+        throw new Error("API Xbox non disponible sur ce serveur. Teste via le deploy Cloudflare.");
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Synchronisation Xbox indisponible.");
+      }
+
+      setXboxLibrary(data);
+      updateXboxProfile({
+        connected: true,
+        gamertag: data.profile?.gamertag || xboxProfile.gamertag,
+        xuid: data.profile?.xuid || xboxProfile.xuid,
+        avatar: data.profile?.avatar || xboxProfile.avatar,
+        lastSyncedAt: data.updatedAt || new Date().toISOString(),
+        lastGameCount: data.total || data.games?.length || 0,
+      });
+    } catch (error) {
+      setXboxLibrary(null);
+      setXboxError(String(error?.message || error));
+    } finally {
+      setIsXboxSyncing(false);
+    }
+  };
+  const importXboxLibrary = async () => {
+    if (!xboxLibrary?.games?.length || !onImportXboxGames) return;
+
+    setIsXboxImporting(true);
+    setXboxError("");
+
+    try {
+      const result = await onImportXboxGames(xboxLibrary.games, {
+        xuid: xboxLibrary.profile?.xuid || xboxProfile.xuid,
+      });
+      updateXboxProfile({
+        connected: true,
+        gamertag: xboxLibrary.profile?.gamertag || xboxProfile.gamertag,
+        xuid: xboxLibrary.profile?.xuid || xboxProfile.xuid,
+        avatar: xboxLibrary.profile?.avatar || xboxProfile.avatar,
+        lastSyncedAt: new Date().toISOString(),
+        lastGameCount: xboxLibrary.total || xboxLibrary.games.length,
+        lastImportedCount: result?.imported || 0,
+      });
+    } catch (error) {
+      setXboxError(String(error?.message || error));
+    } finally {
+      setIsXboxImporting(false);
     }
   };
   const updatePublicSection = (section, enabled) => {
@@ -12646,6 +12733,52 @@ function OptionsTab({
                 </div>
               )}
 
+              {(xboxLibrary || xboxProfile.lastGameCount > 0) && (
+                <div className="steam-sync-status">
+                  <div>
+                    <strong>{xboxLibrary?.total || xboxProfile.lastGameCount || 0}</strong>
+                    <span>titres Xbox detectes</span>
+                  </div>
+                  <div>
+                    <strong>{xboxExistingStats.alreadyPresent}</strong>
+                    <span>deja dans Checkpoint</span>
+                  </div>
+                  <div>
+                    <strong>{xboxExistingStats.missing}</strong>
+                    <span>a importer</span>
+                  </div>
+                </div>
+              )}
+
+              {xboxLibrary?.note && (
+                <div className="xbox-status-note subtle">
+                  <strong>Source Xbox</strong>
+                  <span>{xboxLibrary.note}</span>
+                </div>
+              )}
+
+              {xboxLibrary?.games?.length > 0 && (
+                <div className="steam-preview-list">
+                  {xboxLibrary.games.slice(0, 5).map((game) => (
+                    <div key={game.xboxTitleId} className="steam-preview-row">
+                      {game.image ? (
+                        <img src={game.image} alt="" loading="lazy" />
+                      ) : (
+                        <div className="xbox-preview-fallback">XB</div>
+                      )}
+                      <div>
+                        <strong>{game.name}</strong>
+                        <span>
+                          {game.xboxCurrentGamerscore || game.xboxMaxGamerscore
+                            ? `${game.xboxCurrentGamerscore}/${game.xboxMaxGamerscore} G`
+                            : "Titre detecte par Xbox"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {xboxError && (
                 <div className="steam-sync-error">
                   {xboxError}
@@ -12675,6 +12808,28 @@ function OptionsTab({
                     >
                       Deconnecter
                     </button>
+                    <button
+                      type="button"
+                      className="option-pill steam-sync-primary xbox-connect-action"
+                      onClick={fetchXboxLibrary}
+                      disabled={isXboxSyncing}
+                    >
+                      {isXboxSyncing ? "Analyse Xbox..." : "Analyser les titres"}
+                    </button>
+                    {xboxLibrary?.games?.length > 0 && (
+                      <button
+                        type="button"
+                        className="option-pill steam-import-action"
+                        onClick={importXboxLibrary}
+                        disabled={isXboxImporting || !xboxExistingStats.missing}
+                      >
+                        {isXboxImporting
+                          ? "Import en cours..."
+                          : xboxExistingStats.missing
+                            ? `Importer ${xboxExistingStats.missing} titre${xboxExistingStats.missing > 1 ? "s" : ""}`
+                            : "Titres deja synchronises"}
+                      </button>
+                    )}
                   </>
                 ) : (
                   <button
@@ -15623,6 +15778,94 @@ useEffect(() => {
     return { imported, updated, skipped };
   };
 
+  const importXboxGamesToLibrary = async (xboxGames = [], meta = {}) => {
+    const existingByXboxId = new Map(
+      games
+        .filter((game) => getXboxGameKey(game))
+        .map((game) => [getXboxGameKey(game), game])
+    );
+    const existingByName = new Map(
+      games.map((game) => [normalizeSearchText(game.name || ""), game])
+    );
+    let imported = 0;
+    let updated = 0;
+    let skipped = 0;
+
+    for (const xboxGame of xboxGames) {
+      const xboxKey = getXboxGameKey(xboxGame);
+      const nameKey = normalizeSearchText(xboxGame.name || "");
+      const existingGame =
+        (xboxKey && existingByXboxId.get(xboxKey)) ||
+        (nameKey && existingByName.get(nameKey));
+
+      const xboxPatch = {
+        xboxTitleId: xboxGame.xboxTitleId,
+        xboxProfileId: meta.xuid || "",
+        xboxLastPlayedAt: xboxGame.xboxLastPlayedAt || "",
+        xboxCurrentGamerscore: xboxGame.xboxCurrentGamerscore || 0,
+        xboxMaxGamerscore: xboxGame.xboxMaxGamerscore || 0,
+        xboxCurrentAchievements: xboxGame.xboxCurrentAchievements || 0,
+        xboxTotalAchievements: xboxGame.xboxTotalAchievements || 0,
+        xboxLastSyncedAt: new Date(),
+        source: existingGame?.source || "xbox",
+      };
+
+      if (existingGame?.id) {
+        await updateDoc(doc(db, "games", existingGame.id), {
+          ...xboxPatch,
+          image: existingGame.image || xboxGame.image || "",
+          platformNames: Array.from(
+            new Set([...(existingGame.platformNames || []), "Xbox"])
+          ),
+        });
+        updated++;
+        continue;
+      }
+
+      if (!xboxGame.name) {
+        skipped++;
+        continue;
+      }
+
+      const newGame = {
+        rawgId: null,
+        name: xboxGame.name,
+        completed: false,
+        rating: 0,
+        favorite: false,
+        image: xboxGame.image || "",
+        status: "collection",
+        released: "",
+        platformNames: ["Xbox"],
+        genreNames: [],
+        playtime: null,
+        difficulty: "normal",
+        review: "",
+        ostRating: 0,
+        ostTrack: "",
+        ostLink: "",
+        ratingGraphics: 0,
+        ratingGameplay: 0,
+        ratingStory: 0,
+        ratingSound: 0,
+        ratingLongevity: 0,
+        ...xboxPatch,
+        createdAt: new Date(),
+      };
+
+      await addDoc(collection(db, "games"), newGame);
+      existingByXboxId.set(xboxKey, newGame);
+      existingByName.set(nameKey, newGame);
+      imported++;
+    }
+
+    setToast(
+      `${imported} titre${imported > 1 ? "s" : ""} Xbox importes, ${updated} synchronises.`
+    );
+
+    return { imported, updated, skipped };
+  };
+
   const addGameToSeries = async (seriesName, game) => {
   try {
     const ref = doc(db, "gameCollections", seriesName);
@@ -16912,6 +17155,7 @@ const setPlayedPlatforms = async (id, platforms) => {
                 onOpenTrial={openTrialRoom}
                 checkpointTrialProgress={checkpointTrialProgress}
                 onImportSteamGames={importSteamGamesToLibrary}
+                onImportXboxGames={importXboxGamesToLibrary}
               />
 
               <AdminPanel events={gamingEvents} onImportNews={importNewsFromRSS} />
