@@ -12743,31 +12743,35 @@ function OptionsTab({
     description,
     summary,
     children,
-  }) => (
-    <details
-      className="options-group options-accordion"
-      open={!!openOptionGroups[id]}
-      onToggle={(event) => {
-        const isOpen = event.currentTarget.open;
-        setOpenOptionGroups((current) => ({
-          ...current,
-          [id]: isOpen,
-        }));
-      }}
-    >
-      <summary className="options-group-head">
-        <div>
-          <span>{title}</span>
-          <p>{description}</p>
-        </div>
-        <div className="options-group-summary">
-          <span>{summary}</span>
-          <b aria-hidden="true">v</b>
-        </div>
-      </summary>
-      <div className="options-group-body">{children}</div>
-    </details>
-  );
+  }) => {
+    const isOpen = !!openOptionGroups[id];
+
+    return (
+      <section className={`options-group options-accordion ${isOpen ? "open" : ""}`}>
+        <button
+          type="button"
+          className="options-group-head"
+          onClick={() => {
+            setOpenOptionGroups((current) => ({
+              ...current,
+              [id]: !current[id],
+            }));
+          }}
+          aria-expanded={isOpen}
+        >
+          <div>
+            <span>{title}</span>
+            <p>{description}</p>
+          </div>
+          <div className="options-group-summary">
+            <span>{summary}</span>
+            <b aria-hidden="true">v</b>
+          </div>
+        </button>
+        {isOpen && <div className="options-group-body">{children}</div>}
+      </section>
+    );
+  };
   const helpModal = helpTopic
     ? createPortal(
         <div className="option-help-backdrop" onClick={() => setHelpTopic(null)}>
