@@ -32503,6 +32503,113 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   }
 }
 
+/* Mobile performance pass: smoother long lists on iPhone without changing features. */
+@media (max-width: 760px), (hover: none) and (pointer: coarse) {
+  .game-card,
+  .game-item,
+  .library-simple-card,
+  .hardware-card,
+  .hardware-catalog-card,
+  .hardware-console-card,
+  .hardware-collection-card,
+  .hardware-all-version-card,
+  .compact-series-card,
+  .series-card,
+  .top5-item,
+  .deal-card,
+  .social-feed-item,
+  .profile-showcase-card,
+  .home-recommendation-card,
+  .news-card {
+    content-visibility: auto;
+    contain: layout paint style;
+    contain-intrinsic-size: 180px;
+  }
+
+  .hardware-all-version-card,
+  .hardware-collection-card,
+  .deal-card,
+  .social-feed-item,
+  .top5-item {
+    contain-intrinsic-size: 150px;
+  }
+
+  .compact-series-card,
+  .home-recommendation-card,
+  .news-card {
+    contain-intrinsic-size: 112px;
+  }
+
+  .game-card,
+  .swipe-card,
+  .tab-btn,
+  .theme-btn,
+  .status-btn,
+  .library-switch-btn,
+  .top5-item,
+  .game-item {
+    will-change: auto;
+  }
+
+  .game-card:hover,
+  .hardware-card:hover,
+  .hardware-catalog-card:hover,
+  .hardware-console-card:hover,
+  .compact-series-card:hover,
+  .deal-card:hover,
+  .home-recommendation-card:hover {
+    transform: none;
+  }
+
+  .search-panel,
+  .xp-card,
+  .stat-card,
+  .home-card,
+  .weekly-quiz-card,
+  .home-deals-card,
+  .social-profile-card,
+  .social-command-card,
+  .profile-card,
+  .series-next-card,
+  .series-progress-card,
+  .checkpoint-gate-card,
+  .bottom-tabs {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .tab-transition-overlay.modern {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  body[data-ui="modern"] .game-card,
+  body[data-ui="modern"] .tab-btn,
+  body[data-ui="modern"] .status-btn,
+  body[data-ui="modern"] .filter-toggle-btn,
+  body[data-ui="modern"] .input-container button {
+    transition-duration: 140ms;
+  }
+
+  .badge-card.unlocked.legendary .badge-icon,
+  .badge-card.mythic .badge-icon,
+  .profile-tab .badge-card.creator .badge-sparkles,
+  .profile-tab .badge-card.creator::after {
+    animation-duration: 5.5s;
+  }
+
+  img.game-thumb,
+  img.top5-thumb,
+  img.hardware-catalog-image,
+  img.hardware-collection-image,
+  img.library-game-cover,
+  img.news-image,
+  img.deal-image {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+}
+
 /* Global UX polish: calmer rhythm, stronger hierarchy, fewer "stacked block" feelings. */
 .search-panel,
 .home-card,
