@@ -12271,6 +12271,13 @@ function OptionsTab({
   const [isXboxSyncing, setIsXboxSyncing] = useState(false);
   const [isXboxImporting, setIsXboxImporting] = useState(false);
   const [connectedServicesExpanded, setConnectedServicesExpanded] = useState(false);
+  const [openOptionGroups, setOpenOptionGroups] = useState({
+    interface: true,
+    behavior: false,
+    services: false,
+    development: false,
+    data: false,
+  });
   const themes = [
   { id: "theme-indigo", label: "Aurora Neon" },
   { id: "theme-playstation", label: "PS5 Premium" },
@@ -12728,6 +12735,39 @@ function OptionsTab({
       )}
     </div>
   );
+  const activeThemeLabel =
+    themes.find((item) => item.id === theme)?.label || "Theme actif";
+  const OptionGroup = ({
+    id,
+    title,
+    description,
+    summary,
+    children,
+  }) => (
+    <details
+      className="options-group options-accordion"
+      open={!!openOptionGroups[id]}
+      onToggle={(event) => {
+        const isOpen = event.currentTarget.open;
+        setOpenOptionGroups((current) => ({
+          ...current,
+          [id]: isOpen,
+        }));
+      }}
+    >
+      <summary className="options-group-head">
+        <div>
+          <span>{title}</span>
+          <p>{description}</p>
+        </div>
+        <div className="options-group-summary">
+          <span>{summary}</span>
+          <b aria-hidden="true">v</b>
+        </div>
+      </summary>
+      <div className="options-group-body">{children}</div>
+    </details>
+  );
   const helpModal = helpTopic
     ? createPortal(
         <div className="option-help-backdrop" onClick={() => setHelpTopic(null)}>
@@ -12767,11 +12807,12 @@ function OptionsTab({
           </div>
         </div>
 
-        <div className="options-group">
-          <div className="options-group-head">
-            <span>Interface</span>
-            <p>Ce qui change l'identité visuelle et les retours de l'app.</p>
-          </div>
+        <OptionGroup
+          id="interface"
+          title="Interface"
+          description="Ce qui change l'identité visuelle et les retours de l'app."
+          summary={`${activeThemeLabel} · ${uiMode === "modern" ? "Transitions" : "Sans transition"}`}
+        >
 
           <div className="option-section">
             <SectionTitle title="Thème" />
@@ -12898,13 +12939,14 @@ function OptionsTab({
               </div>
             </div>
           </div>
-        </div>
+        </OptionGroup>
 
-        <div className="options-group">
-          <div className="options-group-head">
-            <span>Comportement</span>
-            <p>Les choix qui évitent des gestes inutiles ou des erreurs.</p>
-          </div>
+        <OptionGroup
+          id="behavior"
+          title="Comportement"
+          description="Les choix qui évitent des gestes inutiles ou des erreurs."
+          summary={appOptions.rememberLastTab ? "Dernier onglet" : "Onglet fixe"}
+        >
 
           <div className="option-section">
             <SectionTitle title="Démarrage" help="navigation" />
@@ -13018,13 +13060,14 @@ function OptionsTab({
               </div>
             </div>
           </div>
-        </div>
+        </OptionGroup>
 
-        <div className="options-group">
-          <div className="options-group-head">
-            <span>Profil & services</span>
-            <p>Ce qui sort de ta bibliothèque personnelle : profil public, notes et promos.</p>
-          </div>
+        <OptionGroup
+          id="services"
+          title="Profil & services"
+          description="Ce qui sort de ta bibliothèque personnelle : profil public, notes et promos."
+          summary={`${socialProfile.visibility === "public" ? "Public" : "Privé"} · Steam ${steamProfile.steamId ? "lié" : "off"}`}
+        >
 
           <div className="option-section option-section-split">
             <div className="option-setting-card">
@@ -13458,13 +13501,14 @@ function OptionsTab({
             )}
           </div>
 
-        </div>
+        </OptionGroup>
 
-        <div className="options-group">
-          <div className="options-group-head">
-            <span>Développement</span>
-            <p>Accès internes pour tester les grands systèmes sans attendre le bon niveau.</p>
-          </div>
+        <OptionGroup
+          id="development"
+          title="Développement"
+          description="Accès internes pour tester les grands systèmes sans attendre le bon niveau."
+          summary="Tests internes"
+        >
 
           <div className="option-section">
             <div className="option-setting-card option-setting-card-featured">
@@ -13490,13 +13534,14 @@ function OptionsTab({
               </div>
             </div>
           </div>
-        </div>
+        </OptionGroup>
 
-        <div className="options-group">
-          <div className="options-group-head">
-            <span>Données</span>
-            <p>Sauvegarde, import et contrôle de cohérence de ta bibliothèque.</p>
-          </div>
+        <OptionGroup
+          id="data"
+          title="Données"
+          description="Sauvegarde, import et contrôle de cohérence de ta bibliothèque."
+          summary={gameIntegrityIssues.length ? `${gameIntegrityIssues.length} à vérifier` : "OK"}
+        >
 
           <div className="option-section">
             <div className="option-setting-card option-setting-card-featured">
@@ -13615,7 +13660,7 @@ function OptionsTab({
               </div>
             </div>
           </div>
-        </div>
+        </OptionGroup>
       </div>
 
       {helpModal}
