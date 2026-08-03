@@ -274,6 +274,68 @@ const DEFAULT_APP_OPTIONS = {
   },
 };
 
+const APP_OPTIONS_STORAGE_KEY = "checkpoint-app-options";
+const APP_OPTIONS_SCHEMA_VERSION = 2;
+
+function normalizeConnectedProfile(profile = {}, defaults = {}) {
+  return {
+    ...defaults,
+    ...normalizeObject(profile),
+  };
+}
+
+function normalizeAppOptions(options = {}) {
+  const source = normalizeObject(options);
+  const startTab = APP_TAB_IDS.includes(source.startTab)
+    ? source.startTab
+    : DEFAULT_APP_OPTIONS.startTab;
+  const visualEffects = ["calm", "balanced", "boost"].includes(source.visualEffects)
+    ? source.visualEffects
+    : DEFAULT_APP_OPTIONS.visualEffects;
+  const ratingDisplay = ["number", "stars", "compact"].includes(source.ratingDisplay)
+    ? source.ratingDisplay
+    : DEFAULT_APP_OPTIONS.ratingDisplay;
+
+  return {
+    ...DEFAULT_APP_OPTIONS,
+    ...source,
+    schemaVersion: APP_OPTIONS_SCHEMA_VERSION,
+    startTab,
+    visualEffects,
+    animatedBackground:
+      typeof source.animatedBackground === "boolean"
+        ? source.animatedBackground
+        : DEFAULT_APP_OPTIONS.animatedBackground,
+    ratingDisplay,
+    rememberLastTab:
+      typeof source.rememberLastTab === "boolean"
+        ? source.rememberLastTab
+        : DEFAULT_APP_OPTIONS.rememberLastTab,
+    confirmDangerActions:
+      typeof source.confirmDangerActions === "boolean"
+        ? source.confirmDangerActions
+        : DEFAULT_APP_OPTIONS.confirmDangerActions,
+    dealSources: {
+      ...DEFAULT_APP_OPTIONS.dealSources,
+      ...normalizeObject(source.dealSources),
+    },
+    steamProfile: normalizeConnectedProfile(
+      source.steamProfile,
+      DEFAULT_APP_OPTIONS.steamProfile
+    ),
+    xboxProfile: normalizeConnectedProfile(
+      source.xboxProfile,
+      DEFAULT_APP_OPTIONS.xboxProfile
+    ),
+  };
+}
+
+function storeAppOptions(options) {
+  const normalizedOptions = normalizeAppOptions(options);
+  localStorage.setItem(APP_OPTIONS_STORAGE_KEY, JSON.stringify(normalizedOptions));
+  return normalizedOptions;
+}
+
 const GAME_RATING_KEYS = [
   "rating",
   "ratingGraphics",
@@ -302,8 +364,8 @@ function clampRating(value, max = APP_RATING_MAX) {
 
 function getRatingDisplayMode() {
   try {
-    const saved = JSON.parse(localStorage.getItem("checkpoint-app-options") || "{}");
-    return saved.ratingDisplay || DEFAULT_APP_OPTIONS.ratingDisplay;
+    const saved = JSON.parse(localStorage.getItem(APP_OPTIONS_STORAGE_KEY) || "{}");
+    return normalizeAppOptions(saved).ratingDisplay;
   } catch (error) {
     return DEFAULT_APP_OPTIONS.ratingDisplay;
   }
@@ -311,25 +373,10 @@ function getRatingDisplayMode() {
 
 function getStoredAppOptions() {
   try {
-    const saved = JSON.parse(localStorage.getItem("checkpoint-app-options") || "{}");
-    return {
-      ...DEFAULT_APP_OPTIONS,
-      ...saved,
-      dealSources: {
-        ...DEFAULT_APP_OPTIONS.dealSources,
-        ...(saved.dealSources || {}),
-      },
-      steamProfile: {
-        ...DEFAULT_APP_OPTIONS.steamProfile,
-        ...(saved.steamProfile || {}),
-      },
-      xboxProfile: {
-        ...DEFAULT_APP_OPTIONS.xboxProfile,
-        ...(saved.xboxProfile || {}),
-      },
-    };
+    const saved = JSON.parse(localStorage.getItem(APP_OPTIONS_STORAGE_KEY) || "{}");
+    return storeAppOptions(saved);
   } catch (error) {
-    return DEFAULT_APP_OPTIONS;
+    return storeAppOptions(DEFAULT_APP_OPTIONS);
   }
 }
 
@@ -364,7 +411,19 @@ function normalizeGameRatings(game = {}) {
     }
   });
 
-  return normalizedGame;
+  return {
+    ...normalizedGame,
+    name: normalizedGame.name || "Jeu sans titre",
+    status: normalizedGame.status || "wishlist",
+    completed: Boolean(normalizedGame.completed),
+    favorite: Boolean(normalizedGame.favorite),
+    platforms: normalizeArray(normalizedGame.platforms).map(String),
+    genreNames: normalizeArray(normalizedGame.genreNames).map(String),
+    tags: normalizeArray(normalizedGame.tags),
+    dlcs: normalizeArray(normalizedGame.dlcs),
+    image: getGameCoverImage(normalizedGame),
+    source: normalizedGame.source || "manual",
+  };
 }
 
 const GAME_GENRE_SIGNAL_RULES = [
@@ -6025,6 +6084,38 @@ function storeSocialProfile(profile) {
   return normalizedProfile;
 }
 
+const SOCIAL_FRIENDS_STORAGE_KEY = "checkpoint-social-friends";
+
+function normalizeSocialFriends(friends = []) {
+  const byHandle = new Map();
+
+  normalizeArray(friends).forEach((friend) => {
+    const item = normalizeObject(friend);
+    const handle = normalizeHandle(item.handle || "");
+    if (!handle) return;
+
+    byHandle.set(handle, {
+      ...item,
+      handle,
+      displayName: item.displayName || handle,
+      bio: item.bio || "",
+      addedAt: item.addedAt || new Date().toISOString(),
+    });
+  });
+
+  return [...byHandle.values()];
+}
+
+function storeSocialFriends(friends) {
+  const normalizedFriends = normalizeSocialFriends(friends);
+  localStorage.setItem(
+    SOCIAL_FRIENDS_STORAGE_KEY,
+    JSON.stringify(normalizedFriends)
+  );
+
+  return normalizedFriends;
+}
+
 function getActivityLikeState(activityLikes = {}, activityId = "") {
   const entry = activityLikes?.[activityId];
 
@@ -10045,6 +10136,14 @@ function normalizeHardwareRatings(item = {}) {
 
   return {
     ...normalizedItem,
+    name: normalizedItem.name || "Materiel sans nom",
+    brand: normalizedItem.brand || "",
+    type: normalizedItem.type || "other",
+    status: normalizedItem.status || "",
+    condition: normalizedItem.condition || "",
+    image: normalizedItem.image || "",
+    displaySizes: normalizeArray(normalizedItem.displaySizes).map(String),
+    components: normalizeObject(normalizedItem.components),
     rating: normalizedItem.rating || getHardwareAverageRating(normalizedItem),
   };
 }
@@ -14685,9 +14784,11 @@ export default function App() {
   });
   const [socialFriends, setSocialFriends] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("checkpoint-social-friends") || "[]");
+      return storeSocialFriends(
+        JSON.parse(localStorage.getItem(SOCIAL_FRIENDS_STORAGE_KEY) || "[]")
+      );
     } catch (error) {
-      return [];
+      return storeSocialFriends([]);
     }
   });
   const [sharedProfile, setSharedProfile] = useState(null);
@@ -14752,19 +14853,17 @@ const [soundEnabled, setSoundEnabled] = useState(
 
 const updateAppOption = (key, value) => {
   setAppOptions((prev) => {
-    const nextOptions = {
+    const nextOptions = storeAppOptions({
       ...prev,
       [key]: value,
-    };
+    });
 
-    localStorage.setItem("checkpoint-app-options", JSON.stringify(nextOptions));
     return nextOptions;
   });
 };
 
 const resetAppOptions = () => {
-  setAppOptions(DEFAULT_APP_OPTIONS);
-  localStorage.setItem("checkpoint-app-options", JSON.stringify(DEFAULT_APP_OPTIONS));
+  setAppOptions(storeAppOptions(DEFAULT_APP_OPTIONS));
   showToast("Options remises au propre.");
 };
 
@@ -14804,24 +14903,8 @@ const importCheckpointBackup = async (event) => {
     const payload = JSON.parse(text);
 
     if (payload.options) {
-      const nextOptions = {
-        ...DEFAULT_APP_OPTIONS,
-        ...payload.options,
-        dealSources: {
-          ...DEFAULT_APP_OPTIONS.dealSources,
-          ...(payload.options.dealSources || {}),
-        },
-        steamProfile: {
-          ...DEFAULT_APP_OPTIONS.steamProfile,
-          ...(payload.options.steamProfile || {}),
-        },
-        xboxProfile: {
-          ...DEFAULT_APP_OPTIONS.xboxProfile,
-          ...(payload.options.xboxProfile || {}),
-        },
-      };
+      const nextOptions = storeAppOptions(payload.options);
       setAppOptions(nextOptions);
-      localStorage.setItem("checkpoint-app-options", JSON.stringify(nextOptions));
     }
 
     if (payload.socialProfile) {
@@ -14831,8 +14914,7 @@ const importCheckpointBackup = async (event) => {
     }
 
     if (Array.isArray(payload.socialFriends)) {
-      setSocialFriends(payload.socialFriends);
-      localStorage.setItem("checkpoint-social-friends", JSON.stringify(payload.socialFriends));
+      setSocialFriends(storeSocialFriends(payload.socialFriends));
     }
 
     showToast("Sauvegarde restaurée.");
@@ -15469,9 +15551,7 @@ const addSocialFriend = async (handleValue) => {
     };
 
     setSocialFriends((prev) => {
-      const nextFriends = [...prev, friend];
-      localStorage.setItem("checkpoint-social-friends", JSON.stringify(nextFriends));
-      return nextFriends;
+      return storeSocialFriends([...prev, friend]);
     });
 
     showToast("Nouvel ami ajouté.");
@@ -15484,9 +15564,7 @@ const addSocialFriend = async (handleValue) => {
 
 const removeSocialFriend = (handle) => {
   setSocialFriends((prev) => {
-    const nextFriends = prev.filter((friend) => friend.handle !== handle);
-    localStorage.setItem("checkpoint-social-friends", JSON.stringify(nextFriends));
-    return nextFriends;
+    return storeSocialFriends(prev.filter((friend) => friend.handle !== handle));
   });
 };
 
@@ -15692,7 +15770,7 @@ useEffect(() => {
   }, [uiMode]);
 
 useEffect(() => {
-  localStorage.setItem("checkpoint-app-options", JSON.stringify(appOptions));
+  storeAppOptions(appOptions);
   document.body.setAttribute("data-effects", appOptions.visualEffects || "balanced");
   document.body.setAttribute(
       "data-background-motion",
