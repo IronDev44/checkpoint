@@ -3905,6 +3905,152 @@ function getProfileShowcase(games = [], hardware = []) {
   };
 }
 
+function getTop5OverviewData(games = [], hardware = []) {
+  const eligibleGames = games.filter(isTopEligibleGame);
+  const ratedGames = eligibleGames.filter((game) => getGameRating(game) > 0);
+  const bestGame = getTopGamesForScore(eligibleGames, "rating", 1)[0] || null;
+  const bestHardware = getTopHardwareItems(hardware, "all", 1)[0] || null;
+  const bestOst = getTopOstGames(eligibleGames, 1)[0] || null;
+  const gotyYears = getGameOfYearYears(games);
+  const latestGotyYear = gotyYears[0] || null;
+  const latestGoty =
+    latestGotyYear &&
+    games.find((game) => Number(game.gotyYear) === Number(latestGotyYear));
+  const specializedFilled = TOP5_ADVANCED_LISTS.filter(
+    (list) => getTopAdvancedGames(eligibleGames, list).length > 0
+  ).length;
+  const scoreFilled = TOP5_SCORE_OPTIONS.filter(
+    (option) => getTopGamesForScore(eligibleGames, option.id, 5).length > 0
+  ).length;
+  const platformGroups = getTopGroups(eligibleGames, "platform");
+  const genreGroups = getTopGroups(eligibleGames, "genre");
+
+  return {
+    bestGame,
+    bestHardware,
+    bestOst,
+    latestGoty,
+    latestGotyYear,
+    ratedGamesCount: ratedGames.length,
+    eligibleGamesCount: eligibleGames.length,
+    hardwareRatedCount: getTopHardwareItems(hardware, "all", 999).length,
+    ostRatedCount: getTopOstGames(eligibleGames, 999).length,
+    gotyCount: games.filter((game) => Number(game.gotyYear) > 0).length,
+    specializedFilled,
+    scoreFilled,
+    platformGroupsCount: platformGroups.length,
+    genreGroupsCount: genreGroups.length,
+  };
+}
+
+function Top5OverviewPanel({ games = [], hardware = [] }) {
+  const overview = getTop5OverviewData(games, hardware);
+  const gameCoverage = overview.eligibleGamesCount
+    ? Math.round((overview.ratedGamesCount / overview.eligibleGamesCount) * 100)
+    : 0;
+  const specializedCoverage = Math.round(
+    (overview.specializedFilled / TOP5_ADVANCED_LISTS.length) * 100
+  );
+  const criteriaCoverage = Math.round(
+    (overview.scoreFilled / TOP5_SCORE_OPTIONS.length) * 100
+  );
+  const cards = [
+    {
+      label: "Champion global",
+      value: overview.bestGame?.name || "A definir",
+      detail: overview.bestGame
+        ? formatRating10(getGameRating(overview.bestGame), "-")
+        : "Note quelques jeux pour lancer le classement.",
+      image: overview.bestGame?.image,
+    },
+    {
+      label: "Materiel repere",
+      value: overview.bestHardware?.name || "A calibrer",
+      detail: overview.bestHardware
+        ? formatRating10(getHardwareAverageRating(overview.bestHardware), "-")
+        : "Ajoute des notes materiel pour faire sortir un favori.",
+      image: overview.bestHardware?.image,
+    },
+    {
+      label: "OST en tete",
+      value: overview.bestOst?.name || "Pas encore d'OST",
+      detail: overview.bestOst
+        ? formatRating10(getGameScore(overview.bestOst, "ostRating"), "-")
+        : "Note les bandes-son dans les fiches jeux.",
+      image: overview.bestOst?.image,
+    },
+    {
+      label: overview.latestGotyYear ? `GOTY ${overview.latestGotyYear}` : "GOTY",
+      value: overview.latestGoty?.name || "A choisir",
+      detail: overview.latestGoty
+        ? formatRating10(getGameRating(overview.latestGoty), "-")
+        : "Choisis tes jeux de l'annee.",
+      image: overview.latestGoty?.image,
+    },
+  ];
+  const gauges = [
+    {
+      label: "Notes jeux",
+      value: `${overview.ratedGamesCount}/${overview.eligibleGamesCount}`,
+      percent: gameCoverage,
+    },
+    {
+      label: "Criteres",
+      value: `${overview.scoreFilled}/${TOP5_SCORE_OPTIONS.length}`,
+      percent: criteriaCoverage,
+    },
+    {
+      label: "Specialises",
+      value: `${overview.specializedFilled}/${TOP5_ADVANCED_LISTS.length}`,
+      percent: specializedCoverage,
+    },
+  ];
+
+  return (
+    <div className="search-panel top5-overview-panel">
+      <div className="profile-section-header">
+        <div>
+          <h2 className="panel-title">Tableau de bord Top 5</h2>
+          <div className="option-value">
+            Un resume rapide de tes classements les plus solides et de ce qu'il reste a completer.
+          </div>
+        </div>
+      </div>
+
+      <div className="top5-overview-grid">
+        {cards.map((card) => (
+          <div key={card.label} className="top5-overview-card">
+            {card.image ? (
+              <img src={card.image} alt={card.value} />
+            ) : (
+              <div className="top5-overview-placeholder">{card.label.slice(0, 3)}</div>
+            )}
+            <div>
+              <span>{card.label}</span>
+              <strong>{card.value}</strong>
+              <small>{card.detail}</small>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="top5-overview-gauges">
+        {gauges.map((gauge) => (
+          <div key={gauge.label} className="top5-overview-gauge">
+            <div>
+              <span>{gauge.label}</span>
+              <strong>{gauge.value}</strong>
+            </div>
+            <div className="top5-overview-bar">
+              <div style={{ width: `${gauge.percent}%` }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Top5RankingPanel({
   title,
   games,
@@ -4316,6 +4462,24 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
     }
   }, [hardwareCriterionOptions, hardwareCriterionKey]);
 
+  useEffect(() => {
+    if (
+      mode === "platform" &&
+      platformGroups[0] &&
+      !platformGroups.some((group) => group.name === selectedPlatform)
+    ) {
+      setSelectedPlatform(platformGroups[0].name);
+    }
+
+    if (
+      mode === "genre" &&
+      genreGroups[0] &&
+      !genreGroups.some((group) => group.name === selectedGenre)
+    ) {
+      setSelectedGenre(genreGroups[0].name);
+    }
+  }, [mode, selectedPlatform, selectedGenre, platformGroups, genreGroups]);
+
   return (
     <div className="progression-stack top5-page">
       <div className="search-panel top5-dashboard">
@@ -4505,6 +4669,8 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
           </>
         ) : null}
       </div>
+
+      <Top5OverviewPanel games={scopedGames} hardware={scopedHardware} />
 
       {contentMode === "games" ? (
         <>
