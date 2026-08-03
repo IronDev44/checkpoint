@@ -8144,6 +8144,98 @@ body[data-ui="modern"] .chip.active {
   line-height: 1.35;
 }
 
+.social-feed-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.social-like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 7px 11px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--surface-border));
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
+    var(--surface-bg);
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 900;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.16);
+  transition:
+    transform 0.16s ease,
+    border-color 0.16s ease,
+    background 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.social-like-btn:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.social-like-btn.liked {
+  color: white;
+  border-color: color-mix(in srgb, var(--accent) 72%, white 18%);
+  background:
+    radial-gradient(circle at 18% 20%, color-mix(in srgb, var(--accent) 38%, white 18%), transparent 44%),
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 72%, #ffffff 10%), color-mix(in srgb, var(--accent-2, var(--accent)) 68%, #111827 16%));
+  box-shadow:
+    0 12px 26px color-mix(in srgb, var(--accent) 26%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.social-like-btn:disabled {
+  cursor: default;
+  opacity: 0.78;
+}
+
+.social-like-icon {
+  width: 13px;
+  height: 13px;
+  position: relative;
+  transform: rotate(-45deg);
+}
+
+.social-like-icon::before,
+.social-like-icon::after {
+  content: "";
+  position: absolute;
+  width: 9px;
+  height: 14px;
+  border-radius: 9px 9px 0 0;
+  background: currentColor;
+}
+
+.social-like-icon::before {
+  left: 6px;
+  top: 0;
+  transform: rotate(45deg);
+  transform-origin: 0 100%;
+}
+
+.social-like-icon::after {
+  left: 0;
+  top: 0;
+  transform: rotate(-45deg);
+  transform-origin: 100% 100%;
+}
+
+.social-like-btn strong {
+  min-width: 18px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  color: inherit;
+  font-size: 11px;
+  line-height: 1.1;
+  text-align: center;
+}
+
 .social-showcase {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

@@ -5939,7 +5939,21 @@ const DEFAULT_SOCIAL_PROFILE = {
   setupPhotos: [],
   collectionPhotos: [],
   publicSections: DEFAULT_PUBLIC_SECTIONS,
+  activityLikes: {},
 };
+
+function getActivityLikeState(activityLikes = {}, activityId = "") {
+  const entry = activityLikes?.[activityId];
+
+  if (typeof entry === "number") {
+    return { count: Math.max(0, entry), liked: false };
+  }
+
+  return {
+    count: Math.max(0, Number(entry?.count || 0)),
+    liked: Boolean(entry?.liked),
+  };
+}
 
 function getInitials(name = "") {
   const words = name.trim().split(/\s+/).filter(Boolean);
@@ -6204,7 +6218,12 @@ function resizeSocialPhoto(file) {
   });
 }
 
-function ActivityFeed({ activities = [], compact = false }) {
+function ActivityFeed({
+  activities = [],
+  compact = false,
+  activityLikes = {},
+  onToggleLike,
+}) {
   if (!activities.length) {
     return (
       <EmptyState
@@ -6216,26 +6235,52 @@ function ActivityFeed({ activities = [], compact = false }) {
 
   return (
     <div className={`social-feed ${compact ? "compact" : ""}`}>
-      {activities.map((activity) => (
-        <div key={activity.id} className="social-feed-item">
-          {activity.image ? (
-            <img src={activity.image} alt={activity.title} />
-          ) : (
-            <div className="social-feed-placeholder">
-              {activity.type === "Badge" ? "B" : "C"}
-            </div>
-          )}
+      {activities.map((activity) => {
+        const storedLikeState = getActivityLikeState(activityLikes, activity.id);
+        const likeCount = Math.max(
+          storedLikeState.count,
+          Number(activity.likes || 0)
+        );
+        const isLiked = storedLikeState.liked || Boolean(activity.liked);
+        const canLike = typeof onToggleLike === "function";
 
-          <div className="social-feed-main">
-            <div className="social-feed-top">
-              <span>{activity.type}</span>
-              <small>{formatActivityTime(activity.date)}</small>
+        return (
+          <div key={activity.id} className="social-feed-item">
+            {activity.image ? (
+              <img src={activity.image} alt={activity.title} />
+            ) : (
+              <div className="social-feed-placeholder">
+                {activity.type === "Badge" ? "B" : "C"}
+              </div>
+            )}
+
+            <div className="social-feed-main">
+              <div className="social-feed-top">
+                <span>{activity.type}</span>
+                <small>{formatActivityTime(activity.date)}</small>
+              </div>
+              <strong>{activity.text}</strong>
+              {activity.detail && <p>{activity.detail}</p>}
+
+              {(canLike || likeCount > 0) && (
+                <div className="social-feed-actions">
+                  <button
+                    type="button"
+                    className={`social-like-btn ${isLiked ? "liked" : ""}`}
+                    onClick={() => onToggleLike?.(activity.id)}
+                    aria-pressed={isLiked}
+                    disabled={!canLike}
+                  >
+                    <span className="social-like-icon" aria-hidden="true" />
+                    <span>{isLiked ? "Aime" : "J'aime"}</span>
+                    <strong>{likeCount}</strong>
+                  </button>
+                </div>
+              )}
             </div>
-            <strong>{activity.text}</strong>
-            {activity.detail && <p>{activity.detail}</p>}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -6603,6 +6648,7 @@ function SocialTab({
   ].filter((section) => section.games.length > 0);
   const currentHardware = getCurrentOwnedHardware(hardware);
   const profileShowcase = getProfileShowcase(games, hardware);
+  const activityLikes = socialProfile.activityLikes || {};
   const featuredBadge = getFeaturedBadgeFromSelection(
     badges,
     socialProfile.featuredBadgeId
@@ -6667,7 +6713,15 @@ function SocialTab({
       ratings: item.ratings || {},
       gameCount: getHardwareConsoleGameStats(item, games).games,
     })),
-    recentActivity: activities.slice(0, 8),
+    recentActivity: activities.slice(0, 8).map((activity) => {
+      const likeState = getActivityLikeState(activityLikes, activity.id);
+
+      return {
+        ...activity,
+        likes: likeState.count,
+        liked: likeState.liked,
+      };
+    }),
   };
 
   const handleVisibilityChange = async (visibility) => {
@@ -6687,6 +6741,20 @@ function SocialTab({
     if (result.ok) {
       setFriendHandle("");
     }
+  };
+
+  const handleToggleActivityLike = (activityId) => {
+    const current = getActivityLikeState(activityLikes, activityId);
+    const nextLikes = {
+      ...activityLikes,
+      [activityId]: {
+        liked: !current.liked,
+        count: Math.max(0, current.count + (current.liked ? -1 : 1)),
+        updatedAt: new Date().toISOString(),
+      },
+    };
+
+    onProfileChange("activityLikes", nextLikes);
   };
 
   const handlePhotoUpload = async (field, event) => {
@@ -7014,7 +7082,12 @@ function SocialTab({
           <h2 className="panel-title">Activite recente</h2>
           <span className="social-section-count">{Math.min(activities.length, 5)}</span>
         </div>
-        <ActivityFeed activities={activities.slice(0, 5)} compact />
+        <ActivityFeed
+          activities={activities.slice(0, 5)}
+          compact
+          activityLikes={activityLikes}
+          onToggleLike={handleToggleActivityLike}
+        />
       </div>
 
       <div className="search-panel social-essential-panel">
@@ -14804,6 +14877,7 @@ const removeSocialProfilePhoto = async (field, index) => {
 const buildPublicSocialProfile = (profileOverride = socialProfile) => {
   const handle = normalizeHandle(profileOverride.handle);
   const activities = getSocialActivityFeed(games, hardware, badges).slice(0, 8);
+  const activityLikes = profileOverride.activityLikes || {};
   const stats = getAdvancedStats(games);
   const currentHardware = getCurrentOwnedHardware(hardware);
   const identityGameIds = Array.isArray(profileOverride.identityGameIds)
@@ -14902,6 +14976,7 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
       detail: activity.detail || "",
       image: activity.image || "",
       date: activity.date || null,
+      likes: getActivityLikeState(activityLikes, activity.id).count,
     })),
     updatedAt: serverTimestamp(),
   };
