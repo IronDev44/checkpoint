@@ -6859,6 +6859,12 @@ function SocialTab({
   const finishedCount = games.filter(isGameFinishedStatus).length;
   const avgRating = stats.avgRating ? stats.avgRating.toFixed(1) : "-";
   const shareUrl = getProfileShareUrl(socialProfile.handle);
+  const profileQuickStats = [
+    { label: "Jeux", value: games.length },
+    { label: "Termines", value: finishedCount },
+    { label: "Note moy.", value: avgRating },
+    { label: "Materiel", value: currentHardware.length },
+  ];
   const ownPublicPreview = {
     displayName: socialProfile.displayName || DEFAULT_SOCIAL_PROFILE.displayName,
     handle: normalizeHandle(socialProfile.handle),
@@ -7036,6 +7042,18 @@ function SocialTab({
             </span>
             <span>Profil {profileCompletion}%</span>
           </div>
+
+          <div className="social-profile-actions">
+            <button type="button" onClick={() => setSocialView("profile")}>
+              Modifier
+            </button>
+            <button type="button" onClick={() => setShowPublicPreview(true)}>
+              Apercu public
+            </button>
+            <button type="button" onClick={() => setSocialView("friends")}>
+              Amis
+            </button>
+          </div>
         </div>
       </div>
 
@@ -7146,10 +7164,12 @@ function SocialTab({
       </div>
 
       <div className={`social-stats-grid ${socialView === "profile" ? "" : "social-section-hidden"}`}>
-        <div className="stat-card">
-          <div className="stat-value">{games.length}</div>
-          <div className="stat-label">Jeux</div>
-        </div>
+        {profileQuickStats.map((item) => (
+          <div key={item.label} className="social-mini-stat">
+            <strong>{item.value}</strong>
+            <span>{item.label}</span>
+          </div>
+        ))}
         <div className="stat-card">
           <div className="stat-value">{finishedCount}</div>
           <div className="stat-label">Terminés</div>
