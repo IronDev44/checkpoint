@@ -7325,7 +7325,7 @@ body[data-ui="modern"] .chip.active {
 
 .social-view-tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   padding: 6px;
   border: 1px solid var(--surface-border);
@@ -8478,10 +8478,6 @@ body[data-ui="modern"] .chip.active {
   .social-friend-card,
   .social-public-profile-body {
     grid-template-columns: 1fr;
-  }
-
-  .social-view-tabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .social-public-favorites {

@@ -1707,10 +1707,18 @@ const BADGE_BRAND_LOGOS = {
   pc: "/images/brands/pc.png",
 };
 
-const CREATOR_HANDLES = ["checkpoint"];
+const CREATOR_HANDLES = ["checkpoint", "irondev44", "bodyjordan", "bodyj"];
 
 function isCreatorProfile(profile = {}) {
-  return CREATOR_HANDLES.includes(normalizeHandle(profile.handle || ""));
+  const handle = normalizeHandle(profile.handle || "");
+  const displayName = normalizeHandle(profile.displayName || "");
+
+  return (
+    profile.isCreator === true ||
+    profile.featuredBadgeId === "creator_checkpoint" ||
+    CREATOR_HANDLES.includes(handle) ||
+    CREATOR_HANDLES.includes(displayName)
+  );
 }
 
 function BadgeVisualIcon({ badge, size = 20 }) {
@@ -6953,29 +6961,8 @@ function SocialTab({
             <span>
               {socialProfile.visibility === "public" ? "Public" : "Privé"}
             </span>
+            <span>Profil {profileCompletion}%</span>
           </div>
-        </div>
-      </div>
-
-      <div className="social-command-center">
-        <div className="social-command-card">
-          <span>Profil public</span>
-          <strong>{profileCompletion}%</strong>
-          <p>
-            {socialProfile.visibility === "public"
-              ? "Visible et partageable"
-              : "Prive pour le moment"}
-          </p>
-        </div>
-        <div className="social-command-card">
-          <span>Reseau</span>
-          <strong>{socialFriends.length}</strong>
-          <p>Ami{socialFriends.length > 1 ? "s" : ""} ajoute{socialFriends.length > 1 ? "s" : ""}</p>
-        </div>
-        <div className="social-command-card">
-          <span>Feed</span>
-          <strong>{socialFeedItems.length}</strong>
-          <p>Activites et posts</p>
         </div>
       </div>
 
@@ -6984,7 +6971,6 @@ function SocialTab({
           { key: "feed", label: "Fil" },
           { key: "profile", label: "Profil" },
           { key: "friends", label: "Amis" },
-          { key: "showcase", label: "Vitrine" },
         ].map((item) => (
           <button
             key={item.key}
@@ -7321,7 +7307,7 @@ function SocialTab({
         />
       </div>
 
-      <div className={`search-panel social-essential-panel ${socialView === "showcase" ? "" : "social-section-hidden"}`}>
+      <div className={`search-panel social-essential-panel ${socialView === "profile" ? "" : "social-section-hidden"}`}>
         <div className="home-section-head">
           <div>
             <h2 className="panel-title">Essentiel du profil</h2>
@@ -14533,12 +14519,16 @@ export default function App() {
   const [hardware, setHardware] = useState([]);
   const [socialProfile, setSocialProfile] = useState(() => {
     try {
+      const storedProfile = JSON.parse(
+        localStorage.getItem("checkpoint-social-profile") || "{}"
+      );
+
       return {
         ...DEFAULT_SOCIAL_PROFILE,
-        ...JSON.parse(localStorage.getItem("checkpoint-social-profile") || "{}"),
+        ...storedProfile,
         publicSections: {
           ...DEFAULT_PUBLIC_SECTIONS,
-          ...(JSON.parse(localStorage.getItem("checkpoint-social-profile") || "{}").publicSections || {}),
+          ...(storedProfile.publicSections || {}),
         },
       };
     } catch (error) {
