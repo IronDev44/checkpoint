@@ -5940,6 +5940,8 @@ const DEFAULT_SOCIAL_PROFILE = {
   collectionPhotos: [],
   publicSections: DEFAULT_PUBLIC_SECTIONS,
   activityLikes: {},
+  activityComments: {},
+  posts: [],
 };
 
 function getActivityLikeState(activityLikes = {}, activityId = "") {
@@ -6235,7 +6237,11 @@ function ActivityFeed({
   compact = false,
   activityLikes = {},
   onToggleLike,
+  activityComments = {},
+  onAddComment,
 }) {
+  const [commentDrafts, setCommentDrafts] = useState({});
+
   if (!activities.length) {
     return (
       <EmptyState
@@ -6249,12 +6255,32 @@ function ActivityFeed({
     <div className={`social-feed ${compact ? "compact" : ""}`}>
       {activities.map((activity) => {
         const storedLikeState = getActivityLikeState(activityLikes, activity.id);
+        const comments = Array.isArray(activityComments[activity.id])
+          ? activityComments[activity.id]
+          : Array.isArray(activity.comments)
+          ? activity.comments
+          : [];
         const likeCount = Math.max(
           storedLikeState.count,
           Number(activity.likes || 0)
         );
         const isLiked = storedLikeState.liked || Boolean(activity.liked);
         const canLike = typeof onToggleLike === "function";
+        const canComment = typeof onAddComment === "function";
+        const commentDraft = commentDrafts[activity.id] || "";
+
+        const submitComment = (event) => {
+          event.preventDefault();
+          const text = commentDraft.trim();
+
+          if (!text) return;
+
+          onAddComment(activity.id, text);
+          setCommentDrafts((current) => ({
+            ...current,
+            [activity.id]: "",
+          }));
+        };
 
         return (
           <div key={activity.id} className="social-feed-item">
@@ -6271,10 +6297,13 @@ function ActivityFeed({
                 <span>{activity.type}</span>
                 <small>{formatActivityTime(activity.date)}</small>
               </div>
+              {activity.author && (
+                <div className="social-feed-author">@{activity.author}</div>
+              )}
               <strong>{activity.text}</strong>
               {activity.detail && <p>{activity.detail}</p>}
 
-              {(canLike || likeCount > 0) && (
+              {(canLike || canComment || likeCount > 0 || comments.length > 0) && (
                 <div className="social-feed-actions">
                   <button
                     type="button"
@@ -6283,13 +6312,48 @@ function ActivityFeed({
                     aria-pressed={isLiked}
                     disabled={!canLike}
                   >
-                    <span className="social-like-icon" aria-hidden="true">
-                      {isLiked ? "♥" : "♡"}
-                    </span>
                     <span>{isLiked ? "Aime" : "J'aime"}</span>
                     <strong>{likeCount}</strong>
                   </button>
+                  {comments.length > 0 && (
+                    <span className="social-comment-count">
+                      {comments.length} commentaire{comments.length > 1 ? "s" : ""}
+                    </span>
+                  )}
                 </div>
+              )}
+
+              {comments.length > 0 && (
+                <div className="social-comments">
+                  {comments.slice(0, 2).map((comment) => (
+                    <div
+                      key={comment.id || `${activity.id}-${comment.createdAt}`}
+                      className="social-comment"
+                    >
+                      <strong>{comment.author || "Checkpoint"}</strong>
+                      <span>{comment.text}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {canComment && (
+                <form className="social-comment-form" onSubmit={submitComment}>
+                  <input
+                    value={commentDraft}
+                    onChange={(event) =>
+                      setCommentDrafts((current) => ({
+                        ...current,
+                        [activity.id]: event.target.value,
+                      }))
+                    }
+                    placeholder="Ajouter un commentaire"
+                    maxLength={160}
+                  />
+                  <button type="submit" disabled={!commentDraft.trim()}>
+                    Envoyer
+                  </button>
+                </form>
               )}
             </div>
           </div>
@@ -6645,6 +6709,8 @@ function SocialTab({
   const [friendHandle, setFriendHandle] = useState("");
   const [socialMessage, setSocialMessage] = useState("");
   const [showPublicPreview, setShowPublicPreview] = useState(false);
+  const [socialView, setSocialView] = useState("feed");
+  const [postDraft, setPostDraft] = useState("");
   const activities = getSocialActivityFeed(games, hardware, badges);
   const stats = getAdvancedStats(games);
   const favorites = games.filter((game) => game.favorite).slice(0, 3);
@@ -6663,6 +6729,48 @@ function SocialTab({
   const currentHardware = getCurrentOwnedHardware(hardware);
   const profileShowcase = getProfileShowcase(games, hardware);
   const activityLikes = socialProfile.activityLikes || {};
+  const activityComments = socialProfile.activityComments || {};
+  const socialPosts = Array.isArray(socialProfile.posts)
+    ? socialProfile.posts
+    : [];
+  const socialPostActivities = socialPosts.map((post, index) => {
+    const date = parseActivityDate(post.createdAt);
+
+    return {
+      id: `post-${post.id || index}`,
+      type: "Post",
+      title: "Publication",
+      text: post.text,
+      detail: post.mood || "",
+      image: post.image || "",
+      author: normalizeHandle(socialProfile.handle),
+      date: post.createdAt,
+      sortTime: date?.getTime() || 0,
+      priority: 90 - index,
+    };
+  });
+  const socialFeedItems = [...socialPostActivities, ...activities]
+    .sort((a, b) => {
+      if ((b.sortTime || 0) !== (a.sortTime || 0)) {
+        return (b.sortTime || 0) - (a.sortTime || 0);
+      }
+
+      return (b.priority || 0) - (a.priority || 0);
+    })
+    .slice(0, 16);
+  const profileCompletionItems = [
+    socialProfile.displayName,
+    normalizeHandle(socialProfile.handle),
+    socialProfile.bio,
+    identityGames.length >= 3,
+    currentHardware.length > 0,
+    (socialProfile.setupPhotos || []).length > 0 ||
+      (socialProfile.collectionPhotos || []).length > 0,
+    socialProfile.visibility === "public",
+  ];
+  const profileCompletion = Math.round(
+    (profileCompletionItems.filter(Boolean).length / profileCompletionItems.length) * 100
+  );
   const featuredBadge = getFeaturedBadgeFromSelection(
     badges,
     socialProfile.featuredBadgeId
@@ -6727,13 +6835,14 @@ function SocialTab({
       ratings: item.ratings || {},
       gameCount: getHardwareConsoleGameStats(item, games).games,
     })),
-    recentActivity: activities.slice(0, 8).map((activity) => {
+    recentActivity: socialFeedItems.slice(0, 8).map((activity) => {
       const likeState = getActivityLikeState(activityLikes, activity.id);
 
       return {
         ...activity,
         likes: likeState.count,
         liked: likeState.liked,
+        comments: activityComments[activity.id] || [],
       };
     }),
   };
@@ -6769,6 +6878,42 @@ function SocialTab({
     };
 
     onProfileChange("activityLikes", nextLikes);
+  };
+
+  const handleAddComment = (activityId, text) => {
+    const nextComments = {
+      ...activityComments,
+      [activityId]: [
+        ...(activityComments[activityId] || []),
+        {
+          id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          text,
+          author: socialProfile.displayName || DEFAULT_SOCIAL_PROFILE.displayName,
+          createdAt: new Date().toISOString(),
+        },
+      ].slice(-12),
+    };
+
+    onProfileChange("activityComments", nextComments);
+  };
+
+  const handlePublishPost = () => {
+    const text = postDraft.trim();
+
+    if (!text) return;
+
+    const nextPosts = [
+      {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+        text,
+        createdAt: new Date().toISOString(),
+      },
+      ...socialPosts,
+    ].slice(0, 24);
+
+    onProfileChange("posts", nextPosts);
+    setPostDraft("");
+    setSocialView("feed");
   };
 
   const handlePhotoUpload = async (field, event) => {
@@ -6812,6 +6957,46 @@ function SocialTab({
         </div>
       </div>
 
+      <div className="social-command-center">
+        <div className="social-command-card">
+          <span>Profil public</span>
+          <strong>{profileCompletion}%</strong>
+          <p>
+            {socialProfile.visibility === "public"
+              ? "Visible et partageable"
+              : "Prive pour le moment"}
+          </p>
+        </div>
+        <div className="social-command-card">
+          <span>Reseau</span>
+          <strong>{socialFriends.length}</strong>
+          <p>Ami{socialFriends.length > 1 ? "s" : ""} ajoute{socialFriends.length > 1 ? "s" : ""}</p>
+        </div>
+        <div className="social-command-card">
+          <span>Feed</span>
+          <strong>{socialFeedItems.length}</strong>
+          <p>Activites et posts</p>
+        </div>
+      </div>
+
+      <div className="social-view-tabs">
+        {[
+          { key: "feed", label: "Fil" },
+          { key: "profile", label: "Profil" },
+          { key: "friends", label: "Amis" },
+          { key: "showcase", label: "Vitrine" },
+        ].map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            className={socialView === item.key ? "active" : ""}
+            onClick={() => setSocialView(item.key)}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
       {sharedProfile && (
         <PublicProfilePreview
           profile={sharedProfile}
@@ -6833,7 +7018,37 @@ function SocialTab({
         />
       )}
 
-      <div className="search-panel social-share-panel">
+      {socialView === "feed" && (
+        <div className="search-panel social-composer-panel">
+          <div className="home-section-head">
+            <div>
+              <h2 className="panel-title">Publier une update</h2>
+              <div className="option-value">
+                Partage une session, une envie, une acquisition ou un avis rapide.
+              </div>
+            </div>
+          </div>
+          <textarea
+            value={postDraft}
+            onChange={(event) => setPostDraft(event.target.value)}
+            placeholder="Ex: Ce soir je continue mon backlog PS5..."
+            maxLength={240}
+            rows={3}
+          />
+          <div className="social-composer-actions">
+            <span>{postDraft.trim().length}/240</span>
+            <button
+              type="button"
+              onClick={handlePublishPost}
+              disabled={!postDraft.trim()}
+            >
+              Publier
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className={`search-panel social-share-panel ${socialView === "profile" ? "" : "social-section-hidden"}`}>
         <div>
           <h2 className="panel-title">Visibilité du profil</h2>
           <div className="option-value">
@@ -6871,7 +7086,7 @@ function SocialTab({
         {socialMessage && <div className="social-message">{socialMessage}</div>}
       </div>
 
-      <div className="social-stats-grid">
+      <div className={`social-stats-grid ${socialView === "profile" ? "" : "social-section-hidden"}`}>
         <div className="stat-card">
           <div className="stat-value">{games.length}</div>
           <div className="stat-label">Jeux</div>
@@ -6890,7 +7105,7 @@ function SocialTab({
         </div>
       </div>
 
-      <div className="search-panel social-editor">
+      <div className={`search-panel social-editor ${socialView === "profile" ? "" : "social-section-hidden"}`}>
         <h2 className="panel-title">Identite publique</h2>
         <div className="social-editor-grid">
           <label>
@@ -6938,7 +7153,7 @@ function SocialTab({
         </label>
       </div>
 
-      <div className="search-panel social-identity-panel">
+      <div className={`search-panel social-identity-panel ${socialView === "profile" ? "" : "social-section-hidden"}`}>
         <div>
           <h2 className="panel-title">Jeux fondateurs</h2>
           <div className="option-value">
@@ -6987,7 +7202,7 @@ function SocialTab({
         )}
       </div>
 
-      <div className="search-panel social-photo-panel">
+      <div className={`search-panel social-photo-panel ${socialView === "profile" ? "" : "social-section-hidden"}`}>
         <div className="home-section-head">
           <div>
             <h2 className="panel-title">Photos publiques</h2>
@@ -7040,7 +7255,7 @@ function SocialTab({
         </div>
       </div>
 
-      <div className="search-panel social-friends-panel">
+      <div className={`search-panel social-friends-panel ${socialView === "friends" ? "" : "social-section-hidden"}`}>
         <div className="home-section-head">
           <div>
             <h2 className="panel-title">Amis</h2>
@@ -7091,20 +7306,22 @@ function SocialTab({
         )}
       </div>
 
-      <div className="search-panel">
+      <div className={`search-panel ${socialView === "feed" ? "" : "social-section-hidden"}`}>
         <div className="home-section-head">
-          <h2 className="panel-title">Activite recente</h2>
-          <span className="social-section-count">{Math.min(activities.length, 5)}</span>
+          <h2 className="panel-title">Fil social</h2>
+          <span className="social-section-count">{Math.min(socialFeedItems.length, 8)}</span>
         </div>
         <ActivityFeed
-          activities={activities.slice(0, 5)}
+          activities={socialFeedItems.slice(0, 8)}
           compact
           activityLikes={activityLikes}
           onToggleLike={handleToggleActivityLike}
+          activityComments={activityComments}
+          onAddComment={handleAddComment}
         />
       </div>
 
-      <div className="search-panel social-essential-panel">
+      <div className={`search-panel social-essential-panel ${socialView === "showcase" ? "" : "social-section-hidden"}`}>
         <div className="home-section-head">
           <div>
             <h2 className="panel-title">Essentiel du profil</h2>
@@ -14890,8 +15107,39 @@ const removeSocialProfilePhoto = async (field, index) => {
 
 const buildPublicSocialProfile = (profileOverride = socialProfile) => {
   const handle = normalizeHandle(profileOverride.handle);
-  const activities = getSocialActivityFeed(games, hardware, badges).slice(0, 8);
+  const socialPosts = Array.isArray(profileOverride.posts)
+    ? profileOverride.posts
+    : [];
+  const postActivities = socialPosts.map((post, index) => {
+    const date = parseActivityDate(post.createdAt);
+
+    return {
+      id: `post-${post.id || index}`,
+      type: "Post",
+      title: "Publication",
+      text: post.text,
+      detail: post.mood || "",
+      image: post.image || "",
+      author: handle,
+      date: post.createdAt,
+      sortTime: date?.getTime() || 0,
+      priority: 90 - index,
+    };
+  });
+  const activities = [
+    ...postActivities,
+    ...getSocialActivityFeed(games, hardware, badges),
+  ]
+    .sort((a, b) => {
+      if ((b.sortTime || 0) !== (a.sortTime || 0)) {
+        return (b.sortTime || 0) - (a.sortTime || 0);
+      }
+
+      return (b.priority || 0) - (a.priority || 0);
+    })
+    .slice(0, 8);
   const activityLikes = profileOverride.activityLikes || {};
+  const activityComments = profileOverride.activityComments || {};
   const stats = getAdvancedStats(games);
   const currentHardware = getCurrentOwnedHardware(hardware);
   const identityGameIds = Array.isArray(profileOverride.identityGameIds)
@@ -14990,7 +15238,9 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
       detail: activity.detail || "",
       image: activity.image || "",
       date: activity.date || null,
+      author: activity.author || "",
       likes: getActivityLikeState(activityLikes, activity.id).count,
+      comments: activityComments[activity.id] || [],
     })),
     updatedAt: serverTimestamp(),
   };
