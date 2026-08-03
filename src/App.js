@@ -5840,6 +5840,43 @@ function LibrarySmartPanel({
         Math.min(wishlistGames.length * 0.4, 8)
     )
   );
+  const libraryMood =
+    libraryPulse >= 80
+      ? "Bibliotheque maitrisee"
+      : libraryPulse >= 55
+      ? "Bibliotheque solide"
+      : "Bibliotheque a organiser";
+  const collectionPlatforms = new Set(
+    collectionGames.flatMap((game) =>
+      game.playedPlatforms?.length
+        ? game.playedPlatforms
+        : game.platformNames?.length
+        ? [game.platformNames[0]]
+        : []
+    )
+  ).size;
+  const premiumMetrics = [
+    {
+      label: "Jeux possedes",
+      value: collectionGames.length,
+      detail: `${collectionPlatforms || 0} plateformes`,
+    },
+    {
+      label: "En rotation",
+      value: inProgressGames.length,
+      detail: inProgressGames.length ? "parties actives" : "aucune partie",
+    },
+    {
+      label: "Notes",
+      value: `${ratedPercent}%`,
+      detail: "collection evaluee",
+    },
+    {
+      label: "Finis",
+      value: `${finishedPercent}%`,
+      detail: "completion actuelle",
+    },
+  ];
   const smartCards = [
     continueGame && {
       label: "A reprendre",
@@ -5882,7 +5919,7 @@ function LibrarySmartPanel({
       <div className="library-smart-head">
         <div>
           <span>Radar bibliotheque</span>
-          <h2>Ce qui merite ton attention</h2>
+          <h2>{libraryMood}</h2>
           <p>
             Checkpoint priorise les jeux a reprendre, a lancer, a noter et les sorties a surveiller.
           </p>
@@ -5895,22 +5932,13 @@ function LibrarySmartPanel({
       </div>
 
       <div className="library-smart-metrics">
-        <div>
-          <strong>{collectionGames.length}</strong>
-          <span>collection</span>
-        </div>
-        <div>
-          <strong>{inProgressGames.length}</strong>
-          <span>en cours</span>
-        </div>
-        <div>
-          <strong>{ratedPercent}%</strong>
-          <span>notes</span>
-        </div>
-        <div>
-          <strong>{finishedPercent}%</strong>
-          <span>termines</span>
-        </div>
+        {premiumMetrics.map((metric) => (
+          <div key={metric.label}>
+            <strong>{metric.value}</strong>
+            <span>{metric.label}</span>
+            <small>{metric.detail}</small>
+          </div>
+        ))}
       </div>
 
       {smartCards.length > 0 && (
@@ -5926,10 +5954,17 @@ function LibrarySmartPanel({
                 onOpenDetail?.(card.game, card.view === "wishlist" ? wishlistGames : games);
               }}
             >
-              <span>{card.label}</span>
-              <strong>{card.title}</strong>
-              <small>{card.detail}</small>
-              <em>{card.action}</em>
+              {card.game.image ? (
+                <img src={card.game.image} alt={card.title} loading="lazy" decoding="async" />
+              ) : (
+                <div className="library-smart-card-art">CP</div>
+              )}
+              <div>
+                <span>{card.label}</span>
+                <strong>{card.title}</strong>
+                <small>{card.detail}</small>
+                <em>{card.action}</em>
+              </div>
             </button>
           ))}
         </div>
