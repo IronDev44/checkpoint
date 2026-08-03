@@ -5955,6 +5955,76 @@ const DEFAULT_SOCIAL_PROFILE = {
   posts: [],
 };
 
+const SOCIAL_PROFILE_STORAGE_KEY = "checkpoint-social-profile";
+const SOCIAL_PROFILE_SCHEMA_VERSION = 2;
+
+function normalizeArray(value, limit = Infinity) {
+  return Array.isArray(value) ? value.filter(Boolean).slice(0, limit) : [];
+}
+
+function normalizeObject(value) {
+  return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+}
+
+function normalizeSocialProfile(profile = {}) {
+  const source = normalizeObject(profile);
+  const displayName =
+    String(source.displayName || DEFAULT_SOCIAL_PROFILE.displayName).trim() ||
+    DEFAULT_SOCIAL_PROFILE.displayName;
+  const handle =
+    normalizeHandle(source.handle || DEFAULT_SOCIAL_PROFILE.handle) ||
+    DEFAULT_SOCIAL_PROFILE.handle;
+  const creatorEnabled =
+    DEFAULT_SOCIAL_PROFILE.creatorBadgeEnabled ||
+    isCreatorProfile({
+      ...DEFAULT_SOCIAL_PROFILE,
+      ...source,
+      displayName,
+      handle,
+    });
+
+  return {
+    ...DEFAULT_SOCIAL_PROFILE,
+    ...source,
+    schemaVersion: SOCIAL_PROFILE_SCHEMA_VERSION,
+    displayName,
+    handle,
+    bio:
+      typeof source.bio === "string"
+        ? source.bio
+        : DEFAULT_SOCIAL_PROFILE.bio,
+    platform:
+      typeof source.platform === "string"
+        ? source.platform
+        : DEFAULT_SOCIAL_PROFILE.platform,
+    visibility: source.visibility === "public" ? "public" : "prive",
+    featuredBadgeId:
+      source.featuredBadgeId || (creatorEnabled ? "creator_checkpoint" : ""),
+    isCreator: creatorEnabled,
+    creatorBadgeEnabled: creatorEnabled,
+    identityGameIds: normalizeArray(source.identityGameIds, 3).map(String),
+    setupPhotos: normalizeArray(source.setupPhotos, 9),
+    collectionPhotos: normalizeArray(source.collectionPhotos, 9),
+    publicSections: {
+      ...DEFAULT_PUBLIC_SECTIONS,
+      ...normalizeObject(source.publicSections),
+    },
+    activityLikes: normalizeObject(source.activityLikes),
+    activityComments: normalizeObject(source.activityComments),
+    posts: normalizeArray(source.posts, 50),
+  };
+}
+
+function storeSocialProfile(profile) {
+  const normalizedProfile = normalizeSocialProfile(profile);
+  localStorage.setItem(
+    SOCIAL_PROFILE_STORAGE_KEY,
+    JSON.stringify(normalizedProfile)
+  );
+
+  return normalizedProfile;
+}
+
 function getActivityLikeState(activityLikes = {}, activityId = "") {
   const entry = activityLikes?.[activityId];
 
@@ -14523,21 +14593,12 @@ export default function App() {
   const [socialProfile, setSocialProfile] = useState(() => {
     try {
       const storedProfile = JSON.parse(
-        localStorage.getItem("checkpoint-social-profile") || "{}"
+        localStorage.getItem(SOCIAL_PROFILE_STORAGE_KEY) || "{}"
       );
 
-      return {
-        ...DEFAULT_SOCIAL_PROFILE,
-        ...storedProfile,
-        isCreator: true,
-        creatorBadgeEnabled: true,
-        publicSections: {
-          ...DEFAULT_PUBLIC_SECTIONS,
-          ...(storedProfile.publicSections || {}),
-        },
-      };
+      return storeSocialProfile(storedProfile);
     } catch (error) {
-      return DEFAULT_SOCIAL_PROFILE;
+      return storeSocialProfile(DEFAULT_SOCIAL_PROFILE);
     }
   });
   const [socialFriends, setSocialFriends] = useState(() => {
@@ -14682,18 +14743,8 @@ const importCheckpointBackup = async (event) => {
     }
 
     if (payload.socialProfile) {
-      const nextProfile = {
-        ...DEFAULT_SOCIAL_PROFILE,
-        ...payload.socialProfile,
-        isCreator: true,
-        creatorBadgeEnabled: true,
-        publicSections: {
-          ...DEFAULT_PUBLIC_SECTIONS,
-          ...(payload.socialProfile.publicSections || {}),
-        },
-      };
+      const nextProfile = storeSocialProfile(payload.socialProfile);
       setSocialProfile(nextProfile);
-      localStorage.setItem("checkpoint-social-profile", JSON.stringify(nextProfile));
       await syncPublicProfileIfNeeded(nextProfile);
     }
 
@@ -15025,16 +15076,12 @@ const handleClaimCheckpointGoal = (goal) => {
   showToast(`${goal.title} validé. +${earnedXP} XP`);
 };
 const updateSocialProfile = (field, value) => {
-  const nextProfile = {
+  const nextProfile = storeSocialProfile({
     ...socialProfile,
     [field]: field === "handle" ? normalizeHandle(value) : value,
-  };
+  });
 
   setSocialProfile(nextProfile);
-  localStorage.setItem(
-    "checkpoint-social-profile",
-    JSON.stringify(nextProfile)
-  );
 
   syncPublicProfileIfNeeded(nextProfile).catch((error) => {
     console.error("Erreur synchronisation profil public :", error);
@@ -15062,16 +15109,12 @@ const addSocialProfilePhotos = async (field, fileList) => {
 
   try {
     const photos = await Promise.all(files.map((file) => resizeSocialPhoto(file)));
-    const nextProfile = {
+    const nextProfile = storeSocialProfile({
       ...socialProfile,
       [field]: [...(socialProfile[field] || []), ...photos].slice(0, 9),
-    };
+    });
 
     setSocialProfile(nextProfile);
-    localStorage.setItem(
-      "checkpoint-social-profile",
-      JSON.stringify(nextProfile)
-    );
     await syncPublicProfileIfNeeded(nextProfile);
 
     return { ok: true, message: "Photos ajoutées au profil." };
@@ -15082,18 +15125,14 @@ const addSocialProfilePhotos = async (field, fileList) => {
 };
 
 const removeSocialProfilePhoto = async (field, index) => {
-  const nextProfile = {
+  const nextProfile = storeSocialProfile({
     ...socialProfile,
     [field]: (socialProfile[field] || []).filter(
       (_, itemIndex) => itemIndex !== index
     ),
-  };
+  });
 
   setSocialProfile(nextProfile);
-  localStorage.setItem(
-    "checkpoint-social-profile",
-    JSON.stringify(nextProfile)
-  );
 
   try {
     await syncPublicProfileIfNeeded(nextProfile);
@@ -15257,16 +15296,13 @@ const setSocialProfileVisibility = async (visibility) => {
       visibility,
     };
 
-    setSocialProfile(nextProfile);
-    localStorage.setItem(
-      "checkpoint-social-profile",
-      JSON.stringify(nextProfile)
-    );
+    const normalizedProfile = storeSocialProfile(nextProfile);
+    setSocialProfile(normalizedProfile);
 
     if (visibility === "public") {
       await setDoc(
         doc(db, "publicProfiles", handle),
-        { ...buildPublicSocialProfile(), visibility: "public" },
+        { ...buildPublicSocialProfile(normalizedProfile), visibility: "public" },
         { merge: true }
       );
 
