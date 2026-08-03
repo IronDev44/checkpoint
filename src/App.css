@@ -8154,6 +8154,7 @@ body[data-ui="modern"] .chip.active {
 .social-like-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 7px;
   min-height: 32px;
   padding: 7px 11px;
@@ -8195,34 +8196,14 @@ body[data-ui="modern"] .chip.active {
 }
 
 .social-like-icon {
-  width: 13px;
-  height: 13px;
-  position: relative;
-  transform: rotate(-45deg);
-}
-
-.social-like-icon::before,
-.social-like-icon::after {
-  content: "";
-  position: absolute;
-  width: 9px;
-  height: 14px;
-  border-radius: 9px 9px 0 0;
-  background: currentColor;
-}
-
-.social-like-icon::before {
-  left: 6px;
-  top: 0;
-  transform: rotate(45deg);
-  transform-origin: 0 100%;
-}
-
-.social-like-icon::after {
-  left: 0;
-  top: 0;
-  transform: rotate(-45deg);
-  transform-origin: 100% 100%;
+  display: inline-grid;
+  place-items: center;
+  width: 15px;
+  height: 15px;
+  color: currentColor;
+  font-size: 15px;
+  line-height: 1;
+  transform: translateY(-1px);
 }
 
 .social-like-btn strong {

@@ -5986,6 +5986,18 @@ function formatActivityTime(value) {
   });
 }
 
+function getGameCoverImage(game = {}) {
+  return (
+    game.image ||
+    game.background_image ||
+    game.cover ||
+    game.coverUrl ||
+    game.imageUrl ||
+    game.thumbnail ||
+    ""
+  );
+}
+
 function getSocialActivityFeed(games = [], hardware = [], badges = []) {
   const activities = [];
 
@@ -5993,7 +6005,7 @@ function getSocialActivityFeed(games = [], hardware = [], badges = []) {
     const date = parseActivityDate(game.updatedAt || game.createdAt);
     const base = {
       id: `game-${game.id || index}`,
-      image: game.image || "",
+      image: getGameCoverImage(game),
       title: game.name,
       date: game.updatedAt || game.createdAt,
       sortTime: date?.getTime() || 0,
@@ -6271,7 +6283,9 @@ function ActivityFeed({
                     aria-pressed={isLiked}
                     disabled={!canLike}
                   >
-                    <span className="social-like-icon" aria-hidden="true" />
+                    <span className="social-like-icon" aria-hidden="true">
+                      {isLiked ? "♥" : "♡"}
+                    </span>
                     <span>{isLiked ? "Aime" : "J'aime"}</span>
                     <strong>{likeCount}</strong>
                   </button>
