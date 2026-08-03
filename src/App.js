@@ -6459,11 +6459,19 @@ function ActivityFeed({
         };
 
         return (
-          <div key={activity.id} className="social-feed-item">
+          <div
+            key={activity.id}
+            className={`social-feed-item source-${activity.source || "generic"}`}
+          >
             {activity.image ? (
-              <img src={activity.image} alt={activity.title} />
+              <img
+                src={activity.image}
+                alt={activity.title}
+                loading="lazy"
+                decoding="async"
+              />
             ) : (
-              <div className="social-feed-placeholder">
+              <div className={`social-feed-placeholder source-${activity.source || "generic"}`}>
                 {activity.type === "Badge" ? "B" : "C"}
               </div>
             )}
@@ -6498,7 +6506,10 @@ function ActivityFeed({
                     aria-pressed={isLiked}
                     disabled={!canLike}
                   >
-                    <span>{isLiked ? "Aime" : "J'aime"}</span>
+                    <span className="social-like-icon" aria-hidden="true">
+                      ♥
+                    </span>
+                    <span>{isLiked ? "Aimé" : "J'aime"}</span>
                     <strong>{likeCount}</strong>
                   </button>
                   {comments.length > 0 && (
@@ -6996,6 +7007,43 @@ function SocialTab({
     { label: "Note moy.", value: avgRating },
     { label: "Materiel", value: currentHardware.length },
   ];
+  const totalSocialLikes = allSocialFeedItems.reduce((total, activity) => {
+    const likeState = getActivityLikeState(activityLikes, activity.id);
+    return total + Math.max(likeState.count, Number(activity.likes || 0));
+  }, 0);
+  const totalSocialComments = Object.values(activityComments).reduce(
+    (total, comments) => total + (Array.isArray(comments) ? comments.length : 0),
+    0
+  );
+  const publicPhotoCount =
+    (socialProfile.setupPhotos || []).length +
+    (socialProfile.collectionPhotos || []).length;
+  const socialMomentumCards = [
+    {
+      label: "Profil",
+      value: `${profileCompletion}%`,
+      detail:
+        socialProfile.visibility === "public"
+          ? "visible par lien"
+          : "prive pour le moment",
+    },
+    {
+      label: "Engagement",
+      value: totalSocialLikes + totalSocialComments,
+      detail: `${totalSocialLikes} likes - ${totalSocialComments} com.`,
+    },
+    {
+      label: "Reseau",
+      value: socialFriends.length,
+      detail: socialFriends.length > 1 ? "amis ajoutes" : "ami ajoute",
+    },
+  ];
+  const nextSocialActions = [
+    !socialPosts.length ? "Publier une premiere update" : "",
+    identityGames.length < 3 ? "Completer les jeux fondateurs" : "",
+    !publicPhotoCount ? "Ajouter une photo de setup" : "",
+    socialProfile.visibility !== "public" ? "Activer le profil public" : "",
+  ].filter(Boolean);
   const ownPublicPreview = {
     displayName: socialProfile.displayName || DEFAULT_SOCIAL_PROFILE.displayName,
     handle: normalizeHandle(socialProfile.handle),
@@ -7212,6 +7260,35 @@ function SocialTab({
           </button>
         ))}
       </div>
+
+      <div className="social-command-center">
+        {socialMomentumCards.map((card) => (
+          <div key={card.label} className="social-command-card">
+            <span>{card.label}</span>
+            <strong>{card.value}</strong>
+            <p>{card.detail}</p>
+          </div>
+        ))}
+      </div>
+
+      {nextSocialActions.length > 0 && (
+        <div className="social-next-actions">
+          <strong>À rendre vivant</strong>
+          <div>
+            {nextSocialActions.slice(0, 3).map((action) => (
+              <button
+                key={action}
+                type="button"
+                onClick={() =>
+                  setSocialView(action.includes("update") ? "feed" : "profile")
+                }
+              >
+                {action}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {sharedProfile && (
         <PublicProfilePreview

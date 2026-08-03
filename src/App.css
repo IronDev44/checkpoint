@@ -7349,6 +7349,42 @@ body[data-ui="modern"] .chip.active {
   font-weight: 800;
 }
 
+.social-next-actions {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 18%, var(--surface-border));
+  border-radius: var(--ui-radius-lg);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.018)),
+    rgba(255, 255, 255, 0.025);
+}
+
+.social-next-actions strong {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.social-next-actions div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.social-next-actions button {
+  min-width: 0;
+  border: 1px solid var(--surface-border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 8px 10px;
+}
+
 .social-view-tabs {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -8339,12 +8375,16 @@ body[data-ui="modern"] .chip.active {
 }
 
 .social-feed-item {
-  display: flex;
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
   align-items: flex-start;
-  gap: 12px;
-  padding: 13px;
+  gap: 13px;
+  overflow: hidden;
+  padding: 14px;
   border-radius: var(--ui-radius-lg);
   background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--accent) 11%, transparent), transparent 42%),
     linear-gradient(135deg, rgba(255,255,255,0.065), rgba(255,255,255,0.02)),
     var(--surface-bg);
   border: 1px solid var(--surface-border);
@@ -8357,19 +8397,35 @@ body[data-ui="modern"] .chip.active {
 
 .social-feed-item img,
 .social-feed-placeholder {
-  width: 58px;
-  height: 58px;
-  border-radius: 15px;
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
   object-fit: cover;
   flex-shrink: 0;
   background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.09);
 }
 
 .social-feed-placeholder {
   display: grid;
   place-items: center;
-  color: white;
+  color: var(--text-main);
   font-weight: 950;
+  background:
+    radial-gradient(circle at 30% 20%, color-mix(in srgb, var(--accent) 24%, transparent), transparent 60%),
+    rgba(255,255,255,0.07);
+}
+
+.social-feed-placeholder.source-posts {
+  color: white;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 72%, #ffffff 10%), color-mix(in srgb, var(--accent-2, var(--accent)) 54%, #111827 18%));
+}
+
+.social-feed-placeholder.source-badges {
+  background:
+    radial-gradient(circle at 50% 12%, rgba(255, 214, 102, 0.28), transparent 45%),
+    rgba(255,255,255,0.07);
 }
 
 .social-feed-main {
@@ -8438,6 +8494,7 @@ body[data-ui="modern"] .chip.active {
 .social-feed-actions {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 9px;
 }
@@ -8458,6 +8515,7 @@ body[data-ui="modern"] .chip.active {
   font-size: 12px;
   font-weight: 900;
   box-shadow: none;
+  white-space: nowrap;
   transition:
     transform 0.16s ease,
     border-color 0.16s ease,
@@ -8488,12 +8546,11 @@ body[data-ui="modern"] .chip.active {
 .social-like-icon {
   display: inline-grid;
   place-items: center;
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   color: currentColor;
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1;
-  transform: translateY(-1px);
 }
 
 .social-like-btn strong {
@@ -8627,7 +8684,6 @@ body[data-ui="modern"] .chip.active {
   }
 
   .social-stats-grid,
-  .social-command-center,
   .social-editor-grid,
   .social-essential-grid,
   .social-identity-selectors,
@@ -8653,19 +8709,57 @@ body[data-ui="modern"] .chip.active {
     display: grid;
   }
 
+  .social-command-center {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .social-command-card {
+    padding: 10px;
+    border-radius: var(--ui-radius-md);
+  }
+
+  .social-command-card span {
+    font-size: 9px;
+  }
+
+  .social-command-card strong {
+    font-size: 20px;
+  }
+
+  .social-command-card p {
+    font-size: 10px;
+    line-height: 1.25;
+  }
+
+  .social-next-actions {
+    padding: 10px;
+  }
+
+  .social-next-actions div {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .social-next-actions div::-webkit-scrollbar {
+    display: none;
+  }
+
   .social-feed-top {
     flex-direction: column;
     gap: 2px;
   }
 
   .social-feed-item {
+    grid-template-columns: 54px minmax(0, 1fr);
     gap: 10px;
   }
 
   .social-feed-item img,
   .social-feed-placeholder {
-    width: 50px;
-    height: 50px;
+    width: 54px;
+    height: 54px;
     border-radius: 13px;
   }
 
