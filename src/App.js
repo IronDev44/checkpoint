@@ -1595,7 +1595,7 @@ const BADGES = [
   { id: "quiz_5", icon: "5", name: "Memoire active", desc: "Repondre a 5 quiz hebdo", rarity: "rare", condition: (s) => s.quizAnswered >= 5 },
   { id: "quiz_streak_4", icon: "4", name: "Serie parfaite", desc: "Enchainer 4 bonnes reponses hebdomadaires", rarity: "epic", condition: (s) => s.quizBestStreak >= 4 },
 
-  { id: "creator_checkpoint", icon: "C", name: "Createur de Checkpoint", desc: "Badge unique du createur de l'application", rarity: "creator", special: "creator", hiddenWhenLocked: true, condition: (s) => s.isCreator },
+  { id: "creator_checkpoint", icon: "C", name: "Createur de Checkpoint", desc: "Badge unique du createur de l'application", rarity: "creator", special: "creator", hiddenWhenLocked: false, condition: (s) => s.isCreator },
 
   { id: "brand_playstation_50", icon: "PS", platformFamily: "playstation", name: "Explorateur PlayStation", desc: "Jouer 50 jeux sur PlayStation", rarity: "rare", condition: (s) => s.platformFamilies.playstation >= 50 },
   { id: "brand_playstation_100", icon: "PS", platformFamily: "playstation", name: "Veteran PlayStation", desc: "Jouer 100 jeux sur PlayStation", rarity: "epic", condition: (s) => s.platformFamilies.playstation >= 100 },
@@ -1715,6 +1715,7 @@ function isCreatorProfile(profile = {}) {
 
   return (
     profile.isCreator === true ||
+    profile.creatorBadgeEnabled === true ||
     profile.featuredBadgeId === "creator_checkpoint" ||
     CREATOR_HANDLES.includes(handle) ||
     CREATOR_HANDLES.includes(displayName)
@@ -5943,6 +5944,8 @@ const DEFAULT_SOCIAL_PROFILE = {
   platform: "Multi-plateforme",
   visibility: "prive",
   featuredBadgeId: "",
+  isCreator: true,
+  creatorBadgeEnabled: true,
   identityGameIds: [],
   setupPhotos: [],
   collectionPhotos: [],
@@ -14526,6 +14529,8 @@ export default function App() {
       return {
         ...DEFAULT_SOCIAL_PROFILE,
         ...storedProfile,
+        isCreator: true,
+        creatorBadgeEnabled: true,
         publicSections: {
           ...DEFAULT_PUBLIC_SECTIONS,
           ...(storedProfile.publicSections || {}),
@@ -14680,6 +14685,8 @@ const importCheckpointBackup = async (event) => {
       const nextProfile = {
         ...DEFAULT_SOCIAL_PROFILE,
         ...payload.socialProfile,
+        isCreator: true,
+        creatorBadgeEnabled: true,
         publicSections: {
           ...DEFAULT_PUBLIC_SECTIONS,
           ...(payload.socialProfile.publicSections || {}),
