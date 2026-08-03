@@ -2418,6 +2418,45 @@ const RANKS = [
   { min: 100, max: 100, title: "Suprême" },
 ];
 
+function getCheckpointRoadmap(
+  level,
+  rawTotalXP,
+  checkpointTrialProgress = DEFAULT_CHECKPOINT_TRIAL_PROGRESS
+) {
+  const completed = checkpointTrialProgress.completed || {};
+  const attempts = checkpointTrialProgress.attempts || {};
+
+  return CHECKPOINT_LEVELS.map((checkpointLevel, index) => {
+    const trial = getCheckpointTrial(checkpointLevel);
+    const checkpointXP = getXPForLevel(checkpointLevel);
+    const previousXP =
+      index === 0 ? 0 : getXPForLevel(CHECKPOINT_LEVELS[index - 1]);
+    const segmentXP = Math.max(checkpointXP - previousXP, 1);
+    const segmentProgress = Math.min(
+      Math.max(((rawTotalXP - previousXP) / segmentXP) * 100, 0),
+      100
+    );
+    const isCompleted = Boolean(completed[String(checkpointLevel)]);
+    const isReached = rawTotalXP >= checkpointXP || level >= checkpointLevel;
+    const isPending = isReached && !isCompleted;
+
+    return {
+      level: checkpointLevel,
+      title: trial?.title || `Checkpoint ${checkpointLevel}`,
+      rewardRank: trial?.rewardRank || "Rang a debloquer",
+      guardian: trial?.guardian || "Gardien du Checkpoint",
+      passScore: trial?.passScore || 0,
+      totalQuestions: trial?.questions?.length || 0,
+      attempts: attempts[String(checkpointLevel)] || 0,
+      isCompleted,
+      isReached,
+      isPending,
+      segmentProgress,
+      xpRemaining: Math.max(checkpointXP - rawTotalXP, 0),
+    };
+  });
+}
+
 function getSuggestedDifficulty(game) {
   const genres = (game.genres || []).map((g) => g.name.toLowerCase());
   const tags = (game.tags || []).map((t) => t.name.toLowerCase());
@@ -8902,11 +8941,15 @@ function ProfileTab({
   badges,
   level,
   totalXP,
+  rawTotalXP,
   progress,
   games,
   hardware = [],
   featuredBadgeId,
   onSelectFeaturedBadge,
+  checkpointTrialProgress = DEFAULT_CHECKPOINT_TRIAL_PROGRESS,
+  pendingCheckpointLevel = null,
+  onOpenTrial,
 }) {
   const unlockedBadges = badges.filter((b) => b.unlocked);
   const lockedBadges = badges.filter((b) => !b.unlocked && !b.hiddenWhenLocked);
@@ -8927,6 +8970,17 @@ function ProfileTab({
     profileShowcase.hardwareHighlights.length > 0;
   const currentRank =
     [...RANKS].reverse().find((rank) => level >= rank.min) || RANKS[0];
+  const checkpointRoadmap = getCheckpointRoadmap(
+    level,
+    rawTotalXP ?? totalXP,
+    checkpointTrialProgress
+  );
+  const completedCheckpoints = checkpointRoadmap.filter((item) => item.isCompleted);
+  const pendingCheckpoint =
+    checkpointRoadmap.find((item) => item.level === pendingCheckpointLevel) ||
+    checkpointRoadmap.find((item) => item.isPending);
+  const nextCheckpoint =
+    pendingCheckpoint || checkpointRoadmap.find((item) => !item.isCompleted);
   const completedCount = games.filter(isGameFinishedStatus).length;
   const ratedGames = games
     .map((game) => ({
@@ -9076,6 +9130,90 @@ function ProfileTab({
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      <div className="search-panel profile-trials-panel">
+        <div className="profile-section-header">
+          <div>
+            <h2 className="panel-title">Salle des Epreuves</h2>
+            <div className="option-value">
+              Les grands rangs se valident par checkpoint, pas seulement par XP.
+            </div>
+          </div>
+
+          <div className="profile-trials-counter">
+            {completedCheckpoints.length}/{CHECKPOINT_LEVELS.length}
+          </div>
+        </div>
+
+        <div className="profile-trials-status">
+          <div>
+            <span>Prochain cap</span>
+            <strong>
+              {nextCheckpoint
+                ? `Checkpoint ${nextCheckpoint.level}`
+                : "Tous les checkpoints valides"}
+            </strong>
+            <small>
+              {pendingCheckpoint
+                ? `${pendingCheckpoint.guardian} attend dans la Salle.`
+                : nextCheckpoint
+                  ? `${nextCheckpoint.xpRemaining} XP avant l'epreuve.`
+                  : "Progression libre jusqu'au prochain chapitre."}
+            </small>
+          </div>
+
+          {pendingCheckpoint && (
+            <button
+              type="button"
+              className="profile-trials-enter"
+              onClick={() => onOpenTrial?.(pendingCheckpoint.level)}
+            >
+              Entrer
+            </button>
+          )}
+        </div>
+
+        <div className="profile-trials-roadmap">
+          {checkpointRoadmap.map((checkpoint) => (
+            <div
+              key={checkpoint.level}
+              className={`profile-trial-node ${
+                checkpoint.isCompleted
+                  ? "completed"
+                  : checkpoint.isPending
+                    ? "pending"
+                    : checkpoint.isReached
+                      ? "reached"
+                      : "locked"
+              }`}
+            >
+              <div className="profile-trial-head">
+                <span>Lvl {checkpoint.level}</span>
+                <strong>{checkpoint.title}</strong>
+              </div>
+              <div className="profile-trial-rank">{checkpoint.rewardRank}</div>
+              <div className="profile-trial-meta">
+                <span>
+                  {checkpoint.isCompleted
+                    ? "Valide"
+                    : checkpoint.isPending
+                      ? "Epreuve disponible"
+                      : `${checkpoint.xpRemaining} XP restants`}
+                </span>
+                {checkpoint.attempts > 0 && <span>{checkpoint.attempts} essai(s)</span>}
+                {checkpoint.totalQuestions > 0 && (
+                  <span>
+                    {checkpoint.passScore}/{checkpoint.totalQuestions} requis
+                  </span>
+                )}
+              </div>
+              <div className="profile-trial-progress">
+                <div style={{ width: `${checkpoint.segmentProgress}%` }} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -17865,6 +18003,7 @@ const setPlayedPlatforms = async (id, platforms) => {
               badges={badges}
               level={level}
               totalXP={totalXP}
+              rawTotalXP={rawTotalXP}
               progress={progress}
               games={games}
               hardware={hardware}
@@ -17872,6 +18011,9 @@ const setPlayedPlatforms = async (id, platforms) => {
               onSelectFeaturedBadge={(badgeId) =>
                 updateSocialProfile("featuredBadgeId", badgeId)
               }
+              checkpointTrialProgress={checkpointTrialProgress}
+              pendingCheckpointLevel={pendingCheckpointLevel}
+              onOpenTrial={openTrialRoom}
             />
           )}
 
