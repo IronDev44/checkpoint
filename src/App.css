@@ -12950,10 +12950,10 @@ html body[data-theme="theme-indigo"] {
 }
 
 .options-group {
-  margin-top: 18px;
-  padding: 14px;
+  margin-top: 14px;
+  padding: 12px;
   border: 1px solid rgba(255, 255, 255, 0.065);
-  border-radius: 22px;
+  border-radius: 20px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
     rgba(0, 0, 0, 0.08);
@@ -12961,11 +12961,11 @@ html body[data-theme="theme-indigo"] {
 
 .options-group-head {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -12985,10 +12985,10 @@ html body[data-theme="theme-indigo"] {
 }
 
 .option-section {
-  margin-top: 12px;
-  padding: 16px;
+  margin-top: 10px;
+  padding: 12px;
   border: 1px solid var(--surface-border);
-  border-radius: var(--ui-radius-lg);
+  border-radius: 18px;
   background: rgba(255, 255, 255, 0.035);
 }
 
@@ -12999,6 +12999,20 @@ html body[data-theme="theme-indigo"] {
 .option-section-split {
   display: grid;
   gap: 10px;
+}
+
+@media (min-width: 860px) {
+  .options-tab .option-section-split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .options-tab .option-section > .option-section-split,
+  .options-tab .connected-services-summary,
+  .options-tab .steam-sync-card,
+  .options-tab .xbox-connect-card,
+  .options-tab .psn-connect-card {
+    grid-column: 1 / -1;
+  }
 }
 
 .option-section h3 {
@@ -13052,6 +13066,11 @@ html body[data-theme="theme-indigo"] {
 
 .option-pill-grid.themes {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 4px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 
 .option-subgrid {
@@ -13102,10 +13121,10 @@ html body[data-theme="theme-indigo"] {
 
 .option-setting-card {
   display: grid;
-  gap: 12px;
-  padding: 14px;
+  gap: 10px;
+  padding: 12px;
   border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 18px;
+  border-radius: 16px;
   background: rgba(0, 0, 0, 0.11);
 }
 
@@ -13158,6 +13177,49 @@ html body[data-theme="theme-indigo"] {
   padding: 13px 12px;
   border-radius: 16px;
   font-size: 0.94rem;
+}
+
+@media (max-width: 640px) {
+  .options-tab .options-panel {
+    padding-inline: 14px;
+  }
+
+  .options-group {
+    margin-top: 12px;
+    padding: 10px;
+    border-radius: 18px;
+  }
+
+  .options-group-head {
+    display: grid;
+    gap: 4px;
+  }
+
+  .options-group-head p {
+    max-width: none;
+    text-align: left;
+  }
+
+  .options-tab .option-section {
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .options-tab .option-setting-card {
+    padding: 11px;
+    border-radius: 15px;
+  }
+
+  .options-tab .option-pill-grid.themes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: 220px;
+  }
+
+  .options-tab .option-pill {
+    min-height: 42px;
+    padding: 10px 9px;
+    border-radius: 14px;
+  }
 }
 
 .startup-target-grid .option-pill {
