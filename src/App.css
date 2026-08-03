@@ -9570,6 +9570,122 @@ body[data-ui="modern"] .chip.active {
   min-width: 0;
 }
 
+.home-command-center {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.home-command-center .home-section-head {
+  margin-bottom: 0;
+}
+
+.home-command-score {
+  flex-shrink: 0;
+  min-width: 74px;
+  padding: 9px 11px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 25% 10%, color-mix(in srgb, var(--accent-solid) 30%, transparent), transparent 52%),
+    rgba(255, 255, 255, 0.07);
+  border: 1px solid color-mix(in srgb, var(--accent-solid) 30%, rgba(255, 255, 255, 0.12));
+  text-align: center;
+}
+
+.home-command-score strong,
+.home-command-score span {
+  display: block;
+}
+
+.home-command-score strong {
+  color: var(--text-main);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.home-command-score span {
+  margin-top: 3px;
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.home-command-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.home-command-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 142px;
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  padding: 13px;
+  border: 1px solid color-mix(in srgb, var(--accent-solid) 18%, rgba(255, 255, 255, 0.1));
+  border-radius: 18px;
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.025)),
+    rgba(0, 0, 0, 0.13);
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-command-card::after {
+  content: "";
+  position: absolute;
+  inset: auto 12px 10px auto;
+  width: 36px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--accent);
+  opacity: 0.75;
+}
+
+.home-command-card span {
+  color: color-mix(in srgb, var(--accent-solid) 55%, var(--text-soft));
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.home-command-card strong {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 16px;
+  line-height: 1.12;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.home-command-card small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-soft);
+  font-size: 12px;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.home-command-card em {
+  align-self: end;
+  width: fit-content;
+  margin-top: auto;
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-solid) 18%, rgba(255, 255, 255, 0.08));
+  border: 1px solid color-mix(in srgb, var(--accent-solid) 24%, rgba(255, 255, 255, 0.12));
+  color: var(--text-main);
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+}
+
 @media (max-width: 560px) {
   .home-hero {
     align-items: flex-start;
@@ -9619,6 +9735,22 @@ body[data-ui="modern"] .chip.active {
 
   .home-deals-card {
     padding: 14px;
+  }
+
+  .home-command-center {
+    padding: 14px;
+  }
+
+  .home-command-center .home-section-head {
+    align-items: flex-start;
+  }
+
+  .home-command-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-command-card {
+    min-height: 0;
   }
 
   .home-deals-card .home-section-head {

@@ -7962,6 +7962,56 @@ function HomeTab({
 
   const upcomingEvents = getUpcomingEvents(gamingEvents);
   const nextEvent = upcomingEvents[0];
+  const homeActionCards = [
+    nextPlayCandidate && {
+      id: "resume",
+      kicker: nextPlayCandidate.status === "en cours" ? "Partie active" : "A lancer",
+      title: nextPlayCandidate.name,
+      detail:
+        nextPlayCandidate.status === "en cours"
+          ? "Reprendre sans repasser par la bibliotheque."
+          : "Une bonne candidate pour la prochaine session.",
+      action: "Ouvrir",
+      onClick: () => onOpenDetail(nextPlayCandidate),
+    },
+    unratedGames.length > 0 && {
+      id: "ratings",
+      kicker: "Bibliotheque",
+      title: `${unratedGames.length} jeux sans note`,
+      detail: "Quelques notes en plus rendent les tops et recommandations plus fiables.",
+      action: "Noter",
+      onClick: () => setActiveTab("library"),
+    },
+    !quizLocked && {
+      id: "quiz",
+      kicker: "XP rapide",
+      title: "Quiz disponible",
+      detail: `Une question gaming, +${WEEKLY_QUIZ_XP.correct} XP si tu valides.`,
+      action: "Jouer",
+      onClick: () =>
+        document
+          .querySelector(".weekly-quiz-card")
+          ?.scrollIntoView({ behavior: "smooth", block: "center" }),
+    },
+    nextBadge?.progressData && {
+      id: "badge",
+      kicker: "Badge proche",
+      title: nextBadge.name,
+      detail: `${nextBadge.progressData.current}/${nextBadge.progressData.target} avant le prochain palier.`,
+      action: "Voir",
+      onClick: () => setActiveTab("profile"),
+    },
+    nextEvent && {
+      id: "event",
+      kicker: "A suivre",
+      title: nextEvent.name,
+      detail: formatEventDate(nextEvent.date),
+      action: "Live",
+      onClick: () => setActiveTab("live"),
+    },
+  ]
+    .filter(Boolean)
+    .slice(0, 3);
 
   useEffect(() => {
     setSelectedQuizAnswer(null);
@@ -8245,106 +8295,39 @@ function HomeTab({
         </div>
       )}
 
-      <div className="home-card progression-command-card">
-        <div className="progression-command-head">
-          <div>
-            <div className="home-card-title">Progression personnelle</div>
-            <p>
-              Tes objectifs, ton rythme et les prochaines recompenses du hub au meme endroit.
-            </p>
-          </div>
-
-          <div className="progression-command-score">
-            <span>Saison</span>
-            <strong>{weeklyMomentum}%</strong>
-          </div>
-        </div>
-
-        <div className="progression-command-grid">
-          {progressionCards.map((card) => (
-            <div key={card.label} className="progression-command-item">
-              <span>{card.label}</span>
-              <strong>{card.value}</strong>
-              <small>{card.detail}</small>
-              <div className="progression-command-meter">
-                <div style={{ width: `${card.progress}%` }} />
-              </div>
+      {homeActionCards.length > 0 && (
+        <div className="home-card home-command-center">
+          <div className="home-section-head">
+            <div>
+              <div className="home-card-title">A faire maintenant</div>
+              <p className="home-section-subtitle">
+                Trois raccourcis utiles, pas une liste de missions qui traine.
+              </p>
             </div>
-          ))}
-        </div>
-      </div>
 
-      <div className="home-card checkpoint-goals-card">
-        <div className="checkpoint-goals-head">
-          <div>
-            <div className="home-card-title">Objectifs Checkpoint</div>
-            <p>Des paliers utiles qui rapportent de l'XP sans remplir l'app de missions inutiles.</p>
+            <div className="home-command-score">
+              <strong>{weeklyMomentum}%</strong>
+              <span>rythme</span>
+            </div>
           </div>
 
-          <div className="checkpoint-goals-xp">
-            <strong>{claimedGoals.length}</strong>
-            <span>{claimedGoalsXP} XP</span>
-          </div>
-        </div>
-
-        {checkpointGoals.length > 0 ? (
-          <div className="checkpoint-goals-list">
-            {checkpointGoals.map((goal) => (
-              <div key={goal.id} className={`checkpoint-goal-row ${goal.claimable ? "claimable" : ""}`}>
-                <div className="checkpoint-goal-main">
-                  <div>
-                    <strong>{goal.title}</strong>
-                    <span>{goal.detail}</span>
-                  </div>
-
-                  <small>{goal.reward}</small>
-
-                  <div className="checkpoint-goal-progress">
-                    <div style={{ width: `${goal.progress}%` }} />
-                  </div>
-
-                  {goal.target && (
-                    <em>{goal.current} / {goal.target}</em>
-                  )}
-                </div>
-
-                <button
-                  type="button"
-                  className="checkpoint-goal-action"
-                  onClick={() => {
-                    if (goal.claimable) {
-                      onClaimCheckpointGoal?.(goal);
-                      return;
-                    }
-
-                    if (goal.game) {
-                      onOpenDetail(goal.game);
-                      return;
-                    }
-
-                    if (goal.tab === "home") {
-                      document
-                        .querySelector(".weekly-quiz-card")
-                        ?.scrollIntoView({ behavior: "smooth", block: "center" });
-                      return;
-                    }
-
-                    if (goal.tab) {
-                      setActiveTab(goal.tab);
-                    }
-                  }}
-                >
-                  {goal.claimable ? "Valider" : goal.actionLabel}
-                </button>
-              </div>
+          <div className="home-command-grid">
+            {homeActionCards.map((card) => (
+              <button
+                key={card.id}
+                type="button"
+                className="home-command-card"
+                onClick={card.onClick}
+              >
+                <span>{card.kicker}</span>
+                <strong>{card.title}</strong>
+                <small>{card.detail}</small>
+                <em>{card.action}</em>
+              </button>
             ))}
           </div>
-        ) : (
-          <div className="checkpoint-goals-empty">
-            Ton hub est propre. Ajoute une nouvelle envie, une note ou un objectif pour relancer la machine.
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="home-actions-grid home-main-actions">
         <button type="button" onClick={() => setActiveTab("search")}>
