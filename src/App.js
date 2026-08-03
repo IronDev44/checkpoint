@@ -6093,6 +6093,7 @@ function getSocialActivityFeed(games = [], hardware = [], badges = []) {
       date: game.updatedAt || game.createdAt,
       sortTime: date?.getTime() || 0,
       priority: 20 - index,
+      source: "games",
     };
 
     if (getGameRating(game) > 0) {
@@ -6163,6 +6164,7 @@ function getSocialActivityFeed(games = [], hardware = [], badges = []) {
       date: item.updatedAt || item.createdAt,
       sortTime: date?.getTime() || 0,
       priority: 8 - index,
+      source: "hardware",
     });
   });
 
@@ -6180,6 +6182,7 @@ function getSocialActivityFeed(games = [], hardware = [], badges = []) {
         date: null,
         sortTime: 0,
         priority: 35 - index,
+        source: "badges",
       });
     });
 
@@ -6320,6 +6323,7 @@ function ActivityFeed({
   onToggleLike,
   activityComments = {},
   onAddComment,
+  onDeletePost,
 }) {
   const [commentDrafts, setCommentDrafts] = useState({});
 
@@ -6376,7 +6380,17 @@ function ActivityFeed({
             <div className="social-feed-main">
               <div className="social-feed-top">
                 <span>{activity.type}</span>
-                <small>{formatActivityTime(activity.date)}</small>
+                <div className="social-feed-top-actions">
+                  <small>{formatActivityTime(activity.date)}</small>
+                  {activity.source === "posts" && typeof onDeletePost === "function" && (
+                    <button
+                      type="button"
+                      onClick={() => onDeletePost(activity.postId)}
+                    >
+                      Retirer
+                    </button>
+                  )}
+                </div>
               </div>
               {activity.author && (
                 <div className="social-feed-author">@{activity.author}</div>
@@ -6791,6 +6805,7 @@ function SocialTab({
   const [socialMessage, setSocialMessage] = useState("");
   const [showPublicPreview, setShowPublicPreview] = useState(false);
   const [socialView, setSocialView] = useState("feed");
+  const [socialFeedFilter, setSocialFeedFilter] = useState("all");
   const [postDraft, setPostDraft] = useState("");
   const activities = getSocialActivityFeed(games, hardware, badges);
   const stats = getAdvancedStats(games);
@@ -6828,9 +6843,11 @@ function SocialTab({
       date: post.createdAt,
       sortTime: date?.getTime() || 0,
       priority: 90 - index,
+      source: "posts",
+      postId: post.id,
     };
   });
-  const socialFeedItems = [...socialPostActivities, ...activities]
+  const allSocialFeedItems = [...socialPostActivities, ...activities]
     .sort((a, b) => {
       if ((b.sortTime || 0) !== (a.sortTime || 0)) {
         return (b.sortTime || 0) - (a.sortTime || 0);
@@ -6839,6 +6856,29 @@ function SocialTab({
       return (b.priority || 0) - (a.priority || 0);
     })
     .slice(0, 16);
+  const socialFeedItems = allSocialFeedItems.filter((activity) => {
+    if (socialFeedFilter === "all") return true;
+    return activity.source === socialFeedFilter;
+  });
+  const socialFeedFilters = [
+    { key: "all", label: "Tout", count: allSocialFeedItems.length },
+    { key: "posts", label: "Posts", count: socialPostActivities.length },
+    {
+      key: "games",
+      label: "Jeux",
+      count: allSocialFeedItems.filter((item) => item.source === "games").length,
+    },
+    {
+      key: "hardware",
+      label: "Materiel",
+      count: allSocialFeedItems.filter((item) => item.source === "hardware").length,
+    },
+    {
+      key: "badges",
+      label: "Badges",
+      count: allSocialFeedItems.filter((item) => item.source === "badges").length,
+    },
+  ];
   const profileCompletionItems = [
     socialProfile.displayName,
     normalizeHandle(socialProfile.handle),
@@ -6922,7 +6962,7 @@ function SocialTab({
       ratings: item.ratings || {},
       gameCount: getHardwareConsoleGameStats(item, games).games,
     })),
-    recentActivity: socialFeedItems.slice(0, 8).map((activity) => {
+    recentActivity: allSocialFeedItems.slice(0, 8).map((activity) => {
       const likeState = getActivityLikeState(activityLikes, activity.id);
 
       return {
@@ -7001,6 +7041,14 @@ function SocialTab({
     onProfileChange("posts", nextPosts);
     setPostDraft("");
     setSocialView("feed");
+    setSocialFeedFilter("posts");
+  };
+
+  const handleDeletePost = (postId) => {
+    if (!postId) return;
+
+    const nextPosts = socialPosts.filter((post) => post.id !== postId);
+    onProfileChange("posts", nextPosts);
   };
 
   const handlePhotoUpload = async (field, event) => {
@@ -7388,7 +7436,20 @@ function SocialTab({
       <div className={`search-panel ${socialView === "feed" ? "" : "social-section-hidden"}`}>
         <div className="home-section-head">
           <h2 className="panel-title">Fil social</h2>
-          <span className="social-section-count">{Math.min(socialFeedItems.length, 8)}</span>
+          <span className="social-section-count">{socialFeedItems.length}</span>
+        </div>
+        <div className="social-feed-filters">
+          {socialFeedFilters.map((filter) => (
+            <button
+              key={filter.key}
+              type="button"
+              className={socialFeedFilter === filter.key ? "active" : ""}
+              onClick={() => setSocialFeedFilter(filter.key)}
+            >
+              <span>{filter.label}</span>
+              <strong>{filter.count}</strong>
+            </button>
+          ))}
         </div>
         <ActivityFeed
           activities={socialFeedItems.slice(0, 8)}
@@ -7397,6 +7458,7 @@ function SocialTab({
           onToggleLike={handleToggleActivityLike}
           activityComments={activityComments}
           onAddComment={handleAddComment}
+          onDeletePost={handleDeletePost}
         />
       </div>
 
