@@ -78,6 +78,21 @@ function buildRawgApiUrl(path, params = {}) {
   return `${RAWG_API_BASE}${normalizedPath}?${searchParams.toString()}`;
 }
 
+async function fetchJsonWithTimeout(url, timeout = 8000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    return response.json();
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 const WEEKLY_QUIZ_STORAGE_KEY = "checkpoint-weekly-quiz";
 const CHECKPOINT_GOALS_STORAGE_KEY = "checkpoint-goals";
 const CHECKPOINT_TRIAL_STORAGE_KEY = "checkpoint-trial-progress";
@@ -9904,6 +9919,156 @@ function createFallbackPoster(title, colorA = "#60a5fa", colorB = "#d6b54a") {
 
 const UPCOMING_GAMES_FALLBACK = [
   {
+    id: "fallback-upcoming-beast-of-reincarnation",
+    name: "Beast of Reincarnation",
+    released: "2026-08-04",
+    tba: false,
+    background_image: createFallbackPoster("Beast of Reincarnation", "#16a34a", "#475569"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+    ],
+    genres: [{ name: "Action" }, { name: "Aventure" }],
+  },
+  {
+    id: "fallback-upcoming-big-walk",
+    name: "Big Walk",
+    released: "2026-08-04",
+    tba: false,
+    background_image: createFallbackPoster("Big Walk", "#38bdf8", "#a855f7"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Nintendo Switch 2" } },
+    ],
+    genres: [{ name: "Aventure" }, { name: "Coop" }],
+  },
+  {
+    id: "fallback-upcoming-marvel-tokon",
+    name: "MARVEL Tokon: Fighting Souls",
+    released: "2026-08-06",
+    tba: false,
+    background_image: createFallbackPoster("Marvel Tokon", "#dc2626", "#2563eb"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+    ],
+    genres: [{ name: "Combat" }, { name: "Action" }],
+  },
+  {
+    id: "fallback-upcoming-duskfade",
+    name: "Duskfade",
+    released: "2026-08-13",
+    tba: false,
+    background_image: createFallbackPoster("Duskfade", "#7c3aed", "#0ea5e9"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+      { platform: { name: "Nintendo Switch 2" } },
+    ],
+    genres: [{ name: "Action" }, { name: "Aventure" }],
+  },
+  {
+    id: "fallback-upcoming-hell-let-loose-vietnam",
+    name: "Hell Let Loose: Vietnam",
+    released: "2026-08-13",
+    tba: false,
+    background_image: createFallbackPoster("Hell Let Loose Vietnam", "#14532d", "#f97316"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+    ],
+    genres: [{ name: "Shooter" }, { name: "Action" }],
+  },
+  {
+    id: "fallback-upcoming-the-sinking-city-2",
+    name: "The Sinking City 2",
+    released: "2026-08-18",
+    tba: false,
+    background_image: createFallbackPoster("The Sinking City 2", "#0f172a", "#0891b2"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+    ],
+    genres: [{ name: "Horreur" }, { name: "Aventure" }],
+  },
+  {
+    id: "fallback-upcoming-mortal-shell-2",
+    name: "Mortal Shell II",
+    released: "2026-08-20",
+    tba: false,
+    background_image: createFallbackPoster("Mortal Shell II", "#64748b", "#ef4444"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+    ],
+    genres: [{ name: "Action" }, { name: "RPG" }],
+  },
+  {
+    id: "fallback-upcoming-the-witchs-bakery",
+    name: "The Witch's Bakery",
+    released: "2026-08-20",
+    tba: false,
+    background_image: createFallbackPoster("The Witch's Bakery", "#d946ef", "#f59e0b"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+      { platform: { name: "Nintendo Switch" } },
+      { platform: { name: "Nintendo Switch 2" } },
+    ],
+    genres: [{ name: "Simulation" }, { name: "Aventure" }],
+  },
+  {
+    id: "fallback-upcoming-metal-gear-solid-master-collection-vol-2",
+    name: "Metal Gear Solid: Master Collection Vol. 2",
+    released: "2026-08-27",
+    tba: false,
+    background_image: createFallbackPoster("Metal Gear Solid Vol. 2", "#334155", "#d6b54a"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+      { platform: { name: "Nintendo Switch" } },
+      { platform: { name: "Nintendo Switch 2" } },
+    ],
+    genres: [{ name: "Action" }, { name: "Infiltration" }],
+  },
+  {
+    id: "fallback-upcoming-onimusha-way-of-the-sword",
+    name: "Onimusha: Way of the Sword",
+    released: "2026-09-04",
+    tba: false,
+    background_image: createFallbackPoster("Onimusha", "#991b1b", "#d6b54a"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+      { platform: { name: "Nintendo Switch 2" } },
+    ],
+    genres: [{ name: "Action" }, { name: "Aventure" }],
+  },
+  {
+    id: "fallback-upcoming-minecraft-dungeons-2",
+    name: "Minecraft Dungeons II",
+    released: "2026-09-29",
+    tba: false,
+    background_image: createFallbackPoster("Minecraft Dungeons II", "#22c55e", "#92400e"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+      { platform: { name: "Nintendo Switch" } },
+      { platform: { name: "Nintendo Switch 2" } },
+    ],
+    genres: [{ name: "Action" }, { name: "RPG" }],
+  },
+  {
     id: "fallback-upcoming-fable",
     name: "Fable",
     released: "",
@@ -16601,13 +16766,10 @@ useEffect(() => {
     if (showSplash) return;
     const fetchFilterData = async () => {
       try {
-        const [platformsRes, genresRes] = await Promise.all([
-          fetch(buildRawgApiUrl("/platforms", { page_size: "40" })),
-          fetch(buildRawgApiUrl("/genres", { page_size: "40" })),
+        const [platformsData, genresData] = await Promise.all([
+          fetchJsonWithTimeout(buildRawgApiUrl("/platforms", { page_size: "40" }), 6500),
+          fetchJsonWithTimeout(buildRawgApiUrl("/genres", { page_size: "40" }), 6500),
         ]);
-
-        const platformsData = await platformsRes.json();
-        const genresData = await genresRes.json();
 
         setPlatforms(platformsData.results || []);
         setGenres(genresData.results || []);
@@ -16633,7 +16795,7 @@ useEffect(() => {
         setIsUpcomingLoading(true);
         setUpcomingSourceStatus("loading");
 
-        const response = await fetch(
+        const data = await fetchJsonWithTimeout(
           buildRawgApiUrl("/games", {
             dates: (() => {
               const today = new Date();
@@ -16645,12 +16807,9 @@ useEffect(() => {
             })(),
             ordering: "released",
             page_size: "40",
-          })
+          }),
+          7000
         );
-        if (!response.ok) {
-          throw new Error(`Upcoming source ${response.status}`);
-        }
-        const data = await response.json();
         const today = new Date();
         const results = (data.results || [])
           .filter(
@@ -17324,6 +17483,15 @@ useEffect(() => {
   try {
     setIsSearching(true);
 
+    const offlineSeed = sortSearchResultsByRelevance(
+      buildOfflineSearchResults(),
+      cleanSearch
+    );
+    if (offlineSeed.length > 0) {
+      setResults(offlineSeed);
+      setNextPage(null);
+    }
+
     const searchAliases = getSearchQueryAliases(cleanSearch);
     const searchTerm =
       normalizeSearchText(cleanSearch) === "gta"
@@ -17343,11 +17511,7 @@ useEffect(() => {
     }
 
     const url = buildRawgApiUrl("/games", params);
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`RAWG search ${response.status}`);
-    }
-    const data = await response.json();
+    const data = await fetchJsonWithTimeout(url, 7000);
     if (data.sourceStatus === "unavailable") {
       throw new Error(data.error || "RAWG unavailable");
     }
