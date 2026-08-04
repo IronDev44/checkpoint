@@ -17,6 +17,18 @@ const PRIVATE_JSON_HEADERS = {
   "cache-control": "no-store, no-cache, max-age=0, must-revalidate",
 };
 
+const RAWG_API_BASE = "https://api.rawg.io/api";
+const RAWG_DEFAULT_KEY = "d7b763a492c745cd82217c285f897e08";
+const RAWG_PUBLIC_PARAMS = new Set([
+  "search",
+  "dates",
+  "platforms",
+  "genres",
+  "ordering",
+  "page",
+  "page_size",
+]);
+
 function jsonResponse(body, init = {}) {
   return new Response(JSON.stringify(body), {
     ...init,
@@ -130,6 +142,191 @@ function buildCookie(name, value, requestUrl, options = {}) {
   }
 
   return parts.join("; ");
+}
+
+function getRawgApiKey(env) {
+  return env.RAWG_API_KEY || env.RAWG_KEY || RAWG_DEFAULT_KEY;
+}
+
+function isFutureReleaseDate(date, referenceDate = new Date()) {
+  if (!date) return false;
+
+  const releaseDate = new Date(date);
+  if (Number.isNaN(releaseDate.getTime())) return false;
+
+  const today = new Date(referenceDate);
+  today.setHours(0, 0, 0, 0);
+  releaseDate.setHours(0, 0, 0, 0);
+
+  return releaseDate >= today;
+}
+
+function isMainRawgGame(game) {
+  const name = String(game?.name || "").toLowerCase();
+  if (!name) return false;
+
+  const allowedWords = [
+    "complete edition",
+    "definitive edition",
+    "ultimate edition",
+    "deluxe edition",
+    "gold edition",
+    "game of the year",
+    "goty",
+    "remastered",
+    "remake",
+    "director's cut",
+    "anniversary edition",
+    "collection",
+    "trilogy",
+  ];
+
+  if (allowedWords.some((word) => name.includes(word))) return true;
+
+  const blockedWords = [
+    "dlc",
+    "season pass",
+    "battle pass",
+    "expansion",
+    "add-on",
+    "addon",
+    "skin",
+    "costume",
+    "soundtrack",
+    "ost",
+    "demo",
+    "beta",
+  ];
+
+  return !blockedWords.some((word) => name.includes(word));
+}
+
+function buildRawgUrl(path, params, env) {
+  const rawgUrl = new URL(`${RAWG_API_BASE}${path}`);
+  rawgUrl.searchParams.set("key", getRawgApiKey(env));
+
+  params.forEach((value, key) => {
+    if (RAWG_PUBLIC_PARAMS.has(key) && value) {
+      rawgUrl.searchParams.set(key, value);
+    }
+  });
+
+  return rawgUrl;
+}
+
+function proxyRawgNextUrl(nextUrl, requestUrl) {
+  if (!nextUrl) return null;
+
+  try {
+    const rawgNext = new URL(nextUrl);
+    const current = new URL(requestUrl);
+    const proxied = new URL("/api/rawg/search", current.origin);
+
+    rawgNext.searchParams.forEach((value, key) => {
+      if (RAWG_PUBLIC_PARAMS.has(key) && key !== "key") {
+        proxied.searchParams.set(key, value);
+      }
+    });
+
+    return `${proxied.pathname}${proxied.search}`;
+  } catch (error) {
+    return null;
+  }
+}
+
+async function getRawgSearch(request, env) {
+  const requestUrl = new URL(request.url);
+  const rawgUrl = buildRawgUrl("/games", requestUrl.searchParams, env);
+
+  try {
+    const data = await fetchJson(rawgUrl.toString(), 12000);
+
+    return jsonResponse({
+      ...data,
+      next: proxyRawgNextUrl(data?.next, request.url),
+      sourceStatus: "ok",
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    return jsonResponse({
+      count: 0,
+      next: null,
+      previous: null,
+      results: [],
+      sourceStatus: "unavailable",
+      error: String(error?.message || error),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+}
+
+async function getRawgUpcoming(request, env) {
+  const requestUrl = new URL(request.url);
+  const referenceDate = new Date();
+  const startDate = referenceDate.toISOString().split("T")[0];
+  const months = Math.min(
+    Math.max(Number(requestUrl.searchParams.get("months")) || 18, 1),
+    36
+  );
+  const limit = Math.min(
+    Math.max(Number(requestUrl.searchParams.get("limit")) || 40, 5),
+    80
+  );
+  const future = new Date(referenceDate);
+  future.setMonth(future.getMonth() + months);
+  const endDate = future.toISOString().split("T")[0];
+  const collected = [];
+  let next = null;
+
+  try {
+    for (let page = 1; page <= 4 && collected.length < limit; page += 1) {
+      const params = new URLSearchParams({
+        dates: `${startDate},${endDate}`,
+        ordering: "released",
+        page: String(page),
+        page_size: "40",
+      });
+      const rawgUrl = buildRawgUrl("/games", params, env);
+      const data = await fetchJson(rawgUrl.toString(), 12000);
+      next = data?.next || null;
+
+      (data?.results || []).forEach((game) => {
+        const isDuplicate = collected.some((candidate) => candidate.id === game.id);
+        if (
+          !isDuplicate &&
+          game?.name &&
+          game.background_image &&
+          isMainRawgGame(game) &&
+          isFutureReleaseDate(game.released, referenceDate)
+        ) {
+          collected.push(game);
+        }
+      });
+
+      if (!next) break;
+    }
+
+    collected.sort((a, b) => new Date(a.released) - new Date(b.released));
+
+    return jsonResponse({
+      results: collected.slice(0, limit),
+      count: collected.length,
+      next: null,
+      sourceStatus: "ok",
+      range: { from: startDate, to: endDate },
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    return jsonResponse({
+      results: [],
+      count: 0,
+      next: null,
+      sourceStatus: "unavailable",
+      range: { from: startDate, to: endDate },
+      error: String(error?.message || error),
+      updatedAt: new Date().toISOString(),
+    });
+  }
 }
 
 function clearCookie(name, requestUrl) {
@@ -928,6 +1125,30 @@ export default {
           { status: 502 }
         );
       }
+    }
+
+    if (url.pathname === "/api/rawg/search") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, { headers: JSON_HEADERS });
+      }
+
+      if (request.method !== "GET") {
+        return jsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      return getRawgSearch(request, env);
+    }
+
+    if (url.pathname === "/api/rawg/upcoming") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, { headers: JSON_HEADERS });
+      }
+
+      if (request.method !== "GET") {
+        return jsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      return getRawgUpcoming(request, env);
     }
 
     if (url.pathname === "/api/steam/owned-games") {

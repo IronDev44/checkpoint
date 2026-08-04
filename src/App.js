@@ -64,6 +64,40 @@ import {
 
 const API_KEY = "d7b763a492c745cd82217c285f897e08";
 
+function shouldUseCloudflareApi() {
+  if (typeof window === "undefined") return false;
+
+  return !["localhost", "127.0.0.1"].includes(window.location.hostname);
+}
+
+function buildRawgSearchUrl(params) {
+  if (shouldUseCloudflareApi()) {
+    return `/api/rawg/search?${params.toString()}`;
+  }
+
+  const localParams = new URLSearchParams(params);
+  localParams.set("key", API_KEY);
+  return `https://api.rawg.io/api/games?${localParams.toString()}`;
+}
+
+function buildRawgUpcomingUrl() {
+  if (shouldUseCloudflareApi()) {
+    return "/api/rawg/upcoming?months=18&limit=40";
+  }
+
+  const today = new Date();
+  const future = new Date(today);
+  future.setMonth(future.getMonth() + 18);
+  const params = new URLSearchParams({
+    key: API_KEY,
+    dates: `${today.toISOString().split("T")[0]},${future.toISOString().split("T")[0]}`,
+    ordering: "released",
+    page_size: "40",
+  });
+
+  return `https://api.rawg.io/api/games?${params.toString()}`;
+}
+
 const WEEKLY_QUIZ_STORAGE_KEY = "checkpoint-weekly-quiz";
 const CHECKPOINT_GOALS_STORAGE_KEY = "checkpoint-goals";
 const CHECKPOINT_TRIAL_STORAGE_KEY = "checkpoint-trial-progress";
@@ -15440,6 +15474,7 @@ export default function App() {
   const [miniPlayerCollapsed, setMiniPlayerCollapsed] = useState(false);
   const [upcomingGames, setUpcomingGames] = useState([]);
   const [isUpcomingLoading, setIsUpcomingLoading] = useState(false);
+  const [upcomingSourceStatus, setUpcomingSourceStatus] = useState("idle");
   const [upcomingMonthFilter, setUpcomingMonthFilter] = useState("");
   const [libraryView, setLibraryView] = useState("collection");
   const [nextPage, setNextPage] = useState(null);
@@ -16606,20 +16641,14 @@ useEffect(() => {
     const fetchUpcomingGames = async () => {
       try {
         setIsUpcomingLoading(true);
+        setUpcomingSourceStatus("loading");
 
-        const today = new Date();
-        const startDate = today.toISOString().split("T")[0];
-
-        const future = new Date(today);
-        future.setMonth(future.getMonth() + 18);
-        const endDate = future.toISOString().split("T")[0];
-
-        const url = `https://api.rawg.io/api/games?key=${API_KEY}&dates=${startDate},${endDate}&ordering=released&page_size=40`;
-        const response = await fetch(url);
+        const response = await fetch(buildRawgUpcomingUrl());
         if (!response.ok) {
-          throw new Error(`RAWG upcoming ${response.status}`);
+          throw new Error(`Upcoming source ${response.status}`);
         }
         const data = await response.json();
+        const today = new Date();
         const results = (data.results || [])
           .filter(
             (game) =>
@@ -16630,10 +16659,12 @@ useEffect(() => {
           .sort((a, b) => new Date(a.released) - new Date(b.released));
 
         setUpcomingGames(results);
+        setUpcomingSourceStatus(data.sourceStatus || "ok");
       } catch (e) {
         if (isAbortError(e)) return;
         console.error("Erreur chargement sorties :", e);
         setUpcomingGames([]);
+        setUpcomingSourceStatus("unavailable");
       } finally {
         setIsUpcomingLoading(false);
       }
@@ -17309,12 +17340,15 @@ useEffect(() => {
       params.append("ordering", sortBy);
     }
 
-    const url = `https://api.rawg.io/api/games?${params.toString()}`;
+    const url = buildRawgSearchUrl(params);
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`RAWG search ${response.status}`);
     }
     const data = await response.json();
+    if (data.sourceStatus === "unavailable") {
+      throw new Error(data.error || "RAWG unavailable");
+    }
 
     let resultsList = (data.results || []).filter(isMainGameResult);
 
@@ -17330,9 +17364,12 @@ useEffect(() => {
       relaxedParams.append("search", searchTerm);
 
       const relaxedResponse = await fetch(
-        `https://api.rawg.io/api/games?${relaxedParams.toString()}`
+        buildRawgSearchUrl(relaxedParams)
       );
       const relaxedData = await relaxedResponse.json();
+      if (relaxedData.sourceStatus === "unavailable") {
+        throw new Error(relaxedData.error || "RAWG unavailable");
+      }
       resultsList = (relaxedData.results || []).filter(isMainGameResult);
     }
 
@@ -17345,11 +17382,14 @@ useEffect(() => {
         aliasParams.append("search", alias);
 
         const aliasResponse = await fetch(
-          `https://api.rawg.io/api/games?${aliasParams.toString()}`
+          buildRawgSearchUrl(aliasParams)
         );
         if (!aliasResponse.ok) continue;
 
         const aliasData = await aliasResponse.json();
+        if (aliasData.sourceStatus === "unavailable") {
+          continue;
+        }
         const aliasResults = (aliasData.results || []).filter(isMainGameResult);
         if (aliasResults.length > 0) {
           resultsList = aliasResults;
@@ -17420,7 +17460,7 @@ useEffect(() => {
     setNextPage(
       data.next ||
         (resultsList.length === 20
-          ? `https://api.rawg.io/api/games?${nextParams.toString()}`
+          ? buildRawgSearchUrl(nextParams)
           : null)
     );
 
@@ -18299,7 +18339,11 @@ const setPlayedPlatforms = async (id, platforms) => {
               {!isUpcomingLoading && filteredUpcomingGames.length === 0 && (
                 <EmptyState
                   title="Aucune sortie trouvée"
-                  subtitle="Essaie un autre mois."
+                  subtitle={
+                    upcomingSourceStatus === "unavailable"
+                      ? "La source des sorties ne répond pas pour le moment."
+                      : "Essaie un autre mois."
+                  }
                 />
               )}
             </div>
