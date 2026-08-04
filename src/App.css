@@ -7729,13 +7729,12 @@ body[data-ui="modern"] .chip.active {
   gap: 8px;
 }
 
-.social-next-actions button {
+.social-next-actions span {
   min-width: 0;
   border: 1px solid var(--surface-border);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.055);
   color: var(--text-main);
-  cursor: pointer;
   font-size: 12px;
   font-weight: 900;
   padding: 8px 10px;

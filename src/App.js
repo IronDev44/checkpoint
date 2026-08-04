@@ -3727,12 +3727,6 @@ function getTopOstGames(games, limit = 5) {
         getGameScore(b, "ostRating") - getGameScore(a, "ostRating");
       if (scoreDiff !== 0) return scoreDiff;
 
-      const aHasTrack = Boolean((a.ostTrack || "").trim());
-      const bHasTrack = Boolean((b.ostTrack || "").trim());
-      if (Number(bHasTrack) - Number(aHasTrack) !== 0) {
-        return Number(bHasTrack) - Number(aHasTrack);
-      }
-
       return (a.name || "").localeCompare(b.name || "");
     })
     .slice(0, limit);
@@ -4223,18 +4217,9 @@ function Top5OstPanel({ games }) {
                 )}
                 <div className="top5-main">
                   <div className="top5-name">{game.name}</div>
-                  <div className="top5-meta">
-                    {(game.ostTrack || "").trim()
-                      ? game.ostTrack
-                      : getTopGameMeta(game)}
-                  </div>
+                  <div className="top5-meta">{getTopGameMeta(game)}</div>
                 </div>
                 <div className="ost-top-actions">
-                  {game.ostLink && (
-                    <a href={game.ostLink} target="_blank" rel="noreferrer">
-                      Écouter
-                    </a>
-                  )}
                   <div className="top5-score">
                     {formatTopScore(getGameScore(game, "ostRating"), "ostRating")}
                   </div>
@@ -4250,11 +4235,7 @@ function Top5OstPanel({ games }) {
           <div>
             <span className="goty-kicker">OST favorite</span>
             <h2 className="panel-title">{featured.name}</h2>
-            <div className="option-value">
-              {(featured.ostTrack || "").trim()
-                ? featured.ostTrack
-                : "Ajoute un morceau préféré dans la fiche du jeu."}
-            </div>
+            <div className="option-value">Ta meilleure OST notée.</div>
           </div>
           {featured.image ? (
             <img src={featured.image} alt={featured.name} />
@@ -4787,8 +4768,6 @@ function GameDetailModal({
 }) {
   const [localReview, setLocalReview] = useState("");
   const [localOstRating, setLocalOstRating] = useState(0);
-  const [localOstTrack, setLocalOstTrack] = useState("");
-  const [localOstLink, setLocalOstLink] = useState("");
   const [dlcs, setDlcs] = useState([]);
   const [loadingDlcs, setLoadingDlcs] = useState(false);
   const swipeStartRef = useRef(null);
@@ -4796,8 +4775,6 @@ function GameDetailModal({
   useEffect(() => {
     setLocalReview(game?.review || "");
     setLocalOstRating(clampRating(game?.ostRating));
-    setLocalOstTrack(game?.ostTrack || "");
-    setLocalOstLink(game?.ostLink || "");
   }, [game]);
 
   useEffect(() => {
@@ -5385,11 +5362,6 @@ function GameDetailModal({
                 <span>Note OST</span>
                 <strong>{formatRating10(localOstRating, "Pas notée")}</strong>
               </div>
-              {game.ostLink && (
-                <a href={game.ostLink} target="_blank" rel="noreferrer">
-                  Écouter
-                </a>
-              )}
             </div>
 
             <RatingSlider
@@ -5397,34 +5369,12 @@ function GameDetailModal({
               onRate={(value) => setLocalOstRating(value)}
             />
 
-            <div className="ost-fields">
-              <label>
-                <span>Morceau préféré</span>
-                <input
-                  value={localOstTrack}
-                  onChange={(e) => setLocalOstTrack(e.target.value)}
-                  placeholder="Ex : Snake Eater, Secunda, Bury the Light..."
-                />
-              </label>
-
-              <label>
-                <span>Lien d'écoute</span>
-                <input
-                  value={localOstLink}
-                  onChange={(e) => setLocalOstLink(e.target.value)}
-                  placeholder="Spotify, YouTube, Apple Music..."
-                />
-              </label>
-            </div>
-
             <button
               className="save-review-btn"
               type="button"
               onClick={() =>
                 onSetOstInfo(game.id, {
-                  ostRating: localOstRating,
-                  ostTrack: localOstTrack,
-                  ostLink: localOstLink,
+                  ostRating: localOstRating
                 })
               }
             >
@@ -7513,18 +7463,10 @@ function SocialTab({
 
       {nextSocialActions.length > 0 && (
         <div className="social-next-actions">
-          <strong>À rendre vivant</strong>
+          <strong>Pour donner du relief au profil</strong>
           <div>
             {nextSocialActions.slice(0, 3).map((action) => (
-              <button
-                key={action}
-                type="button"
-                onClick={() =>
-                  setSocialView(action.includes("update") ? "feed" : "profile")
-                }
-              >
-                {action}
-              </button>
+              <span key={action}>{action}</span>
             ))}
           </div>
         </div>
@@ -9740,7 +9682,98 @@ function getRawgSlugCandidates(query = "") {
   return Array.from(new Set([base, withoutArticles].filter(Boolean)));
 }
 
+function getSearchQueryAliases(query = "") {
+  const normalized = normalizeSearchText(query);
+  if (!normalized) return [];
+
+  const aliases = [query.trim()];
+
+  if (/\bgta\b/.test(normalized)) {
+    aliases.push("grand theft auto", "grand theft auto v", "grand theft auto vi");
+  }
+
+  return Array.from(new Set(aliases.filter(Boolean)));
+}
+
 const KNOWN_SEARCH_FALLBACKS = [
+  {
+    id: "known-gta-v",
+    slug: "grand-theft-auto-v",
+    name: "Grand Theft Auto V",
+    aliases: ["gta", "gta 5", "gta v", "grand theft auto"],
+    playtime: 0,
+    released: "2013-09-17",
+    tba: false,
+    background_image: "",
+    rating: 4.5,
+    ratings_count: 10000,
+    platforms: [
+      { platform: { id: 4, name: "PC", slug: "pc" } },
+      { platform: { id: 18, name: "PlayStation 4", slug: "playstation4" } },
+      { platform: { id: 1, name: "Xbox One", slug: "xbox-one" } },
+    ],
+    parent_platforms: [
+      { platform: { id: 1, name: "PC", slug: "pc" } },
+      { platform: { id: 2, name: "PlayStation", slug: "playstation" } },
+      { platform: { id: 3, name: "Xbox", slug: "xbox" } },
+    ],
+    genres: [
+      { id: 4, name: "Action", slug: "action" },
+      { id: 3, name: "Adventure", slug: "adventure" },
+    ],
+  },
+  {
+    id: "known-gta-iv",
+    slug: "grand-theft-auto-iv",
+    name: "Grand Theft Auto IV",
+    aliases: ["gta", "gta 4", "gta iv", "grand theft auto"],
+    playtime: 0,
+    released: "2008-04-29",
+    tba: false,
+    background_image: "",
+    rating: 4.3,
+    ratings_count: 7000,
+    platforms: [
+      { platform: { id: 4, name: "PC", slug: "pc" } },
+      { platform: { id: 16, name: "PlayStation 3", slug: "playstation3" } },
+      { platform: { id: 14, name: "Xbox 360", slug: "xbox360" } },
+    ],
+    parent_platforms: [
+      { platform: { id: 1, name: "PC", slug: "pc" } },
+      { platform: { id: 2, name: "PlayStation", slug: "playstation" } },
+      { platform: { id: 3, name: "Xbox", slug: "xbox" } },
+    ],
+    genres: [
+      { id: 4, name: "Action", slug: "action" },
+      { id: 3, name: "Adventure", slug: "adventure" },
+    ],
+  },
+  {
+    id: "known-gta-san-andreas",
+    slug: "grand-theft-auto-san-andreas",
+    name: "Grand Theft Auto: San Andreas",
+    aliases: ["gta", "gta san andreas", "grand theft auto"],
+    playtime: 0,
+    released: "2004-10-26",
+    tba: false,
+    background_image: "",
+    rating: 4.4,
+    ratings_count: 8000,
+    platforms: [
+      { platform: { id: 4, name: "PC", slug: "pc" } },
+      { platform: { id: 15, name: "PlayStation 2", slug: "playstation2" } },
+      { platform: { id: 80, name: "Xbox", slug: "xbox-old" } },
+    ],
+    parent_platforms: [
+      { platform: { id: 1, name: "PC", slug: "pc" } },
+      { platform: { id: 2, name: "PlayStation", slug: "playstation" } },
+      { platform: { id: 3, name: "Xbox", slug: "xbox" } },
+    ],
+    genres: [
+      { id: 4, name: "Action", slug: "action" },
+      { id: 3, name: "Adventure", slug: "adventure" },
+    ],
+  },
   {
     id: 989329,
     slug: "ghost-of-yotei",
@@ -9783,14 +9816,53 @@ function getKnownSearchFallbacks(query = "") {
 
   return KNOWN_SEARCH_FALLBACKS.filter((game) => {
     const normalizedName = normalizeSearchText(game.name);
+    const normalizedAliases = (game.aliases || []).map(normalizeSearchText);
     const queryWords = normalizedQuery.split(" ").filter(Boolean);
 
     return (
       normalizedName.includes(normalizedQuery) ||
+      normalizedAliases.some((alias) => alias.includes(normalizedQuery)) ||
       queryWords.every((word) => normalizedName.includes(word))
     );
   });
 }
+
+const UPCOMING_GAMES_FALLBACK = [
+  {
+    id: "fallback-upcoming-fable",
+    name: "Fable",
+    released: "",
+    tba: true,
+    background_image: "",
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "Xbox Series X/S" } },
+    ],
+    genres: [{ name: "RPG" }, { name: "Aventure" }],
+  },
+  {
+    id: "fallback-upcoming-intergalactic",
+    name: "Intergalactic: The Heretic Prophet",
+    released: "",
+    tba: true,
+    background_image: "",
+    platforms: [{ platform: { name: "PlayStation 5" } }],
+    genres: [{ name: "Action" }, { name: "Aventure" }],
+  },
+  {
+    id: "fallback-upcoming-pragmata",
+    name: "Pragmata",
+    released: "",
+    tba: true,
+    background_image: "",
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+    ],
+    genres: [{ name: "Action" }],
+  },
+];
 
 function gameMatchesSearchFilters(game, filters = {}) {
   const { yearFilter, platformFilter, genreFilter } = filters;
@@ -10651,8 +10723,6 @@ function HardwareDetailModal({
     .filter((field) => field.value > 0)
     .sort((a, b) => b.value - a.value);
   const bestRatedField = ratedFields[0];
-  const weakestRatedField =
-    ratedFields.length > 1 ? ratedFields[ratedFields.length - 1] : null;
   const ratingCompletion = fields.length
     ? Math.round((ratedFields.length / fields.length) * 100)
     : 0;
@@ -10716,16 +10786,6 @@ function HardwareDetailModal({
                     {bestRatedField.icon} {bestRatedField.label}
                   </strong>
                   <small>{formatRating10(bestRatedField.value, "-")}</small>
-                </div>
-              )}
-
-              {weakestRatedField && weakestRatedField.key !== bestRatedField?.key && (
-                <div className="hardware-detail-insight">
-                  <span>À surveiller</span>
-                  <strong>
-                    {weakestRatedField.icon} {weakestRatedField.label}
-                  </strong>
-                  <small>{formatRating10(weakestRatedField.value, "-")}</small>
                 </div>
               )}
             </div>
@@ -15452,8 +15512,18 @@ const importNewsFromRSS = async ({ silent = false, force = false } = {}) => {
   }
 };
 
+useEffect(() => {
+  if (showSplash) return;
+
+  importNewsFromRSS({ silent: true }).catch((error) => {
+    console.error("Erreur actualisation automatique des actus :", error);
+  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [showSplash]);
+
 const [newUnlockedBadge, setNewUnlockedBadge] = useState(null);
 const badgeToastInitializedRef = useRef(false);
+const newsEmptyImportAttemptedRef = useRef(false);
 
 const addHardware = async (item) => {
   try {
@@ -16078,6 +16148,16 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
+  if (showSplash || newsItems.length > 0 || newsEmptyImportAttemptedRef.current) return;
+
+  newsEmptyImportAttemptedRef.current = true;
+  importNewsFromRSS({ silent: true, force: true }).catch((error) => {
+    console.error("Erreur import actus au demarrage :", error);
+  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [showSplash, newsItems.length]);
+
+useEffect(() => {
   const unsubscribe = onSnapshot(collection(db, "hardware"), (snapshot) => {
     const hardwareData = snapshot.docs.map((docItem) =>
       normalizeHardwareRatings({
@@ -16400,12 +16480,17 @@ const endDate = future.toISOString().split("T")[0];
 
 const url = `https://api.rawg.io/api/games?key=${API_KEY}&dates=${startDate},${endDate}&ordering=released&page_size=40`;
         const response = await fetch(url);
+        if (!response.ok) {
+          throw new Error(`RAWG upcoming ${response.status}`);
+        }
         const data = await response.json();
+        const results = (data.results || []).filter((game) => game.name);
 
-        setUpcomingGames(data.results || []);
+        setUpcomingGames(results.length ? results : UPCOMING_GAMES_FALLBACK);
       } catch (e) {
         if (isAbortError(e)) return;
         console.error("Erreur chargement sorties :", e);
+        setUpcomingGames(UPCOMING_GAMES_FALLBACK);
       } finally {
         setIsUpcomingLoading(false);
       }
@@ -17022,12 +17107,17 @@ useEffect(() => {
   try {
     setIsSearching(true);
 
+    const searchAliases = getSearchQueryAliases(cleanSearch);
+    const searchTerm =
+      normalizeSearchText(cleanSearch) === "gta"
+        ? "grand theft auto"
+        : searchAliases[0] || cleanSearch;
     const params = new URLSearchParams();
     params.append("key", API_KEY);
     params.append("page_size", "20");
     params.append("page", "1");
 
-    if (cleanSearch) params.append("search", cleanSearch);
+    if (searchTerm) params.append("search", searchTerm);
     if (yearFilter) params.append("dates", `${yearFilter}-01-01,${yearFilter}-12-31`);
     if (platformFilter) params.append("platforms", platformFilter);
     if (genreFilter) params.append("genres", genreFilter);
@@ -17044,8 +17134,29 @@ useEffect(() => {
 
     let resultsList = (data.results || []).filter(isMainGameResult);
 
+    if (
+      cleanSearch &&
+      resultsList.length === 0 &&
+      (yearFilter || platformFilter || genreFilter)
+    ) {
+      const relaxedParams = new URLSearchParams();
+      relaxedParams.append("key", API_KEY);
+      relaxedParams.append("page_size", "20");
+      relaxedParams.append("page", "1");
+      relaxedParams.append("search", searchTerm);
+      relaxedParams.append("search_precise", "true");
+
+      const relaxedResponse = await fetch(
+        `https://api.rawg.io/api/games?${relaxedParams.toString()}`
+      );
+      const relaxedData = await relaxedResponse.json();
+      resultsList = (relaxedData.results || []).filter(isMainGameResult);
+    }
+
     if (cleanSearch) {
-      for (const slug of getRawgSlugCandidates(cleanSearch)) {
+      const slugCandidates = searchAliases.flatMap((alias) => getRawgSlugCandidates(alias));
+
+      for (const slug of Array.from(new Set(slugCandidates))) {
         try {
           const detailResponse = await fetch(
             `https://api.rawg.io/api/games/${slug}?key=${API_KEY}`
@@ -17068,13 +17179,17 @@ useEffect(() => {
         }
       }
 
-      const fallbackResults = getKnownSearchFallbacks(cleanSearch).filter((game) =>
+      let fallbackResults = getKnownSearchFallbacks(cleanSearch).filter((game) =>
         gameMatchesSearchFilters(game, {
           yearFilter,
           platformFilter,
           genreFilter,
         })
       );
+
+      if (resultsList.length === 0 && fallbackResults.length === 0) {
+        fallbackResults = getKnownSearchFallbacks(cleanSearch);
+      }
 
       if (fallbackResults.length > 0) {
         resultsList = [
@@ -17486,8 +17601,6 @@ const setPlayedPlatforms = async (id, platforms) => {
   const setOstInfo = async (id, ostInfo) => {
     const payload = {
       ostRating: clampRating(ostInfo.ostRating),
-      ostTrack: (ostInfo.ostTrack || "").trim(),
-      ostLink: (ostInfo.ostLink || "").trim(),
     };
 
     try {
