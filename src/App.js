@@ -693,6 +693,16 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
 
   useEffect(() => {
     if (!game) return;
+    const isExternalFallbackGame =
+      game.source === "steam" || String(game.id || "").startsWith("steam-");
+
+    if (isExternalFallbackGame) {
+      setDetails(null);
+      setScreenshots([]);
+      setMovies([]);
+      setLoading(false);
+      return;
+    }
 
     const fetchDetails = async () => {
       try {

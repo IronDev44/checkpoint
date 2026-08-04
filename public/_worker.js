@@ -19,6 +19,8 @@ const PRIVATE_JSON_HEADERS = {
 
 const RAWG_API_BASE = "https://api.rawg.io/api";
 const RAWG_DEFAULT_KEY = "d7b763a492c745cd82217c285f897e08";
+const STEAM_STORE_SEARCH_URL = "https://store.steampowered.com/api/storesearch/";
+const STEAM_SEARCH_RESULTS_URL = "https://store.steampowered.com/search/results/";
 const RAWG_PUBLIC_PARAMS = new Set([
   "search",
   "dates",
@@ -94,6 +96,29 @@ async function fetchJson(url, timeout = 9000) {
     }
 
     return response.json();
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function fetchText(url, timeout = 9000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort("timeout"), timeout);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "user-agent": "Checkpoint/1.0 (gaming discovery app)",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    return response.text();
   } finally {
     clearTimeout(timeoutId);
   }
@@ -202,6 +227,122 @@ function isMainRawgGame(game) {
   return !blockedWords.some((word) => name.includes(word));
 }
 
+function decodeHtmlEntities(value = "") {
+  return String(value)
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&nbsp;/g, " ")
+    .trim();
+}
+
+function stripHtml(value = "") {
+  return decodeHtmlEntities(String(value).replace(/<[^>]*>/g, " ").replace(/\s+/g, " "));
+}
+
+function parseSteamDateLabel(label = "") {
+  const cleaned = stripHtml(label).replace(/\s+/g, " ").trim();
+  if (!cleaned) return "";
+
+  const parsed = Date.parse(cleaned);
+  if (!Number.isNaN(parsed)) {
+    return new Date(parsed).toISOString().split("T")[0];
+  }
+
+  return "";
+}
+
+function normalizeSteamGame(item, index = 0) {
+  if (!item?.name) return null;
+
+  const appId = item.id || item.appid || item.appId || item.steamAppId || `fallback-${index}`;
+  const image =
+    item.large_capsule_image ||
+    item.tiny_image ||
+    item.logo ||
+    `https://cdn.cloudflare.steamstatic.com/steam/apps/${appId}/capsule_616x353.jpg`;
+  const released = item.released || parseSteamDateLabel(item.releaseLabel || item.release_date);
+  const metascore = Number(item.metascore);
+
+  return {
+    id: `steam-${appId}`,
+    steamAppId: appId,
+    source: "steam",
+    name: decodeHtmlEntities(item.name),
+    slug: `steam-${appId}`,
+    released,
+    releaseLabel: item.releaseLabel || item.release_date || released,
+    background_image: image,
+    rating: metascore ? Math.round((metascore / 20) * 10) / 10 : 0,
+    ratings_count: metascore ? 1 : 0,
+    playtime: 0,
+    parent_platforms: [{ platform: { id: 1, name: "PC", slug: "pc" } }],
+    platforms: [{ platform: { id: 4, name: "PC", slug: "pc" } }],
+    genres: [],
+  };
+}
+
+async function getSteamSearchFallback(requestUrl) {
+  const query = requestUrl.searchParams.get("search") || "";
+  if (!query.trim()) return [];
+
+  const steamUrl = new URL(STEAM_STORE_SEARCH_URL);
+  steamUrl.searchParams.set("term", query);
+  steamUrl.searchParams.set("l", "french");
+  steamUrl.searchParams.set("cc", "FR");
+
+  const data = await fetchJson(steamUrl.toString(), 10000);
+  return (data?.items || [])
+    .map((item, index) => normalizeSteamGame(item, index))
+    .filter(Boolean);
+}
+
+function parseSteamUpcomingRows(html) {
+  const rows = [];
+  const rowRegex = /<a\b[^>]*class="[^"]*search_result_row[^"]*"[\s\S]*?<\/a>/g;
+  const matches = html.match(rowRegex) || [];
+
+  matches.forEach((row, index) => {
+    const appId =
+      row.match(/data-ds-appid="(\d+)"/)?.[1] ||
+      row.match(/\/app\/(\d+)\//)?.[1] ||
+      "";
+    const name = stripHtml(row.match(/<span class="title">([\s\S]*?)<\/span>/)?.[1] || "");
+    const image = decodeHtmlEntities(row.match(/<img[^>]+src="([^"]+)"/)?.[1] || "");
+    const releaseLabel = stripHtml(
+      row.match(/<div class="search_released[^"]*">([\s\S]*?)<\/div>/)?.[1] || ""
+    );
+    const released = parseSteamDateLabel(releaseLabel);
+
+    if (appId && name && image && released) {
+      rows.push(normalizeSteamGame({ id: appId, name, logo: image, released, releaseLabel }, index));
+    }
+  });
+
+  return rows.filter(Boolean);
+}
+
+async function getSteamUpcomingFallback(limit, referenceDate) {
+  const steamUrl = new URL(STEAM_SEARCH_RESULTS_URL);
+  steamUrl.searchParams.set("query", "");
+  steamUrl.searchParams.set("start", "0");
+  steamUrl.searchParams.set("count", String(Math.min(Math.max(limit * 2, 25), 100)));
+  steamUrl.searchParams.set("sort_by", "Released_ASC");
+  steamUrl.searchParams.set("category1", "998");
+  steamUrl.searchParams.set("filter", "popularcomingsoon");
+  steamUrl.searchParams.set("cc", "FR");
+  steamUrl.searchParams.set("l", "english");
+
+  const html = await fetchText(steamUrl.toString(), 10000);
+  return parseSteamUpcomingRows(html)
+    .filter((game) => isFutureReleaseDate(game.released, referenceDate))
+    .sort((a, b) => new Date(a.released) - new Date(b.released))
+    .slice(0, limit);
+}
+
 function buildRawgUrl(path, params, env) {
   const rawgUrl = new URL(`${RAWG_API_BASE}${path}`);
   rawgUrl.searchParams.set("key", getRawgApiKey(env));
@@ -249,6 +390,24 @@ async function getRawgSearch(request, env) {
       updatedAt: new Date().toISOString(),
     });
   } catch (error) {
+    try {
+      const fallbackResults = await getSteamSearchFallback(requestUrl);
+
+      if (fallbackResults.length > 0) {
+        return jsonResponse({
+          count: fallbackResults.length,
+          next: null,
+          previous: null,
+          results: fallbackResults,
+          sourceStatus: "steam-fallback",
+          primarySourceError: String(error?.message || error),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    } catch (fallbackError) {
+      console.warn("Steam search fallback failed:", fallbackError);
+    }
+
     return jsonResponse({
       count: 0,
       next: null,
@@ -340,6 +499,24 @@ async function getRawgUpcoming(request, env) {
       updatedAt: new Date().toISOString(),
     });
   } catch (error) {
+    try {
+      const fallbackResults = await getSteamUpcomingFallback(limit, referenceDate);
+
+      if (fallbackResults.length > 0) {
+        return jsonResponse({
+          results: fallbackResults,
+          count: fallbackResults.length,
+          next: null,
+          sourceStatus: "steam-fallback",
+          range: { from: startDate, to: endDate },
+          primarySourceError: String(error?.message || error),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    } catch (fallbackError) {
+      console.warn("Steam upcoming fallback failed:", fallbackError);
+    }
+
     return jsonResponse({
       results: [],
       count: 0,
