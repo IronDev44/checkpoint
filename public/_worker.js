@@ -19,6 +19,7 @@ const PRIVATE_JSON_HEADERS = {
 
 const RAWG_API_BASE = "https://api.rawg.io/api";
 const RAWG_DEFAULT_KEY = "d7b763a492c745cd82217c285f897e08";
+const RAWG_RETRY_STATUSES = new Set([502, 503, 504, 522]);
 const RAWG_PUBLIC_PARAMS = new Set([
   "search",
   "dates",
@@ -97,6 +98,105 @@ async function fetchJson(url, timeout = 9000) {
   } finally {
     clearTimeout(timeoutId);
   }
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+class RawgUpstreamError extends Error {
+  constructor(message, { status = 0, code = "RAWG_UPSTREAM_ERROR", retryable = false } = {}) {
+    super(message);
+    this.name = "RawgUpstreamError";
+    this.status = status;
+    this.code = code;
+    this.retryable = retryable;
+  }
+}
+
+function getRawgErrorMessage(status) {
+  if (status === 522) {
+    return "RAWG est temporairement indisponible : Cloudflare ne parvient pas a joindre son serveur d'origine.";
+  }
+
+  if (status === 429) {
+    return "RAWG limite temporairement les requetes.";
+  }
+
+  if (status >= 500) {
+    return "RAWG est temporairement indisponible.";
+  }
+
+  return `RAWG a renvoye une erreur HTTP ${status}.`;
+}
+
+async function fetchRawgJson(url, { timeout = 12000, retries = 2 } = {}) {
+  let lastError = null;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+        headers: {
+          accept: "application/json",
+          "user-agent": "Checkpoint/1.0 (RAWG proxy)",
+        },
+      });
+      const contentType = response.headers.get("content-type") || "";
+      const payload = contentType.includes("application/json") ? await response.json() : null;
+
+      if (!response.ok) {
+        throw new RawgUpstreamError(getRawgErrorMessage(response.status), {
+          status: response.status,
+          code: response.status === 522 ? "RAWG_522" : "RAWG_HTTP_ERROR",
+          retryable: RAWG_RETRY_STATUSES.has(response.status),
+        });
+      }
+
+      return payload;
+    } catch (error) {
+      lastError =
+        error?.name === "AbortError"
+          ? new RawgUpstreamError("RAWG n'a pas repondu assez vite.", {
+              code: "RAWG_TIMEOUT",
+              retryable: false,
+            })
+          : error;
+
+      const shouldRetry =
+        attempt < retries &&
+        lastError instanceof RawgUpstreamError &&
+        lastError.retryable;
+
+      if (!shouldRetry) {
+        throw lastError;
+      }
+
+      await wait(450 * (attempt + 1));
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  throw lastError;
+}
+
+function rawgUnavailableResponse(error, extra = {}) {
+  const status = error instanceof RawgUpstreamError ? error.status : 0;
+  return jsonResponse(
+    {
+      sourceStatus: "unavailable",
+      code: error?.code || "RAWG_UNAVAILABLE",
+      upstreamStatus: status || null,
+      message: error?.message || "RAWG est temporairement indisponible.",
+      updatedAt: new Date().toISOString(),
+      ...extra,
+    },
+    { status: status === 429 ? 429 : 503 }
+  );
 }
 
 function encodeBase64Url(value) {
@@ -240,7 +340,7 @@ async function getRawgSearch(request, env) {
   const rawgUrl = buildRawgUrl("/games", requestUrl.searchParams, env);
 
   try {
-    const data = await fetchJson(rawgUrl.toString(), 12000);
+    const data = await fetchRawgJson(rawgUrl.toString(), { timeout: 12000 });
 
     return jsonResponse({
       ...data,
@@ -249,14 +349,10 @@ async function getRawgSearch(request, env) {
       updatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    return jsonResponse({
-      count: 0,
+    return rawgUnavailableResponse(error, {
+      count: null,
       next: null,
       previous: null,
-      results: [],
-      sourceStatus: "unavailable",
-      error: String(error?.message || error),
-      updatedAt: new Date().toISOString(),
     });
   }
 }
@@ -266,7 +362,7 @@ async function getRawgProxy(request, env, rawgPath) {
   const rawgUrl = buildRawgUrl(rawgPath, requestUrl.searchParams, env);
 
   try {
-    const data = await fetchJson(rawgUrl.toString(), 12000);
+    const data = await fetchRawgJson(rawgUrl.toString(), { timeout: 12000 });
 
     return jsonResponse({
       ...data,
@@ -274,12 +370,7 @@ async function getRawgProxy(request, env, rawgPath) {
       updatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    return jsonResponse({
-      results: [],
-      sourceStatus: "unavailable",
-      error: String(error?.message || error),
-      updatedAt: new Date().toISOString(),
-    });
+    return rawgUnavailableResponse(error);
   }
 }
 
@@ -310,7 +401,7 @@ async function getRawgUpcoming(request, env) {
         page_size: "40",
       });
       const rawgUrl = buildRawgUrl("/games", params, env);
-      const data = await fetchJson(rawgUrl.toString(), 12000);
+      const data = await fetchRawgJson(rawgUrl.toString(), { timeout: 12000 });
       next = data?.next || null;
 
       (data?.results || []).forEach((game) => {
@@ -340,14 +431,10 @@ async function getRawgUpcoming(request, env) {
       updatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    return jsonResponse({
-      results: [],
-      count: 0,
+    return rawgUnavailableResponse(error, {
+      count: null,
       next: null,
-      sourceStatus: "unavailable",
       range: { from: startDate, to: endDate },
-      error: String(error?.message || error),
-      updatedAt: new Date().toISOString(),
     });
   }
 }
