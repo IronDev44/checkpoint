@@ -568,6 +568,19 @@ function getReleaseCountdown(date) {
   return "";
 }
 
+function isFutureReleaseDate(date, referenceDate = new Date()) {
+  if (!date) return false;
+
+  const releaseDate = new Date(date);
+  if (Number.isNaN(releaseDate.getTime())) return false;
+
+  const today = new Date(referenceDate);
+  today.setHours(0, 0, 0, 0);
+  releaseDate.setHours(0, 0, 0, 0);
+
+  return releaseDate >= today;
+}
+
 function getGenreChartData(games) {
   const genres = {};
 
@@ -9686,11 +9699,19 @@ function getSearchQueryAliases(query = "") {
   const normalized = normalizeSearchText(query);
   if (!normalized) return [];
 
-  const aliases = [query.trim()];
+  const aliases = [];
 
   if (/\bgta\b/.test(normalized)) {
-    aliases.push("grand theft auto", "grand theft auto v", "grand theft auto vi");
+    aliases.push(
+      "grand theft auto",
+      "grand theft auto v",
+      "grand theft auto vi",
+      "grand theft auto san andreas",
+      "grand theft auto iv"
+    );
   }
+
+  aliases.push(query.trim());
 
   return Array.from(new Set(aliases.filter(Boolean)));
 }
@@ -16587,25 +16608,32 @@ useEffect(() => {
         setIsUpcomingLoading(true);
 
         const today = new Date();
-const startDate = today.toISOString().split("T")[0];
+        const startDate = today.toISOString().split("T")[0];
 
-const future = new Date();
-future.setMonth(future.getMonth() + 6);
-const endDate = future.toISOString().split("T")[0];
+        const future = new Date(today);
+        future.setMonth(future.getMonth() + 18);
+        const endDate = future.toISOString().split("T")[0];
 
-const url = `https://api.rawg.io/api/games?key=${API_KEY}&dates=${startDate},${endDate}&ordering=released&page_size=40`;
+        const url = `https://api.rawg.io/api/games?key=${API_KEY}&dates=${startDate},${endDate}&ordering=released&page_size=40`;
         const response = await fetch(url);
         if (!response.ok) {
           throw new Error(`RAWG upcoming ${response.status}`);
         }
         const data = await response.json();
-        const results = (data.results || []).filter((game) => game.name);
+        const results = (data.results || [])
+          .filter(
+            (game) =>
+              game?.name &&
+              isMainGameResult(game) &&
+              isFutureReleaseDate(game.released, today)
+          )
+          .sort((a, b) => new Date(a.released) - new Date(b.released));
 
-        setUpcomingGames(results.length ? results : UPCOMING_GAMES_FALLBACK);
+        setUpcomingGames(results);
       } catch (e) {
         if (isAbortError(e)) return;
         console.error("Erreur chargement sorties :", e);
-        setUpcomingGames(UPCOMING_GAMES_FALLBACK);
+        setUpcomingGames([]);
       } finally {
         setIsUpcomingLoading(false);
       }
@@ -17277,9 +17305,7 @@ useEffect(() => {
     if (platformFilter) params.append("platforms", platformFilter);
     if (genreFilter) params.append("genres", genreFilter);
 
-    if (cleanSearch) {
-      params.append("search_precise", "true");
-    } else {
+    if (!cleanSearch) {
       params.append("ordering", sortBy);
     }
 
@@ -17302,13 +17328,34 @@ useEffect(() => {
       relaxedParams.append("page_size", "20");
       relaxedParams.append("page", "1");
       relaxedParams.append("search", searchTerm);
-      relaxedParams.append("search_precise", "true");
 
       const relaxedResponse = await fetch(
         `https://api.rawg.io/api/games?${relaxedParams.toString()}`
       );
       const relaxedData = await relaxedResponse.json();
       resultsList = (relaxedData.results || []).filter(isMainGameResult);
+    }
+
+    if (cleanSearch && resultsList.length === 0 && searchAliases.length > 1) {
+      for (const alias of searchAliases.slice(1)) {
+        const aliasParams = new URLSearchParams();
+        aliasParams.append("key", API_KEY);
+        aliasParams.append("page_size", "20");
+        aliasParams.append("page", "1");
+        aliasParams.append("search", alias);
+
+        const aliasResponse = await fetch(
+          `https://api.rawg.io/api/games?${aliasParams.toString()}`
+        );
+        if (!aliasResponse.ok) continue;
+
+        const aliasData = await aliasResponse.json();
+        const aliasResults = (aliasData.results || []).filter(isMainGameResult);
+        if (aliasResults.length > 0) {
+          resultsList = aliasResults;
+          break;
+        }
+      }
     }
 
     if (cleanSearch) {
@@ -17359,6 +17406,10 @@ useEffect(() => {
       }
     }
 
+    if (cleanSearch && resultsList.length === 0) {
+      resultsList = buildOfflineSearchResults();
+    }
+
     resultsList = sortSearchResultsByRelevance(resultsList, cleanSearch);
 
     const nextParams = new URLSearchParams(params);
@@ -17399,7 +17450,7 @@ useEffect(() => {
     if (activeTab !== "search") return;
     if (debouncedSearch.trim().length < 3) return;
 
-    searchGames();
+    searchGames(debouncedSearch);
   }, [debouncedSearch]);
 
   const deleteGame = async (id) => {
