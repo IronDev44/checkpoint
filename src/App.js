@@ -65,12 +65,6 @@ import {
 const API_KEY = "d7b763a492c745cd82217c285f897e08";
 const RAWG_API_BASE = "https://api.rawg.io/api";
 
-function shouldUseCloudflareApi() {
-  if (typeof window === "undefined") return false;
-
-  return !["localhost", "127.0.0.1"].includes(window.location.hostname);
-}
-
 function createSearchParams(params = {}) {
   if (params instanceof URLSearchParams) return new URLSearchParams(params);
   return new URLSearchParams(params);
@@ -79,10 +73,6 @@ function createSearchParams(params = {}) {
 function buildRawgApiUrl(path, params = {}) {
   const searchParams = createSearchParams(params);
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
-
-  if (shouldUseCloudflareApi()) {
-    return `/api/rawg${normalizedPath}?${searchParams.toString()}`;
-  }
 
   searchParams.set("key", API_KEY);
   return `${RAWG_API_BASE}${normalizedPath}?${searchParams.toString()}`;
@@ -693,16 +683,6 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
 
   useEffect(() => {
     if (!game) return;
-    const isExternalFallbackGame =
-      game.source === "steam" || String(game.id || "").startsWith("steam-");
-
-    if (isExternalFallbackGame) {
-      setDetails(null);
-      setScreenshots([]);
-      setMovies([]);
-      setLoading(false);
-      return;
-    }
 
     const fetchDetails = async () => {
       try {
@@ -16654,20 +16634,18 @@ useEffect(() => {
         setUpcomingSourceStatus("loading");
 
         const response = await fetch(
-          shouldUseCloudflareApi()
-            ? "/api/rawg/upcoming?months=18&limit=40"
-            : buildRawgApiUrl("/games", {
-                dates: (() => {
-                  const today = new Date();
-                  const future = new Date(today);
-                  future.setMonth(future.getMonth() + 18);
-                  return `${today.toISOString().split("T")[0]},${
-                    future.toISOString().split("T")[0]
-                  }`;
-                })(),
-                ordering: "released",
-                page_size: "40",
-              })
+          buildRawgApiUrl("/games", {
+            dates: (() => {
+              const today = new Date();
+              const future = new Date(today);
+              future.setMonth(future.getMonth() + 6);
+              return `${today.toISOString().split("T")[0]},${
+                future.toISOString().split("T")[0]
+              }`;
+            })(),
+            ordering: "released",
+            page_size: "40",
+          })
         );
         if (!response.ok) {
           throw new Error(`Upcoming source ${response.status}`);
@@ -16683,12 +16661,12 @@ useEffect(() => {
           )
           .sort((a, b) => new Date(a.released) - new Date(b.released));
 
-        setUpcomingGames(results);
+        setUpcomingGames(results.length ? results : UPCOMING_GAMES_FALLBACK);
         setUpcomingSourceStatus(data.sourceStatus || "ok");
       } catch (e) {
         if (isAbortError(e)) return;
         console.error("Erreur chargement sorties :", e);
-        setUpcomingGames([]);
+        setUpcomingGames(UPCOMING_GAMES_FALLBACK);
         setUpcomingSourceStatus("unavailable");
       } finally {
         setIsUpcomingLoading(false);
