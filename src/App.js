@@ -9827,13 +9827,44 @@ function getKnownSearchFallbacks(query = "") {
   });
 }
 
+function createFallbackPoster(title, colorA = "#60a5fa", colorB = "#d6b54a") {
+  const safeTitle = String(title || "Checkpoint").replace(/[<>&"]/g, "");
+  const shortTitle = safeTitle
+    .split(/\s+/)
+    .slice(0, 3)
+    .join(" ");
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#07111f"/>
+          <stop offset="0.52" stop-color="${colorA}"/>
+          <stop offset="1" stop-color="${colorB}"/>
+        </linearGradient>
+        <radialGradient id="glow" cx="50%" cy="44%" r="55%">
+          <stop offset="0" stop-color="#ffffff" stop-opacity=".28"/>
+          <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <rect width="960" height="540" fill="url(#bg)"/>
+      <rect width="960" height="540" fill="#020813" opacity=".52"/>
+      <circle cx="480" cy="230" r="260" fill="url(#glow)"/>
+      <path d="M-60 440 C170 330 300 500 520 390 C710 295 830 330 1030 230" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="22"/>
+      <text x="64" y="82" fill="#dbeafe" font-family="Arial, sans-serif" font-size="26" font-weight="800" letter-spacing="8">CHECKPOINT WATCH</text>
+      <text x="64" y="300" fill="#ffffff" font-family="Arial Black, Arial, sans-serif" font-size="58" font-weight="900">${shortTitle}</text>
+      <text x="64" y="350" fill="#dbeafe" font-family="Arial, sans-serif" font-size="28" font-weight="700" opacity=".86">Sortie a suivre</text>
+    </svg>`;
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
 const UPCOMING_GAMES_FALLBACK = [
   {
     id: "fallback-upcoming-fable",
     name: "Fable",
     released: "",
     tba: true,
-    background_image: "",
+    background_image: createFallbackPoster("Fable", "#22c55e", "#d6b54a"),
     platforms: [
       { platform: { name: "PC" } },
       { platform: { name: "Xbox Series X/S" } },
@@ -9845,7 +9876,7 @@ const UPCOMING_GAMES_FALLBACK = [
     name: "Intergalactic: The Heretic Prophet",
     released: "",
     tba: true,
-    background_image: "",
+    background_image: createFallbackPoster("Intergalactic", "#4f46e5", "#e879f9"),
     platforms: [{ platform: { name: "PlayStation 5" } }],
     genres: [{ name: "Action" }, { name: "Aventure" }],
   },
@@ -9854,11 +9885,95 @@ const UPCOMING_GAMES_FALLBACK = [
     name: "Pragmata",
     released: "",
     tba: true,
-    background_image: "",
+    background_image: createFallbackPoster("Pragmata", "#0891b2", "#94a3b8"),
     platforms: [
       { platform: { name: "PC" } },
       { platform: { name: "PlayStation 5" } },
       { platform: { name: "Xbox Series X/S" } },
+    ],
+    genres: [{ name: "Action" }],
+  },
+  {
+    id: "fallback-upcoming-marathon",
+    name: "Marathon",
+    released: "",
+    tba: true,
+    background_image: createFallbackPoster("Marathon", "#f97316", "#06b6d4"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+    ],
+    genres: [{ name: "Shooter" }],
+  },
+  {
+    id: "fallback-upcoming-perfect-dark",
+    name: "Perfect Dark",
+    released: "",
+    tba: true,
+    background_image: createFallbackPoster("Perfect Dark", "#10b981", "#111827"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "Xbox Series X/S" } },
+    ],
+    genres: [{ name: "Action" }],
+  },
+  {
+    id: "fallback-upcoming-wolverine",
+    name: "Marvel's Wolverine",
+    released: "",
+    tba: true,
+    background_image: createFallbackPoster("Wolverine", "#facc15", "#1f2937"),
+    platforms: [{ platform: { name: "PlayStation 5" } }],
+    genres: [{ name: "Action" }, { name: "Aventure" }],
+  },
+  {
+    id: "fallback-upcoming-state-of-decay-3",
+    name: "State of Decay 3",
+    released: "",
+    tba: true,
+    background_image: createFallbackPoster("State of Decay 3", "#dc2626", "#14532d"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "Xbox Series X/S" } },
+    ],
+    genres: [{ name: "Survie" }],
+  },
+  {
+    id: "fallback-upcoming-007-first-light",
+    name: "007 First Light",
+    released: "",
+    tba: true,
+    background_image: createFallbackPoster("007 First Light", "#c084fc", "#334155"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+    ],
+    genres: [{ name: "Action" }],
+  },
+  {
+    id: "fallback-upcoming-crimson-desert",
+    name: "Crimson Desert",
+    released: "",
+    tba: true,
+    background_image: createFallbackPoster("Crimson Desert", "#b91c1c", "#d97706"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
+      { platform: { name: "Xbox Series X/S" } },
+    ],
+    genres: [{ name: "Action" }, { name: "RPG" }],
+  },
+  {
+    id: "fallback-upcoming-phantom-blade-zero",
+    name: "Phantom Blade Zero",
+    released: "",
+    tba: true,
+    background_image: createFallbackPoster("Phantom Blade Zero", "#64748b", "#ef4444"),
+    platforms: [
+      { platform: { name: "PC" } },
+      { platform: { name: "PlayStation 5" } },
     ],
     genres: [{ name: "Action" }],
   },
@@ -17104,6 +17219,46 @@ useEffect(() => {
     return;
   }
 
+  const buildOfflineSearchResults = () => {
+    if (!cleanSearch) return [];
+
+    const normalizedQuery = normalizeSearchText(cleanSearch);
+    const queryWords = normalizedQuery.split(" ").filter(Boolean);
+    const knownResults = getKnownSearchFallbacks(cleanSearch);
+    const localResults = games
+      .filter((game) => {
+        const normalizedName = normalizeSearchText(game.name);
+        return (
+          normalizedName.includes(normalizedQuery) ||
+          queryWords.every((word) => normalizedName.includes(word))
+        );
+      })
+      .map((game) => ({
+        id: game.rawgId || `local-${game.id}`,
+        name: game.name,
+        slug: normalizeSearchText(game.name).replace(/\s+/g, "-"),
+        released: game.released || "",
+        background_image: game.image || "",
+        rating: clampRating(game.rating) / 2,
+        ratings_count: game.rating ? 1 : 0,
+        playtime: game.playtime || 0,
+        platforms: (game.platformNames || []).map((name) => ({
+          platform: { name },
+        })),
+        genres: (game.genreNames || []).map((name) => ({ name })),
+      }));
+
+    return [...knownResults, ...localResults].filter(
+      (game, index, list) =>
+        index ===
+        list.findIndex(
+          (candidate) =>
+            String(candidate.id) === String(game.id) ||
+            normalizeSearchText(candidate.name) === normalizeSearchText(game.name)
+        )
+    );
+  };
+
   try {
     setIsSearching(true);
 
@@ -17130,6 +17285,9 @@ useEffect(() => {
 
     const url = `https://api.rawg.io/api/games?${params.toString()}`;
     const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`RAWG search ${response.status}`);
+    }
     const data = await response.json();
 
     let resultsList = (data.results || []).filter(isMainGameResult);
@@ -17219,7 +17377,19 @@ useEffect(() => {
   } catch (e) {
     if (isAbortError(e)) return;
     console.error("Erreur recherche RAWG :", e);
-    setToast("La recherche n’a pas répondu correctement.");
+    const offlineResults = sortSearchResultsByRelevance(
+      buildOfflineSearchResults(),
+      cleanSearch
+    );
+
+    if (offlineResults.length > 0) {
+      setResults(offlineResults);
+      setNextPage(null);
+      setShowFilters(false);
+      setToast("Source externe indisponible, résultats locaux affichés.");
+    } else {
+      setToast("La recherche n'a pas répondu correctement.");
+    }
   } finally {
     setIsSearching(false);
   }
