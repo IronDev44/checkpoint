@@ -63,6 +63,7 @@ import {
 } from "lucide-react";
 
 const API_KEY = "d7b763a492c745cd82217c285f897e08";
+const RAWG_API_BASE = "https://api.rawg.io/api";
 
 function shouldUseCloudflareApi() {
   if (typeof window === "undefined") return false;
@@ -70,32 +71,21 @@ function shouldUseCloudflareApi() {
   return !["localhost", "127.0.0.1"].includes(window.location.hostname);
 }
 
-function buildRawgSearchUrl(params) {
-  if (shouldUseCloudflareApi()) {
-    return `/api/rawg/search?${params.toString()}`;
-  }
-
-  const localParams = new URLSearchParams(params);
-  localParams.set("key", API_KEY);
-  return `https://api.rawg.io/api/games?${localParams.toString()}`;
+function createSearchParams(params = {}) {
+  if (params instanceof URLSearchParams) return new URLSearchParams(params);
+  return new URLSearchParams(params);
 }
 
-function buildRawgUpcomingUrl() {
+function buildRawgApiUrl(path, params = {}) {
+  const searchParams = createSearchParams(params);
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+
   if (shouldUseCloudflareApi()) {
-    return "/api/rawg/upcoming?months=18&limit=40";
+    return `/api/rawg${normalizedPath}?${searchParams.toString()}`;
   }
 
-  const today = new Date();
-  const future = new Date(today);
-  future.setMonth(future.getMonth() + 18);
-  const params = new URLSearchParams({
-    key: API_KEY,
-    dates: `${today.toISOString().split("T")[0]},${future.toISOString().split("T")[0]}`,
-    ordering: "released",
-    page_size: "40",
-  });
-
-  return `https://api.rawg.io/api/games?${params.toString()}`;
+  searchParams.set("key", API_KEY);
+  return `${RAWG_API_BASE}${normalizedPath}?${searchParams.toString()}`;
 }
 
 const WEEKLY_QUIZ_STORAGE_KEY = "checkpoint-weekly-quiz";
@@ -709,9 +699,9 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
         setLoading(true);
 
         const [detailsRes, screenshotsRes, moviesRes] = await Promise.all([
-          fetch(`https://api.rawg.io/api/games/${game.id}?key=${API_KEY}&lang=fr`),
-          fetch(`https://api.rawg.io/api/games/${game.id}/screenshots?key=${API_KEY}`),
-          fetch(`https://api.rawg.io/api/games/${game.id}/movies?key=${API_KEY}`),
+          fetch(buildRawgApiUrl(`/games/${encodeURIComponent(game.id)}`, { lang: "fr" })),
+          fetch(buildRawgApiUrl(`/games/${encodeURIComponent(game.id)}/screenshots`)),
+          fetch(buildRawgApiUrl(`/games/${encodeURIComponent(game.id)}/movies`)),
         ]);
 
         const detailsData = await detailsRes.json();
@@ -4869,7 +4859,9 @@ function GameDetailModal({
 
         if (rawgGameId) {
           const additionsRes = await fetch(
-            `https://api.rawg.io/api/games/${rawgGameId}/additions?key=${API_KEY}&page_size=20`
+            buildRawgApiUrl(`/games/${encodeURIComponent(rawgGameId)}/additions`, {
+              page_size: "20",
+            })
           );
 
           const additionsData = await additionsRes.json();
@@ -4877,9 +4869,12 @@ function GameDetailModal({
         }
 
         if (foundDlcs.length === 0) {
-          const search = encodeURIComponent(`${game.name} DLC expansion`);
+          const search = `${game.name} DLC expansion`;
           const searchRes = await fetch(
-            `https://api.rawg.io/api/games?key=${API_KEY}&search=${search}&page_size=20`
+            buildRawgApiUrl("/games", {
+              search,
+              page_size: "20",
+            })
           );
 
           const searchData = await searchRes.json();
@@ -8367,7 +8362,11 @@ function HomeTab({
           .join(",");
 
         const res = await fetch(
-          `https://api.rawg.io/api/games?key=${API_KEY}&genres=${genreQuery}&ordering=-rating&page_size=40`
+          buildRawgApiUrl("/games", {
+            genres: genreQuery,
+            ordering: "-rating",
+            page_size: "40",
+          })
         );
 
         const data = await res.json();
@@ -10193,10 +10192,11 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
   };
 
   const loadSeriesSuggestions = async (seriesName) => {
-    const query = encodeURIComponent(seriesName);
-
     const res = await fetch(
-      `https://api.rawg.io/api/games?key=${API_KEY}&search=${query}&page_size=30`
+      buildRawgApiUrl("/games", {
+        search: seriesName,
+        page_size: "30",
+      })
     );
 
     const data = await res.json();
@@ -16612,8 +16612,8 @@ useEffect(() => {
     const fetchFilterData = async () => {
       try {
         const [platformsRes, genresRes] = await Promise.all([
-          fetch(`https://api.rawg.io/api/platforms?key=${API_KEY}&page_size=40`),
-          fetch(`https://api.rawg.io/api/genres?key=${API_KEY}&page_size=40`),
+          fetch(buildRawgApiUrl("/platforms", { page_size: "40" })),
+          fetch(buildRawgApiUrl("/genres", { page_size: "40" })),
         ]);
 
         const platformsData = await platformsRes.json();
@@ -16643,7 +16643,22 @@ useEffect(() => {
         setIsUpcomingLoading(true);
         setUpcomingSourceStatus("loading");
 
-        const response = await fetch(buildRawgUpcomingUrl());
+        const response = await fetch(
+          shouldUseCloudflareApi()
+            ? "/api/rawg/upcoming?months=18&limit=40"
+            : buildRawgApiUrl("/games", {
+                dates: (() => {
+                  const today = new Date();
+                  const future = new Date(today);
+                  future.setMonth(future.getMonth() + 18);
+                  return `${today.toISOString().split("T")[0]},${
+                    future.toISOString().split("T")[0]
+                  }`;
+                })(),
+                ordering: "released",
+                page_size: "40",
+              })
+        );
         if (!response.ok) {
           throw new Error(`Upcoming source ${response.status}`);
         }
@@ -17327,7 +17342,6 @@ useEffect(() => {
         ? "grand theft auto"
         : searchAliases[0] || cleanSearch;
     const params = new URLSearchParams();
-    params.append("key", API_KEY);
     params.append("page_size", "20");
     params.append("page", "1");
 
@@ -17340,7 +17354,7 @@ useEffect(() => {
       params.append("ordering", sortBy);
     }
 
-    const url = buildRawgSearchUrl(params);
+    const url = buildRawgApiUrl("/games", params);
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`RAWG search ${response.status}`);
@@ -17358,13 +17372,12 @@ useEffect(() => {
       (yearFilter || platformFilter || genreFilter)
     ) {
       const relaxedParams = new URLSearchParams();
-      relaxedParams.append("key", API_KEY);
       relaxedParams.append("page_size", "20");
       relaxedParams.append("page", "1");
       relaxedParams.append("search", searchTerm);
 
       const relaxedResponse = await fetch(
-        buildRawgSearchUrl(relaxedParams)
+        buildRawgApiUrl("/games", relaxedParams)
       );
       const relaxedData = await relaxedResponse.json();
       if (relaxedData.sourceStatus === "unavailable") {
@@ -17376,13 +17389,12 @@ useEffect(() => {
     if (cleanSearch && resultsList.length === 0 && searchAliases.length > 1) {
       for (const alias of searchAliases.slice(1)) {
         const aliasParams = new URLSearchParams();
-        aliasParams.append("key", API_KEY);
         aliasParams.append("page_size", "20");
         aliasParams.append("page", "1");
         aliasParams.append("search", alias);
 
         const aliasResponse = await fetch(
-          buildRawgSearchUrl(aliasParams)
+          buildRawgApiUrl("/games", aliasParams)
         );
         if (!aliasResponse.ok) continue;
 
@@ -17404,7 +17416,7 @@ useEffect(() => {
       for (const slug of Array.from(new Set(slugCandidates))) {
         try {
           const detailResponse = await fetch(
-            `https://api.rawg.io/api/games/${slug}?key=${API_KEY}`
+            buildRawgApiUrl(`/games/${encodeURIComponent(slug)}`)
           );
 
           if (detailResponse.ok) {
@@ -17460,7 +17472,7 @@ useEffect(() => {
     setNextPage(
       data.next ||
         (resultsList.length === 20
-          ? buildRawgSearchUrl(nextParams)
+          ? buildRawgApiUrl("/games", nextParams)
           : null)
     );
 

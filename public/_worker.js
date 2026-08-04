@@ -27,6 +27,7 @@ const RAWG_PUBLIC_PARAMS = new Set([
   "ordering",
   "page",
   "page_size",
+  "lang",
 ]);
 
 function jsonResponse(body, init = {}) {
@@ -252,6 +253,28 @@ async function getRawgSearch(request, env) {
       count: 0,
       next: null,
       previous: null,
+      results: [],
+      sourceStatus: "unavailable",
+      error: String(error?.message || error),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+}
+
+async function getRawgProxy(request, env, rawgPath) {
+  const requestUrl = new URL(request.url);
+  const rawgUrl = buildRawgUrl(rawgPath, requestUrl.searchParams, env);
+
+  try {
+    const data = await fetchJson(rawgUrl.toString(), 12000);
+
+    return jsonResponse({
+      ...data,
+      sourceStatus: "ok",
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    return jsonResponse({
       results: [],
       sourceStatus: "unavailable",
       error: String(error?.message || error),
@@ -1127,7 +1150,7 @@ export default {
       }
     }
 
-    if (url.pathname === "/api/rawg/search") {
+    if (url.pathname === "/api/rawg/search" || url.pathname === "/api/rawg/games") {
       if (request.method === "OPTIONS") {
         return new Response(null, { headers: JSON_HEADERS });
       }
@@ -1149,6 +1172,36 @@ export default {
       }
 
       return getRawgUpcoming(request, env);
+    }
+
+    if (url.pathname === "/api/rawg/platforms") {
+      if (request.method !== "GET") {
+        return jsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      return getRawgProxy(request, env, "/platforms");
+    }
+
+    if (url.pathname === "/api/rawg/genres") {
+      if (request.method !== "GET") {
+        return jsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      return getRawgProxy(request, env, "/genres");
+    }
+
+    const rawgGameMatch = url.pathname.match(
+      /^\/api\/rawg\/games\/([^/]+)(?:\/(screenshots|movies|additions))?$/
+    );
+
+    if (rawgGameMatch) {
+      if (request.method !== "GET") {
+        return jsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      const gameId = rawgGameMatch[1];
+      const childPath = rawgGameMatch[2] ? `/${rawgGameMatch[2]}` : "";
+      return getRawgProxy(request, env, `/games/${gameId}${childPath}`);
     }
 
     if (url.pathname === "/api/steam/owned-games") {
