@@ -1332,6 +1332,193 @@ function getPlayerAnalysis(games = [], hardware = [], badges = []) {
   };
 }
 
+function getTimelineYear(value) {
+  if (!value) return null;
+
+  const text = String(value);
+  const match = text.match(/\b(19|20)\d{2}\b/);
+
+  if (match) return Number(match[0]);
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date.getFullYear();
+}
+
+function getGameTimelineYear(game = {}) {
+  return (
+    getTimelineYear(game.completedAt) ||
+    getTimelineYear(game.finishedAt) ||
+    getTimelineYear(game.updatedAt) ||
+    getTimelineYear(game.createdAt) ||
+    getTimelineYear(game.released) ||
+    getTimelineYear(game.year)
+  );
+}
+
+function getHardwareTimelineYear(item = {}) {
+  return (
+    getTimelineYear(item.acquiredAt) ||
+    getTimelineYear(item.obtainedAt) ||
+    getTimelineYear(item.updatedAt) ||
+    getTimelineYear(item.createdAt) ||
+    getTimelineYear(item.releaseDate) ||
+    getTimelineYear(item.releaseYear) ||
+    getTimelineYear(item.year)
+  );
+}
+
+function getGamingTimeline(games = [], hardware = [], socialProfile = {}) {
+  const events = [];
+  const seen = new Set();
+  const addEvent = (event) => {
+    const year = Number(event.year) || null;
+    const id = event.id || `${event.type}-${year || "now"}-${event.title}`;
+
+    if (!event.title || seen.has(id)) return;
+    seen.add(id);
+    events.push({
+      ...event,
+      id,
+      year,
+      yearLabel: event.yearLabel || (year ? String(year) : "Maintenant"),
+      sortYear: year || 9999,
+    });
+  };
+
+  const identityGameIds = Array.isArray(socialProfile.identityGameIds)
+    ? socialProfile.identityGameIds.slice(0, 3).map(String)
+    : [];
+  const identityGames = identityGameIds
+    .map((id) => games.find((game) => String(game.id) === id))
+    .filter(Boolean);
+
+  identityGames.forEach((game, index) => {
+    addEvent({
+      id: `identity-${game.id || game.name}`,
+      type: "identity",
+      icon: "CP",
+      kicker: `Jeu fondateur ${index + 1}`,
+      title: game.name,
+      detail:
+        game.platforms?.length > 0
+          ? game.platforms.slice(0, 2).join(" / ")
+          : formatRating10(getGameRating(game), "Jeu marquant"),
+      image: game.image || "",
+      year: getGameTimelineYear(game),
+      tone: "legendary",
+    });
+  });
+
+  games
+    .filter((game) => Number(game.gotyYear) > 0)
+    .sort((a, b) => Number(a.gotyYear) - Number(b.gotyYear))
+    .forEach((game) => {
+      addEvent({
+        id: `goty-${game.gotyYear}-${game.id || game.name}`,
+        type: "goty",
+        icon: "G",
+        kicker: `GOTY perso ${game.gotyYear}`,
+        title: game.name,
+        detail: formatRating10(getGameRating(game), "Choix personnel"),
+        image: game.image || "",
+        year: Number(game.gotyYear),
+        tone: "gold",
+      });
+    });
+
+  const markedGames = games
+    .filter((game) => game.favorite || getGameRating(game) >= 9 || isGameFinishedStatus(game))
+    .map((game) => ({
+      game,
+      year: getGameTimelineYear(game),
+      score:
+        getGameRating(game) * 12 +
+        (game.favorite ? 22 : 0) +
+        (isGameFinishedStatus(game) ? 8 : 0),
+    }))
+    .filter((item) => item.year)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 8);
+
+  markedGames.forEach(({ game, year }) => {
+    addEvent({
+      id: `marked-${year}-${game.id || game.name}`,
+      type: "game",
+      icon: "J",
+      kicker: game.favorite ? "Favori marquant" : "Jeu valide",
+      title: game.name,
+      detail: `${formatRating10(getGameRating(game), "non note")} - ${
+        game.genres?.[0]?.name || game.genres?.[0] || game.platforms?.[0] || "bibliotheque"
+      }`,
+      image: game.image || "",
+      year,
+      tone: game.favorite ? "favorite" : "standard",
+    });
+  });
+
+  hardware
+    .filter((item) => {
+      const status = normalizeIdentityText(item.status || "");
+      const type = normalizeIdentityText(item.type || "");
+      return (
+        type.includes("console") ||
+        type.includes("vr") ||
+        type.includes("display") ||
+        status.includes("poss") ||
+        status.includes("hist")
+      );
+    })
+    .map((item) => ({
+      item,
+      year: getHardwareTimelineYear(item),
+      score:
+        (getHardwareAverageRating(item) || 0) * 10 +
+        (normalizeIdentityText(item.status || "").includes("poss") ? 14 : 0),
+    }))
+    .filter((entry) => entry.year)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 6)
+    .forEach(({ item, year }) => {
+      addEvent({
+        id: `hardware-${year}-${item.id || item.name}`,
+        type: "hardware",
+        icon: "M",
+        kicker: "Materiel repere",
+        title: item.name,
+        detail: [item.brand, item.category || item.type].filter(Boolean).join(" - "),
+        image: item.image || "",
+        year,
+        tone: "hardware",
+      });
+    });
+
+  const finishedCount = games.filter(isGameFinishedStatus).length;
+  const ratedCount = games.filter((game) => getGameRating(game) > 0).length;
+  const currentHardware = getCurrentOwnedHardware(hardware);
+
+  if (games.length || currentHardware.length) {
+    addEvent({
+      id: "timeline-current-checkpoint",
+      type: "checkpoint",
+      icon: "XP",
+      kicker: "Checkpoint actuel",
+      title: "Univers en construction",
+      detail: `${games.length} jeux, ${finishedCount} termines, ${ratedCount} notes, ${currentHardware.length} materiels actuels`,
+      year: null,
+      yearLabel: "Aujourd'hui",
+      tone: "current",
+    });
+  }
+
+  return events
+    .sort((a, b) => {
+      if (a.sortYear !== b.sortYear) return a.sortYear - b.sortYear;
+      const typeOrder = { hardware: 0, identity: 1, goty: 2, game: 3, checkpoint: 4 };
+      return (typeOrder[a.type] || 9) - (typeOrder[b.type] || 9);
+    })
+    .slice(0, 18);
+}
+
 function getProfileInsights(games = [], hardware = [], badges = []) {
   const stats = getAdvancedStats(games);
   const completedGames = games.filter(isGameFinishedStatus);
@@ -7527,6 +7714,67 @@ function ActivityFeed({
   );
 }
 
+function GamingTimeline({ timeline = [], compact = false }) {
+  if (!timeline.length) {
+    return (
+      <EmptyState
+        title="Timeline a construire"
+        message="Ajoute tes jeux fondateurs, tes GOTY et ton materiel pour commencer a raconter ton parcours."
+      />
+    );
+  }
+
+  const knownYears = timeline
+    .map((event) => event.year)
+    .filter(Boolean)
+    .sort((a, b) => a - b);
+  const firstYear = knownYears[0];
+  const lastYear = knownYears[knownYears.length - 1];
+  const visibleTimeline = compact ? timeline.slice(-6) : timeline;
+
+  return (
+    <div className={`gaming-timeline ${compact ? "compact" : ""}`}>
+      {!compact && (
+        <div className="gaming-timeline-overview">
+          <div>
+            <span>Parcours actif</span>
+            <strong>
+              {firstYear && lastYear
+                ? `${firstYear} - ${lastYear}`
+                : "A enrichir"}
+            </strong>
+            <small>{timeline.length} moments retenus dans ta frise.</small>
+          </div>
+          <div>
+            <span>Memoire Checkpoint</span>
+            <strong>{timeline.filter((event) => event.type === "goty").length}</strong>
+            <small>GOTY personnels epingles.</small>
+          </div>
+        </div>
+      )}
+
+      <div className="gaming-timeline-track">
+        {visibleTimeline.map((event) => (
+          <article
+            key={event.id}
+            className={`gaming-timeline-event tone-${event.tone || event.type}`}
+          >
+            <div className="gaming-timeline-year">{event.yearLabel}</div>
+            <div className="gaming-timeline-node">
+              {event.image ? <img src={event.image} alt={event.title} /> : <span>{event.icon}</span>}
+            </div>
+            <div className="gaming-timeline-card">
+              <span>{event.kicker}</span>
+              <strong>{event.title}</strong>
+              <small>{event.detail}</small>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function PublicProfilePreview({
   profile,
   title = "Profil public",
@@ -7563,6 +7811,7 @@ function PublicProfilePreview({
     .slice(0, 5);
   const platformStrengths = (profile.platformStrengths || []).slice(0, 4);
   const identityGames = (profile.identityGames || []).slice(0, 3);
+  const gamingTimeline = (profile.gamingTimeline || []).slice(0, 8);
   const heroGame =
     identityGames[0] ||
     profileShowcase.topScores?.[0]?.game ||
@@ -7755,6 +8004,16 @@ function PublicProfilePreview({
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {gamingTimeline.length > 0 && (
+        <div className="public-vitrine-section public-gaming-timeline">
+          <div className="public-vitrine-section-head">
+            <span>Timeline gaming</span>
+            <strong>Parcours joueur</strong>
+          </div>
+          <GamingTimeline timeline={gamingTimeline} compact />
         </div>
       )}
 
@@ -8023,6 +8282,7 @@ function SocialTab({
   ].filter((section) => section.games.length > 0);
   const currentHardware = getCurrentOwnedHardware(hardware);
   const profileShowcase = getProfileShowcase(games, hardware);
+  const gamingTimeline = getGamingTimeline(games, hardware, socialProfile);
   const activityLikes = socialProfile.activityLikes || {};
   const activityComments = socialProfile.activityComments || {};
   const socialPosts = Array.isArray(socialProfile.posts)
@@ -8172,6 +8432,7 @@ function SocialTab({
     collectionPhotos: socialProfile.collectionPhotos || [],
     identityTitle,
     playerAnalysis,
+    gamingTimeline,
     showcase: profileShowcase,
     identityGames: identityGames.map((game) => ({
       id: game.id,
@@ -10272,6 +10533,7 @@ function ProfileTab({
   progress,
   games,
   hardware = [],
+  socialProfile = {},
   featuredBadgeId,
   onSelectFeaturedBadge,
   checkpointTrialProgress = DEFAULT_CHECKPOINT_TRIAL_PROGRESS,
@@ -10291,6 +10553,7 @@ function ProfileTab({
   const featuredBadge = getFeaturedBadgeFromSelection(badges, featuredBadgeId);
   const profileInsights = getProfileInsights(games, hardware, badges);
   const profileShowcase = getProfileShowcase(games, hardware);
+  const gamingTimeline = getGamingTimeline(games, hardware, socialProfile);
   const hasProfileShowcase =
     profileShowcase.topScores.length > 0 ||
     profileShowcase.specializedTops.length > 0 ||
@@ -10651,6 +10914,19 @@ function ProfileTab({
           <ProfileShowcase showcase={profileShowcase} />
         </div>
       )}
+
+      <div className="search-panel profile-timeline-panel">
+        <div className="profile-section-header">
+          <div>
+            <h2 className="panel-title">Timeline gaming</h2>
+            <div className="option-value">
+              Tes consoles, jeux fondateurs, GOTY perso et moments marquants.
+            </div>
+          </div>
+        </div>
+
+        <GamingTimeline timeline={gamingTimeline} />
+      </div>
 
       <div className="search-panel profile-insights-panel">
         <div className="profile-section-header">
@@ -17797,6 +18073,7 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
     .filter(Boolean);
   const identityTitle = getIdentityPlayerTitle(identityGames);
   const playerAnalysis = getPlayerAnalysis(games, hardware, badges);
+  const gamingTimeline = getGamingTimeline(games, hardware, profileOverride);
   const essentialTopSections = [
     { key: "rating", label: "Global", games: getTopGamesForScore(games, "rating", 1) },
     { key: "ratingGameplay", label: "Gameplay", games: getTopGamesForScore(games, "ratingGameplay", 1) },
@@ -17849,6 +18126,7 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
     collectionPhotos: profileOverride.collectionPhotos || [],
     identityTitle,
     playerAnalysis,
+    gamingTimeline,
     showcase: profileShowcase,
     identityGames: identityGames.map((game) => ({
       id: game.id,
@@ -20361,6 +20639,7 @@ const setPlayedPlatforms = async (id, platforms) => {
               progress={progress}
               games={games}
               hardware={hardware}
+              socialProfile={socialProfile}
               featuredBadgeId={socialProfile.featuredBadgeId}
               onSelectFeaturedBadge={(badgeId) =>
                 updateSocialProfile("featuredBadgeId", badgeId)
