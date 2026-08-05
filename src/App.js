@@ -15712,6 +15712,7 @@ const DEAL_SORT_OPTIONS = [
 
 const DEAL_LIBRARY_FILTERS = [
   { id: "all", label: "Toutes" },
+  { id: "smart-wishlist", label: "Alertes wishlist" },
   { id: "wishlist", label: "Wishlist" },
   { id: "missing", label: "Pas dans ma bibliothèque" },
   { id: "owned", label: "Déjà possédées" },
@@ -15776,6 +15777,96 @@ function normalizeDealTitle(value = "") {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+}
+
+function normalizeSmartWishlistTitle(value = "") {
+  return normalizeDealTitle(value)
+    .replace(
+      /\b(remaster(ed)?|remake|definitive|complete|deluxe|ultimate|standard|collector|edition|bundle|pack|goty|game of the year)\b/g,
+      " "
+    )
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function getSteamAppIdFromDeal(deal = {}) {
+  if (deal.steamAppId) return String(deal.steamAppId);
+
+  const idMatch = String(deal.id || "").match(/^steam-(\d+)/);
+  if (idMatch?.[1]) return idMatch[1];
+
+  const urlMatch = String(deal.url || "").match(/store\.steampowered\.com\/app\/(\d+)/i);
+  return urlMatch?.[1] || "";
+}
+
+function getWishlistOriginLabel(game = {}) {
+  if (game.source === "steam-wishlist" || game.steamWishlistAddedAt) {
+    return "Wishlist Steam";
+  }
+
+  return "Wishlist";
+}
+
+function getDealWishlistMatch(deal = {}, games = []) {
+  if (deal.isStoreHub) return null;
+
+  const wishlistGames = games.filter((game) => game.status === "wishlist");
+  if (!wishlistGames.length) return null;
+
+  const dealSteamAppId = getSteamAppIdFromDeal(deal);
+  if (dealSteamAppId) {
+    const steamMatch = wishlistGames.find(
+      (game) => getSteamGameKey(game) && getSteamGameKey(game) === dealSteamAppId
+    );
+
+    if (steamMatch) {
+      return {
+        game: steamMatch,
+        confidence: 100,
+        origin: getWishlistOriginLabel(steamMatch),
+      };
+    }
+  }
+
+  const dealKey = normalizeSmartWishlistTitle(deal.title);
+  if (!dealKey) return null;
+
+  const dealTokens = new Set(dealKey.split(" ").filter((token) => token.length > 1));
+  let bestMatch = null;
+
+  wishlistGames.forEach((game) => {
+    const gameKey = normalizeSmartWishlistTitle(game.name);
+    if (!gameKey) return;
+
+    let confidence = 0;
+    if (dealKey === gameKey) {
+      confidence = 96;
+    } else if (
+      dealKey.length >= 7 &&
+      gameKey.length >= 7 &&
+      (dealKey.includes(gameKey) || gameKey.includes(dealKey))
+    ) {
+      confidence = 86;
+    } else {
+      const gameTokens = gameKey.split(" ").filter((token) => token.length > 1);
+      const sharedTokens = gameTokens.filter((token) => dealTokens.has(token));
+      const ratio = sharedTokens.length / Math.max(gameTokens.length, 1);
+
+      if (sharedTokens.length >= 2 && ratio >= 0.66) {
+        confidence = 74 + Math.round(ratio * 10);
+      }
+    }
+
+    if (confidence > (bestMatch?.confidence || 0)) {
+      bestMatch = {
+        game,
+        confidence,
+        origin: getWishlistOriginLabel(game),
+      };
+    }
+  });
+
+  return bestMatch?.confidence >= 74 ? bestMatch : null;
 }
 
 function parseDealPrice(value = "") {
@@ -15845,7 +15936,10 @@ function enrichDealsWithLibrary(deals, games = []) {
       if (!key || !dealKey) return false;
       return key === dealKey || key.includes(dealKey) || dealKey.includes(key);
     });
-    const libraryStatus = match
+    const wishlistMatch = getDealWishlistMatch(deal, games);
+    const libraryStatus = wishlistMatch
+      ? "wishlist"
+      : match
       ? match.game.status === "wishlist"
         ? "wishlist"
         : "owned"
@@ -15854,7 +15948,10 @@ function enrichDealsWithLibrary(deals, games = []) {
     return {
       ...deal,
       libraryStatus,
-      matchedGameId: match?.game?.id || null,
+      smartWishlistMatch: Boolean(wishlistMatch),
+      wishlistOrigin: wishlistMatch?.origin || "",
+      matchedGameId: wishlistMatch?.game?.id || match?.game?.id || null,
+      matchedGameName: wishlistMatch?.game?.name || match?.game?.name || "",
       priceValue: parseDealPrice(deal.salePrice),
       endsAtTime: getDealEndTime(deal),
     };
@@ -16056,6 +16153,9 @@ function HomeDealsPreview({
 
     return enrichedDeals
       .sort((a, b) => {
+        const smartWishlistDelta =
+          Number(b.smartWishlistMatch) - Number(a.smartWishlistMatch);
+        if (smartWishlistDelta !== 0) return smartWishlistDelta;
         const wishlistDelta =
           Number(b.libraryStatus === "wishlist") - Number(a.libraryStatus === "wishlist");
         if (wishlistDelta !== 0) return wishlistDelta;
@@ -16069,6 +16169,7 @@ function HomeDealsPreview({
   const wishlistCount = previewDeals.filter(
     (deal) => deal.libraryStatus === "wishlist"
   ).length;
+  const wishlistAlertCount = previewDeals.filter((deal) => deal.smartWishlistMatch).length;
   const bestDiscount = previewDeals.reduce(
     (max, deal) => Math.max(max, deal.discount || 0),
     0
@@ -16078,8 +16179,14 @@ function HomeDealsPreview({
     <section className="home-deals-card">
       <div className="home-section-head">
         <div>
-          <div className="home-card-title">Bonnes affaires</div>
-          <p>Les promos les plus interessantes remontent ici sans ouvrir l'onglet complet.</p>
+          <div className="home-card-title">
+            {wishlistAlertCount ? "Alertes wishlist" : "Bonnes affaires"}
+          </div>
+          <p>
+            {wishlistAlertCount
+              ? "Un jeu de ta wishlist vient de passer en promo."
+              : "Les promos les plus interessantes remontent ici sans ouvrir l'onglet complet."}
+          </p>
         </div>
 
         <button type="button" onClick={onOpenDeals}>
@@ -16089,7 +16196,7 @@ function HomeDealsPreview({
 
       <div className="home-deals-summary">
         <span>{previewDeals.length || (isLoading ? "..." : 0)} offres</span>
-        <span>{wishlistCount} wishlist</span>
+        <span>{wishlistAlertCount ? `${wishlistAlertCount} alerte${wishlistAlertCount > 1 ? "s" : ""}` : `${wishlistCount} wishlist`}</span>
         <span>{bestDiscount ? `-${bestDiscount}% max` : "Steam / Epic / consoles"}</span>
       </div>
 
@@ -16102,7 +16209,7 @@ function HomeDealsPreview({
           {previewDeals.map((deal) => (
             <a
               key={deal.id}
-              className="home-deal-row"
+              className={`home-deal-row ${deal.smartWishlistMatch ? "wishlist-alert" : ""}`}
               href={deal.url}
               target="_blank"
               rel="noreferrer"
@@ -16118,12 +16225,20 @@ function HomeDealsPreview({
                   {deal.storeLabel}
                 </span>
                 <strong>{deal.title}</strong>
-                <small>{deal.salePrice || "Prix indisponible"}</small>
+                <small>
+                  {deal.smartWishlistMatch
+                    ? `${deal.wishlistOrigin || "Wishlist"} - ${deal.salePrice || "Prix indisponible"}`
+                    : deal.salePrice || "Prix indisponible"}
+                </small>
               </div>
 
               <div className="home-deal-side">
                 {deal.discount > 0 && <b>-{deal.discount}%</b>}
-                {deal.libraryStatus === "wishlist" && <em>Wishlist</em>}
+                {deal.smartWishlistMatch ? (
+                  <em>Alerte</em>
+                ) : (
+                  deal.libraryStatus === "wishlist" && <em>Wishlist</em>
+                )}
               </div>
             </a>
           ))}
@@ -16271,13 +16386,20 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
 
     return enrichedDeals
       .filter((deal) => activeSource === "all" || deal.store === activeSource)
-      .filter((deal) => libraryFilter === "all" || deal.libraryStatus === libraryFilter)
+      .filter((deal) => {
+        if (libraryFilter === "all") return true;
+        if (libraryFilter === "smart-wishlist") return deal.smartWishlistMatch;
+        return deal.libraryStatus === libraryFilter;
+      })
       .filter((deal) => !searchKey || normalizeDealTitle(deal.title).includes(searchKey))
       .sort((a, b) => {
         if (sortMode === "discount") return (b.discount || 0) - (a.discount || 0);
         if (sortMode === "price") return a.priceValue - b.priceValue;
         if (sortMode === "ending") return a.endsAtTime - b.endsAtTime;
 
+        const smartWishlistDelta =
+          Number(b.smartWishlistMatch) - Number(a.smartWishlistMatch);
+        if (smartWishlistDelta !== 0) return smartWishlistDelta;
         const libraryScore = { wishlist: 0, missing: 1, owned: 2 };
         const statusDelta =
           (libraryScore[a.libraryStatus] ?? 3) - (libraryScore[b.libraryStatus] ?? 3);
@@ -16285,9 +16407,15 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
         return (b.discount || 0) - (a.discount || 0);
       });
   }, [activeSource, dealSearch, enrichedDeals, libraryFilter, sortMode]);
-  const bestDeal = visibleDeals[0] || enrichedDeals.find((deal) => deal.discount >= 75) || enrichedDeals[0];
+  const bestDeal =
+    visibleDeals.find((deal) => deal.smartWishlistMatch) ||
+    visibleDeals[0] ||
+    enrichedDeals.find((deal) => deal.smartWishlistMatch) ||
+    enrichedDeals.find((deal) => deal.discount >= 75) ||
+    enrichedDeals[0];
   const freeCount = enrichedDeals.filter((deal) => deal.priceValue === 0).length;
   const wishlistDealCount = enrichedDeals.filter((deal) => deal.libraryStatus === "wishlist").length;
+  const smartWishlistDealCount = enrichedDeals.filter((deal) => deal.smartWishlistMatch).length;
   const averageDiscount = enrichedDeals.length
     ? Math.round(
         enrichedDeals.reduce((sum, deal) => sum + (deal.discount || 0), 0) /
@@ -16308,14 +16436,16 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
       </div>
 
       <div className="deals-dashboard">
-        <div className="deals-spotlight">
-          <span className="deals-spotlight-kicker">Offre à surveiller</span>
+        <div className={`deals-spotlight ${bestDeal?.smartWishlistMatch ? "wishlist-alert" : ""}`}>
+          <span className="deals-spotlight-kicker">{bestDeal?.smartWishlistMatch ? "Alerte wishlist" : "Offre a surveiller"}</span>
           {bestDeal ? (
             <a href={bestDeal.url} target="_blank" rel="noreferrer">
               <div>
                 <strong>{bestDeal.title}</strong>
                 <span>
-                  {bestDeal.storeLabel} · -{bestDeal.discount || 0}% · {bestDeal.salePrice || "Prix indisponible"}
+                  {bestDeal.smartWishlistMatch
+                    ? `${bestDeal.wishlistOrigin || "Wishlist"} - ${bestDeal.storeLabel} - -${bestDeal.discount || 0}% - ${bestDeal.salePrice || "Prix indisponible"}`
+                    : `${bestDeal.storeLabel} - -${bestDeal.discount || 0}% - ${bestDeal.salePrice || "Prix indisponible"}`}
                 </span>
               </div>
               <b>Voir</b>
@@ -16331,8 +16461,8 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
             <span>offres</span>
           </div>
           <div>
-            <strong>{wishlistDealCount}</strong>
-            <span>wishlist</span>
+            <strong>{smartWishlistDealCount || wishlistDealCount}</strong>
+            <span>{smartWishlistDealCount ? "alertes" : "wishlist"}</span>
           </div>
           <div>
             <strong>{freeCount}</strong>
@@ -16442,7 +16572,13 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
       ) : (
         <div className="deals-grid">
           {visibleDeals.map((deal) => (
-            <a key={deal.id} className="deal-card" href={deal.url} target="_blank" rel="noreferrer">
+            <a
+              key={deal.id}
+              className={`deal-card ${deal.smartWishlistMatch ? "wishlist-alert" : ""}`}
+              href={deal.url}
+              target="_blank"
+              rel="noreferrer"
+            >
               <div className="deal-image-wrap">
                 {deal.image ? (
                   <img src={deal.image} alt={deal.title} />
@@ -16452,8 +16588,12 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
                 {deal.isStoreHub && <span className="deal-hub-badge">Officiel</span>}
                 {deal.discount > 0 && <span className="deal-discount">-{deal.discount}%</span>}
                 {deal.libraryStatus !== "missing" && (
-                  <span className={`deal-library-badge ${deal.libraryStatus}`}>
-                    {deal.libraryStatus === "wishlist" ? "Wishlist" : "Déjà possédé"}
+                  <span className={`deal-library-badge ${deal.smartWishlistMatch ? "smart-wishlist" : deal.libraryStatus}`}>
+                    {deal.smartWishlistMatch
+                      ? deal.wishlistOrigin || "Alerte wishlist"
+                      : deal.libraryStatus === "wishlist"
+                        ? "Wishlist"
+                        : "Deja possede"}
                   </span>
                 )}
               </div>

@@ -10091,6 +10091,14 @@ body[data-ui="modern"] .chip.active {
   text-decoration: none;
 }
 
+.home-deal-row.wishlist-alert {
+  border-color: color-mix(in srgb, var(--accent-solid) 54%, rgba(255, 255, 255, 0.18));
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent-2) 26%, transparent), transparent 42%),
+    var(--surface-bg);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24), 0 0 24px color-mix(in srgb, var(--accent-solid) 16%, transparent);
+}
+
 .home-deal-row img,
 .home-deal-placeholder {
   width: 74px;
@@ -10156,6 +10164,12 @@ body[data-ui="modern"] .chip.active {
   background: rgba(255, 88, 173, 0.22);
   color: #ffd4eb;
   font-size: 11px;
+}
+
+.home-deal-row.wishlist-alert .home-deal-side em {
+  background: var(--accent-gradient);
+  color: #fff;
+  box-shadow: var(--accent-shadow);
 }
 
 .home-deals-empty {
@@ -25931,6 +25945,11 @@ body[data-theme="theme-steamdeck"] {
   position: relative;
 }
 
+.deals-spotlight.wishlist-alert {
+  border-color: color-mix(in srgb, var(--accent-solid) 52%, rgba(255, 255, 255, 0.18));
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.28), 0 0 34px color-mix(in srgb, var(--accent-solid) 18%, transparent);
+}
+
 .deals-spotlight::before {
   content: "";
   position: absolute;
@@ -26160,6 +26179,15 @@ body[data-theme="theme-steamdeck"] {
   border: 1px solid rgba(255, 255, 255, 0.11);
 }
 
+.deal-card.wishlist-alert {
+  border-color: color-mix(in srgb, var(--accent-solid) 56%, rgba(255, 255, 255, 0.18));
+  background:
+    radial-gradient(circle at 82% 5%, color-mix(in srgb, var(--accent-2) 20%, transparent), transparent 38%),
+    linear-gradient(155deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.052)),
+    rgba(17, 25, 48, 0.86);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28), 0 0 24px color-mix(in srgb, var(--accent-solid) 16%, transparent);
+}
+
 .deal-image-wrap {
   position: relative;
   aspect-ratio: 16 / 9;
@@ -26231,6 +26259,11 @@ body[data-theme="theme-steamdeck"] {
 .deal-library-badge.wishlist {
   background: rgba(255, 88, 173, 0.28);
   box-shadow: 0 0 18px rgba(255, 88, 173, 0.24);
+}
+
+.deal-library-badge.smart-wishlist {
+  background: var(--accent-gradient);
+  box-shadow: var(--accent-shadow);
 }
 
 .deal-library-badge.owned {
