@@ -5,7 +5,11 @@ import { db } from "./firebase";
 import { HARDWARE_CATALOG } from "./data/hardware";
 import { PC_COMPONENT_FIELDS, getPcComponentOptions } from "./data/pcComponents";
 import { WEEKLY_QUIZ_QUESTIONS, WEEKLY_QUIZ_XP } from "./data/weeklyQuiz";
-import { CHECKPOINT_LEVELS, getCheckpointTrial } from "./data/checkpointTrials";
+import {
+  CHECKPOINT_LEVELS,
+  getCheckpointRewardBadges,
+  getCheckpointTrial,
+} from "./data/checkpointTrials";
 import { getOfficialGotyForSeason } from "./data/officialGoty";
 import SplashScreen from "./components/SplashScreen";
 import TrialRoom from "./components/TrialRoom";
@@ -2482,6 +2486,8 @@ function getProgress(totalXP) {
 const DEFAULT_CHECKPOINT_TRIAL_PROGRESS = {
   completed: {},
   attempts: {},
+  exclusiveBadges: {},
+  history: [],
   lastUnlockedLevel: null,
 };
 
@@ -2514,6 +2520,11 @@ function getStoredCheckpointTrialProgress() {
         ...DEFAULT_CHECKPOINT_TRIAL_PROGRESS.attempts,
         ...(parsed.attempts || {}),
       },
+      exclusiveBadges: {
+        ...DEFAULT_CHECKPOINT_TRIAL_PROGRESS.exclusiveBadges,
+        ...(parsed.exclusiveBadges || {}),
+      },
+      history: Array.isArray(parsed.history) ? parsed.history : [],
     };
   } catch (error) {
     console.error("Erreur lecture progression Salle des Epreuves :", error);
@@ -2602,6 +2613,7 @@ function getCheckpointRoadmap(
       level: checkpointLevel,
       title: trial?.title || `Checkpoint ${checkpointLevel}`,
       rewardRank: trial?.rewardRank || "Rang a debloquer",
+      reward: trial?.reward || null,
       guardian: trial?.guardian || "Gardien du Checkpoint",
       passScore: trial?.passScore || 0,
       totalQuestions: trial?.questions?.length || 0,
@@ -9969,6 +9981,10 @@ function ProfileTab({
     checkpointTrialProgress
   );
   const completedCheckpoints = checkpointRoadmap.filter((item) => item.isCompleted);
+  const trialRewardBadges = getCheckpointRewardBadges(checkpointTrialProgress);
+  const trialHistory = Array.isArray(checkpointTrialProgress.history)
+    ? checkpointTrialProgress.history.slice(0, 5)
+    : [];
   const pendingCheckpoint =
     checkpointRoadmap.find((item) => item.level === pendingCheckpointLevel) ||
     checkpointRoadmap.find((item) => item.isPending);
@@ -10167,6 +10183,70 @@ function ProfileTab({
             </button>
           )}
         </div>
+
+        <div className="profile-trials-rewards">
+          <div className="profile-trials-rewards-head">
+            <div>
+              <span>Recompenses exclusives</span>
+              <strong>
+                {trialRewardBadges.length
+                  ? `${trialRewardBadges.length} sceau${trialRewardBadges.length > 1 ? "x" : ""} obtenu${trialRewardBadges.length > 1 ? "s" : ""}`
+                  : "Aucun sceau debloque"}
+              </strong>
+            </div>
+            <small>Ces badges viennent uniquement des Epreuves.</small>
+          </div>
+
+          <div className="profile-trials-badge-row">
+            {checkpointRoadmap.map((checkpoint) => {
+              const reward = checkpoint.reward;
+              const unlocked = checkpoint.isCompleted && reward;
+
+              return (
+                <div
+                  key={`reward-${checkpoint.level}`}
+                  className={`profile-trial-reward ${unlocked ? "unlocked" : "locked"}`}
+                  style={reward?.accent ? { "--trial-reward-accent": reward.accent } : undefined}
+                >
+                  <span>{reward?.badgeIcon || checkpoint.level}</span>
+                  <div>
+                    <strong>{reward?.badgeName || `Checkpoint ${checkpoint.level}`}</strong>
+                    <small>
+                      {unlocked
+                        ? checkpoint.rewardRank
+                        : checkpoint.isPending
+                          ? "Epreuve disponible"
+                          : `Niveau ${checkpoint.level}`}
+                    </small>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {trialHistory.length > 0 && (
+          <div className="profile-trials-history">
+            <div className="profile-trials-history-head">
+              <span>Historique des Epreuves</span>
+              <strong>Dernieres validations</strong>
+            </div>
+
+            {trialHistory.map((entry) => (
+              <div key={entry.id || `${entry.level}-${entry.completedAt}`} className="profile-trial-history-row">
+                <div>
+                  <span>Checkpoint {entry.level}</span>
+                  <strong>{entry.rewardRank}</strong>
+                  <small>{entry.badgeName || entry.title}</small>
+                </div>
+                <div>
+                  <strong>{entry.score}/{entry.totalQuestions}</strong>
+                  <small>{formatFullDate(entry.completedAt)}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="profile-trials-roadmap">
           {checkpointRoadmap.map((checkpoint) => (
@@ -17067,21 +17147,61 @@ const closeTrialRoom = () => {
   setActiveTrialLevel(null);
 };
 
-const completeCheckpointTrial = async (trial) => {
+const completeCheckpointTrial = async (trial, result = {}) => {
   const key = String(trial.level);
+  const completedAt = new Date().toISOString();
+  const reward = trial.reward || {};
+  const nextAttempts = (checkpointTrialProgress.attempts?.[key] || 0) + 1;
+  const historyEntry = {
+    id: `trial-${key}-${Date.now()}`,
+    level: trial.level,
+    title: trial.title,
+    guardian: trial.guardian,
+    rewardRank: trial.rewardRank,
+    badgeId: reward.badgeId || "",
+    badgeName: reward.badgeName || "",
+    score: Number(result.score) || 0,
+    totalQuestions: Number(result.totalQuestions) || trial.questions?.length || 0,
+    attempts: nextAttempts,
+    completedAt,
+  };
   const nextProgress = {
     ...checkpointTrialProgress,
     completed: {
       ...(checkpointTrialProgress.completed || {}),
       [key]: {
-        completedAt: new Date().toISOString(),
+        completedAt,
         rewardRank: trial.rewardRank,
+        badgeId: reward.badgeId || "",
+        badgeName: reward.badgeName || "",
+        score: historyEntry.score,
+        totalQuestions: historyEntry.totalQuestions,
       },
     },
     attempts: {
       ...(checkpointTrialProgress.attempts || {}),
-      [key]: (checkpointTrialProgress.attempts?.[key] || 0) + 1,
+      [key]: nextAttempts,
     },
+    exclusiveBadges: reward.badgeId
+      ? {
+          ...(checkpointTrialProgress.exclusiveBadges || {}),
+          [reward.badgeId]: {
+            id: reward.badgeId,
+            name: reward.badgeName,
+            icon: reward.badgeIcon,
+            rarity: reward.rarity,
+            accent: reward.accent,
+            unlockedAt: completedAt,
+            checkpointLevel: trial.level,
+          },
+        }
+      : checkpointTrialProgress.exclusiveBadges || {},
+    history: [
+      historyEntry,
+      ...(checkpointTrialProgress.history || []).filter(
+        (entry) => String(entry.level) !== key
+      ),
+    ].slice(0, 24),
     lastUnlockedLevel: trial.level,
   };
 
@@ -17127,6 +17247,11 @@ useEffect(() => {
           ...DEFAULT_CHECKPOINT_TRIAL_PROGRESS.attempts,
           ...(remote.attempts || {}),
         },
+        exclusiveBadges: {
+          ...DEFAULT_CHECKPOINT_TRIAL_PROGRESS.exclusiveBadges,
+          ...(remote.exclusiveBadges || {}),
+        },
+        history: Array.isArray(remote.history) ? remote.history : [],
       };
 
       setCheckpointTrialProgress(nextProgress);
@@ -18008,8 +18133,11 @@ useEffect(() => {
 }, [level, prevLevel, soundStyle]);
 
   const badges = useMemo(
-    () => getUnlockedBadgesV2(games, level, hardware, socialProfile, weeklyQuizProgress),
-    [games, level, hardware, socialProfile, weeklyQuizProgress]
+    () => [
+      ...getUnlockedBadgesV2(games, level, hardware, socialProfile, weeklyQuizProgress),
+      ...getCheckpointRewardBadges(checkpointTrialProgress),
+    ],
+    [games, level, hardware, socialProfile, weeklyQuizProgress, checkpointTrialProgress]
   );
   const socialActivities = useMemo(
     () => getSocialActivityFeed(games, hardware, badges),

@@ -3,6 +3,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Crown,
+  Gem,
   Lock,
   ScanLine,
   Shield,
@@ -161,6 +162,23 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
               </div>
             </div>
 
+            {trial.reward && (
+              <div
+                className="trial-reward-preview"
+                style={{ "--trial-reward-accent": trial.reward.accent }}
+              >
+                <div className="trial-reward-medal">
+                  <span>{trial.reward.badgeIcon}</span>
+                  <Gem size={20} />
+                </div>
+                <div>
+                  <span>{trial.reward.title}</span>
+                  <strong>{trial.reward.badgeName}</strong>
+                  <small>{trial.reward.description}</small>
+                </div>
+              </div>
+            )}
+
             <div className="trial-guardian-message">
               <ScanLine size={18} />
               <span>{trial.guardian} analyse ton profil. Une seule règle : franchir le seuil.</span>
@@ -267,9 +285,30 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
               <strong>{score}/{questions.length}</strong>
             </div>
 
+            {passed && trial.reward && (
+              <div
+                className="trial-reward-unlocked"
+                style={{ "--trial-reward-accent": trial.reward.accent }}
+              >
+                <div className="trial-reward-medal">
+                  <span>{trial.reward.badgeIcon}</span>
+                  <Gem size={20} />
+                </div>
+                <div>
+                  <span>Badge exclusif debloque</span>
+                  <strong>{trial.reward.badgeName}</strong>
+                  <small>{trial.reward.description}</small>
+                </div>
+              </div>
+            )}
+
             <div className="trial-result-actions">
               {passed ? (
-                <button type="button" className="trial-primary-btn trial-reveal-btn" onClick={() => onComplete(trial)}>
+                <button
+                  type="button"
+                  className="trial-primary-btn trial-reveal-btn"
+                  onClick={() => onComplete(trial, { score, totalQuestions: questions.length })}
+                >
                   Révéler le rang
                   <Sparkles size={18} />
                 </button>

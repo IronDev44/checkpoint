@@ -6,6 +6,15 @@ export const CHECKPOINT_TRIALS = [
     title: "Premier Seuil",
     guardian: "Le Gardien du Signal",
     rewardRank: "Éclaireur du Nexus",
+    reward: {
+      badgeId: "trial_seal_25",
+      badgeName: "Sceau du Signal",
+      badgeIcon: "25",
+      rarity: "epic",
+      title: "Badge exclusif",
+      description: "Premier sceau de la Salle des Epreuves.",
+      accent: "#67e8f9",
+    },
     intro:
       "Tu as accumulé assez d'XP pour atteindre ton premier vrai cap. Le rang ne s'ouvre qu'à ceux qui gardent leur sang-froid.",
     passScore: 3,
@@ -41,6 +50,15 @@ export const CHECKPOINT_TRIALS = [
     title: "Chambre du Rang",
     guardian: "Le Gardien des Archives",
     rewardRank: "Légende I",
+    reward: {
+      badgeId: "trial_seal_50",
+      badgeName: "Sceau des Archives",
+      badgeIcon: "50",
+      rarity: "legendary",
+      title: "Badge exclusif",
+      description: "Le sceau des joueurs qui ont franchi la Chambre du Rang.",
+      accent: "#facc15",
+    },
     intro:
       "La moitié du parcours est derrière toi. Cette épreuve vérifie ta culture, ta mémoire et ta lecture des licences.",
     passScore: 4,
@@ -82,6 +100,15 @@ export const CHECKPOINT_TRIALS = [
     title: "Noyau des Maîtres",
     guardian: "Le Gardien du Core",
     rewardRank: "Architecte du Checkpoint",
+    reward: {
+      badgeId: "trial_seal_75",
+      badgeName: "Sceau du Core",
+      badgeIcon: "75",
+      rarity: "mythic",
+      title: "Badge exclusif",
+      description: "Un sceau rare pour les profils qui maitrisent leur univers.",
+      accent: "#c084fc",
+    },
     intro:
       "Ici, les réponses faciles ne suffisent plus. Le checkpoint juge ta capacité à relier mécanique, plateforme et héritage.",
     passScore: 4,
@@ -123,6 +150,15 @@ export const CHECKPOINT_TRIALS = [
     title: "Porte Suprême",
     guardian: "Le Gardien du Dernier Rang",
     rewardRank: "Suprême",
+    reward: {
+      badgeId: "trial_seal_100",
+      badgeName: "Sceau Supreme",
+      badgeIcon: "100",
+      rarity: "creator",
+      title: "Badge exclusif",
+      description: "Le sceau ultime de la premiere saison des Epreuves.",
+      accent: "#f97316",
+    },
     intro:
       "Dernier seuil actuel. Cette épreuve valide ton statut au sommet de Checkpoint.",
     passScore: 5,
@@ -169,4 +205,22 @@ export const CHECKPOINT_TRIALS = [
 
 export function getCheckpointTrial(level) {
   return CHECKPOINT_TRIALS.find((trial) => trial.level === Number(level)) || null;
+}
+
+export function getCheckpointRewardBadges(progress = {}) {
+  const completed = progress.completed || {};
+
+  return CHECKPOINT_TRIALS
+    .filter((trial) => completed[String(trial.level)] && trial.reward)
+    .map((trial) => ({
+      id: trial.reward.badgeId,
+      icon: trial.reward.badgeIcon,
+      name: trial.reward.badgeName,
+      desc: trial.reward.description,
+      rarity: trial.reward.rarity || "legendary",
+      special: "trial",
+      checkpointLevel: trial.level,
+      accent: trial.reward.accent,
+      unlocked: true,
+    }));
 }

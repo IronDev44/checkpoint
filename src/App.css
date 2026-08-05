@@ -7641,6 +7641,133 @@ body[data-ui="modern"] .chip.active {
   box-shadow: var(--accent-shadow);
 }
 
+.profile-trials-rewards,
+.profile-trials-history {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 22px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background:
+    radial-gradient(circle at 0 0, color-mix(in srgb, var(--accent), transparent 80%), transparent 38%),
+    rgba(255,255,255,0.045);
+}
+
+.profile-trials-rewards-head,
+.profile-trials-history-head,
+.profile-trial-history-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.profile-trials-rewards-head span,
+.profile-trials-history-head span,
+.profile-trial-history-row span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.profile-trials-rewards-head strong,
+.profile-trials-history-head strong,
+.profile-trial-history-row strong {
+  display: block;
+  margin-top: 4px;
+  color: white;
+  font-weight: 1000;
+}
+
+.profile-trials-rewards-head small,
+.profile-trial-history-row small {
+  color: var(--text-soft);
+  font-size: 0.78rem;
+  font-weight: 820;
+}
+
+.profile-trials-badge-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.profile-trial-reward {
+  --trial-reward-accent: var(--accent-solid);
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.052);
+}
+
+.profile-trial-reward > span {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 1000;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255,255,255,0.42), transparent 34%),
+    linear-gradient(135deg, var(--trial-reward-accent), color-mix(in srgb, var(--trial-reward-accent), #050816 48%));
+  box-shadow: 0 0 22px color-mix(in srgb, var(--trial-reward-accent), transparent 44%);
+}
+
+.profile-trial-reward.locked {
+  opacity: 0.55;
+}
+
+.profile-trial-reward.locked > span {
+  filter: grayscale(0.8);
+  box-shadow: none;
+}
+
+.profile-trial-reward strong,
+.profile-trial-reward small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-trial-reward strong {
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 1000;
+}
+
+.profile-trial-reward small {
+  margin-top: 3px;
+  color: var(--text-soft);
+  font-size: 0.7rem;
+  font-weight: 850;
+}
+
+.profile-trial-history-row {
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.profile-trial-history-row:first-of-type {
+  border-top: 0;
+}
+
+.profile-trial-history-row > div:last-child {
+  text-align: right;
+  flex-shrink: 0;
+}
+
 .profile-stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -33774,6 +33901,101 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   text-align: left;
 }
 
+.trial-reward-preview,
+.trial-reward-unlocked {
+  --trial-reward-accent: var(--accent-solid);
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 20px 0;
+  padding: 15px;
+  text-align: left;
+  overflow: hidden;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--trial-reward-accent) 48%, rgba(255,255,255,0.14));
+  background:
+    radial-gradient(circle at 12% 0, color-mix(in srgb, var(--trial-reward-accent) 24%, transparent), transparent 36%),
+    linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.045));
+  box-shadow: 0 0 34px color-mix(in srgb, var(--trial-reward-accent) 22%, transparent);
+}
+
+.trial-reward-preview::after,
+.trial-reward-unlocked::after {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background: linear-gradient(115deg, transparent 35%, rgba(255,255,255,0.18), transparent 62%);
+  transform: translateX(-110%);
+  animation: trialRewardSweep 3.2s ease-in-out infinite;
+}
+
+.trial-reward-medal {
+  position: relative;
+  z-index: 1;
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  color: white;
+  background:
+    radial-gradient(circle at 30% 16%, rgba(255,255,255,0.56), transparent 30%),
+    linear-gradient(135deg, var(--trial-reward-accent), color-mix(in srgb, var(--trial-reward-accent), #050816 52%));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 0 30px color-mix(in srgb, var(--trial-reward-accent) 42%, transparent);
+}
+
+.trial-reward-medal span {
+  font-size: 1rem;
+  font-weight: 1000;
+}
+
+.trial-reward-medal svg {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  opacity: 0.72;
+}
+
+.trial-reward-preview > div:last-child,
+.trial-reward-unlocked > div:last-child {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.trial-reward-preview span,
+.trial-reward-unlocked span {
+  display: block;
+  color: color-mix(in srgb, var(--trial-reward-accent) 54%, white);
+  font-size: 0.74rem;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trial-reward-preview strong,
+.trial-reward-unlocked strong {
+  display: block;
+  margin-top: 5px;
+  color: white;
+  font-size: clamp(1.15rem, 4vw, 1.55rem);
+  line-height: 1.05;
+}
+
+.trial-reward-preview small,
+.trial-reward-unlocked small {
+  display: block;
+  margin-top: 6px;
+  color: var(--text-soft);
+  font-size: 0.86rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
 .trial-dev-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -33820,6 +34042,15 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   }
 }
 
+@keyframes trialRewardSweep {
+  0%, 42% {
+    transform: translateX(-110%);
+  }
+  72%, 100% {
+    transform: translateX(110%);
+  }
+}
+
 @media (max-width: 620px) {
   .checkpoint-gate-overlay,
   .trial-room-shell {
@@ -33840,6 +34071,19 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   .trial-answer-grid,
   .trial-dev-grid {
     grid-template-columns: 1fr;
+  }
+
+  .profile-trials-badge-row,
+  .profile-trials-roadmap {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-trials-rewards-head,
+  .profile-trials-history-head,
+  .profile-trial-history-row,
+  .trial-reward-preview,
+  .trial-reward-unlocked {
+    align-items: flex-start;
   }
 
   .trial-room-frame {
