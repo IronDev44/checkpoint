@@ -10549,6 +10549,177 @@ body[data-ui="modern"] .chip.active {
   -webkit-line-clamp: 2;
 }
 
+.home-agenda-card {
+  position: relative;
+  overflow: hidden;
+  border-color: color-mix(in srgb, #ef4444 22%, var(--panel-border));
+  background:
+    radial-gradient(circle at 12% 0%, rgba(239, 68, 68, 0.2), transparent 34%),
+    radial-gradient(circle at 86% 20%, color-mix(in srgb, var(--accent-solid) 16%, transparent), transparent 30%),
+    linear-gradient(145deg, rgba(255,255,255,0.065), rgba(255,255,255,0.02)),
+    var(--panel-bg);
+}
+
+.home-agenda-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(255,255,255,0.045) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+  background-size: 68px 68px;
+  opacity: 0.22;
+  mask-image: radial-gradient(circle at 42% 24%, black, transparent 72%);
+}
+
+.home-agenda-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.home-agenda-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(240px, 0.9fr);
+  gap: 12px;
+}
+
+.home-agenda-featured,
+.home-agenda-row {
+  border: 1px solid var(--surface-border);
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+}
+
+.home-agenda-featured {
+  display: grid;
+  align-content: end;
+  min-height: 214px;
+  padding: 16px;
+  border-radius: var(--ui-radius-xl);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(239, 68, 68, 0.34), transparent 38%),
+    radial-gradient(circle at 100% 20%, color-mix(in srgb, var(--accent-solid) 22%, transparent), transparent 34%),
+    linear-gradient(150deg, rgba(255,255,255,0.09), rgba(255,255,255,0.025)),
+    rgba(0,0,0,0.2);
+}
+
+.home-agenda-featured.live {
+  border-color: rgba(239, 68, 68, 0.48);
+  box-shadow: 0 0 34px rgba(239, 68, 68, 0.16);
+}
+
+.home-agenda-status {
+  width: fit-content;
+  margin-bottom: 10px;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.16);
+  color: #fecaca;
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.home-agenda-featured strong {
+  color: white;
+  font-size: clamp(1.45rem, 4vw, 2.15rem);
+  line-height: 1;
+}
+
+.home-agenda-featured small {
+  margin-top: 9px;
+  color: var(--text-soft);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.home-agenda-featured p {
+  display: -webkit-box;
+  margin: 10px 0 0;
+  overflow: hidden;
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.home-agenda-side {
+  display: grid;
+  gap: 9px;
+}
+
+.home-agenda-meter,
+.home-agenda-row,
+.home-agenda-empty {
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--ui-radius-lg);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025)),
+    var(--surface-bg);
+}
+
+.home-agenda-meter {
+  padding: 13px;
+}
+
+.home-agenda-meter span,
+.home-agenda-row span {
+  display: block;
+  color: color-mix(in srgb, var(--accent-solid) 56%, var(--text-soft));
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.home-agenda-meter strong {
+  display: block;
+  margin-top: 4px;
+  color: white;
+  font-size: 31px;
+  line-height: 1;
+}
+
+.home-agenda-meter small,
+.home-agenda-row small {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.home-agenda-row {
+  min-width: 0;
+  padding: 11px;
+}
+
+.home-agenda-row strong {
+  display: block;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 15px;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-agenda-empty {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  padding: 28px 14px;
+  color: var(--text-soft);
+  text-align: center;
+}
+
+.home-agenda-empty strong {
+  color: var(--text-main);
+  font-size: 18px;
+}
+
 .home-recommendation-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -10928,6 +11099,22 @@ body[data-ui="modern"] .chip.active {
   .home-pulse-featured strong {
     font-size: 16px;
     -webkit-line-clamp: 2;
+  }
+
+  .home-agenda-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .home-agenda-featured {
+    min-height: 168px;
+  }
+
+  .home-agenda-side {
+    grid-template-columns: 1fr;
+  }
+
+  .home-agenda-meter strong {
+    font-size: 26px;
   }
 
   .home-recommendation-list {

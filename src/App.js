@@ -8485,6 +8485,10 @@ function HomeTab({
 
   const upcomingEvents = getUpcomingEvents(gamingEvents);
   const nextEvent = upcomingEvents[0];
+  const homeAgendaEvents = upcomingEvents.slice(0, 3);
+  const liveAgendaCount = upcomingEvents.filter(
+    (event) => getEventState(event) === "live"
+  ).length;
   const homeActionCards = [
     nextPlayCandidate && {
       id: "resume",
@@ -9086,32 +9090,63 @@ function HomeTab({
           </div>
         )}
       </div>
-      <div className="search-panel live-event-card">
-        <div className="home-section-head">
-          <h2 className="panel-title">Événements à venir</h2>
+      <div className="search-panel live-event-card home-agenda-card">
+        <div className="home-section-head home-agenda-head">
+          <div>
+            <div className="home-card-title">Agenda Checkpoint</div>
+            <p className="home-section-subtitle">
+              Les lives et rendez-vous gaming à garder dans le viseur.
+            </p>
+          </div>
 
           <button type="button" onClick={() => setActiveTab("live")}>
-            Voir les lives
+            Voir le live
           </button>
         </div>
 
         {nextEvent ? (
-          <>
-            <div className="live-event-title">{nextEvent.name}</div>
+          <div className="home-agenda-layout">
+            <button
+              type="button"
+              className={`home-agenda-featured ${getEventState(nextEvent)}`}
+              onClick={() => setActiveTab("live")}
+            >
+              <span className="home-agenda-status">
+                {getEventState(nextEvent) === "live" ? "Live maintenant" : "Prochain signal"}
+              </span>
+              <strong>{nextEvent.name}</strong>
+              <small>{formatEventDate(nextEvent.date)}</small>
+              {nextEvent.description && <p>{nextEvent.description}</p>}
+            </button>
 
-            <div className="event-date">
-              📅 {formatEventDate(nextEvent.date)}
-            </div>
+            <div className="home-agenda-side">
+              <div className="home-agenda-meter">
+                <span>Surveillance</span>
+                <strong>{homeAgendaEvents.length}</strong>
+                <small>
+                  {liveAgendaCount ? `${liveAgendaCount} live actif` : "Aucun live en cours"}
+                </small>
+              </div>
 
-            <div className="empty-small">
-              Prochain événement gaming à suivre.
+              {homeAgendaEvents.slice(1).map((event) => (
+                <button
+                  key={event.id}
+                  type="button"
+                  className="home-agenda-row"
+                  onClick={() => setActiveTab("live")}
+                >
+                  <span>{event.type || "Événement"}</span>
+                  <strong>{event.name}</strong>
+                  <small>{formatEventDate(event.date)}</small>
+                </button>
+              ))}
             </div>
-          </>
+          </div>
         ) : (
-          <EmptyState
-            title="Aucun événement prévu"
-            subtitle="Les prochains lives seront ajoutés ici."
-          />
+          <div className="home-agenda-empty">
+            <strong>Aucun événement prévu</strong>
+            <span>Les prochains lives seront ajoutés ici.</span>
+          </div>
         )}
       </div>
     </div>
