@@ -398,6 +398,9 @@ const DEFAULT_APP_OPTIONS = {
     lastSyncedAt: "",
     lastGameCount: 0,
     lastImportedCount: 0,
+    lastWishlistSyncedAt: "",
+    lastWishlistCount: 0,
+    lastWishlistImportedCount: 0,
   },
   xboxProfile: {
     connected: false,
@@ -13209,9 +13212,13 @@ function OptionsTab({
     appOptions.steamProfile?.profileInput || ""
   );
   const [steamLibrary, setSteamLibrary] = useState(null);
+  const [steamWishlist, setSteamWishlist] = useState(null);
   const [steamError, setSteamError] = useState("");
+  const [steamWishlistError, setSteamWishlistError] = useState("");
   const [isSteamLoading, setIsSteamLoading] = useState(false);
   const [isSteamImporting, setIsSteamImporting] = useState(false);
+  const [isSteamWishlistLoading, setIsSteamWishlistLoading] = useState(false);
+  const [isSteamWishlistImporting, setIsSteamWishlistImporting] = useState(false);
   const [xboxSession, setXboxSession] = useState(null);
   const [xboxLibrary, setXboxLibrary] = useState(null);
   const [xboxError, setXboxError] = useState("");
@@ -13299,6 +13306,23 @@ function OptionsTab({
       missing: Math.max(0, libraryGames.length - alreadyPresent),
     };
   }, [games, steamLibrary]);
+  const steamWishlistExistingStats = useMemo(() => {
+    const steamIds = new Set(games.map(getSteamGameKey).filter(Boolean));
+    const names = new Set(
+      games.map((game) => normalizeSearchText(game.name || "")).filter(Boolean)
+    );
+    const wishlistGames = steamWishlist?.games || [];
+    const alreadyPresent = wishlistGames.filter((game) => {
+      const steamKey = getSteamGameKey(game);
+      const nameKey = normalizeSearchText(game.name || "");
+      return (steamKey && steamIds.has(steamKey)) || (nameKey && names.has(nameKey));
+    }).length;
+
+    return {
+      alreadyPresent,
+      missing: Math.max(0, wishlistGames.length - alreadyPresent),
+    };
+  }, [games, steamWishlist]);
   const xboxExistingStats = useMemo(() => {
     const xboxIds = new Set(games.map(getXboxGameKey).filter(Boolean));
     const names = new Set(
@@ -13417,6 +13441,74 @@ function OptionsTab({
       setSteamError(String(error?.message || error));
     } finally {
       setIsSteamImporting(false);
+    }
+  };
+  const fetchSteamWishlist = async () => {
+    const profileInput = steamInput.trim();
+
+    if (!profileInput) {
+      setSteamWishlistError("Ajoute ton SteamID64 ou ton URL de profil Steam.");
+      return;
+    }
+
+    setSteamWishlistError("");
+    setIsSteamWishlistLoading(true);
+
+    try {
+      const response = await fetch(
+        `/api/steam/wishlist?profile=${encodeURIComponent(profileInput)}`
+      );
+      const contentType = response.headers.get("content-type") || "";
+
+      if (!contentType.includes("application/json")) {
+        throw new Error(
+          "API Steam non disponible sur ce serveur. Teste via le deploy Cloudflare."
+        );
+      }
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Wishlist Steam indisponible.");
+      }
+
+      setSteamWishlist(data);
+      updateSteamProfile({
+        profileInput,
+        steamId: data.steamId || steamProfile.steamId,
+        lastWishlistSyncedAt: data.updatedAt || new Date().toISOString(),
+        lastWishlistCount: data.total || data.games?.length || 0,
+      });
+    } catch (error) {
+      setSteamWishlist(null);
+      setSteamWishlistError(String(error?.message || error));
+    } finally {
+      setIsSteamWishlistLoading(false);
+    }
+  };
+  const importSteamWishlist = async () => {
+    if (!steamWishlist?.games?.length || !onImportSteamGames) return;
+
+    setIsSteamWishlistImporting(true);
+    setSteamWishlistError("");
+
+    try {
+      const result = await onImportSteamGames(steamWishlist.games, {
+        steamId: steamWishlist.steamId,
+        status: "wishlist",
+        source: "steam-wishlist",
+      });
+      updateSteamProfile({
+        profileInput: steamInput.trim(),
+        steamId: steamWishlist.steamId || steamProfile.steamId,
+        lastWishlistSyncedAt: new Date().toISOString(),
+        lastWishlistCount: steamWishlist.total || steamWishlist.games.length,
+        lastWishlistImportedCount: result?.imported || 0,
+      });
+    } catch (error) {
+      setSteamWishlistError(String(error?.message || error));
+    } finally {
+      setIsSteamWishlistImporting(false);
     }
   };
   const refreshXboxSession = async () => {
@@ -14272,6 +14364,83 @@ function OptionsTab({
                       : steamExistingStats.missing
                         ? `Importer ${steamExistingStats.missing} jeu${steamExistingStats.missing > 1 ? "x" : ""}`
                         : "Bibliotheque deja synchronisee"}
+                  </button>
+                </>
+              )}
+
+              <div className="steam-sync-subsection">
+                <div>
+                  <strong>Wishlist Steam</strong>
+                  <span>
+                    Importe les jeux de ta wishlist Steam directement en statut Wishlist.
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="option-pill steam-sync-secondary"
+                  onClick={fetchSteamWishlist}
+                  disabled={isSteamWishlistLoading}
+                >
+                  {isSteamWishlistLoading ? "Analyse..." : "Analyser la wishlist"}
+                </button>
+              </div>
+
+              {steamWishlistError && (
+                <div className="steam-sync-error">
+                  {steamWishlistError}
+                  <small>
+                    Steam ne renvoie la wishlist que si elle est publique. Tu peux garder ta
+                    bibliotheque publique et laisser le reste prive si tu preferes.
+                  </small>
+                </div>
+              )}
+
+              {(steamWishlist || steamProfile.lastWishlistCount > 0) && (
+                <div className="steam-sync-status">
+                  <div>
+                    <strong>{steamWishlist?.total || steamProfile.lastWishlistCount || 0}</strong>
+                    <span>jeux en wishlist</span>
+                  </div>
+                  <div>
+                    <strong>{steamWishlistExistingStats.alreadyPresent}</strong>
+                    <span>deja dans Checkpoint</span>
+                  </div>
+                  <div>
+                    <strong>{steamWishlistExistingStats.missing}</strong>
+                    <span>a ajouter</span>
+                  </div>
+                </div>
+              )}
+
+              {steamWishlist?.games?.length > 0 && (
+                <>
+                  <div className="steam-preview-list">
+                    {steamWishlist.games.slice(0, 5).map((game) => (
+                      <div key={game.steamAppId} className="steam-preview-row">
+                        <img src={game.image} alt="" loading="lazy" />
+                        <div>
+                          <strong>{game.name}</strong>
+                          <span>
+                            {game.steamDiscountPercent
+                              ? `-${game.steamDiscountPercent}% sur Steam`
+                              : "Wishlist Steam"}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    className="option-pill steam-import-action"
+                    onClick={importSteamWishlist}
+                    disabled={isSteamWishlistImporting || !steamWishlistExistingStats.missing}
+                  >
+                    {isSteamWishlistImporting
+                      ? "Import en cours..."
+                      : steamWishlistExistingStats.missing
+                        ? `Importer ${steamWishlistExistingStats.missing} souhait${steamWishlistExistingStats.missing > 1 ? "s" : ""}`
+                        : "Wishlist deja synchronisee"}
                   </button>
                 </>
               )}
@@ -17333,6 +17502,7 @@ useEffect(() => {
     let imported = 0;
     let updated = 0;
     let skipped = 0;
+    const importingWishlist = meta.status === "wishlist";
 
     for (const steamGame of steamGames) {
       const steamKey = getSteamGameKey(steamGame);
@@ -17340,13 +17510,17 @@ useEffect(() => {
       const existingGame =
         (steamKey && existingBySteamId.get(steamKey)) ||
         (nameKey && existingByName.get(nameKey));
+      const steamSource = meta.source || steamGame.source || "steam";
+      const steamStatus = meta.status || steamGame.status || "";
 
       const steamPatch = {
         steamAppId: steamGame.steamAppId,
         steamProfileId: meta.steamId || "",
         steamPlaytimeForever: steamGame.playtimeForever || 0,
         steamLastSyncedAt: new Date(),
-        source: existingGame?.source || "steam",
+        steamWishlistPriority: steamGame.steamWishlistPriority || null,
+        steamWishlistAddedAt: steamGame.steamWishlistAddedAt || "",
+        source: existingGame?.source || steamSource,
       };
 
       if (existingGame?.id) {
@@ -17373,11 +17547,11 @@ useEffect(() => {
         rating: 0,
         favorite: false,
         image: steamGame.image || "",
-        status: "collection",
+        status: steamStatus === "wishlist" || importingWishlist ? "wishlist" : "collection",
         released: "",
         platformNames: ["PC"],
         genreNames: [],
-        playtime: steamGame.playtimeForever || null,
+        playtime: importingWishlist ? null : steamGame.playtimeForever || null,
         difficulty: "normal",
         review: "",
         ostRating: 0,

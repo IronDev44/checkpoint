@@ -930,6 +930,40 @@ function normalizeSteamLibraryGame(game) {
   };
 }
 
+function normalizeSteamWishlistGame(appId, game) {
+  const numericAppId = Number(appId || game?.appid);
+  const subs = Array.isArray(game?.subs) ? game.subs : [];
+  const bestSub =
+    subs.find((sub) => Number(sub.discount_pct || 0) > 0) ||
+    subs.find((sub) => Number(sub.price || 0) > 0) ||
+    subs[0] ||
+    {};
+
+  return {
+    steamAppId: numericAppId,
+    name: game?.name || `Steam App ${numericAppId}`,
+    image:
+      game?.capsule ||
+      (numericAppId
+        ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${numericAppId}/header.jpg`
+        : ""),
+    icon:
+      game?.capsule ||
+      (numericAppId
+        ? `https://cdn.cloudflare.steamstatic.com/steam/apps/${numericAppId}/capsule_184x69.jpg`
+        : ""),
+    playtimeForever: 0,
+    status: "wishlist",
+    source: "steam-wishlist",
+    steamWishlistPriority: Number(game?.priority || 0),
+    steamWishlistAddedAt: game?.added ? new Date(Number(game.added) * 1000).toISOString() : "",
+    steamReleaseString: game?.release_string || "",
+    steamReviewPercent: Number(game?.reviews_percent || 0),
+    steamDiscountPercent: Number(bestSub.discount_pct || 0),
+    steamPrice: Number(bestSub.price || 0),
+  };
+}
+
 async function getSteamOwnedGames(requestUrl, env) {
   if (!env.STEAM_API_KEY) {
     return privateJsonResponse(
@@ -966,6 +1000,52 @@ async function getSteamOwnedGames(requestUrl, env) {
   return privateJsonResponse({
     steamId,
     total: Number(response.game_count || games.length),
+    games,
+    updatedAt: new Date().toISOString(),
+  });
+}
+
+async function getSteamWishlist(requestUrl, env) {
+  if (!env.STEAM_API_KEY) {
+    return privateJsonResponse(
+      {
+        games: [],
+        error: "STEAM_API_KEY manquante dans Cloudflare Pages.",
+        setupRequired: true,
+      },
+      { status: 501 }
+    );
+  }
+
+  const url = new URL(requestUrl);
+  const profileInput =
+    url.searchParams.get("profile") ||
+    url.searchParams.get("steamid") ||
+    "";
+  const steamId = await resolveSteamId(profileInput, env);
+  const wishlistUrl = `https://store.steampowered.com/wishlist/profiles/${encodeURIComponent(
+    steamId
+  )}/wishlistdata/?p=0`;
+  const data = await fetchJson(wishlistUrl, 14000);
+
+  if (!data || Array.isArray(data) || typeof data !== "object") {
+    throw new Error(
+      "Wishlist Steam indisponible. Verifie que ton profil et ta wishlist sont publics."
+    );
+  }
+
+  const games = Object.entries(data)
+    .map(([appId, game]) => normalizeSteamWishlistGame(appId, game))
+    .filter((game) => game.steamAppId && game.name)
+    .sort((a, b) => {
+      const priorityDelta = a.steamWishlistPriority - b.steamWishlistPriority;
+      if (priorityDelta) return priorityDelta;
+      return a.name.localeCompare(b.name);
+    });
+
+  return privateJsonResponse({
+    steamId,
+    total: games.length,
     games,
     updatedAt: new Date().toISOString(),
   });
@@ -1302,6 +1382,28 @@ export default {
 
       try {
         return await getSteamOwnedGames(request.url, env);
+      } catch (error) {
+        return privateJsonResponse(
+          {
+            games: [],
+            error: String(error?.message || error),
+          },
+          { status: 502 }
+        );
+      }
+    }
+
+    if (url.pathname === "/api/steam/wishlist") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, { headers: PRIVATE_JSON_HEADERS });
+      }
+
+      if (request.method !== "GET") {
+        return privateJsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      try {
+        return await getSteamWishlist(request.url, env);
       } catch (error) {
         return privateJsonResponse(
           {
