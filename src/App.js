@@ -6,6 +6,7 @@ import { HARDWARE_CATALOG } from "./data/hardware";
 import { PC_COMPONENT_FIELDS, getPcComponentOptions } from "./data/pcComponents";
 import { WEEKLY_QUIZ_QUESTIONS, WEEKLY_QUIZ_XP } from "./data/weeklyQuiz";
 import { CHECKPOINT_LEVELS, getCheckpointTrial } from "./data/checkpointTrials";
+import { getOfficialGotyForSeason } from "./data/officialGoty";
 import SplashScreen from "./components/SplashScreen";
 import TrialRoom from "./components/TrialRoom";
 import {
@@ -4418,6 +4419,19 @@ function GameOfYearPanel({ games, onSetGameOfYear }) {
       return (a.name || "").localeCompare(b.name || "");
     });
   const selectedGame = candidates.find((game) => Number(game.gotyYear) === year);
+  const officialGoty = getOfficialGotyForSeason(year);
+  const normalizeGotyName = (value = "") =>
+    value
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, " ")
+      .trim();
+  const selectedOfficialMatch = selectedGame
+    ? officialGoty?.awards.find(
+        (award) => normalizeGotyName(award.winner) === normalizeGotyName(selectedGame.name)
+      )
+    : null;
 
   return (
     <div className="progression-stack">
@@ -4455,7 +4469,7 @@ function GameOfYearPanel({ games, onSetGameOfYear }) {
         <>
           <div className="search-panel goty-current-card">
             <div>
-              <span className="goty-kicker">GOTY {year}</span>
+              <span className="goty-kicker">Mon GOTY {year}</span>
               <h2 className="panel-title">
                 {selectedGame ? selectedGame.name : "Aucun jeu sélectionné"}
               </h2>
@@ -4464,11 +4478,58 @@ function GameOfYearPanel({ games, onSetGameOfYear }) {
                   ? `${formatRating10(getGameRating(selectedGame), "Non noté")} - ${getTopGameMeta(selectedGame)}`
                   : "Sélectionne un jeu dans la liste ci-dessous."}
               </div>
+              {selectedOfficialMatch && (
+                <div className="goty-official-match">
+                  Aussi sacré par {selectedOfficialMatch.ceremony} {selectedOfficialMatch.awardYear}.
+                </div>
+              )}
             </div>
             {selectedGame?.image ? (
               <img src={selectedGame.image} alt={selectedGame.name} />
             ) : (
               <div className="goty-empty-cover">GOTY</div>
+            )}
+          </div>
+
+          <div className="search-panel goty-official-panel">
+            <div className="top5-section-head">
+              <div>
+                <h2 className="panel-title">Palmarès officiel</h2>
+                <div className="option-value">
+                  Les grands prix de la saison {year}, pour comparer avec ton choix.
+                </div>
+              </div>
+              <span className="top5-count">
+                {officialGoty ? officialGoty.awards.length : 0}
+              </span>
+            </div>
+
+            {officialGoty ? (
+              <div className="goty-official-grid">
+                {officialGoty.awards.map((award) => {
+                  const isPersonalPick =
+                    selectedGame &&
+                    normalizeGotyName(award.winner) === normalizeGotyName(selectedGame.name);
+
+                  return (
+                    <div
+                      key={`${award.ceremony}-${award.awardYear}`}
+                      className={`goty-official-award ${isPersonalPick ? "match" : ""}`}
+                    >
+                      <div>
+                        <span>{award.ceremony}</span>
+                        <small>{award.awardYear}</small>
+                      </div>
+                      <strong>{award.winner}</strong>
+                      {isPersonalPick && <em>Ton choix aussi</em>}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="goty-official-empty">
+                Aucun palmarès officiel enregistré pour cette année.
+              </div>
             )}
           </div>
 

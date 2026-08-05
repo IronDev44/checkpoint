@@ -2581,6 +2581,75 @@ button:disabled {
   background: color-mix(in srgb, var(--accent) 22%, var(--surface-bg));
 }
 
+.goty-official-panel {
+  overflow: hidden;
+}
+
+.goty-official-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.goty-official-award {
+  position: relative;
+  min-width: 0;
+  padding: 14px;
+  border-radius: var(--ui-radius-md);
+  border: 1px solid var(--surface-border);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)),
+    color-mix(in srgb, var(--surface-bg) 88%, black);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.goty-official-award.match {
+  border-color: color-mix(in srgb, var(--accent-solid) 70%, white 10%);
+  background:
+    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent-solid) 24%, transparent), transparent 52%),
+    color-mix(in srgb, var(--surface-bg) 84%, var(--accent-solid));
+  box-shadow: var(--accent-shadow), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.goty-official-award div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.goty-official-award strong {
+  display: block;
+  color: white;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.goty-official-award em,
+.goty-official-match {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 10px;
+  border-radius: 999px;
+  padding: 6px 9px;
+  background: color-mix(in srgb, var(--accent-solid) 22%, rgba(255,255,255,0.08));
+  color: white;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.goty-official-empty {
+  color: var(--text-soft);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
 @media (max-width: 700px) {
   .top5-content-tabs,
   .top5-mode-tabs {
@@ -2602,6 +2671,10 @@ button:disabled {
   }
 
   .top5-group-picker.top5-hardware-criteria-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .goty-official-grid {
     grid-template-columns: 1fr;
   }
 
