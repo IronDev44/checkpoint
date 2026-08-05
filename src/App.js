@@ -8539,6 +8539,33 @@ function HomeTab({
   ]
     .filter(Boolean)
     .slice(0, 3);
+  const featuredCheckpointGoal = checkpointGoals[0] || null;
+  const secondaryCheckpointGoals = checkpointGoals.slice(1, 3);
+  const rewardTrackCards = progressionCards.slice(0, 3);
+  const handleCheckpointGoalAction = (goal) => {
+    if (!goal) return;
+
+    if (goal.claimable) {
+      onClaimCheckpointGoal?.(goal);
+      return;
+    }
+
+    if (goal.game) {
+      onOpenDetail(goal.game);
+      return;
+    }
+
+    if (goal.tab === "home") {
+      document
+        .querySelector(".weekly-quiz-card")
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    if (goal.tab) {
+      setActiveTab(goal.tab);
+    }
+  };
 
   useEffect(() => {
     setSelectedQuizAnswer(null);
@@ -9146,6 +9173,75 @@ function HomeTab({
           <div className="home-agenda-empty">
             <strong>Aucun événement prévu</strong>
             <span>Les prochains lives seront ajoutés ici.</span>
+          </div>
+        )}
+      </div>
+
+      <div className="home-card home-reward-panel">
+        <div className="home-section-head home-reward-head">
+          <div>
+            <div className="home-card-title">Récompenses à portée</div>
+            <p className="home-section-subtitle">
+              Les prochains gains utiles, sans transformer l'accueil en liste de tâches.
+            </p>
+          </div>
+
+          <div className="home-reward-xp">
+            <strong>{claimedGoalsXP}</strong>
+            <span>XP bonus</span>
+          </div>
+        </div>
+
+        <div className="home-reward-track">
+          {rewardTrackCards.map((card) => (
+            <div key={card.label} className="home-reward-track-card">
+              <span>{card.label}</span>
+              <strong>{card.value}</strong>
+              <small>{card.detail}</small>
+              <div className="home-reward-meter">
+                <div style={{ width: `${Math.max(4, Math.min(card.progress, 100))}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {featuredCheckpointGoal ? (
+          <div className="home-reward-layout">
+            <button
+              type="button"
+              className={`home-reward-featured ${featuredCheckpointGoal.claimable ? "claimable" : ""}`}
+              onClick={() => handleCheckpointGoalAction(featuredCheckpointGoal)}
+            >
+              <span>{featuredCheckpointGoal.claimable ? "Prêt à réclamer" : "Mission prioritaire"}</span>
+              <strong>{featuredCheckpointGoal.title}</strong>
+              <small>{featuredCheckpointGoal.detail}</small>
+              <div className="home-reward-progress-line">
+                <div style={{ width: `${Math.max(4, Math.min(featuredCheckpointGoal.progress, 100))}%` }} />
+              </div>
+              <em>{featuredCheckpointGoal.claimable ? featuredCheckpointGoal.reward : featuredCheckpointGoal.actionLabel}</em>
+            </button>
+
+            <div className="home-reward-mini-list">
+              {secondaryCheckpointGoals.map((goal) => (
+                <button
+                  key={goal.id}
+                  type="button"
+                  className={`home-reward-mini ${goal.claimable ? "claimable" : ""}`}
+                  onClick={() => handleCheckpointGoalAction(goal)}
+                >
+                  <div>
+                    <span>{goal.reward}</span>
+                    <strong>{goal.title}</strong>
+                  </div>
+                  <small>{Math.round(goal.progress)}%</small>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="home-reward-empty">
+            <strong>Tout est propre</strong>
+            <span>Continue à jouer, noter et compléter ton profil pour ouvrir de nouveaux gains.</span>
           </div>
         )}
       </div>
