@@ -36570,3 +36570,387 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
     max-height: min(520px, calc(100vh - 160px));
   }
 }
+
+/* Final mobile polish: consistent iPhone rhythm across the whole app. */
+@media (max-width: 700px) {
+  html,
+  body,
+  #root {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .app-shell {
+    min-height: 100svh;
+  }
+
+  .container {
+    width: min(100%, 560px) !important;
+    padding:
+      calc(14px + env(safe-area-inset-top))
+      clamp(14px, 4vw, 18px)
+      calc(118px + env(safe-area-inset-bottom))
+      clamp(14px, 4vw, 18px) !important;
+  }
+
+  .container > * + * {
+    margin-top: 16px;
+  }
+
+  .app-title-row {
+    margin-bottom: 12px;
+  }
+
+  .title {
+    max-width: calc(100vw - 118px);
+    font-size: clamp(1.9rem, 9.2vw, 2.85rem) !important;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .search-panel,
+  .xp-card,
+  .home-card,
+  .weekly-quiz-card,
+  .home-deals-card,
+  .social-profile-card,
+  .social-command-card,
+  .profile-card,
+  .series-next-card,
+  .series-progress-card,
+  .checkpoint-goals-card,
+  .options-page,
+  .option-section,
+  .physical-hero,
+  .physical-editor-panel,
+  .physical-stats-panel {
+    padding: clamp(16px, 4.6vw, 20px) !important;
+    border-radius: 22px !important;
+  }
+
+  .stats-grid,
+  .social-stats-grid,
+  .physical-stats-grid,
+  .profile-living-cards {
+    gap: 10px !important;
+  }
+
+  .stat-card {
+    min-height: 88px;
+    padding: 13px 10px !important;
+    border-radius: 18px !important;
+  }
+
+  .stat-value,
+  .stat-card strong {
+    font-size: clamp(1.32rem, 6vw, 1.75rem);
+  }
+
+  .input-container,
+  .search-actions,
+  .search-actions.two-actions,
+  .profile-actions,
+  .social-actions,
+  .hardware-detail-actions,
+  .checkpoint-gate-actions,
+  .trial-actions,
+  .physical-editor-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .option-pill,
+  .status-btn,
+  .filter-toggle-btn,
+  .choice-pill,
+  .quick-status-btn,
+  .hardware-status-action,
+  .library-switch-btn,
+  .trial-primary-btn,
+  .trial-secondary-btn {
+    min-height: 42px;
+  }
+
+  .option-pill,
+  .status-btn,
+  .filter-toggle-btn,
+  .choice-pill,
+  .quick-status-btn,
+  .hardware-status-action,
+  .deals-source-tabs button,
+  .social-view-tabs button,
+  .social-feed-filters button,
+  .series-filter-tabs button,
+  .top5-content-tabs button,
+  .top5-mode-tabs button,
+  .top5-score-tabs button {
+    padding: 10px 12px;
+    border-radius: 16px;
+    font-size: clamp(0.82rem, 3.7vw, 0.95rem);
+    line-height: 1.1;
+  }
+
+  .option-chip-grid,
+  .theme-grid,
+  .social-view-tabs,
+  .social-feed-filters,
+  .series-filter-tabs,
+  .top5-content-tabs,
+  .top5-mode-tabs,
+  .top5-score-tabs,
+  .deals-source-tabs,
+  .hardware-type-grid,
+  .hardware-status-actions,
+  .hardware-all-status-actions,
+  .status-buttons {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 9px !important;
+  }
+
+  .top5-score-tabs,
+  .status-buttons {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .option-chip-grid > *,
+  .theme-grid > *,
+  .social-view-tabs > *,
+  .social-feed-filters > *,
+  .series-filter-tabs > *,
+  .top5-content-tabs > *,
+  .top5-mode-tabs > *,
+  .top5-score-tabs > *,
+  .deals-source-tabs > *,
+  .hardware-type-grid > *,
+  .hardware-status-actions > *,
+  .hardware-all-status-actions > *,
+  .status-buttons > * {
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+
+  .game-card,
+  .game-item,
+  .library-simple-card,
+  .hardware-card,
+  .hardware-catalog-card,
+  .hardware-console-card,
+  .hardware-collection-card,
+  .hardware-all-version-card,
+  .compact-series-card,
+  .series-card,
+  .top5-item,
+  .deal-card,
+  .social-feed-item,
+  .profile-showcase-card,
+  .home-recommendation-card,
+  .news-card,
+  .physical-card {
+    min-width: 0;
+    border-radius: 20px !important;
+    padding: 13px !important;
+  }
+
+  .game-card,
+  .library-simple-card,
+  .top5-item,
+  .deal-card,
+  .social-feed-item,
+  .home-recommendation-card,
+  .news-card {
+    display: grid !important;
+    grid-template-columns: 76px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+  }
+
+  .game-thumb,
+  .top5-thumb,
+  .news-card img,
+  .news-card-image,
+  .home-recommendation-card img,
+  .home-recommendation-card .home-game-placeholder,
+  .deal-image-wrap {
+    width: 76px !important;
+    height: 76px !important;
+    max-width: 76px !important;
+    aspect-ratio: 1 !important;
+    border-radius: 15px !important;
+  }
+
+  .game-name,
+  .hardware-name,
+  .series-title,
+  .top5-name,
+  .deal-card h3,
+  .social-feed-title,
+  .home-recommendation-card strong,
+  .profile-showcase-card strong,
+  .news-card h3 {
+    max-width: 100%;
+    font-size: clamp(1rem, 4.8vw, 1.28rem) !important;
+    line-height: 1.12 !important;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+
+  .library-meta,
+  .hardware-meta,
+  .series-card-meta,
+  .top5-meta,
+  .deal-card small,
+  .social-feed-meta,
+  .news-card p {
+    font-size: clamp(0.78rem, 3.4vw, 0.9rem) !important;
+    line-height: 1.25;
+  }
+
+  .empty-state {
+    min-height: 150px;
+    padding: 22px 18px !important;
+    border-radius: 22px !important;
+  }
+
+  .empty-state-icon {
+    width: 54px;
+    height: 54px;
+    font-size: 1.45rem;
+  }
+
+  .empty-state-title {
+    font-size: clamp(1.12rem, 5.2vw, 1.42rem) !important;
+  }
+
+  .empty-state-subtitle {
+    max-width: 32ch;
+    margin-inline: auto;
+    font-size: 0.92rem;
+  }
+
+  .modal-backdrop,
+  .search-detail-modal,
+  .hardware-modal-backdrop {
+    padding:
+      calc(12px + env(safe-area-inset-top))
+      12px
+      calc(104px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .game-modal,
+  .search-detail-panel,
+  .hardware-modal-panel,
+  .hardware-inline-detail-panel,
+  .trial-room,
+  .checkpoint-gate-card {
+    width: 100% !important;
+    max-width: 560px !important;
+    max-height: calc(100svh - 126px - env(safe-area-inset-bottom)) !important;
+    border-radius: 24px !important;
+  }
+
+  .modal-title-row,
+  .hardware-inline-detail-panel .modal-title-row,
+  .game-detail-premium-hero {
+    gap: 12px;
+  }
+
+  .modal-title-row h2,
+  .hardware-inline-detail-panel .modal-title-row h2,
+  .game-detail-premium-identity h2 {
+    font-size: clamp(1.35rem, 7vw, 2rem) !important;
+    line-height: 1.08 !important;
+  }
+
+  .modal-close-btn {
+    width: 42px !important;
+    height: 42px !important;
+    flex: 0 0 42px;
+  }
+
+  .bottom-tabs {
+    left: 10px !important;
+    right: 10px !important;
+    bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    max-width: none !important;
+    transform: none !important;
+    justify-content: flex-start;
+    gap: 6px !important;
+    padding: 8px !important;
+    border-radius: 24px !important;
+  }
+
+  .tab-btn {
+    flex: 0 0 74px !important;
+    width: 74px !important;
+    min-width: 74px !important;
+    height: 62px !important;
+    padding: 7px 5px !important;
+    border-radius: 17px !important;
+  }
+
+  .tab-btn.active {
+    flex-basis: 92px !important;
+    width: 92px !important;
+    min-width: 92px !important;
+  }
+
+  .tab-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .tab-label {
+    max-width: 100%;
+    font-size: 0.64rem !important;
+    line-height: 1.05 !important;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tab-transition-overlay {
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100svh !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .container {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .option-chip-grid,
+  .theme-grid,
+  .social-view-tabs,
+  .social-feed-filters,
+  .series-filter-tabs,
+  .top5-content-tabs,
+  .top5-mode-tabs,
+  .deals-source-tabs,
+  .hardware-type-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .top5-score-tabs,
+  .status-buttons {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .tab-btn {
+    flex-basis: 68px !important;
+    width: 68px !important;
+    min-width: 68px !important;
+  }
+
+  .tab-btn.active {
+    flex-basis: 86px !important;
+    width: 86px !important;
+    min-width: 86px !important;
+  }
+}
