@@ -10151,7 +10151,240 @@ body[data-ui="modern"] .chip.active {
 }
 
 .home-recommendations-panel {
+  position: relative;
   overflow: hidden;
+}
+
+.home-radar-panel {
+  border-color: color-mix(in srgb, var(--accent-solid) 24%, var(--panel-border));
+  background:
+    radial-gradient(circle at 12% 8%, color-mix(in srgb, var(--accent-solid) 18%, transparent), transparent 34%),
+    radial-gradient(circle at 92% 16%, rgba(255, 255, 255, 0.08), transparent 28%),
+    linear-gradient(145deg, rgba(255,255,255,0.065), rgba(255,255,255,0.018)),
+    var(--panel-bg);
+}
+
+.home-radar-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent-solid) 10%, transparent), transparent),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 82px);
+  opacity: 0.35;
+  mask-image: linear-gradient(180deg, black, transparent 72%);
+}
+
+.home-radar-head,
+.home-radar-signals,
+.home-radar-layout,
+.home-radar-loading,
+.home-radar-empty {
+  position: relative;
+  z-index: 1;
+}
+
+.home-radar-signals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.home-radar-signal {
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--ui-radius-md);
+  background: rgba(0,0,0,0.14);
+}
+
+.home-radar-signal span {
+  display: block;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.home-radar-signal strong {
+  display: block;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-radar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.28fr) minmax(220px, 0.72fr);
+  gap: 12px;
+}
+
+.home-radar-hero,
+.home-radar-mini-card,
+.home-radar-action-card {
+  border: 1px solid var(--surface-border);
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.home-radar-hero {
+  position: relative;
+  min-height: 254px;
+  overflow: hidden;
+  border-radius: var(--ui-radius-xl);
+  background: rgba(0,0,0,0.18);
+  text-align: left;
+}
+
+.home-radar-hero img,
+.home-radar-hero .home-game-placeholder {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(1.08) contrast(1.03);
+}
+
+.home-radar-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, transparent 12%, rgba(0,0,0,0.22), rgba(0,0,0,0.78)),
+    radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--accent-solid) 22%, transparent), transparent 34%);
+}
+
+.home-radar-hero-overlay {
+  position: absolute;
+  inset: auto 14px 14px;
+  z-index: 1;
+  display: grid;
+  gap: 7px;
+}
+
+.home-radar-hero-overlay strong {
+  color: white;
+  font-size: clamp(1.55rem, 4vw, 2.25rem);
+  line-height: 0.98;
+  text-shadow: 0 10px 30px rgba(0,0,0,0.65);
+}
+
+.home-radar-hero-overlay small {
+  color: rgba(255,255,255,0.82);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.home-radar-hero-overlay em {
+  width: fit-content;
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(0,0,0,0.38);
+  color: white;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.home-radar-side-list {
+  display: grid;
+  gap: 10px;
+}
+
+.home-radar-mini-card {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  padding: 9px;
+  border-radius: var(--ui-radius-lg);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.025)),
+    var(--surface-bg);
+  text-align: left;
+}
+
+.home-radar-mini-card img,
+.home-radar-mini-card .home-game-placeholder {
+  width: 72px;
+  height: 54px;
+  border-radius: 13px;
+  object-fit: cover;
+}
+
+.home-radar-mini-card span,
+.home-radar-action-card span {
+  display: block;
+  color: color-mix(in srgb, var(--accent-solid) 55%, var(--text-soft));
+  font-size: 10px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.home-radar-mini-card strong {
+  display: block;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 14px;
+  line-height: 1.12;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-radar-mini-card small {
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.home-radar-action-card {
+  min-height: 72px;
+  padding: 13px;
+  border-radius: var(--ui-radius-lg);
+  background:
+    radial-gradient(circle at 18% 10%, color-mix(in srgb, var(--accent-solid) 28%, transparent), transparent 56%),
+    linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03)),
+    var(--surface-bg);
+  text-align: left;
+}
+
+.home-radar-action-card strong {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-main);
+  font-size: 15px;
+}
+
+.home-radar-loading,
+.home-radar-empty {
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  padding: 24px 14px;
+  border: 1px dashed color-mix(in srgb, var(--accent-solid) 28%, var(--surface-border));
+  border-radius: var(--ui-radius-lg);
+  color: var(--text-soft);
+  text-align: center;
+}
+
+.home-radar-loading span {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.14);
+  border-top-color: var(--accent-solid);
+  animation: spin 0.9s linear infinite;
+}
+
+.home-radar-empty strong {
+  color: var(--text-main);
+  font-size: 18px;
 }
 
 .home-recommendation-list {
@@ -10468,6 +10701,32 @@ body[data-ui="modern"] .chip.active {
     grid-column: 1 / -1;
     display: flex;
     justify-content: flex-start;
+  }
+
+  .home-radar-signals {
+    grid-template-columns: 1fr;
+  }
+
+  .home-radar-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .home-radar-hero {
+    min-height: 218px;
+  }
+
+  .home-radar-side-list {
+    grid-template-columns: 1fr;
+  }
+
+  .home-radar-mini-card {
+    grid-template-columns: 68px minmax(0, 1fr);
+  }
+
+  .home-radar-mini-card img,
+  .home-radar-mini-card .home-game-placeholder {
+    width: 68px;
+    height: 50px;
   }
 
   .home-recommendation-list {

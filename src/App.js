@@ -8205,6 +8205,25 @@ function HomeTab({
     { label: "Promos", tab: "deals" },
     { label: "Top 5", tab: "top5" },
   ];
+  const favoriteGamesCount = games.filter((game) => game.favorite).length;
+  const primaryRecommendation = recommendations[0] || null;
+  const secondaryRecommendations = recommendations.slice(1, 4);
+  const radarSignals = [
+    {
+      label: "Profil",
+      value: profile.title,
+    },
+    {
+      label: "Affinités",
+      value: favoriteGamesCount
+        ? `${favoriteGamesCount} favoris`
+        : `${ratedGames.length} notes`,
+    },
+    {
+      label: "Plateformes",
+      value: `${hardwareByType.console || 0} actives`,
+    },
+  ];
 
   const badgeStats = calculateBadgeStats(games, level, hardware);
 
@@ -8886,12 +8905,12 @@ function HomeTab({
       </div>
 
 
-      <div className="search-panel home-recommendations-panel">
-        <div className="home-section-head">
+      <div className="search-panel home-recommendations-panel home-radar-panel">
+        <div className="home-section-head home-radar-head">
           <div>
-            <h2 className="panel-title">À découvrir ensuite</h2>
+            <div className="home-card-title">Radar découverte</div>
             <p className="home-section-subtitle">
-              Une sélection courte basée sur tes favoris, tes notes et tes plateformes.
+              Une veille personnalisée qui mélange tes goûts, tes notes et tes plateformes.
             </p>
           </div>
 
@@ -8900,43 +8919,83 @@ function HomeTab({
           </button>
         </div>
 
+        <div className="home-radar-signals">
+          {radarSignals.map((signal) => (
+            <div key={signal.label} className="home-radar-signal">
+              <span>{signal.label}</span>
+              <strong>{signal.value}</strong>
+            </div>
+          ))}
+        </div>
+
         {loadingRecommendations ? (
-          <div className="empty-small">Chargement des suggestions...</div>
-        ) : recommendations.length === 0 ? (
-          <div className="empty-small">
-            Ajoute plus de jeux pour obtenir des suggestions personnalisées.
+          <div className="home-radar-loading">
+            <span />
+            Analyse de ton univers en cours...
+          </div>
+        ) : !primaryRecommendation ? (
+          <div className="home-radar-empty">
+            <strong>Radar en calibration</strong>
+            <span>Ajoute quelques notes ou favoris pour obtenir des pistes plus fines.</span>
           </div>
         ) : (
-          <div className="home-recommendation-list">
-            {recommendations.map((game, index) => (
-              <button
-                key={game.id}
-                type="button"
-                className="home-recommendation-card"
-                onClick={() => setActiveTab("search")}
-              >
-                {game.background_image ? (
-                  <img src={game.background_image} alt={game.name} />
-                ) : (
-                  <div className="home-game-placeholder">CP</div>
-                )}
+          <div className="home-radar-layout">
+            <button
+              type="button"
+              className="home-radar-hero"
+              onClick={() => setActiveTab("search")}
+            >
+              {primaryRecommendation.background_image ? (
+                <img src={primaryRecommendation.background_image} alt={primaryRecommendation.name} />
+              ) : (
+                <div className="home-game-placeholder">CP</div>
+              )}
 
-                <div>
-                  <span className="home-recommendation-kicker">
-                    Suggestion {index + 1}
-                  </span>
-                  <strong>{game.name}</strong>
-                  <small>
-                    {(game.recommendationReasons || []).length
-                      ? `Pour ton affinité ${game.recommendationReasons.join(" / ")}`
-                      : "Bonne piste à comparer à ta bibliothèque"}
-                  </small>
-                  <em>
-                    {game.released?.split("-")[0] || "Année inconnue"} - {formatRating10(game.rating || 0, "Non noté")}
-                  </em>
-                </div>
+              <div className="home-radar-hero-overlay">
+                <span className="home-recommendation-kicker">Signal principal</span>
+                <strong>{primaryRecommendation.name}</strong>
+                <small>
+                  {(primaryRecommendation.recommendationReasons || []).length
+                    ? `Aligné avec ${primaryRecommendation.recommendationReasons.join(" / ")}`
+                    : "Une piste forte à comparer à ta bibliothèque"}
+                </small>
+                <em>
+                  {primaryRecommendation.released?.split("-")[0] || "Année inconnue"} ·{" "}
+                  {formatRating10(primaryRecommendation.rating || 0, "Non noté")}
+                </em>
+              </div>
+            </button>
+
+            <div className="home-radar-side-list">
+              {secondaryRecommendations.map((game, index) => (
+                <button
+                  key={game.id}
+                  type="button"
+                  className="home-radar-mini-card"
+                  onClick={() => setActiveTab("search")}
+                >
+                  {game.background_image ? (
+                    <img src={game.background_image} alt={game.name} />
+                  ) : (
+                    <div className="home-game-placeholder">CP</div>
+                  )}
+                  <div>
+                    <span>Signal {index + 2}</span>
+                    <strong>{game.name}</strong>
+                    <small>{formatRating10(game.rating || 0, "Non noté")}</small>
+                  </div>
+                </button>
+              ))}
+
+              <button
+                type="button"
+                className="home-radar-action-card"
+                onClick={() => setActiveTab("deals")}
+              >
+                <span>Opportunités</span>
+                <strong>Voir les promos liées</strong>
               </button>
-            ))}
+            </div>
           </div>
         )}
       </div>
