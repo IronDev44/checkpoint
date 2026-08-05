@@ -9551,6 +9551,41 @@ body[data-ui="modern"] .chip.active {
   gap: 12px;
 }
 
+.home-premium-cockpit {
+  position: relative;
+  overflow: hidden;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent-solid) 22%, var(--panel-border));
+  border-radius: var(--ui-radius-xl);
+  background:
+    radial-gradient(circle at 18% 0%, color-mix(in srgb, var(--accent-solid) 20%, transparent), transparent 32%),
+    linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025)),
+    var(--panel-bg);
+  box-shadow: var(--panel-shadow);
+}
+
+.home-premium-cockpit::before {
+  content: "";
+  position: absolute;
+  inset: 12px;
+  border-radius: calc(var(--ui-radius-xl) - 8px);
+  border: 1px solid rgba(255,255,255,0.045);
+  pointer-events: none;
+}
+
+.home-cockpit-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: 12px;
+}
+
+.home-cockpit-side {
+  display: grid;
+  gap: 10px;
+}
+
 .home-focus-card {
   position: relative;
   overflow: hidden;
@@ -9566,6 +9601,12 @@ body[data-ui="modern"] .chip.active {
     var(--panel-bg);
   border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--panel-border));
   box-shadow: var(--panel-shadow);
+}
+
+.home-premium-cockpit .home-focus-card {
+  min-height: 100%;
+  align-content: center;
+  box-shadow: none;
 }
 
 .home-focus-card::after {
@@ -9624,6 +9665,10 @@ body[data-ui="modern"] .chip.active {
   gap: 10px;
 }
 
+.home-cockpit-side .home-dashboard-stats {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .home-dashboard-stat {
   min-width: 0;
   padding: 13px 12px;
@@ -9656,6 +9701,64 @@ body[data-ui="modern"] .chip.active {
   color: var(--text-muted);
   font-size: 11px;
   line-height: 1.2;
+}
+
+.home-session-queue {
+  position: relative;
+  z-index: 1;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--ui-radius-xl);
+  background: rgba(0,0,0,0.12);
+}
+
+.home-session-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.home-session-card {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 9px;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--ui-radius-lg);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025)),
+    var(--surface-bg);
+  color: var(--text-main);
+  text-align: left;
+  cursor: pointer;
+}
+
+.home-session-card img,
+.home-session-card .home-game-placeholder {
+  width: 64px;
+  height: 42px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.home-session-card strong {
+  display: block;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 14px;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-session-card span {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 850;
 }
 
 .home-deals-card {
@@ -10298,6 +10401,28 @@ body[data-ui="modern"] .chip.active {
 
   .home-dashboard-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-premium-cockpit {
+    padding: 12px;
+  }
+
+  .home-cockpit-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-session-list {
+    grid-template-columns: 1fr;
+  }
+
+  .home-session-card {
+    grid-template-columns: 70px minmax(0, 1fr);
+  }
+
+  .home-session-card img,
+  .home-session-card .home-game-placeholder {
+    width: 70px;
+    height: 46px;
   }
 
   .home-deals-card {

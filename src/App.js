@@ -8194,6 +8194,17 @@ function HomeTab({
     { label: "Note moy.", value: averageRating ? formatRating10(averageRating, "-") : "-", detail: `${ratedGames.length} notes` },
     { label: "Materiel", value: ownedHardwareCount, detail: `${hardwareByType.console || 0} plateformes` },
   ];
+  const sessionQueue = [
+    ...inProgressGames,
+    ...backlogCandidates.filter(
+      (candidate) => !inProgressGames.some((game) => game.id === candidate.id)
+    ),
+  ].slice(0, 3);
+  const homeQuickActions = [
+    { label: "Ajouter", tab: "search" },
+    { label: "Promos", tab: "deals" },
+    { label: "Top 5", tab: "top5" },
+  ];
 
   const badgeStats = calculateBadgeStats(games, level, hardware);
 
@@ -8630,39 +8641,96 @@ function HomeTab({
         progress={progress}
       />
 
-      <div className="home-dashboard-panel">
-        <div className="home-focus-card">
-          <div className="home-focus-content">
-            <span className="home-kicker">Ton checkpoint du jour</span>
-            <h3>{dashboardAction.title}</h3>
-            <p>{dashboardAction.detail}</p>
+      <div className="home-dashboard-panel home-premium-cockpit">
+        <div className="home-cockpit-grid">
+          <div className="home-focus-card">
+            <div className="home-focus-content">
+              <span className="home-kicker">Session du jour</span>
+              <h3>{dashboardAction.title}</h3>
+              <p>{dashboardAction.detail}</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (dashboardAction.game) {
+                  onOpenDetail(dashboardAction.game);
+                  return;
+                }
+                if (dashboardAction.tab && dashboardAction.tab !== "home") {
+                  setActiveTab(dashboardAction.tab);
+                }
+              }}
+            >
+              {dashboardAction.label}
+            </button>
           </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (dashboardAction.game) {
-                onOpenDetail(dashboardAction.game);
-                return;
-              }
-              if (dashboardAction.tab && dashboardAction.tab !== "home") {
-                setActiveTab(dashboardAction.tab);
-              }
-            }}
-          >
-            {dashboardAction.label}
-          </button>
+          <div className="home-cockpit-side">
+            <div className="home-dashboard-stats">
+              {dashboardStats.map((stat) => (
+                <div key={stat.label} className="home-dashboard-stat">
+                  <strong>{stat.value}</strong>
+                  <span>{stat.label}</span>
+                  <small>{stat.detail}</small>
+                </div>
+              ))}
+            </div>
+
+            <div className="home-actions-grid home-main-actions">
+              {homeQuickActions.map((action) => (
+                <button
+                  key={action.tab}
+                  type="button"
+                  onClick={() => setActiveTab(action.tab)}
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="home-dashboard-stats">
-          {dashboardStats.map((stat) => (
-            <div key={stat.label} className="home-dashboard-stat">
-              <strong>{stat.value}</strong>
-              <span>{stat.label}</span>
-              <small>{stat.detail}</small>
+        {sessionQueue.length > 0 && (
+          <div className="home-session-queue">
+            <div className="home-section-head">
+              <div>
+                <div className="home-card-title">File de session</div>
+                <p className="home-section-subtitle">
+                  Les jeux les plus logiques à reprendre ou lancer maintenant.
+                </p>
+              </div>
+
+              <button type="button" onClick={() => setActiveTab("library")}>
+                Bibliothèque
+              </button>
             </div>
-          ))}
-        </div>
+
+            <div className="home-session-list">
+              {sessionQueue.map((game) => (
+                <button
+                  key={game.id}
+                  type="button"
+                  className="home-session-card"
+                  onClick={() => onOpenDetail(game)}
+                >
+                  {game.image ? (
+                    <img src={game.image} alt={game.name} loading="lazy" />
+                  ) : (
+                    <div className="home-game-placeholder">CP</div>
+                  )}
+                  <div>
+                    <strong>{game.name}</strong>
+                    <span>
+                      {game.status === "en cours" ? "En cours" : "À lancer"} -{" "}
+                      {formatRating10(getGameRating(game), "non note")}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <HomeDealsPreview
@@ -8806,21 +8874,7 @@ function HomeTab({
         </div>
       )}
 
-      <div className="home-actions-grid home-main-actions">
-        <button type="button" onClick={() => setActiveTab("search")}>
-          Ajouter un jeu
-        </button>
-
-        <button type="button" onClick={() => setActiveTab("deals")}>
-          Promos
-        </button>
-
-        <button type="button" onClick={() => setActiveTab("top5")}>
-          Top 5
-        </button>
-      </div>
-
-      <div className="search-panel">
+      <div className="home-card home-activity-card">
         <div className="home-section-head">
           <h2 className="panel-title">Activité récente</h2>
           <button type="button" onClick={() => setActiveTab("social")}>
@@ -8828,48 +8882,9 @@ function HomeTab({
           </button>
         </div>
 
-        <ActivityFeed activities={socialActivities.slice(0, 4)} compact />
+        <ActivityFeed activities={socialActivities.slice(0, 3)} compact />
       </div>
 
-      <div className="search-panel">
-        <div className="home-section-head">
-          <h2 className="panel-title">Jeux en cours</h2>
-          <button type="button" onClick={() => setActiveTab("library")}>
-            Voir tout
-          </button>
-        </div>
-
-        {inProgressGames.length === 0 ? (
-          <EmptyState
-            title="Aucun jeu en cours"
-            subtitle="Passe un jeu en statut En cours pour le retrouver ici."
-          />
-        ) : (
-          <div className="home-game-list">
-            {inProgressGames.map((game) => (
-              <button
-                key={game.id}
-                type="button"
-                className="home-game-row improved"
-                onClick={() => onOpenDetail(game)}
-              >
-                <div className="home-game-meta">▶️ En cours</div>
-
-                {game.image ? (
-                  <img src={game.image} alt={game.name} />
-                ) : (
-                  <div className="home-game-placeholder">🎮</div>
-                )}
-
-                <div>
-                  <strong>{game.name}</strong>
-                  <span>{game.released?.split("-")[0] || "Année inconnue"}</span>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
 
       <div className="search-panel home-recommendations-panel">
         <div className="home-section-head">
