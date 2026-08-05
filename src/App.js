@@ -1157,6 +1157,181 @@ function getPlayerProfile(games) {
   };
 }
 
+function getPlayerAnalysis(games = [], hardware = [], badges = []) {
+  const stats = getAdvancedStats(games);
+  const finishedGames = games.filter(isGameFinishedStatus);
+  const ratedGames = games.filter((game) => getGameRating(game) > 0);
+  const favoriteGames = games.filter((game) => game.favorite);
+  const currentHardware = getCurrentOwnedHardware(hardware);
+  const unlockedBadges = badges.filter((badge) => badge.unlocked);
+  const totalGames = games.length;
+  const completionRate = totalGames
+    ? Math.round((finishedGames.length / totalGames) * 100)
+    : 0;
+  const averageRating = stats.avgRating || 0;
+  const platformCount = stats.topPlatforms.length;
+  const genreMap = Object.fromEntries(stats.topGenres.map(([label, count]) => [label, count]));
+  const hasGenre = (...labels) =>
+    labels.some((label) => (genreMap[label] || 0) > 0);
+  const genreScore = (...labels) =>
+    labels.reduce((sum, label) => sum + (genreMap[label] || 0), 0);
+
+  const archetypes = [
+    {
+      key: "narrativeExplorer",
+      title: "Explorateur narratif",
+      icon: "◇",
+      score:
+        genreScore("RPG", "Aventure") * 13 +
+        Math.min(platformCount * 8, 18) +
+        Math.min(finishedGames.length * 0.55, 18),
+      subtitle:
+        "Tu construis ton univers avec des mondes, des ambiances et des histoires qui restent.",
+      vibe: "Decouverte, lore, grands voyages.",
+    },
+    {
+      key: "strategist",
+      title: "Strategiste",
+      icon: "⌬",
+      score:
+        genreScore("Strategie", "Simulation") * 16 +
+        Math.min(stats.avgDifficulty * 9, 24),
+      subtitle:
+        "Tu aimes comprendre les systemes, optimiser tes choix et prendre l'avantage proprement.",
+      vibe: "Planification, maitrise, decisions.",
+    },
+    {
+      key: "competitor",
+      title: "Competiteur instinctif",
+      icon: "▲",
+      score:
+        genreScore("Shooter", "Course", "Combat", "Sport") * 15 +
+        Math.min(averageRating * 2.2, 20),
+      subtitle:
+        "Ton profil ressort quand il y a du rythme, du controle et un vrai feeling en main.",
+      vibe: "Reflexes, precision, performance.",
+    },
+    {
+      key: "collector",
+      title: "Collectionneur d'univers",
+      icon: "◆",
+      score:
+        Math.min(totalGames * 0.7, 42) +
+        Math.min(currentHardware.length * 3, 22) +
+        Math.min(unlockedBadges.length * 0.55, 18),
+      subtitle:
+        "Ton plaisir vient aussi de construire une collection qui raconte ton parcours.",
+      vibe: "Bibliotheque, materiel, badges.",
+    },
+    {
+      key: "completionist",
+      title: "Chasseur de 100%",
+      icon: "◎",
+      score:
+        completionRate * 0.62 +
+        Math.min(finishedGames.length * 0.7, 24) +
+        (completionRate >= 70 ? 14 : 0),
+      subtitle:
+        "Tu transformes ta bibliotheque en trajectoire claire, avec des jeux vraiment valides.",
+      vibe: "Finir, consolider, verrouiller.",
+    },
+    {
+      key: "curator",
+      title: "Curateur de pepites",
+      icon: "✦",
+      score:
+        Math.min(averageRating * 7, 56) +
+        Math.min(favoriteGames.length * 3, 22) +
+        Math.min(ratedGames.length * 0.8, 18),
+      subtitle:
+        "Tu selectionnes, tu notes, et tu fais ressortir les jeux qui meritent une vraie place.",
+      vibe: "Gout personnel, favoris, exigence.",
+    },
+  ];
+
+  const ranked = archetypes
+    .map((item) => ({ ...item, score: Math.max(0, Math.round(item.score)) }))
+    .sort((a, b) => b.score - a.score);
+  const primary = ranked[0] || archetypes[0];
+  const secondary = ranked.slice(1, 3);
+  const topGenreName = stats.topGenres[0]?.[0] || "profil varie";
+  const topPlatformName = stats.topPlatforms[0]?.[0] || "multi-plateforme";
+  const confidence = Math.min(
+    100,
+    Math.round(
+      Math.min(totalGames * 1.4, 34) +
+        Math.min(ratedGames.length * 2.1, 28) +
+        Math.min(finishedGames.length * 1.1, 24) +
+        Math.min(currentHardware.length * 1.2, 14)
+    )
+  );
+  const signals = [
+    {
+      label: "Genre dominant",
+      value: topGenreName,
+      detail: stats.topGenres[0]
+        ? `${stats.topGenres[0][1]} signaux detectes`
+        : "Ajoute plus de genres pour affiner.",
+    },
+    {
+      label: "Plateforme forte",
+      value: topPlatformName,
+      detail: stats.topPlatforms[0]
+        ? `${stats.topPlatforms[0][1]} jeux associes`
+        : "Les plateformes ressortiront avec la bibliotheque.",
+    },
+    {
+      label: "Rythme",
+      value: `${completionRate}% termines`,
+      detail: `${finishedGames.length} jeux valides sur ${totalGames || 0}`,
+    },
+    {
+      label: "Exigence",
+      value: averageRating ? formatRating10(averageRating, "-") : "A calibrer",
+      detail: ratedGames.length
+        ? `${ratedGames.length} notes dans l'app`
+        : "Les notes vont renforcer l'analyse.",
+    },
+  ];
+  const nextSteps = [];
+
+  if (ratedGames.length < 10) {
+    nextSteps.push("Noter au moins 10 jeux pour rendre ton style beaucoup plus precis.");
+  }
+
+  if (finishedGames.length < 15) {
+    nextSteps.push("Terminer quelques jeux de plus pour distinguer passion et curiosite.");
+  }
+
+  if (!hasGenre("RPG", "Aventure", "Shooter", "Strategie", "Course", "Simulation")) {
+    nextSteps.push("Associer des genres plus specifiques pour eviter un profil trop generaliste.");
+  }
+
+  if (currentHardware.length && currentHardware.filter((item) => getHardwareAverageRating(item) > 0).length < 3) {
+    nextSteps.push("Noter ton materiel principal pour lier ton style a ton setup.");
+  }
+
+  return {
+    key: primary.key,
+    title: primary.title,
+    icon: primary.icon,
+    subtitle: primary.subtitle,
+    vibe: primary.vibe,
+    confidence,
+    maturity:
+      confidence >= 80
+        ? "Analyse solide"
+        : confidence >= 55
+          ? "Analyse fiable"
+          : confidence >= 30
+            ? "Analyse en progression"
+            : "Analyse naissante",
+    secondary,
+    signals,
+    nextSteps: nextSteps.slice(0, 3),
+  };
+}
+
 function getProfileInsights(games = [], hardware = [], badges = []) {
   const stats = getAdvancedStats(games);
   const completedGames = games.filter(isGameFinishedStatus);
@@ -7376,6 +7551,7 @@ function PublicProfilePreview({
     gotyHighlights: [],
     hardwareHighlights: [],
   };
+  const playerAnalysis = profile.playerAnalysis || null;
   const publicBadges = [
     profile.featuredBadge,
     ...(profile.selectedBadges || []),
@@ -7469,6 +7645,23 @@ function PublicProfilePreview({
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {playerAnalysis && (
+        <div className="public-vitrine-section public-player-analysis">
+          <div className="public-vitrine-section-head">
+            <span>Analyse joueur</span>
+            <strong>{playerAnalysis.maturity}</strong>
+          </div>
+          <div className="public-analysis-card">
+            <div className="public-analysis-icon">{playerAnalysis.icon}</div>
+            <div>
+              <strong>{playerAnalysis.title}</strong>
+              <p>{playerAnalysis.subtitle}</p>
+              <span>{playerAnalysis.vibe}</span>
+            </div>
           </div>
         </div>
       )}
@@ -7822,6 +8015,7 @@ function SocialTab({
     .map((id) => games.find((game) => String(game.id) === id))
     .filter(Boolean);
   const identityTitle = getIdentityPlayerTitle(identityGames);
+  const playerAnalysis = getPlayerAnalysis(games, hardware, badges);
   const essentialTopSections = [
     { key: "rating", label: "Global", games: getTopGamesForScore(games, "rating", 1) },
     { key: "ratingGameplay", label: "Gameplay", games: getTopGamesForScore(games, "ratingGameplay", 1) },
@@ -7977,6 +8171,7 @@ function SocialTab({
     setupPhotos: socialProfile.setupPhotos || [],
     collectionPhotos: socialProfile.collectionPhotos || [],
     identityTitle,
+    playerAnalysis,
     showcase: profileShowcase,
     identityGames: identityGames.map((game) => ({
       id: game.id,
@@ -8627,6 +8822,7 @@ function HomeTab({
   });
 
   const profile = getPlayerProfile(games);
+  const playerAnalysis = getPlayerAnalysis(games, hardware, badges);
   const quizQuestion = WEEKLY_QUIZ_QUESTIONS[quizQuestionIndex] || weeklyQuiz?.question;
   const quizChoices = useMemo(() => getQuizAnswerChoices(quizQuestion), [quizQuestion]);
   const quizAnswerKey = quizQuestion ? `free-${quizQuestion.id}` : weeklyQuiz?.weekKey;
@@ -8720,7 +8916,7 @@ function HomeTab({
   const radarSignals = [
     {
       label: "Profil",
-      value: profile.title,
+      value: playerAnalysis.title,
     },
     {
       label: "Affinités",
@@ -9202,8 +9398,12 @@ function HomeTab({
       <div className="home-hero">
         <div>
           <div className="home-kicker">{homeGreeting}</div>
-          <h2>{profile.title}</h2>
-          <p>{profile.subtitle}</p>
+          <h2>{playerAnalysis.title}</h2>
+          <p>{playerAnalysis.subtitle}</p>
+          <div className="home-analysis-tags">
+            <span>{playerAnalysis.maturity}</span>
+            <span>{playerAnalysis.vibe}</span>
+          </div>
         </div>
 
         <div className="home-level-pill">
@@ -10086,6 +10286,7 @@ function ProfileTab({
   const nextRank = RANKS.find((rank) => rank.min > level);
   const stats = getAdvancedStats(games);
   const profile = getPlayerProfile(games);
+  const playerAnalysis = getPlayerAnalysis(games, hardware, badges);
   const badgeStats = calculateBadgeStats(games, level, hardware);
   const featuredBadge = getFeaturedBadgeFromSelection(badges, featuredBadgeId);
   const profileInsights = getProfileInsights(games, hardware, badges);
@@ -10454,29 +10655,44 @@ function ProfileTab({
       <div className="search-panel profile-insights-panel">
         <div className="profile-section-header">
           <div>
-            <h2 className="panel-title">Insights joueur</h2>
+            <h2 className="panel-title">Analyse de joueur</h2>
             <div className="option-value">
-              Une lecture de ton identité à partir de tes jeux, notes, badges et matériel.
+              Ton style ressort de tes notes, plateformes, genres, jeux termines et materiel.
             </div>
           </div>
         </div>
 
-        <div className="profile-insights-lead">
-          <span>Lecture Checkpoint</span>
-          <strong>{profileInsights.headline}</strong>
-          <p>{profileInsights.summary}</p>
+        <div className="player-analysis-hero">
+          <div className="player-analysis-emblem">{playerAnalysis.icon}</div>
           <div>
-            <small>{profileInsights.completionRate}% de complétion</small>
-            <small>{profileInsights.badgeCompletion}% badges</small>
-            <small>{profileInsights.maturity}</small>
+            <span>Style principal</span>
+            <strong>{playerAnalysis.title}</strong>
+            <p>{playerAnalysis.subtitle}</p>
+            <div className="player-analysis-meta">
+              <small>{playerAnalysis.maturity}</small>
+              <small>{playerAnalysis.confidence}% de confiance</small>
+              <small>{playerAnalysis.vibe}</small>
+            </div>
           </div>
         </div>
 
+        {playerAnalysis.secondary.length > 0 && (
+          <div className="player-analysis-secondary">
+            {playerAnalysis.secondary.map((style) => (
+              <div key={style.key}>
+                <span>{style.icon}</span>
+                <strong>{style.title}</strong>
+                <small>{style.vibe}</small>
+              </div>
+            ))}
+          </div>
+        )}
+
         <div className="profile-insights-grid">
-          {profileInsights.cards.map((card) => (
+          {playerAnalysis.signals.map((card) => (
             <div
               key={card.label}
-              className={`profile-insight-card tone-${card.tone || "neutral"}`}
+              className="profile-insight-card tone-primary"
             >
               <span>{card.label}</span>
               <strong>{card.value}</strong>
@@ -10485,10 +10701,10 @@ function ProfileTab({
           ))}
         </div>
 
-        {profileInsights.focus.length > 0 && (
+        {playerAnalysis.nextSteps.length > 0 && (
           <div className="profile-insights-focus">
-            <span>À faire évoluer</span>
-            {profileInsights.focus.map((item) => (
+            <span>Pour affiner ton analyse</span>
+            {playerAnalysis.nextSteps.map((item) => (
               <div key={item} className="profile-insights-focus-item">
                 {item}
               </div>
@@ -17580,6 +17796,7 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
     .map((id) => games.find((game) => String(game.id) === id))
     .filter(Boolean);
   const identityTitle = getIdentityPlayerTitle(identityGames);
+  const playerAnalysis = getPlayerAnalysis(games, hardware, badges);
   const essentialTopSections = [
     { key: "rating", label: "Global", games: getTopGamesForScore(games, "rating", 1) },
     { key: "ratingGameplay", label: "Gameplay", games: getTopGamesForScore(games, "ratingGameplay", 1) },
@@ -17631,6 +17848,7 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
     setupPhotos: profileOverride.setupPhotos || [],
     collectionPhotos: profileOverride.collectionPhotos || [],
     identityTitle,
+    playerAnalysis,
     showcase: profileShowcase,
     identityGames: identityGames.map((game) => ({
       id: game.id,

@@ -7834,6 +7834,134 @@ body[data-ui="modern"] .chip.active {
   font-weight: 900;
 }
 
+.player-analysis-hero {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+  overflow: hidden;
+  padding: 16px;
+  border-radius: 24px;
+  border: 1px solid color-mix(in srgb, var(--accent), transparent 56%);
+  background:
+    radial-gradient(circle at 14% 10%, color-mix(in srgb, var(--accent) 34%, transparent), transparent 34%),
+    radial-gradient(circle at 96% 0%, color-mix(in srgb, var(--accent-2, var(--accent)) 22%, transparent), transparent 30%),
+    linear-gradient(135deg, rgba(255,255,255,0.09), rgba(255,255,255,0.03));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 18px 40px rgba(0,0,0,0.16);
+}
+
+.player-analysis-emblem {
+  width: 92px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 28px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--accent) 88%, white 8%), color-mix(in srgb, var(--accent-2, var(--accent)) 74%, #111827 8%));
+  color: white;
+  font-size: 38px;
+  font-weight: 1000;
+  box-shadow: var(--accent-shadow);
+}
+
+.player-analysis-hero span,
+.player-analysis-secondary span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.player-analysis-hero strong {
+  display: block;
+  margin-top: 6px;
+  color: white;
+  font-size: clamp(1.45rem, 4.6vw, 2.35rem);
+  line-height: 1;
+}
+
+.player-analysis-hero p {
+  max-width: 760px;
+  margin: 9px 0 0;
+  color: var(--text-soft);
+  font-size: 0.94rem;
+  font-weight: 760;
+  line-height: 1.45;
+}
+
+.player-analysis-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.player-analysis-meta small {
+  border-radius: 999px;
+  background: rgba(255,255,255,0.085);
+  color: rgba(255,255,255,0.92);
+  font-size: 0.76rem;
+  font-weight: 900;
+  padding: 7px 10px;
+}
+
+.player-analysis-secondary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.player-analysis-secondary div {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  column-gap: 10px;
+  row-gap: 3px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--surface-border);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--accent) 15%, transparent), transparent 40%),
+    rgba(255,255,255,0.045);
+}
+
+.player-analysis-secondary div > span {
+  grid-row: span 2;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: rgba(255,255,255,0.08);
+  color: white;
+  font-size: 18px;
+  letter-spacing: 0;
+}
+
+.player-analysis-secondary strong,
+.player-analysis-secondary small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-analysis-secondary strong {
+  color: white;
+  font-size: 0.92rem;
+}
+
+.player-analysis-secondary small {
+  color: var(--text-soft);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
 .profile-insights-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -8033,6 +8161,20 @@ body[data-ui="modern"] .chip.active {
   }
 
   .profile-insights-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .player-analysis-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .player-analysis-emblem {
+    width: 74px;
+    border-radius: 22px;
+    font-size: 30px;
+  }
+
+  .player-analysis-secondary {
     grid-template-columns: 1fr;
   }
 
@@ -8740,6 +8882,52 @@ body[data-ui="modern"] .chip.active {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
+}
+
+.public-analysis-card {
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+}
+
+.public-analysis-icon {
+  width: 58px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2, var(--accent)));
+  color: white;
+  font-size: 24px;
+  font-weight: 1000;
+  box-shadow: var(--accent-shadow);
+}
+
+.public-analysis-card strong {
+  display: block;
+  color: white;
+  font-size: 20px;
+  line-height: 1.05;
+}
+
+.public-analysis-card p {
+  margin: 6px 0 0;
+  color: var(--text-soft);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.public-analysis-card span {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 8px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+  font-size: 11px;
+  font-weight: 900;
+  padding: 6px 9px;
 }
 
 .social-public-profile-v2 .social-photo-gallery {
@@ -10280,6 +10468,23 @@ body[data-ui="modern"] .chip.active {
   margin: 8px 0 0;
   color: var(--text-soft);
   font-size: 14px;
+}
+
+.home-analysis-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.home-analysis-tags span {
+  border: 1px solid color-mix(in srgb, var(--accent-solid) 24%, var(--surface-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent-solid) 10%, transparent);
+  color: rgba(255,255,255,0.9);
+  font-size: 0.76rem;
+  font-weight: 900;
+  padding: 7px 10px;
 }
 
 .home-level-pill {
