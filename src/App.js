@@ -8224,6 +8224,25 @@ function HomeTab({
       value: `${hardwareByType.console || 0} actives`,
     },
   ];
+  const homeActivityItems = socialActivities.slice(0, 4);
+  const featuredActivity = homeActivityItems[0] || null;
+  const secondaryActivities = homeActivityItems.slice(1, 4);
+  const homePulseStats = [
+    {
+      label: "Activités",
+      value: socialActivities.length,
+    },
+    {
+      label: "Notes",
+      value: socialActivities.filter((activity) =>
+        normalizeIdentityText(activity.type || "").includes("note")
+      ).length,
+    },
+    {
+      label: "Badges",
+      value: socialActivities.filter((activity) => activity.source === "badges").length,
+    },
+  ];
 
   const badgeStats = calculateBadgeStats(games, level, hardware);
 
@@ -8893,15 +8912,83 @@ function HomeTab({
         </div>
       )}
 
-      <div className="home-card home-activity-card">
+      <div className="home-card home-activity-card home-pulse-panel">
         <div className="home-section-head">
-          <h2 className="panel-title">Activité récente</h2>
+          <div>
+            <div className="home-card-title">Pulse social</div>
+            <p className="home-section-subtitle">
+              Ce qui vient de bouger dans ton univers Checkpoint.
+            </p>
+          </div>
+
           <button type="button" onClick={() => setActiveTab("social")}>
             Voir le social
           </button>
         </div>
 
-        <ActivityFeed activities={socialActivities.slice(0, 3)} compact />
+        <div className="home-pulse-stats">
+          {homePulseStats.map((stat) => (
+            <div key={stat.label} className="home-pulse-stat">
+              <strong>{stat.value}</strong>
+              <span>{stat.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {featuredActivity ? (
+          <div className="home-pulse-layout">
+            <button
+              type="button"
+              className="home-pulse-featured"
+              onClick={() => setActiveTab("social")}
+            >
+              {featuredActivity.image ? (
+                <img src={featuredActivity.image} alt={featuredActivity.title} loading="lazy" />
+              ) : (
+                <div className={`social-feed-placeholder source-${featuredActivity.source || "generic"}`}>
+                  {featuredActivity.type === "Badge" ? "B" : "C"}
+                </div>
+              )}
+
+              <div>
+                <span>{featuredActivity.type}</span>
+                <strong>{featuredActivity.text}</strong>
+                <small>
+                  {featuredActivity.detail} · {formatActivityTime(featuredActivity.date)}
+                </small>
+              </div>
+            </button>
+
+            <div className="home-pulse-list">
+              {secondaryActivities.map((activity) => (
+                <button
+                  key={activity.id}
+                  type="button"
+                  className="home-pulse-row"
+                  onClick={() => setActiveTab("social")}
+                >
+                  {activity.image ? (
+                    <img src={activity.image} alt={activity.title} loading="lazy" />
+                  ) : (
+                    <div className={`social-feed-placeholder source-${activity.source || "generic"}`}>
+                      {activity.type === "Badge" ? "B" : "C"}
+                    </div>
+                  )}
+                  <div>
+                    <span>{activity.type}</span>
+                    <strong>{activity.text}</strong>
+                    <small>{formatActivityTime(activity.date)}</small>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <EmptyState
+            title="Pulse en attente"
+            subtitle="Ajoute des jeux, des notes ou du matériel pour alimenter ton activité."
+          />
+        )}
       </div>
 
 

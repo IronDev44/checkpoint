@@ -10387,6 +10387,168 @@ body[data-ui="modern"] .chip.active {
   font-size: 18px;
 }
 
+.home-pulse-panel {
+  position: relative;
+  overflow: hidden;
+  padding: 15px;
+  border-color: color-mix(in srgb, var(--accent-solid) 20%, var(--panel-border));
+  background:
+    radial-gradient(circle at 86% 8%, color-mix(in srgb, var(--accent-solid) 16%, transparent), transparent 30%),
+    linear-gradient(145deg, rgba(255,255,255,0.065), rgba(255,255,255,0.02)),
+    var(--panel-bg);
+}
+
+.home-pulse-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(120deg, transparent 0 36%, color-mix(in srgb, var(--accent-solid) 9%, transparent) 48%, transparent 64%),
+    radial-gradient(circle at 18% 100%, rgba(255,255,255,0.06), transparent 36%);
+  opacity: 0.8;
+}
+
+.home-pulse-panel > * {
+  position: relative;
+  z-index: 1;
+}
+
+.home-pulse-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.home-pulse-stat {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: var(--ui-radius-md);
+  background: rgba(0,0,0,0.12);
+}
+
+.home-pulse-stat strong,
+.home-pulse-stat span {
+  display: block;
+}
+
+.home-pulse-stat strong {
+  color: var(--text-main);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.home-pulse-stat span {
+  margin-top: 4px;
+  overflow: hidden;
+  color: var(--text-soft);
+  font-size: 11px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.home-pulse-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(260px, 1.05fr);
+  gap: 10px;
+}
+
+.home-pulse-featured,
+.home-pulse-row {
+  min-width: 0;
+  border: 1px solid var(--surface-border);
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+}
+
+.home-pulse-featured {
+  display: grid;
+  align-content: end;
+  min-height: 188px;
+  overflow: hidden;
+  padding: 12px;
+  border-radius: var(--ui-radius-xl);
+  background:
+    radial-gradient(circle at 20% 10%, color-mix(in srgb, var(--accent-solid) 24%, transparent), transparent 44%),
+    rgba(0,0,0,0.2);
+}
+
+.home-pulse-featured img,
+.home-pulse-featured .social-feed-placeholder {
+  width: 74px;
+  height: 74px;
+  margin-bottom: 12px;
+  border-radius: 18px;
+  object-fit: cover;
+}
+
+.home-pulse-featured span,
+.home-pulse-row span {
+  display: block;
+  color: color-mix(in srgb, var(--accent-solid) 62%, var(--text-soft));
+  font-size: 11px;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.home-pulse-featured strong {
+  display: -webkit-box;
+  overflow: hidden;
+  color: white;
+  font-size: 20px;
+  line-height: 1.12;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.home-pulse-featured small,
+.home-pulse-row small {
+  display: block;
+  margin-top: 7px;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.home-pulse-list {
+  display: grid;
+  gap: 8px;
+}
+
+.home-pulse-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 9px;
+  border-radius: var(--ui-radius-lg);
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.07), rgba(255,255,255,0.025)),
+    var(--surface-bg);
+}
+
+.home-pulse-row img,
+.home-pulse-row .social-feed-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.home-pulse-row strong {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 14px;
+  line-height: 1.18;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
 .home-recommendation-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -10727,6 +10889,45 @@ body[data-ui="modern"] .chip.active {
   .home-radar-mini-card .home-game-placeholder {
     width: 68px;
     height: 50px;
+  }
+
+  .home-pulse-panel {
+    padding: 12px;
+  }
+
+  .home-pulse-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .home-pulse-stat {
+    padding: 9px 8px;
+  }
+
+  .home-pulse-stat strong {
+    font-size: 18px;
+  }
+
+  .home-pulse-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .home-pulse-featured {
+    min-height: 0;
+    grid-template-columns: 64px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+  }
+
+  .home-pulse-featured img,
+  .home-pulse-featured .social-feed-placeholder {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 0;
+  }
+
+  .home-pulse-featured strong {
+    font-size: 16px;
+    -webkit-line-clamp: 2;
   }
 
   .home-recommendation-list {
