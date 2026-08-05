@@ -59,6 +59,7 @@ import {
   Monitor,
   Package,
   PenLine,
+  Bell,
   ScrollText,
   Sparkles,
   Star as StarIcon,
@@ -732,6 +733,118 @@ function isFutureReleaseDate(date, referenceDate = new Date()) {
   releaseDate.setHours(0, 0, 0, 0);
 
   return releaseDate >= today;
+}
+
+function getDaysUntil(date, referenceDate = new Date()) {
+  if (!date) return null;
+
+  const target = new Date(date);
+  if (Number.isNaN(target.getTime())) return null;
+
+  const today = new Date(referenceDate);
+  today.setHours(0, 0, 0, 0);
+  target.setHours(0, 0, 0, 0);
+
+  return Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+}
+
+function getUsefulNotifications({
+  games = [],
+  upcomingGames = [],
+  pendingCheckpointLevel = null,
+  upcomingSourceStatus = "idle",
+} = {}) {
+  const notifications = [];
+  const add = (notification) => {
+    if (!notification?.id || notifications.some((item) => item.id === notification.id)) return;
+    notifications.push(notification);
+  };
+
+  if (pendingCheckpointLevel) {
+    add({
+      id: `checkpoint-${pendingCheckpointLevel}`,
+      type: "trial",
+      priority: 100,
+      title: "Nouvelle epreuve disponible",
+      message: `Le Checkpoint ${pendingCheckpointLevel} t'attend dans la Salle des Epreuves.`,
+      cta: "Entrer",
+      tab: "profile",
+      tone: "legendary",
+    });
+  }
+
+  const unratedGames = games
+    .filter((game) => game.status !== "wishlist" && getGameRating(game) <= 0)
+    .sort((a, b) => {
+      const dateA = parseActivityDate(a.updatedAt || a.createdAt || a.released)?.getTime() || 0;
+      const dateB = parseActivityDate(b.updatedAt || b.createdAt || b.released)?.getTime() || 0;
+      return dateB - dateA;
+    });
+
+  if (unratedGames.length >= 3) {
+    add({
+      id: `unrated-${unratedGames.slice(0, 3).map((game) => game.id || game.name).join("-")}`,
+      type: "rating",
+      priority: 72,
+      title: `${Math.min(unratedGames.length, 9)} jeux sans note`,
+      message: `${unratedGames[0].name} et quelques jeux recents attendent une note.`,
+      cta: "Noter",
+      tab: "library",
+      tone: "focus",
+    });
+  }
+
+  const weekReleases = upcomingGames
+    .map((game) => ({ game, days: getDaysUntil(game.released) }))
+    .filter(({ days }) => days !== null && days >= 0 && days <= 7)
+    .sort((a, b) => a.days - b.days);
+
+  if (weekReleases.length > 0) {
+    add({
+      id: `release-week-${weekReleases[0].game.id || weekReleases[0].game.name}`,
+      type: "release",
+      priority: 66,
+      title: `${weekReleases.length} sortie${weekReleases.length > 1 ? "s" : ""} cette semaine`,
+      message: `${weekReleases[0].game.name} - ${getReleaseCountdown(weekReleases[0].game.released) || formatFullDate(weekReleases[0].game.released)}.`,
+      cta: "Voir",
+      tab: "upcoming",
+      tone: "release",
+    });
+  }
+
+  const wishlistSoon = games
+    .filter((game) => game.status === "wishlist")
+    .map((game) => ({ game, days: getDaysUntil(game.released) }))
+    .filter(({ days }) => days !== null && days >= 0 && days <= 30)
+    .sort((a, b) => a.days - b.days);
+
+  if (wishlistSoon.length > 0) {
+    add({
+      id: `wishlist-soon-${wishlistSoon[0].game.id || wishlistSoon[0].game.name}`,
+      type: "wishlist",
+      priority: 58,
+      title: "Wishlist a surveiller",
+      message: `${wishlistSoon[0].game.name} approche : ${getReleaseCountdown(wishlistSoon[0].game.released) || formatFullDate(wishlistSoon[0].game.released)}.`,
+      cta: "Ouvrir",
+      tab: "library",
+      tone: "wishlist",
+    });
+  }
+
+  if (upcomingSourceStatus === "unavailable") {
+    add({
+      id: "source-upcoming-unavailable",
+      type: "source",
+      priority: 20,
+      title: "Source sorties temporairement indisponible",
+      message: "Les donnees deja chargees restent utilisables, mais la mise a jour externe est en attente.",
+      cta: "Sorties",
+      tab: "upcoming",
+      tone: "muted",
+    });
+  }
+
+  return notifications.sort((a, b) => b.priority - a.priority).slice(0, 8);
 }
 
 function getGenreChartData(games) {
@@ -3083,6 +3196,78 @@ function EmptyState({ title, subtitle, icon = "✦" }) {
       <div className="empty-state-icon">✦</div>
       <div className="empty-state-title">{title}</div>
       {subtitle && <div className="empty-state-subtitle">{subtitle}</div>}
+    </div>
+  );
+}
+
+function NotificationCenter({
+  notifications = [],
+  open,
+  onToggle,
+  onOpenNotification,
+  onDismiss,
+}) {
+  const count = notifications.length;
+
+  return (
+    <div className={`notification-center ${open ? "open" : ""}`}>
+      <button
+        type="button"
+        className={`notification-trigger ${count > 0 ? "has-items" : ""}`}
+        onClick={onToggle}
+        aria-label="Ouvrir les notifications utiles"
+      >
+        <Bell size={19} strokeWidth={2.5} />
+        {count > 0 && <span>{Math.min(count, 9)}</span>}
+      </button>
+
+      {open && (
+        <div className="notification-panel">
+          <div className="notification-panel-header">
+            <div>
+              <strong>Notifications utiles</strong>
+              <small>Ce qui merite ton attention maintenant.</small>
+            </div>
+            <span>{count}</span>
+          </div>
+
+          {count === 0 ? (
+            <div className="notification-empty">
+              Rien d'urgent. Ton hub est tranquille.
+            </div>
+          ) : (
+            <div className="notification-list">
+              {notifications.map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`notification-item tone-${notification.tone || "default"}`}
+                >
+                  <button
+                    type="button"
+                    className="notification-item-main"
+                    onClick={() => onOpenNotification(notification)}
+                  >
+                    <span>{notification.title}</span>
+                    <small>{notification.message}</small>
+                    <em>{notification.cta || "Ouvrir"}</em>
+                  </button>
+                  <button
+                    type="button"
+                    className="notification-dismiss"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onDismiss(notification.id);
+                    }}
+                    aria-label="Masquer cette notification"
+                  >
+                    x
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -17465,6 +17650,14 @@ export default function App() {
   const [isUpcomingLoading, setIsUpcomingLoading] = useState(false);
   const [upcomingSourceStatus, setUpcomingSourceStatus] = useState("idle");
   const [upcomingMonthFilter, setUpcomingMonthFilter] = useState("");
+  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [dismissedNotificationIds, setDismissedNotificationIds] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("checkpoint-dismissed-notifications") || "[]");
+    } catch (error) {
+      return [];
+    }
+  });
   const [libraryView, setLibraryView] = useState("collection");
   const [nextPage, setNextPage] = useState(null);
   const [gamingEvents, setGamingEvents] = useState(FALLBACK_GAMING_EVENTS);
@@ -17518,6 +17711,13 @@ const tabOrder = [
 const [soundEnabled, setSoundEnabled] = useState(
   localStorage.getItem("checkpoint-sound-enabled") !== "false"
 );
+
+useEffect(() => {
+  localStorage.setItem(
+    "checkpoint-dismissed-notifications",
+    JSON.stringify(dismissedNotificationIds.slice(-80))
+  );
+}, [dismissedNotificationIds]);
 
 const updateAppOption = (key, value) => {
   setAppOptions((prev) => {
@@ -18751,6 +18951,23 @@ useEffect(() => {
   const title = pendingCheckpointLevel
     ? `Checkpoint ${pendingCheckpointLevel}`
     : getRankTitle(level);
+  const usefulNotifications = useMemo(
+    () =>
+      getUsefulNotifications({
+        games,
+        upcomingGames,
+        pendingCheckpointLevel,
+        upcomingSourceStatus,
+      }),
+    [games, upcomingGames, pendingCheckpointLevel, upcomingSourceStatus]
+  );
+  const visibleNotifications = useMemo(
+    () =>
+      usefulNotifications.filter(
+        (notification) => !dismissedNotificationIds.includes(notification.id)
+      ),
+    [usefulNotifications, dismissedNotificationIds]
+  );
 
   const [prevLevel, setPrevLevel] = useState(1);
 
@@ -19964,6 +20181,7 @@ const setPlayedPlatforms = async (id, platforms) => {
   const changeTab = (nextTab) => {
     if (nextTab === activeTab) return;
 
+    setNotificationPanelOpen(false);
     setSelectedGame(null);
     setSelectedSearchGame(null);
     document.body.classList.remove("modal-open");
@@ -19995,6 +20213,23 @@ const setPlayedPlatforms = async (id, platforms) => {
         setPixelTransition(null);
       }, 540);
     }, 16);
+  };
+
+  const openNotification = (notification) => {
+    setNotificationPanelOpen(false);
+    if (notification?.type === "trial" && pendingCheckpointLevel) {
+      openTrialRoom(pendingCheckpointLevel);
+      return;
+    }
+    if (notification?.tab) {
+      changeTab(notification.tab);
+    }
+  };
+
+  const dismissNotification = (id) => {
+    setDismissedNotificationIds((prev) =>
+      prev.includes(id) ? prev : [...prev, id]
+    );
   };
 
   useEffect(() => {
@@ -20078,7 +20313,16 @@ const setPlayedPlatforms = async (id, platforms) => {
           )}
       <div className={`app-shell ${showSplash ? "app-hidden" : "app-visible"}`}>
         <div className="container">
-          <h1 className="title" data-title="Checkpoint">Checkpoint</h1>
+          <div className="app-title-row">
+            <h1 className="title" data-title="Checkpoint">Checkpoint</h1>
+            <NotificationCenter
+              notifications={visibleNotifications}
+              open={notificationPanelOpen}
+              onToggle={() => setNotificationPanelOpen((prev) => !prev)}
+              onOpenNotification={openNotification}
+              onDismiss={dismissNotification}
+            />
+          </div>
 
           {showFullHeader && (
   <>
