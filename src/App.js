@@ -7376,9 +7376,103 @@ function PublicProfilePreview({
     gotyHighlights: [],
     hardwareHighlights: [],
   };
+  const publicBadges = [
+    profile.featuredBadge,
+    ...(profile.selectedBadges || []),
+  ]
+    .filter(Boolean)
+    .filter((badge, index, list) =>
+      list.findIndex((item) => String(item.id) === String(badge.id)) === index
+    )
+    .slice(0, 5);
+  const platformStrengths = (profile.platformStrengths || []).slice(0, 4);
+  const identityGames = (profile.identityGames || []).slice(0, 3);
+  const heroGame =
+    identityGames[0] ||
+    profileShowcase.topScores?.[0]?.game ||
+    profile.favoriteGames?.[0] ||
+    null;
 
   return (
-    <div className="search-panel social-public-profile">
+    <div className="search-panel social-public-profile social-public-profile-v2">
+      <div className="public-vitrine-hero">
+        <div className="public-vitrine-hero-bg" aria-hidden="true" />
+        <div className="public-vitrine-topbar">
+          <div>
+            <span>{title}</span>
+            <strong>@{profile.handle}</strong>
+          </div>
+          {onClose && (
+            <button type="button" onClick={onClose}>
+              Fermer
+            </button>
+          )}
+        </div>
+
+        <div className="public-vitrine-main">
+          <div className="public-vitrine-avatar">
+            {heroGame?.image ? (
+              <img src={heroGame.image} alt={heroGame.name} />
+            ) : (
+              <span>{getInitials(profile.displayName)}</span>
+            )}
+          </div>
+          <div className="public-vitrine-identity">
+            <div className="public-profile-name-row">
+              <h3>{profile.displayName}</h3>
+              <FeaturedBadgePill badge={profile.featuredBadge} />
+            </div>
+            <p>{profile.bio || "Profil Checkpoint"}</p>
+            {profile.identityTitle && (
+              <div className="public-vitrine-signature">
+                <span>Signature joueur</span>
+                <strong>{profile.identityTitle.title}</strong>
+                <small>{profile.identityTitle.subtitle}</small>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="public-vitrine-stats">
+          <div>
+            <strong>{profile.level || 1}</strong>
+            <span>Niveau</span>
+          </div>
+          <div>
+            <strong>{profile.totalGames || 0}</strong>
+            <span>Jeux</span>
+          </div>
+          <div>
+            <strong>{profile.finishedGames || 0}</strong>
+            <span>Termines</span>
+          </div>
+          <div>
+            <strong>{profile.averageRating || "-"}</strong>
+            <span>Note moy.</span>
+          </div>
+        </div>
+      </div>
+
+      {publicBadges.length > 0 && (
+        <div className="public-vitrine-section">
+          <div className="public-vitrine-section-head">
+            <span>Badges choisis</span>
+            <strong>Marqueurs du profil</strong>
+          </div>
+          <div className="public-badge-strip">
+            {publicBadges.map((badge) => (
+              <div key={badge.id} className={`public-badge-chip rarity-${badge.rarity || "common"}`}>
+                <span>{badge.icon}</span>
+                <div>
+                  <strong>{badge.name}</strong>
+                  <small>{badge.rarity || "badge"}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="home-section-head">
         <div>
           <h2 className="panel-title">{title}</h2>
@@ -7465,6 +7559,23 @@ function PublicProfilePreview({
                         : "Jeu marquant"}
                   </span>
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {platformStrengths.length > 0 && (
+        <div className="public-vitrine-section">
+          <div className="public-vitrine-section-head">
+            <span>Plateformes fortes</span>
+            <strong>Terrain de jeu principal</strong>
+          </div>
+          <div className="public-platform-strip">
+            {platformStrengths.map(([platform, count]) => (
+              <div key={platform}>
+                <strong>{platform}</strong>
+                <span>{count} jeux</span>
               </div>
             ))}
           </div>
@@ -7847,11 +7958,22 @@ function SocialTab({
       ...(socialProfile.publicSections || {}),
     },
     featuredBadge,
+    selectedBadges: badges
+      .filter((badge) => badge.unlocked)
+      .slice(0, 5)
+      .map((badge) => ({
+        id: badge.id,
+        icon: badge.icon,
+        name: badge.name,
+        rarity: badge.rarity,
+        special: badge.special || "",
+      })),
     level,
     totalGames: games.length,
     finishedGames: finishedCount,
     hardwareCount: currentHardware.length,
     averageRating: stats.avgRating ? Math.round(stats.avgRating * 10) / 10 : 0,
+    platformStrengths: stats.topPlatforms,
     setupPhotos: socialProfile.setupPhotos || [],
     collectionPhotos: socialProfile.collectionPhotos || [],
     identityTitle,
@@ -17490,11 +17612,22 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
           special: featuredBadge.special || "",
         }
       : null,
+    selectedBadges: badges
+      .filter((badge) => badge.unlocked)
+      .slice(0, 5)
+      .map((badge) => ({
+        id: badge.id,
+        icon: badge.icon,
+        name: badge.name,
+        rarity: badge.rarity,
+        special: badge.special || "",
+      })),
     level,
     totalGames: games.length,
     finishedGames: games.filter(isGameFinishedStatus).length,
     hardwareCount: currentHardware.length,
     averageRating: stats.avgRating ? Math.round(stats.avgRating * 10) / 10 : 0,
+    platformStrengths: stats.topPlatforms,
     setupPhotos: profileOverride.setupPhotos || [],
     collectionPhotos: profileOverride.collectionPhotos || [],
     identityTitle,

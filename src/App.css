@@ -8454,6 +8454,393 @@ body[data-ui="modern"] .chip.active {
   gap: 14px;
 }
 
+.social-public-profile-v2 {
+  gap: 16px;
+  overflow: hidden;
+  padding: 0 0 18px;
+  border-color: rgba(var(--accent-rgb, 97, 132, 255), 0.34);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb, 97, 132, 255), 0.28), transparent 34%),
+    radial-gradient(circle at 82% 18%, rgba(255, 214, 102, 0.16), transparent 28%),
+    linear-gradient(180deg, rgba(255,255,255,0.085), rgba(255,255,255,0.035));
+}
+
+.social-public-profile-v2 > .home-section-head,
+.social-public-profile-v2 > .social-public-profile-body {
+  display: none;
+}
+
+.public-vitrine-hero {
+  position: relative;
+  display: grid;
+  gap: 18px;
+  overflow: hidden;
+  min-height: 320px;
+  padding: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  background:
+    linear-gradient(145deg, rgba(10, 14, 30, 0.18), rgba(10, 14, 30, 0.74)),
+    radial-gradient(circle at 18% 15%, rgba(var(--accent-rgb, 97, 132, 255), 0.42), transparent 34%),
+    radial-gradient(circle at 85% 12%, rgba(255,255,255,0.14), transparent 24%);
+}
+
+.public-vitrine-hero-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  background:
+    linear-gradient(120deg, transparent 0 28%, rgba(255,255,255,0.12) 29% 30%, transparent 31% 100%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 72px);
+  pointer-events: none;
+}
+
+.public-vitrine-topbar,
+.public-vitrine-main,
+.public-vitrine-stats {
+  position: relative;
+  z-index: 1;
+}
+
+.public-vitrine-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.public-vitrine-topbar div {
+  display: grid;
+  gap: 4px;
+}
+
+.public-vitrine-topbar span,
+.public-vitrine-section-head span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.public-vitrine-topbar strong {
+  color: white;
+  font-size: 15px;
+}
+
+.public-vitrine-topbar button {
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  cursor: pointer;
+  font-weight: 950;
+  padding: 9px 13px;
+}
+
+.public-vitrine-main {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+}
+
+.public-vitrine-avatar {
+  width: 132px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 30px;
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb, 97, 132, 255), 0.55), rgba(255, 215, 95, 0.38)),
+    rgba(255,255,255,0.07);
+  box-shadow: 0 22px 48px rgba(0,0,0,0.28);
+}
+
+.public-vitrine-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.public-vitrine-avatar span {
+  color: white;
+  font-size: 38px;
+  font-weight: 1000;
+}
+
+.public-vitrine-identity {
+  min-width: 0;
+}
+
+.public-vitrine-identity h3 {
+  margin: 0;
+  color: white;
+  font-size: clamp(30px, 6vw, 52px);
+  line-height: 0.95;
+}
+
+.public-vitrine-identity p {
+  max-width: 680px;
+  margin: 10px 0 0;
+  color: var(--text-soft);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.public-vitrine-signature {
+  display: grid;
+  gap: 4px;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 14px;
+  border: 1px solid rgba(var(--accent-rgb, 97, 132, 255), 0.34);
+  border-radius: 18px;
+  background: rgba(0,0,0,0.22);
+  padding: 11px 13px;
+}
+
+.public-vitrine-signature span {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.public-vitrine-signature strong {
+  color: white;
+  font-size: 17px;
+}
+
+.public-vitrine-signature small {
+  color: var(--text-soft);
+  font-size: 12px;
+}
+
+.public-vitrine-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.public-vitrine-stats div,
+.public-platform-strip div {
+  min-width: 0;
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.08);
+  padding: 12px;
+}
+
+.public-vitrine-stats strong,
+.public-platform-strip strong {
+  display: block;
+  color: white;
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.public-vitrine-stats span,
+.public-platform-strip span {
+  display: block;
+  margin-top: 5px;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.public-vitrine-section,
+.social-public-profile-v2 .social-public-mini-section {
+  margin: 0 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 24px;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.075), rgba(255,255,255,0.032));
+  padding: 16px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.public-vitrine-section-head,
+.social-public-profile-v2 .social-public-mini-section > strong {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.public-vitrine-section-head strong,
+.social-public-profile-v2 .social-public-mini-section > strong {
+  color: white;
+  font-size: 18px;
+  font-weight: 1000;
+}
+
+.public-badge-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.public-badge-chip {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.07);
+  padding: 10px;
+}
+
+.public-badge-chip > span {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: rgba(var(--accent-rgb, 97, 132, 255), 0.18);
+  font-size: 18px;
+}
+
+.public-badge-chip strong,
+.public-badge-chip small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.public-badge-chip strong {
+  color: white;
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.public-badge-chip small {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.public-badge-chip.rarity-mythic,
+.public-badge-chip.rarity-creator {
+  border-color: rgba(255, 214, 102, 0.34);
+  background:
+    linear-gradient(135deg, rgba(255,214,102,0.14), rgba(var(--accent-rgb, 97, 132, 255), 0.1));
+}
+
+.public-platform-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.social-public-profile-v2 .social-photo-gallery {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.social-public-profile-v2 .social-photo-gallery img {
+  aspect-ratio: 16 / 10;
+  border-radius: 18px;
+  object-fit: cover;
+}
+
+.social-public-profile-v2 .social-public-add {
+  margin: 0 16px;
+  align-self: stretch;
+  border-color: rgba(var(--accent-rgb, 97, 132, 255), 0.34);
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+@media (max-width: 720px) {
+  .social-public-profile-v2 {
+    border-radius: 24px;
+  }
+
+  .public-vitrine-hero {
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .public-vitrine-main {
+    grid-template-columns: 92px minmax(0, 1fr);
+    align-items: start;
+    gap: 14px;
+  }
+
+  .public-vitrine-avatar {
+    width: 92px;
+    border-radius: 24px;
+  }
+
+  .public-vitrine-identity h3 {
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  .public-vitrine-identity p {
+    font-size: 14px;
+  }
+
+  .public-vitrine-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .public-badge-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .public-platform-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .public-vitrine-section,
+  .social-public-profile-v2 .social-public-mini-section,
+  .social-public-profile-v2 .social-public-add {
+    margin-right: 12px;
+    margin-left: 12px;
+  }
+}
+
+@media (max-width: 440px) {
+  .public-vitrine-topbar {
+    align-items: stretch;
+  }
+
+  .public-vitrine-topbar button {
+    padding: 8px 11px;
+  }
+
+  .public-vitrine-main {
+    grid-template-columns: 1fr;
+  }
+
+  .public-vitrine-avatar {
+    width: 108px;
+  }
+
+  .public-vitrine-stats strong,
+  .public-platform-strip strong {
+    font-size: 19px;
+  }
+
+  .public-badge-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .social-public-profile-v2 .social-photo-gallery {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 .social-public-profile-body {
   display: flex;
   align-items: center;
