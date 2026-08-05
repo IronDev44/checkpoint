@@ -18,7 +18,6 @@ const PRIVATE_JSON_HEADERS = {
 };
 
 const RAWG_API_BASE = "https://api.rawg.io/api";
-const RAWG_DEFAULT_KEY = "d7b763a492c745cd82217c285f897e08";
 const RAWG_RETRY_STATUSES = new Set([502, 503, 504, 522]);
 const RAWG_PUBLIC_PARAMS = new Set([
   "search",
@@ -246,7 +245,19 @@ function buildCookie(name, value, requestUrl, options = {}) {
 }
 
 function getRawgApiKey(env) {
-  return env.RAWG_API_KEY || env.RAWG_KEY || RAWG_DEFAULT_KEY;
+  const key = env.RAWG_API_KEY || env.RAWG_KEY;
+
+  if (!key) {
+    throw new RawgUpstreamError(
+      "RAWG_API_KEY manque dans les variables d'environnement Cloudflare.",
+      {
+        code: "RAWG_KEY_MISSING",
+        retryable: false,
+      }
+    );
+  }
+
+  return key;
 }
 
 function isFutureReleaseDate(date, referenceDate = new Date()) {
