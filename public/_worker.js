@@ -18,6 +18,8 @@ const PRIVATE_JSON_HEADERS = {
 };
 
 const RAWG_API_BASE = "https://api.rawg.io/api";
+const IGDB_API_BASE = "https://api.igdb.com/v4";
+const TWITCH_TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 const RAWG_RETRY_STATUSES = new Set([502, 503, 504, 522]);
 const RAWG_PUBLIC_PARAMS = new Set([
   "search",
@@ -29,6 +31,72 @@ const RAWG_PUBLIC_PARAMS = new Set([
   "page_size",
   "lang",
 ]);
+const IGDB_GAME_FIELDS = [
+  "id",
+  "name",
+  "slug",
+  "summary",
+  "storyline",
+  "first_release_date",
+  "cover.image_id",
+  "artworks.image_id",
+  "screenshots.image_id",
+  "videos.video_id",
+  "videos.name",
+  "genres.name",
+  "platforms.name",
+  "involved_companies.company.name",
+  "involved_companies.developer",
+  "involved_companies.publisher",
+  "collection.name",
+  "franchises.name",
+  "parent_game",
+  "version_parent",
+  "category",
+  "rating",
+  "rating_count",
+  "total_rating",
+  "total_rating_count",
+].join(",");
+
+const RAWG_TO_IGDB_PLATFORMS = {
+  1: 49,
+  3: 39,
+  4: 6,
+  5: 14,
+  6: 3,
+  7: 130,
+  14: 12,
+  16: 9,
+  18: 48,
+  21: 34,
+  187: 167,
+  186: 169,
+};
+
+const RAWG_TO_IGDB_GENRES = {
+  1: 10,
+  2: 5,
+  3: 31,
+  4: 31,
+  5: 12,
+  6: 4,
+  7: 9,
+  10: 15,
+  11: 33,
+  14: 13,
+  15: 14,
+  17: 35,
+  28: 35,
+  40: 33,
+  51: 32,
+  83: 8,
+};
+
+let twitchTokenCache = {
+  accessToken: "",
+  expiresAt: 0,
+};
 
 function jsonResponse(body, init = {}) {
   return new Response(JSON.stringify(body), {
@@ -198,6 +266,120 @@ function rawgUnavailableResponse(error, extra = {}) {
   );
 }
 
+class IgdbUpstreamError extends Error {
+  constructor(message, { status = 0, code = "IGDB_UPSTREAM_ERROR", retryableAuth = false } = {}) {
+    super(message);
+    this.name = "IgdbUpstreamError";
+    this.status = status;
+    this.code = code;
+    this.retryableAuth = retryableAuth;
+  }
+}
+
+function igdbUnavailableResponse(error, extra = {}) {
+  return jsonResponse(
+    {
+      sourceStatus: "unavailable",
+      code: error?.code || "IGDB_UNAVAILABLE",
+      upstreamStatus: error?.status || null,
+      message: error?.message || "IGDB est temporairement indisponible.",
+      updatedAt: new Date().toISOString(),
+      ...extra,
+    },
+    { status: 503 }
+  );
+}
+
+function getIgdbCredentials(env) {
+  const clientId = env.TWITCH_CLIENT_ID || env.IGDB_CLIENT_ID;
+  const clientSecret = env.TWITCH_CLIENT_SECRET || env.IGDB_CLIENT_SECRET;
+
+  if (!clientId || !clientSecret) {
+    throw new IgdbUpstreamError(
+      "Les variables TWITCH_CLIENT_ID et TWITCH_CLIENT_SECRET manquent dans Cloudflare.",
+      { code: "IGDB_CREDENTIALS_MISSING" }
+    );
+  }
+
+  return { clientId, clientSecret };
+}
+
+async function getTwitchAppToken(env, { forceRefresh = false } = {}) {
+  const { clientId, clientSecret } = getIgdbCredentials(env);
+  const now = Date.now();
+  const refreshMarginMs = 5 * 60 * 1000;
+
+  if (
+    !forceRefresh &&
+    twitchTokenCache.accessToken &&
+    twitchTokenCache.expiresAt - now > refreshMarginMs
+  ) {
+    return twitchTokenCache.accessToken;
+  }
+
+  const body = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    grant_type: "client_credentials",
+  });
+
+  const response = await fetch(TWITCH_TOKEN_URL, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body,
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok || !data?.access_token) {
+    throw new IgdbUpstreamError("Authentification IGDB indisponible.", {
+      status: response.status,
+      code: "IGDB_AUTH_FAILED",
+    });
+  }
+
+  twitchTokenCache = {
+    accessToken: data.access_token,
+    expiresAt: now + Math.max(Number(data.expires_in || 0) - 60, 60) * 1000,
+  };
+
+  return twitchTokenCache.accessToken;
+}
+
+async function fetchIgdb(endpoint, query, env, { refreshOnUnauthorized = true } = {}) {
+  const { clientId } = getIgdbCredentials(env);
+  const token = await getTwitchAppToken(env);
+  const response = await fetch(`${IGDB_API_BASE}${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Client-ID": clientId,
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "text/plain",
+      accept: "application/json",
+    },
+    body: query,
+  });
+
+  if (response.status === 401 && refreshOnUnauthorized) {
+    twitchTokenCache = { accessToken: "", expiresAt: 0 };
+    await getTwitchAppToken(env, { forceRefresh: true });
+    return fetchIgdb(endpoint, query, env, { refreshOnUnauthorized: false });
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json") ? await response.json() : null;
+
+  if (!response.ok) {
+    throw new IgdbUpstreamError("IGDB est temporairement indisponible.", {
+      status: response.status,
+      code: response.status === 401 ? "IGDB_UNAUTHORIZED" : "IGDB_HTTP_ERROR",
+      retryableAuth: response.status === 401,
+    });
+  }
+
+  return Array.isArray(data) ? data : [];
+}
+
 function encodeBase64Url(value) {
   const bytes = value instanceof Uint8Array ? value : new TextEncoder().encode(String(value));
   let binary = "";
@@ -258,6 +440,10 @@ function getRawgApiKey(env) {
   }
 
   return key;
+}
+
+function isForcedRawgFailure(env) {
+  return String(env.FORCE_RAWG_FAILURE || "").toLowerCase() === "true";
 }
 
 function isFutureReleaseDate(date, referenceDate = new Date()) {
@@ -326,6 +512,200 @@ function buildRawgUrl(path, params, env) {
   return rawgUrl;
 }
 
+function escapeIgdbText(value = "") {
+  return String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function timestampFromDate(value, endOfDay = false) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  if (endOfDay) date.setHours(23, 59, 59, 999);
+  return Math.floor(date.getTime() / 1000);
+}
+
+function mappedIds(csvValue, mapping) {
+  return String(csvValue || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean)
+    .map((value) => mapping[value])
+    .filter(Boolean);
+}
+
+function buildIgdbWhere(params, { upcoming = false } = {}) {
+  const clauses = [];
+  const platformIds = mappedIds(params.get("platforms"), RAWG_TO_IGDB_PLATFORMS);
+  const genreIds = mappedIds(params.get("genres"), RAWG_TO_IGDB_GENRES);
+  const dates = String(params.get("dates") || "").split(",");
+  const from = timestampFromDate(dates[0]);
+  const to = timestampFromDate(dates[1], true);
+
+  if (upcoming) {
+    clauses.push(`first_release_date >= ${Math.floor(Date.now() / 1000)}`);
+  } else {
+    if (from) clauses.push(`first_release_date >= ${from}`);
+    if (to) clauses.push(`first_release_date <= ${to}`);
+  }
+
+  if (platformIds.length) {
+    clauses.push(`platforms = (${platformIds.join(",")})`);
+  }
+
+  if (genreIds.length) {
+    clauses.push(`genres = (${genreIds.join(",")})`);
+  }
+
+  clauses.push("category = (0,2,4,8,9,10,11)");
+
+  return clauses.length ? `where ${clauses.join(" & ")};` : "";
+}
+
+function buildIgdbSearchQuery(params, { upcoming = false } = {}) {
+  const pageSize = Math.min(Math.max(Number(params.get("page_size")) || Number(params.get("limit")) || 20, 1), 50);
+  const page = Math.max(Number(params.get("page")) || 1, 1);
+  const offset = (page - 1) * pageSize;
+  const search = String(params.get("search") || "").trim();
+  const ordering = params.get("ordering") || "";
+  const query = [
+    `fields ${IGDB_GAME_FIELDS};`,
+    search && !upcoming ? `search "${escapeIgdbText(search)}";` : "",
+    buildIgdbWhere(params, { upcoming }),
+    upcoming
+      ? "sort first_release_date asc;"
+      : ordering.includes("released")
+        ? "sort first_release_date desc;"
+        : "sort total_rating_count desc;",
+    `limit ${pageSize};`,
+    `offset ${offset};`,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return { query, page, pageSize };
+}
+
+function proxiedIgdbNextUrl(requestUrl, page, pageSize, count) {
+  if (count < pageSize) return null;
+  const current = new URL(requestUrl);
+  current.searchParams.set("page", String(page + 1));
+  return `${current.pathname}${current.search}`;
+}
+
+async function getIgdbGames(request, env) {
+  const requestUrl = new URL(request.url);
+  const { query, page, pageSize } = buildIgdbSearchQuery(requestUrl.searchParams);
+
+  try {
+    const results = await fetchIgdb("/games", query, env);
+
+    return jsonResponse({
+      results,
+      count: null,
+      next: proxiedIgdbNextUrl(request.url, page, pageSize, results.length),
+      previous: page > 1 ? null : null,
+      page,
+      pageSize,
+      hasNextPage: results.length === pageSize,
+      sourceStatus: "ok",
+      source: "igdb",
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    return igdbUnavailableResponse(error, {
+      results: [],
+      count: null,
+      next: null,
+      previous: null,
+    });
+  }
+}
+
+async function getIgdbUpcoming(request, env) {
+  const requestUrl = new URL(request.url);
+  const params = new URLSearchParams(requestUrl.searchParams);
+  if (!params.get("page_size")) params.set("page_size", params.get("limit") || "40");
+  const { query, page, pageSize } = buildIgdbSearchQuery(params, { upcoming: true });
+
+  try {
+    const results = await fetchIgdb("/games", query, env);
+
+    return jsonResponse({
+      results,
+      count: results.length,
+      next: proxiedIgdbNextUrl(request.url, page, pageSize, results.length),
+      previous: null,
+      page,
+      pageSize,
+      hasNextPage: results.length === pageSize,
+      sourceStatus: "ok",
+      source: "igdb",
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    return igdbUnavailableResponse(error, {
+      results: [],
+      count: null,
+      next: null,
+      previous: null,
+    });
+  }
+}
+
+async function getIgdbGameDetails(request, env, gameId, childPath = "") {
+  const safeId = Number(gameId);
+  if (!Number.isFinite(safeId)) {
+    return jsonResponse({ error: "Invalid IGDB game id" }, { status: 400 });
+  }
+
+  const query = `fields ${IGDB_GAME_FIELDS}; where id = ${safeId}; limit 1;`;
+
+  try {
+    const results = await fetchIgdb("/games", query, env);
+    const game = results[0] || null;
+
+    if (!game) {
+      return jsonResponse({ error: "IGDB game not found" }, { status: 404 });
+    }
+
+    if (childPath === "/screenshots") {
+      return jsonResponse({
+        screenshots: game.screenshots || [],
+        sourceStatus: "ok",
+        source: "igdb",
+      });
+    }
+
+    if (childPath === "/movies") {
+      return jsonResponse({
+        videos: game.videos || [],
+        sourceStatus: "ok",
+        source: "igdb",
+      });
+    }
+
+    if (childPath === "/additions") {
+      return jsonResponse({
+        results: [],
+        count: 0,
+        next: null,
+        previous: null,
+        sourceStatus: "ok",
+        source: "igdb",
+      });
+    }
+
+    return jsonResponse({
+      ...game,
+      sourceStatus: "ok",
+      source: "igdb",
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    return igdbUnavailableResponse(error);
+  }
+}
+
 function proxyRawgNextUrl(nextUrl, requestUrl) {
   if (!nextUrl) return null;
 
@@ -348,9 +728,17 @@ function proxyRawgNextUrl(nextUrl, requestUrl) {
 
 async function getRawgSearch(request, env) {
   const requestUrl = new URL(request.url);
-  const rawgUrl = buildRawgUrl("/games", requestUrl.searchParams, env);
 
   try {
+    if (isForcedRawgFailure(env)) {
+      throw new RawgUpstreamError("RAWG est desactive pour test.", {
+        status: 522,
+        code: "RAWG_FORCED_FAILURE",
+        retryable: true,
+      });
+    }
+
+    const rawgUrl = buildRawgUrl("/games", requestUrl.searchParams, env);
     const data = await fetchRawgJson(rawgUrl.toString(), { timeout: 12000 });
 
     return jsonResponse({
@@ -370,9 +758,17 @@ async function getRawgSearch(request, env) {
 
 async function getRawgProxy(request, env, rawgPath) {
   const requestUrl = new URL(request.url);
-  const rawgUrl = buildRawgUrl(rawgPath, requestUrl.searchParams, env);
 
   try {
+    if (isForcedRawgFailure(env)) {
+      throw new RawgUpstreamError("RAWG est desactive pour test.", {
+        status: 522,
+        code: "RAWG_FORCED_FAILURE",
+        retryable: true,
+      });
+    }
+
+    const rawgUrl = buildRawgUrl(rawgPath, requestUrl.searchParams, env);
     const data = await fetchRawgJson(rawgUrl.toString(), { timeout: 12000 });
 
     return jsonResponse({
@@ -404,6 +800,14 @@ async function getRawgUpcoming(request, env) {
   let next = null;
 
   try {
+    if (isForcedRawgFailure(env)) {
+      throw new RawgUpstreamError("RAWG est desactive pour test.", {
+        status: 522,
+        code: "RAWG_FORCED_FAILURE",
+        retryable: true,
+      });
+    }
+
     for (let page = 1; page <= 4 && collected.length < limit; page += 1) {
       const params = new URLSearchParams({
         dates: `${startDate},${endDate}`,
@@ -1340,6 +1744,30 @@ export default {
       return getRawgSearch(request, env);
     }
 
+    if (url.pathname === "/api/igdb/games") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, { headers: JSON_HEADERS });
+      }
+
+      if (request.method !== "GET") {
+        return jsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      return getIgdbGames(request, env);
+    }
+
+    if (url.pathname === "/api/igdb/upcoming") {
+      if (request.method === "OPTIONS") {
+        return new Response(null, { headers: JSON_HEADERS });
+      }
+
+      if (request.method !== "GET") {
+        return jsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      return getIgdbUpcoming(request, env);
+    }
+
     if (url.pathname === "/api/rawg/upcoming") {
       if (request.method === "OPTIONS") {
         return new Response(null, { headers: JSON_HEADERS });
@@ -1380,6 +1808,20 @@ export default {
       const gameId = rawgGameMatch[1];
       const childPath = rawgGameMatch[2] ? `/${rawgGameMatch[2]}` : "";
       return getRawgProxy(request, env, `/games/${gameId}${childPath}`);
+    }
+
+    const igdbGameMatch = url.pathname.match(
+      /^\/api\/igdb\/games\/([^/]+)(?:\/(screenshots|movies|additions))?$/
+    );
+
+    if (igdbGameMatch) {
+      if (request.method !== "GET") {
+        return jsonResponse({ error: "Method not allowed" }, { status: 405 });
+      }
+
+      const gameId = igdbGameMatch[1];
+      const childPath = igdbGameMatch[2] ? `/${igdbGameMatch[2]}` : "";
+      return getIgdbGameDetails(request, env, gameId, childPath);
     }
 
     if (url.pathname === "/api/steam/owned-games") {
