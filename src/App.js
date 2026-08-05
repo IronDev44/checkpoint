@@ -558,6 +558,14 @@ function normalizeGameRatings(game = {}) {
     status: normalizedGame.status || "wishlist",
     completed: Boolean(normalizedGame.completed),
     favorite: Boolean(normalizedGame.favorite),
+    physicalOwned: Boolean(normalizedGame.physicalOwned),
+    physicalEdition: normalizedGame.physicalEdition || "",
+    physicalCondition: normalizedGame.physicalCondition || "",
+    physicalRarity: normalizedGame.physicalRarity || "",
+    physicalEstimatedValue: Number(normalizedGame.physicalEstimatedValue) || 0,
+    physicalPhoto: normalizedGame.physicalPhoto || "",
+    physicalNotes: normalizedGame.physicalNotes || "",
+    physicalUpdatedAt: normalizedGame.physicalUpdatedAt || "",
     platforms: normalizeArray(normalizedGame.platforms).map(String),
     genreNames: normalizeArray(normalizedGame.genreNames).map(String),
     tags: normalizeArray(normalizedGame.tags),
@@ -5805,6 +5813,295 @@ function LibraryShelf3D({ games, onOpenDetail }) {
             </section>
           );
         })}
+      </div>
+    </div>
+  );
+}
+
+const PHYSICAL_CONDITION_OPTIONS = [
+  "Neuf scellé",
+  "Excellent",
+  "Très bon",
+  "Bon",
+  "Usé",
+  "À restaurer",
+];
+
+const PHYSICAL_RARITY_OPTIONS = [
+  "Commune",
+  "Peu commune",
+  "Rare",
+  "Très rare",
+  "Collector",
+  "Graal",
+];
+
+function PhysicalCollectionPanel({ games, onOpenDetail, onUpdatePhysicalGame }) {
+  const [selectedGameId, setSelectedGameId] = useState(games[0]?.id || "");
+  const selectedGame = games.find((game) => game.id === selectedGameId) || games[0];
+  const physicalGames = games.filter((game) => game.physicalOwned);
+  const totalEstimatedValue = physicalGames.reduce(
+    (total, game) => total + (Number(game.physicalEstimatedValue) || 0),
+    0
+  );
+  const collectorCount = physicalGames.filter((game) =>
+    ["Collector", "Graal"].includes(game.physicalRarity)
+  ).length;
+
+  useEffect(() => {
+    if (!games.length) {
+      setSelectedGameId("");
+      return;
+    }
+
+    if (!games.some((game) => game.id === selectedGameId)) {
+      setSelectedGameId(games[0].id);
+    }
+  }, [games, selectedGameId]);
+
+  const updateSelectedGame = (patch) => {
+    if (!selectedGame) return;
+    onUpdatePhysicalGame(selectedGame.id, {
+      physicalOwned: true,
+      ...patch,
+    });
+  };
+
+  const handlePhotoUpload = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !selectedGame) return;
+
+    try {
+      const photo = await resizeSocialPhoto(file);
+      updateSelectedGame({ physicalPhoto: photo.src });
+    } catch (error) {
+      console.error("Erreur photo collection physique :", error);
+    }
+  };
+
+  if (!games.length) {
+    return (
+      <EmptyState
+        title="Aucune base pour la collection physique"
+        subtitle="Ajoute d'abord quelques jeux à ta collection numérique pour créer leurs versions boîte."
+      />
+    );
+  }
+
+  return (
+    <div className="physical-collection-panel">
+      <div className="physical-hero">
+        <div>
+          <span>Inventaire physique</span>
+          <h2>Jeux boîte, collectors et pièces rares</h2>
+          <p>
+            Sépare ta bibliothèque jouée de ta vraie collection : état, rareté,
+            édition, photo et valeur estimée manuelle.
+          </p>
+        </div>
+        <div className="physical-hero-score">
+          <strong>{physicalGames.length}</strong>
+          <span>pièces</span>
+        </div>
+      </div>
+
+      <div className="physical-stats-grid">
+        <div>
+          <strong>{physicalGames.length}</strong>
+          <span>Jeux boîte</span>
+        </div>
+        <div>
+          <strong>{collectorCount}</strong>
+          <span>Collectors / graals</span>
+        </div>
+        <div>
+          <strong>{totalEstimatedValue ? `${totalEstimatedValue.toLocaleString("fr-FR")} €` : "-"}</strong>
+          <span>Valeur estimée</span>
+        </div>
+      </div>
+
+      <div className="physical-editor">
+        <div className="physical-editor-head">
+          <div>
+            <span>Ajouter ou modifier</span>
+            <strong>{selectedGame?.name || "Choisir un jeu"}</strong>
+          </div>
+          {selectedGame && (
+            <button type="button" onClick={() => onOpenDetail(selectedGame)}>
+              Fiche jeu
+            </button>
+          )}
+        </div>
+
+        <label className="physical-field full">
+          <span>Jeu concerné</span>
+          <select
+            value={selectedGame?.id || ""}
+            onChange={(event) => setSelectedGameId(event.target.value)}
+          >
+            {games.map((game) => (
+              <option key={game.id} value={game.id}>
+                {game.name}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {selectedGame && (
+          <>
+            <div className="physical-editor-grid">
+              <label className="physical-field">
+                <span>Édition</span>
+                <input
+                  value={selectedGame.physicalEdition || ""}
+                  placeholder="Standard, Collector, Steelbook..."
+                  onChange={(event) =>
+                    updateSelectedGame({ physicalEdition: event.target.value })
+                  }
+                />
+              </label>
+
+              <label className="physical-field">
+                <span>État</span>
+                <select
+                  value={selectedGame.physicalCondition || "Très bon"}
+                  onChange={(event) =>
+                    updateSelectedGame({ physicalCondition: event.target.value })
+                  }
+                >
+                  {PHYSICAL_CONDITION_OPTIONS.map((condition) => (
+                    <option key={condition} value={condition}>
+                      {condition}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="physical-field">
+                <span>Rareté</span>
+                <select
+                  value={selectedGame.physicalRarity || "Commune"}
+                  onChange={(event) =>
+                    updateSelectedGame({ physicalRarity: event.target.value })
+                  }
+                >
+                  {PHYSICAL_RARITY_OPTIONS.map((rarity) => (
+                    <option key={rarity} value={rarity}>
+                      {rarity}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="physical-field">
+                <span>Valeur estimée</span>
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={selectedGame.physicalEstimatedValue || ""}
+                  placeholder="0"
+                  onChange={(event) =>
+                    updateSelectedGame({
+                      physicalEstimatedValue: Number(event.target.value) || 0,
+                    })
+                  }
+                />
+              </label>
+            </div>
+
+            <label className="physical-field full">
+              <span>Notes collection</span>
+              <textarea
+                value={selectedGame.physicalNotes || ""}
+                placeholder="État de la boîte, notice, fourreau, souvenir d'achat..."
+                onChange={(event) =>
+                  updateSelectedGame({ physicalNotes: event.target.value })
+                }
+              />
+            </label>
+
+            <div className="physical-photo-row">
+              <div className="physical-photo-preview">
+                {selectedGame.physicalPhoto || selectedGame.image ? (
+                  <img
+                    src={selectedGame.physicalPhoto || selectedGame.image}
+                    alt={selectedGame.name}
+                  />
+                ) : (
+                  <span>Photo</span>
+                )}
+              </div>
+
+              <div>
+                <label className="physical-photo-add">
+                  Ajouter une photo
+                  <input type="file" accept="image/*" onChange={handlePhotoUpload} />
+                </label>
+                {selectedGame.physicalOwned && (
+                  <button
+                    type="button"
+                    className="physical-remove-btn"
+                    onClick={() =>
+                      onUpdatePhysicalGame(selectedGame.id, {
+                        physicalOwned: false,
+                        physicalPhoto: "",
+                      })
+                    }
+                  >
+                    Retirer de la collection physique
+                  </button>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="physical-list">
+        <div className="physical-list-head">
+          <strong>Vitrine physique</strong>
+          <span>{physicalGames.length} pièces renseignées</span>
+        </div>
+
+        {physicalGames.length === 0 ? (
+          <div className="physical-empty">
+            Aucun jeu boîte renseigné pour le moment.
+          </div>
+        ) : (
+          physicalGames.map((game) => (
+            <button
+              key={`physical-${game.id}`}
+              type="button"
+              className="physical-card"
+              onClick={() => {
+                setSelectedGameId(game.id);
+                onOpenDetail(game);
+              }}
+            >
+              <div className="physical-card-image">
+                {game.physicalPhoto || game.image ? (
+                  <img src={game.physicalPhoto || game.image} alt={game.name} />
+                ) : (
+                  <span>CP</span>
+                )}
+              </div>
+              <div className="physical-card-main">
+                <span>{game.physicalRarity || "Commune"}</span>
+                <strong>{game.name}</strong>
+                <small>
+                  {game.physicalEdition || "Édition standard"} • {game.physicalCondition || "Très bon"}
+                </small>
+              </div>
+              <em>
+                {Number(game.physicalEstimatedValue)
+                  ? `${Number(game.physicalEstimatedValue).toLocaleString("fr-FR")} €`
+                  : "Valeur libre"}
+              </em>
+            </button>
+          ))
+        )}
       </div>
     </div>
   );
@@ -18708,6 +19005,28 @@ const setPlayedPlatforms = async (id, platforms) => {
     }
   };
 
+  const updatePhysicalGame = async (id, patch) => {
+    const payload = {
+      ...patch,
+      physicalUpdatedAt: new Date().toISOString(),
+    };
+
+    setGames((prev) =>
+      prev.map((game) => (game.id === id ? { ...game, ...payload } : game))
+    );
+    if (selectedGame?.id === id) {
+      setSelectedGame((prev) => ({ ...prev, ...payload }));
+    }
+
+    try {
+      await updateDoc(doc(db, "games", id), payload);
+      setToast("Collection physique mise a jour.");
+    } catch (e) {
+      console.error("Erreur collection physique :", e);
+      setToast("Impossible de mettre a jour la collection physique.");
+    }
+  };
+
   const setOstInfo = async (id, ostInfo) => {
     const payload = {
       ostRating: clampRating(ostInfo.ostRating),
@@ -19261,6 +19580,14 @@ const setPlayedPlatforms = async (id, platforms) => {
     Wishlist
   </button>
 
+  <button
+    type="button"
+    className={`library-switch-btn ${libraryView === "physical" ? "active" : ""}`}
+    onClick={() => setLibraryView("physical")}
+  >
+    Physique
+  </button>
+
 </div>
 
 {libraryView === "collection" && (
@@ -19302,6 +19629,14 @@ const setPlayedPlatforms = async (id, platforms) => {
     onOpenDetail={(game) => openGameDetail(game, wishlistGames)}
     libraryCardMode={libraryCardMode}
     setLibraryCardMode={setLibraryCardMode}
+  />
+)}
+
+{libraryView === "physical" && (
+  <PhysicalCollectionPanel
+    games={collectionGames}
+    onOpenDetail={(game) => openGameDetail(game, collectionGames)}
+    onUpdatePhysicalGame={updatePhysicalGame}
   />
 )}
 
