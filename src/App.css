@@ -2512,23 +2512,55 @@ button:disabled {
 }
 
 .goty-year-picker {
-  min-width: 160px;
+  min-width: min(360px, 100%);
   color: var(--text-muted);
   font-size: 12px;
   font-weight: 900;
 }
 
-.goty-year-picker select {
-  width: 100%;
-  margin-top: 6px;
+.goty-year-picker > span {
+  display: block;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.goty-year-scroll {
+  display: flex;
+  max-width: min(430px, 100%);
+  gap: 8px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  padding: 4px;
   border: 1px solid var(--surface-border);
-  border-radius: var(--ui-radius-md);
-  background: var(--surface-bg);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface-bg) 82%, black);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+.goty-year-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.goty-year-scroll button {
+  flex: 0 0 auto;
+  min-width: 68px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.06);
   color: white;
-  padding: 11px 12px;
+  padding: 10px 12px;
   font: inherit;
   font-weight: 950;
+  cursor: pointer;
   outline: none;
+}
+
+.goty-year-scroll button.active {
+  border-color: color-mix(in srgb, var(--accent-solid) 70%, white 10%);
+  background: var(--accent);
+  box-shadow: var(--accent-shadow);
 }
 
 .goty-current-card {
@@ -2587,7 +2619,7 @@ button:disabled {
 
 .goty-official-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 12px;
 }
 

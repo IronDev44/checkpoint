@@ -4444,19 +4444,21 @@ function GameOfYearPanel({ games, onSetGameOfYear }) {
         </div>
 
         {years.length > 0 && (
-          <label className="goty-year-picker">
+          <div className="goty-year-picker" role="group" aria-label="Choisir une annee GOTY">
             <span>Année</span>
-            <select
-              value={selectedYear}
-              onChange={(event) => setSelectedYear(event.target.value)}
-            >
+            <div className="goty-year-scroll">
               {years.map((item) => (
-                <option key={item} value={item}>
+                <button
+                  key={item}
+                  type="button"
+                  className={Number(selectedYear) === item ? "active" : ""}
+                  onClick={() => setSelectedYear(item)}
+                >
                   {item}
-                </option>
+                </button>
               ))}
-            </select>
-          </label>
+            </div>
+          </div>
         )}
       </div>
 
@@ -4496,7 +4498,7 @@ function GameOfYearPanel({ games, onSetGameOfYear }) {
               <div>
                 <h2 className="panel-title">Palmarès officiel</h2>
                 <div className="option-value">
-                  Les grands prix de la saison {year}, pour comparer avec ton choix.
+                  Le GOTY The Game Awards de la saison {year}, pour comparer avec ton choix.
                 </div>
               </div>
               <span className="top5-count">
