@@ -5206,6 +5206,43 @@ function GameDetailModal({
   const ratingSummary = getGameDetailedRatingSummary(game);
   const detailedAverage = averageDetailedRating(game);
   const hasSpecificCriteria = ratingSummary.contextualFields.length > 0;
+  const progressStatus =
+    game.progressStatus || (isGameFinishedStatus(game) ? "completed" : "not_started");
+  const progressLabel = getProgressLabel(progressStatus);
+  const playtimeLabel = getPlaytimeRangeLabel(game.playtimeRange);
+  const selectedPlatforms = game.playedPlatforms?.length
+    ? game.playedPlatforms
+    : game.platformNames || [];
+  const primaryPlatform = selectedPlatforms[0] || game.platformNames?.[0] || "Plateforme à choisir";
+  const genresLabel = game.genreNames?.length
+    ? game.genreNames.slice(0, 3).join(" • ")
+    : "Genre à compléter";
+  const releaseLabel = game.released ? formatReleaseDate(game.released) : "Date inconnue";
+  const seriesLabel = detectSeriesName(game.name) || game.parentGame || "Série non détectée";
+  const editionLabel = game.isDLC
+    ? "DLC / Extension"
+    : game.name.match(
+        /(standard|digital|deluxe|ultimate|complete|definitive|collector|goty|game of the year|remastered|remake)/i
+      )?.[0] || "Édition standard";
+  const captureImages = [game.image, ...(game.screenshots || [])].filter(Boolean).slice(0, 4);
+  const formatGameHistoryDate = (value) => {
+    if (!value) return "Non renseigné";
+    const dateValue =
+      typeof value.toDate === "function"
+        ? value.toDate()
+        : value.seconds
+          ? new Date(value.seconds * 1000)
+          : new Date(value);
+
+    return Number.isNaN(dateValue.getTime())
+      ? "Non renseigné"
+      : formatFullDate(dateValue);
+  };
+  const historyItems = [
+    { label: "Ajout", value: formatGameHistoryDate(game.createdAt) },
+    { label: "Dernière mise à jour", value: formatGameHistoryDate(game.updatedAt) },
+    { label: "Statut actuel", value: getGameProgressStateLabel(getGameProgressState(game)) },
+  ];
 
   return (
     <div
@@ -5252,62 +5289,60 @@ function GameDetailModal({
           ›
         </button>
 
-        {game.image ? (
-          <img src={game.image} alt={game.name} className="modal-image" />
-        ) : (
-          <div className="modal-image placeholder">🎮</div>
-        )}
+        <div
+          className={`game-detail-premium-hero ${game.image ? "" : "empty"}`}
+          style={game.image ? { "--hero-image": `url(${game.image})` } : undefined}
+        >
+          <div className="game-detail-premium-cover">
+            {game.image ? (
+              <img src={game.image} alt={game.name} />
+            ) : (
+              <span>🎮</span>
+            )}
+          </div>
 
-        <div className="modal-content">
-          <div className="modal-title-row">
+          <div className="game-detail-premium-identity">
+            <div className="game-detail-kicker">
+              <span>{progressLabel}</span>
+              <span>{primaryPlatform}</span>
+            </div>
             <h2>{game.name}</h2>
+            <p>{releaseLabel} • {genresLabel}</p>
 
-            <button
-              className={`heart-btn ${game.favorite ? "active" : ""}`}
-              onClick={() => onToggleFavorite(game.id, game.favorite)}
-              type="button"
-            >
-              <Heart size={18} fill={game.favorite ? "currentColor" : "none"} />
-            </button>
+            <div className="game-detail-premium-actions">
+              <button
+                className={`heart-btn ${game.favorite ? "active" : ""}`}
+                onClick={() => onToggleFavorite(game.id, game.favorite)}
+                type="button"
+              >
+                <Heart size={18} fill={game.favorite ? "currentColor" : "none"} />
+              </button>
+              <span>{calculateXP(game)} XP estimée</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="modal-content game-detail-premium-content">
+          <div className="game-detail-meta-grid">
+            <div>
+              <span>Série</span>
+              <strong>{seriesLabel}</strong>
+            </div>
+            <div>
+              <span>Édition</span>
+              <strong>{editionLabel}</strong>
+            </div>
+            <div>
+              <span>Temps joué</span>
+              <strong>{playtimeLabel}</strong>
+            </div>
+            <div>
+              <span>Difficulté</span>
+              <strong>{difficultyLabel(game.difficulty)}</strong>
+            </div>
           </div>
 
-          {game.isDLC && game.parentGame && (
-            <div className="modal-meta">
-              <strong>DLC de :</strong> {game.parentGame}
-            </div>
-          )}
-
-          {game.released && (
-            <div className="modal-meta">
-              <strong>Sortie :</strong> {formatReleaseDate(game.released)}
-            </div>
-          )}
-
-          {game.platformNames?.length > 0 && (
-            <div className="modal-meta">
-              <strong>Plateformes :</strong> {game.platformNames.join(" • ")}
-            </div>
-          )}
-
-          {game.genreNames?.length > 0 && (
-            <div className="modal-meta">
-              <strong>Genres :</strong> {game.genreNames.join(" • ")}
-            </div>
-          )}
-
-          <div className="modal-meta">
-            <strong>Temps joué :</strong> {getPlaytimeRangeLabel(game.playtimeRange)}
-          </div>
-
-          <div className="modal-meta">
-            <strong>Difficulté :</strong> {difficultyLabel(game.difficulty)}
-          </div>
-
-          <div className="modal-meta">
-            <strong>XP estimée :</strong> {calculateXP(game)} XP
-          </div>
-
-          <div className="game-detail-scoreboard">
+          <div className="game-detail-scoreboard premium">
             <div className="game-detail-score-main">
               <span>Note globale</span>
               <strong>{formatRating10(getGameRating(game), "À noter")}</strong>
@@ -5331,7 +5366,18 @@ function GameDetailModal({
             </div>
           </div>
 
-          <div className="modal-block">
+          <div className="game-detail-section game-detail-personal-summary">
+            <div>
+              <span>Résumé perso</span>
+              <strong>
+                {localReview.trim()
+                  ? localReview.trim()
+                  : "Ajoute ton ressenti pour donner une vraie mémoire à cette fiche."}
+              </strong>
+            </div>
+          </div>
+
+          <div className="game-detail-section">
             <div className="modal-block-title">Statut</div>
 
             <div className="status-row">
@@ -5361,7 +5407,7 @@ function GameDetailModal({
             </div>
           </div>
 
-          <div className="modal-block">
+          <div className="game-detail-section">
             <div className="modal-block-title">Plateforme utilisée</div>
 
             <div className="choice-grid platform-choice-grid">
@@ -5394,7 +5440,27 @@ function GameDetailModal({
             )}
           </div>
 
-          <div className="modal-block">
+          <div className="game-detail-section game-detail-media-section">
+            <div className="modal-block-title">Captures</div>
+
+            {captureImages.length > 0 ? (
+              <div className="game-detail-capture-grid">
+                {captureImages.map((image, index) => (
+                  <img
+                    key={`${game.id}-capture-${index}`}
+                    src={image}
+                    alt={`${game.name} capture ${index + 1}`}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="game-detail-empty-note">
+                Aucune capture enregistrée pour le moment.
+              </div>
+            )}
+          </div>
+
+          <div className="game-detail-section">
             <div className="modal-block-title">DLC & Extensions</div>
 
             {loadingDlcs && <div className="option-value">Recherche des DLC...</div>}
@@ -5471,7 +5537,7 @@ function GameDetailModal({
             )}
           </div>
 
-          <div className="modal-block">
+          <div className="game-detail-section">
             <div className="modal-block-title">Progression</div>
 
             <div className="choice-grid progress-choice-grid">
@@ -5494,7 +5560,7 @@ function GameDetailModal({
             </div>
           </div>
 
-          <div className="modal-block">
+          <div className="game-detail-section">
             <div className="modal-block-title">Temps joué estimé</div>
 
             <div className="choice-grid time-choice-grid">
@@ -5513,7 +5579,7 @@ function GameDetailModal({
             </div>
           </div>
 
-          <div className="modal-block">
+          <div className="game-detail-section">
             <div className="modal-block-title">Difficulté</div>
 
             <div className="status-row">
@@ -5551,7 +5617,7 @@ function GameDetailModal({
             </div>
           </div>
 
-          <div className="modal-block">
+          <div className="game-detail-section">
             <div className="modal-block-title">Note globale</div>
 
             <RatingSlider
@@ -5560,7 +5626,7 @@ function GameDetailModal({
             />
           </div>
 
-          <div className="modal-block">
+          <div className="game-detail-section game-detail-ratings-section">
             <div className="modal-block-title">Notes détaillées</div>
 
             <DetailedRatingsBlock
@@ -5569,7 +5635,7 @@ function GameDetailModal({
             />
           </div>
 
-          <div className="modal-block ost-block">
+          <div className="game-detail-section ost-block">
             <div className="modal-block-title">OST / Musique</div>
 
             <div className="ost-summary">
@@ -5597,7 +5663,19 @@ function GameDetailModal({
             </button>
           </div>
 
-          <div className="modal-block">
+          <div className="game-detail-section game-detail-history-section">
+            <div className="modal-block-title">Historique</div>
+            <div className="game-detail-history-list">
+              {historyItems.map((item) => (
+                <div key={item.label}>
+                  <span>{item.label}</span>
+                  <strong>{item.value}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="game-detail-section">
             <div className="modal-block-title">Avis personnel</div>
 
             <textarea
