@@ -576,7 +576,7 @@ function mappedIds(csvValue, mapping) {
     .filter(Boolean);
 }
 
-function buildIgdbWhere(params, { upcoming = false } = {}) {
+function buildIgdbWhere(params, { upcoming = false, includeCategory = true } = {}) {
   const clauses = [];
   const platformIds = mappedIds(params.get("platforms"), RAWG_TO_IGDB_PLATFORMS);
   const genreIds = mappedIds(params.get("genres"), RAWG_TO_IGDB_GENRES);
@@ -599,7 +599,9 @@ function buildIgdbWhere(params, { upcoming = false } = {}) {
     clauses.push(`genres = (${genreIds.join(",")})`);
   }
 
-  clauses.push("category = (0, 2, 4, 8, 9, 10, 11)");
+  if (includeCategory) {
+    clauses.push("category = (0, 2, 4, 8, 9, 10, 11)");
+  }
 
   return clauses.length ? `where ${clauses.join(" & ")};` : "";
 }
@@ -621,7 +623,7 @@ function buildIgdbSearchQuery(params, { upcoming = false } = {}) {
   const query = [
     `fields ${IGDB_GAME_FIELDS};`,
     search && !upcoming ? `search "${escapeIgdbString(search)}";` : "",
-    buildIgdbWhere(params, { upcoming }),
+    buildIgdbWhere(params, { upcoming, includeCategory: !search || upcoming }),
     sortClause,
     `limit ${pageSize};`,
     `offset ${offset};`,
