@@ -405,13 +405,14 @@ async function fetchIgdb(endpoint, query, env, { refreshOnUnauthorized = true, w
       endpoint,
       workerRoute,
       upstreamMessage,
+      queryPreview: query.slice(0, 300),
     });
 
     throw new IgdbUpstreamError("IGDB a refuse la requete.", {
       status: response.status,
       code,
       retryableAuth: response.status === 401,
-      upstreamMessage,
+      upstreamMessage: `${upstreamMessage} | query: ${query.slice(0, 300)}`,
     });
   }
 
