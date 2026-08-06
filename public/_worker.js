@@ -609,15 +609,19 @@ function buildIgdbSearchQuery(params, { upcoming = false } = {}) {
   const offset = (page - 1) * pageSize;
   const search = String(params.get("search") || "").trim();
   const ordering = params.get("ordering") || "";
+  const sortClause =
+    search && !upcoming
+      ? ""
+      : upcoming
+        ? "sort first_release_date asc;"
+        : ordering.includes("released")
+          ? "sort first_release_date desc;"
+          : "sort total_rating_count desc;";
   const query = [
     `fields ${IGDB_GAME_FIELDS};`,
     search && !upcoming ? `search "${escapeIgdbString(search)}";` : "",
     buildIgdbWhere(params, { upcoming }),
-    upcoming
-      ? "sort first_release_date asc;"
-      : ordering.includes("released")
-        ? "sort first_release_date desc;"
-        : "sort total_rating_count desc;",
+    sortClause,
     `limit ${pageSize};`,
     `offset ${offset};`,
   ]
