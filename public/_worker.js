@@ -36,22 +36,20 @@ const IGDB_GAME_FIELDS = [
   "name",
   "slug",
   "summary",
-  "storyline",
   "first_release_date",
   "cover.image_id",
+  "platforms.id",
+  "platforms.name",
+  "genres.id",
+  "genres.name",
+].join(",");
+
+const IGDB_GAME_DETAIL_FIELDS = [
+  IGDB_GAME_FIELDS,
   "artworks.image_id",
   "screenshots.image_id",
   "videos.video_id",
   "videos.name",
-  "genres.name",
-  "platforms.name",
-  "involved_companies.company.name",
-  "involved_companies.developer",
-  "involved_companies.publisher",
-  "collection.name",
-  "franchises.name",
-  "parent_game",
-  "version_parent",
   "category",
   "rating",
   "rating_count",
@@ -267,26 +265,32 @@ function rawgUnavailableResponse(error, extra = {}) {
 }
 
 class IgdbUpstreamError extends Error {
-  constructor(message, { status = 0, code = "IGDB_UPSTREAM_ERROR", retryableAuth = false } = {}) {
+  constructor(
+    message,
+    { status = 0, code = "IGDB_UPSTREAM_ERROR", retryableAuth = false, upstreamMessage = "" } = {}
+  ) {
     super(message);
     this.name = "IgdbUpstreamError";
     this.status = status;
     this.code = code;
     this.retryableAuth = retryableAuth;
+    this.upstreamMessage = upstreamMessage;
   }
 }
 
 function igdbUnavailableResponse(error, extra = {}) {
+  const status = error?.status || null;
   return jsonResponse(
     {
       sourceStatus: "unavailable",
       code: error?.code || "IGDB_UNAVAILABLE",
-      upstreamStatus: error?.status || null,
+      upstreamStatus: status,
+      ...(error?.upstreamMessage ? { upstreamMessage: error.upstreamMessage } : {}),
       message: error?.message || "IGDB est temporairement indisponible.",
       updatedAt: new Date().toISOString(),
       ...extra,
     },
-    { status: 503 }
+    { status: status && status >= 400 && status < 500 ? 400 : 503 }
   );
 }
 
@@ -346,7 +350,7 @@ async function getTwitchAppToken(env, { forceRefresh = false } = {}) {
   return twitchTokenCache.accessToken;
 }
 
-async function fetchIgdb(endpoint, query, env, { refreshOnUnauthorized = true } = {}) {
+async function fetchIgdb(endpoint, query, env, { refreshOnUnauthorized = true, workerRoute = "" } = {}) {
   const { clientId } = getIgdbCredentials(env);
   const token = await getTwitchAppToken(env);
   const response = await fetch(`${IGDB_API_BASE}${endpoint}`, {
@@ -355,7 +359,7 @@ async function fetchIgdb(endpoint, query, env, { refreshOnUnauthorized = true } 
       "Client-ID": clientId,
       Authorization: `Bearer ${token}`,
       "Content-Type": "text/plain",
-      accept: "application/json",
+      Accept: "application/json",
     },
     body: query,
   });
@@ -363,17 +367,51 @@ async function fetchIgdb(endpoint, query, env, { refreshOnUnauthorized = true } 
   if (response.status === 401 && refreshOnUnauthorized) {
     twitchTokenCache = { accessToken: "", expiresAt: 0 };
     await getTwitchAppToken(env, { forceRefresh: true });
-    return fetchIgdb(endpoint, query, env, { refreshOnUnauthorized: false });
+    return fetchIgdb(endpoint, query, env, { refreshOnUnauthorized: false, workerRoute });
   }
 
+  const responseText = await response.text();
   const contentType = response.headers.get("content-type") || "";
-  const data = contentType.includes("application/json") ? await response.json() : null;
+  let data = null;
+  if (contentType.includes("application/json") && responseText) {
+    try {
+      data = JSON.parse(responseText);
+    } catch (error) {
+      throw new IgdbUpstreamError("IGDB a renvoye un JSON invalide.", {
+        status: response.status,
+        code: "IGDB_INVALID_RESPONSE",
+        upstreamMessage: responseText.slice(0, 300),
+      });
+    }
+  }
 
   if (!response.ok) {
-    throw new IgdbUpstreamError("IGDB est temporairement indisponible.", {
+    const upstreamMessage = responseText.slice(0, 300);
+    const code =
+      response.status === 400 || response.status === 406
+        ? "IGDB_BAD_REQUEST"
+        : response.status === 401
+          ? "IGDB_AUTH_ERROR"
+          : response.status === 403
+            ? "IGDB_FORBIDDEN"
+            : response.status === 429
+              ? "IGDB_RATE_LIMIT"
+              : response.status >= 500
+                ? "IGDB_TEMPORARY_ERROR"
+                : "IGDB_HTTP_ERROR";
+
+    console.error("IGDB upstream error", {
       status: response.status,
-      code: response.status === 401 ? "IGDB_UNAUTHORIZED" : "IGDB_HTTP_ERROR",
+      endpoint,
+      workerRoute,
+      upstreamMessage,
+    });
+
+    throw new IgdbUpstreamError("IGDB a refuse la requete.", {
+      status: response.status,
+      code,
       retryableAuth: response.status === 401,
+      upstreamMessage,
     });
   }
 
@@ -512,8 +550,12 @@ function buildRawgUrl(path, params, env) {
   return rawgUrl;
 }
 
-function escapeIgdbText(value = "") {
-  return String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+function escapeIgdbString(value = "") {
+  return String(value)
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/[\r\n]+/g, " ")
+    .trim();
 }
 
 function timestampFromDate(value, endOfDay = false) {
@@ -556,7 +598,7 @@ function buildIgdbWhere(params, { upcoming = false } = {}) {
     clauses.push(`genres = (${genreIds.join(",")})`);
   }
 
-  clauses.push("category = (0,2,4,8,9,10,11)");
+  clauses.push("category = (0, 2, 4, 8, 9, 10, 11)");
 
   return clauses.length ? `where ${clauses.join(" & ")};` : "";
 }
@@ -569,7 +611,7 @@ function buildIgdbSearchQuery(params, { upcoming = false } = {}) {
   const ordering = params.get("ordering") || "";
   const query = [
     `fields ${IGDB_GAME_FIELDS};`,
-    search && !upcoming ? `search "${escapeIgdbText(search)}";` : "",
+    search && !upcoming ? `search "${escapeIgdbString(search)}";` : "",
     buildIgdbWhere(params, { upcoming }),
     upcoming
       ? "sort first_release_date asc;"
@@ -597,7 +639,7 @@ async function getIgdbGames(request, env) {
   const { query, page, pageSize } = buildIgdbSearchQuery(requestUrl.searchParams);
 
   try {
-    const results = await fetchIgdb("/games", query, env);
+    const results = await fetchIgdb("/games", query, env, { workerRoute: requestUrl.pathname });
 
     return jsonResponse({
       results,
@@ -628,7 +670,7 @@ async function getIgdbUpcoming(request, env) {
   const { query, page, pageSize } = buildIgdbSearchQuery(params, { upcoming: true });
 
   try {
-    const results = await fetchIgdb("/games", query, env);
+    const results = await fetchIgdb("/games", query, env, { workerRoute: requestUrl.pathname });
 
     return jsonResponse({
       results,
@@ -658,10 +700,11 @@ async function getIgdbGameDetails(request, env, gameId, childPath = "") {
     return jsonResponse({ error: "Invalid IGDB game id" }, { status: 400 });
   }
 
-  const query = `fields ${IGDB_GAME_FIELDS}; where id = ${safeId}; limit 1;`;
+  const query = `fields ${IGDB_GAME_DETAIL_FIELDS}; where id = ${safeId}; limit 1;`;
 
   try {
-    const results = await fetchIgdb("/games", query, env);
+    const requestUrl = new URL(request.url);
+    const results = await fetchIgdb("/games", query, env, { workerRoute: requestUrl.pathname });
     const game = results[0] || null;
 
     if (!game) {
