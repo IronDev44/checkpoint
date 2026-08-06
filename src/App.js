@@ -19493,7 +19493,11 @@ useEffect(() => {
       params.append("ordering", sortBy);
     }
 
-    const data = await rawgApiRequest("/games", params, { timeout: 7000 });
+    const fastSearchOptions = cleanSearch
+      ? { timeout: 5000, preferIgdb: true }
+      : { timeout: 6500, retries: 1 };
+
+    const data = await rawgApiRequest("/games", params, fastSearchOptions);
 
     let resultsList = (data.results || []).filter(isMainGameResult);
 
@@ -19507,9 +19511,7 @@ useEffect(() => {
       relaxedParams.append("page", "1");
       relaxedParams.append("search", searchTerm);
 
-      const relaxedData = await rawgApiRequest("/games", relaxedParams, {
-        timeout: 7000,
-      });
+      const relaxedData = await rawgApiRequest("/games", relaxedParams, fastSearchOptions);
       resultsList = (relaxedData.results || []).filter(isMainGameResult);
     }
 
@@ -19520,9 +19522,7 @@ useEffect(() => {
         aliasParams.append("page", "1");
         aliasParams.append("search", alias);
 
-        const aliasData = await rawgApiRequest("/games", aliasParams, {
-          timeout: 7000,
-        });
+        const aliasData = await rawgApiRequest("/games", aliasParams, fastSearchOptions);
         const aliasResults = (aliasData.results || []).filter(isMainGameResult);
         if (aliasResults.length > 0) {
           resultsList = aliasResults;
@@ -19531,7 +19531,7 @@ useEffect(() => {
       }
     }
 
-    if (cleanSearch) {
+    if (cleanSearch && data?.meta?.source !== "igdb") {
       const slugCandidates = searchAliases.flatMap((alias) => getRawgSlugCandidates(alias));
 
       for (const slug of Array.from(new Set(slugCandidates))) {

@@ -13,6 +13,9 @@ const RAWG_FALLBACK_CODES = new Set([
   "RAWG_INVALID_RESPONSE",
   "RAWG_UNAVAILABLE",
 ]);
+const RAWG_OUTAGE_TTL_MS = 5 * 60 * 1000;
+
+let rawgUnavailableUntil = 0;
 
 function createSearchParams(params = {}) {
   if (params instanceof URLSearchParams) return new URLSearchParams(params);
@@ -209,6 +212,14 @@ function isRawgTemporaryFailure(error) {
   return RAWG_RETRY_STATUSES.has(Number(error.status));
 }
 
+function markRawgUnavailable() {
+  rawgUnavailableUntil = Date.now() + RAWG_OUTAGE_TTL_MS;
+}
+
+function shouldUseFallbackFirst(options = {}, fallbackUrl = "") {
+  return Boolean(fallbackUrl && (options.preferIgdb || Date.now() < rawgUnavailableUntil));
+}
+
 function parseProxyRequest(path, params = {}) {
   const url =
     typeof path === "string" && path.startsWith("/api/")
@@ -306,7 +317,7 @@ export async function requestGames(path, params = {}, options = {}) {
     igdbOnlyUrl && (String(path).includes("igdb%3A") || String(path).includes("igdb:"))
   );
 
-  if (isIgdbIdRequest) {
+  if (isIgdbIdRequest || shouldUseFallbackFirst(options, igdbOnlyUrl)) {
     const data = await requestIgdb(igdbOnlyUrl, {}, options);
     return { ...data, meta: { source: "igdb", fallbackUsed: true, stale: false } };
   }
@@ -323,6 +334,8 @@ export async function requestGames(path, params = {}, options = {}) {
     if (!fallbackUrl || !isRawgTemporaryFailure(rawgError)) {
       throw rawgError;
     }
+
+    markRawgUnavailable();
 
     try {
       const data = await requestIgdb(fallbackUrl, {}, options);

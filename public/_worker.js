@@ -788,7 +788,7 @@ async function getRawgSearch(request, env) {
     }
 
     const rawgUrl = buildRawgUrl("/games", requestUrl.searchParams, env);
-    const data = await fetchRawgJson(rawgUrl.toString(), { timeout: 12000 });
+    const data = await fetchRawgJson(rawgUrl.toString(), { timeout: 4500, retries: 1 });
 
     return jsonResponse({
       ...data,
@@ -865,7 +865,7 @@ async function getRawgUpcoming(request, env) {
         page_size: "40",
       });
       const rawgUrl = buildRawgUrl("/games", params, env);
-      const data = await fetchRawgJson(rawgUrl.toString(), { timeout: 12000 });
+      const data = await fetchRawgJson(rawgUrl.toString(), { timeout: 4500, retries: 1 });
       next = data?.next || null;
 
       (data?.results || []).forEach((game) => {
