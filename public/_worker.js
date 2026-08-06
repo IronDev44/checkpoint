@@ -405,14 +405,13 @@ async function fetchIgdb(endpoint, query, env, { refreshOnUnauthorized = true, w
       endpoint,
       workerRoute,
       upstreamMessage,
-      queryPreview: query.slice(0, 300),
     });
 
     throw new IgdbUpstreamError("IGDB a refuse la requete.", {
       status: response.status,
       code,
       retryableAuth: response.status === 401,
-      upstreamMessage: `${upstreamMessage} | query: ${query.slice(0, 300)}`,
+      upstreamMessage,
     });
   }
 
@@ -644,7 +643,6 @@ function proxiedIgdbNextUrl(requestUrl, page, pageSize, count) {
 async function getIgdbGames(request, env) {
   const requestUrl = new URL(request.url);
   const { query, page, pageSize } = buildIgdbSearchQuery(requestUrl.searchParams);
-  const includeDebugQuery = requestUrl.searchParams.get("_debug") === "query";
 
   try {
     const results = await fetchIgdb("/games", query, env, { workerRoute: requestUrl.pathname });
@@ -660,7 +658,6 @@ async function getIgdbGames(request, env) {
       sourceStatus: "ok",
       source: "igdb",
       updatedAt: new Date().toISOString(),
-      ...(includeDebugQuery ? { debugQuery: query } : {}),
     });
   } catch (error) {
     return igdbUnavailableResponse(error, {
