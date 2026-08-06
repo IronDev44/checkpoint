@@ -6,6 +6,8 @@ const IGDB_PROXY_BASE = "/api/igdb";
 const RAWG_RETRY_STATUSES = new Set([502, 503, 504, 522]);
 const RAWG_FALLBACK_CODES = new Set([
   "RAWG_522",
+  "RAWG_KEY_MISSING",
+  "RAWG_FORCED_FAILURE",
   "RAWG_TIMEOUT",
   "RAWG_NETWORK_ERROR",
   "RAWG_INVALID_RESPONSE",
@@ -134,11 +136,18 @@ export async function requestRawg(path, params = {}, options = {}) {
       }
 
       if (!response.ok) {
-        throw new RawgRequestError(getRawgErrorMessage(response.status), {
-          status: response.status,
-          code: response.status === 522 ? "RAWG_522" : "RAWG_HTTP_ERROR",
-          retryable: RAWG_RETRY_STATUSES.has(response.status),
-        });
+        const status = Number(data?.status || data?.upstreamStatus || response.status || 0);
+        throw new RawgRequestError(
+          data?.message || data?.error || getRawgErrorMessage(status || response.status),
+          {
+            status: status || response.status,
+            code: data?.code || (response.status === 522 ? "RAWG_522" : "RAWG_HTTP_ERROR"),
+            retryable:
+              typeof data?.retryable === "boolean"
+                ? data.retryable
+                : RAWG_RETRY_STATUSES.has(status || response.status),
+          }
+        );
       }
 
       if (data?.sourceStatus === "unavailable" && !allowUnavailablePayload) {
@@ -148,7 +157,10 @@ export async function requestRawg(path, params = {}, options = {}) {
           {
             status,
             code: data.code || "RAWG_UNAVAILABLE",
-            retryable: RAWG_RETRY_STATUSES.has(status),
+            retryable:
+              typeof data.retryable === "boolean"
+                ? data.retryable
+                : RAWG_RETRY_STATUSES.has(status),
           }
         );
       }
