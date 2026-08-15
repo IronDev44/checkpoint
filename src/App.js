@@ -261,6 +261,7 @@ const DEFAULT_APP_OPTIONS = {
   rememberLastTab: true,
   confirmDangerActions: true,
   afterAddAction: "stay",
+  afterRatingAction: "stay",
   dealRegion: "FR",
   dealSources: {
     steam: true,
@@ -312,6 +313,9 @@ function normalizeAppOptions(options = {}) {
   const ratingDisplay = ["number", "stars", "compact"].includes(source.ratingDisplay)
     ? source.ratingDisplay
     : DEFAULT_APP_OPTIONS.ratingDisplay;
+  const afterRatingAction = ["stay", "list"].includes(source.afterRatingAction)
+    ? source.afterRatingAction
+    : DEFAULT_APP_OPTIONS.afterRatingAction;
 
   return {
     ...DEFAULT_APP_OPTIONS,
@@ -324,6 +328,7 @@ function normalizeAppOptions(options = {}) {
         ? source.animatedBackground
         : DEFAULT_APP_OPTIONS.animatedBackground,
     ratingDisplay,
+    afterRatingAction,
     rememberLastTab:
       typeof source.rememberLastTab === "boolean"
         ? source.rememberLastTab
@@ -3337,6 +3342,7 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
     g.rawgId === game.id ||
     g.name.toLowerCase() === game.name.toLowerCase()
   );
+  const isIgdbResult = game.source === "igdb";
 
   return (
     <div className="swipe-wrapper">
@@ -3373,7 +3379,7 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
       )}
 
       <div
-        className={`game-card swipe-card ${isDragging ? "dragging" : ""} ${
+        className={`game-card swipe-card ${isIgdbResult ? "igdb-result-card" : ""} ${isDragging ? "dragging" : ""} ${
           translateX > 40 ? "swiping-wishlist" : ""
         } ${translateX < -40 ? "swiping-collection" : ""}`}
         onClick={() => {
@@ -3394,11 +3400,23 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
           : "transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)",
         }}
       >
-        <img
-          src={game.background_image}
-          alt={game.name}
-          className="game-image"
-        />
+        {game.background_image ? (
+          <>
+            <img
+              src={game.background_image}
+              alt=""
+              className="game-image-backdrop"
+              aria-hidden="true"
+            />
+            <img
+              src={game.background_image}
+              alt={game.name}
+              className="game-image"
+            />
+          </>
+        ) : (
+          <div className="game-image placeholder">🎮</div>
+        )}
 
         <div className="game-overlay">
           <div className="game-title">{game.name}</div>
@@ -3440,6 +3458,7 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
 /* ==================== SORTIES À VENIR ==================== */
 
 function UpcomingGameCard({ game, onWishlist }) {
+  const isIgdbResult = game.source === "igdb";
   const payload = {
     name: game.name,
     rating: 0,
@@ -3461,11 +3480,14 @@ function UpcomingGameCard({ game, onWishlist }) {
   };
 
   return (
-    <div className="upcoming-card">
+    <div className={`upcoming-card ${isIgdbResult ? "igdb-upcoming-card" : ""}`}>
       {game.background_image ? (
-        <img src={game.background_image} alt={game.name} className="upcoming-image" />
+        <div className="upcoming-image-frame">
+          <img src={game.background_image} alt="" className="upcoming-image-backdrop" aria-hidden="true" />
+          <img src={game.background_image} alt={game.name} className="upcoming-image" />
+        </div>
       ) : (
-        <div className="upcoming-image placeholder">🎮</div>
+        <div className="upcoming-image-frame placeholder">🎮</div>
       )}
 
       <div className="upcoming-content">
@@ -3520,18 +3542,21 @@ function Star({ fill = 0, onHalfClick, onFullClick }) {
   );
 }
 
-function RatingSlider({ rating = 0, onRate }) {
+function RatingSlider({ rating = 0, onRate, onCommit }) {
   const safeRating = clampRating(rating);
   const [draftRating, setDraftRating] = useState(safeRating);
   const sliderRef = useRef(null);
   const activePointerIdRef = useRef(null);
+  const latestRatingRef = useRef(safeRating);
 
   useEffect(() => {
     setDraftRating(safeRating);
+    latestRatingRef.current = safeRating;
   }, [safeRating]);
 
   const commitRating = (value) => {
     const nextRating = clampRating(value);
+    latestRatingRef.current = nextRating;
     setDraftRating(nextRating);
     onRate(nextRating);
   };
@@ -3550,6 +3575,7 @@ function RatingSlider({ rating = 0, onRate }) {
 
     activePointerIdRef.current = null;
     e.currentTarget.releasePointerCapture?.(e.pointerId);
+    onCommit?.(latestRatingRef.current);
   };
 
   return (
@@ -3594,6 +3620,7 @@ function RatingSlider({ rating = 0, onRate }) {
           if (activePointerIdRef.current !== null) return;
 
           commitRating(e.target.value);
+          onCommit?.(clampRating(e.target.value));
 
           if (navigator.vibrate) {
             navigator.vibrate(8);
@@ -3706,7 +3733,7 @@ function getContextualRatingFields(game) {
   );
 }
 
-function DetailedRatingsBlock({ game, onSetDetailedRating }) {
+function DetailedRatingsBlock({ game, onSetDetailedRating, onRatingCommit }) {
   const summary = getGameDetailedRatingSummary(game);
 
   return (
@@ -3714,7 +3741,7 @@ function DetailedRatingsBlock({ game, onSetDetailedRating }) {
       <div className="game-ratings-summary">
         <div>
           <span>Moyenne détaillée</span>
-          <strong>{formatRating10(averageDetailedRating(game), "À construire")}</strong>
+          <strong>{formatRating10(averageDetailedRating(game), "En attente de la note complète")}</strong>
         </div>
 
         <div>
@@ -3757,6 +3784,7 @@ function DetailedRatingsBlock({ game, onSetDetailedRating }) {
             <RatingSlider
               rating={item.value}
               onRate={(value) => onSetDetailedRating(game.id, item.key, value)}
+              onCommit={onRatingCommit}
             />
           </div>
         ))}
@@ -3794,6 +3822,7 @@ function DetailedRatingsBlock({ game, onSetDetailedRating }) {
                 <RatingSlider
                   rating={item.value}
                   onRate={(value) => onSetDetailedRating(game.id, item.key, value)}
+                  onCommit={onRatingCommit}
                 />
               </div>
             ))}
@@ -5401,6 +5430,7 @@ function GameDetailModal({
   onDelete,
   onSetStatus,
   onSetRating,
+  onRatingCommit,
   onToggleFavorite,
   onSetDifficulty,
   onSetReview,
@@ -5662,7 +5692,7 @@ function GameDetailModal({
     : game.name.match(
         /(standard|digital|deluxe|ultimate|complete|definitive|collector|goty|game of the year|remastered|remake)/i
       )?.[0] || "Édition standard";
-  const captureImages = [game.image, ...(game.screenshots || [])].filter(Boolean).slice(0, 4);
+  const captureImages = (game.screenshots || []).filter(Boolean).slice(0, 4);
   const formatGameHistoryDate = (value) => {
     if (!value) return "Non renseigné";
     const dateValue =
@@ -5789,7 +5819,7 @@ function GameDetailModal({
 
             <div className="game-detail-score-card">
               <span>Moyenne critères</span>
-              <strong>{formatRating10(detailedAverage, "À construire")}</strong>
+              <strong>{formatRating10(detailedAverage, "En attente de la note complète")}</strong>
               <small>
                 {ratingSummary.ratedBaseFields.length}/{ratingSummary.baseFields.length} essentiels
               </small>
@@ -5840,7 +5870,7 @@ function GameDetailModal({
                 onClick={() => onSetStatus(game.id, "collection")}
                 type="button"
               >
-                AJOUTÉ
+                Dans la collection
               </button>
             </div>
           </div>
@@ -5878,10 +5908,9 @@ function GameDetailModal({
             )}
           </div>
 
-          <div className="game-detail-section game-detail-media-section">
-            <div className="modal-block-title">Captures</div>
-
-            {captureImages.length > 0 ? (
+          {captureImages.length > 0 && (
+            <div className="game-detail-section game-detail-media-section">
+              <div className="modal-block-title">Captures</div>
               <div className="game-detail-capture-grid">
                 {captureImages.map((image, index) => (
                   <img
@@ -5891,12 +5920,8 @@ function GameDetailModal({
                   />
                 ))}
               </div>
-            ) : (
-              <div className="game-detail-empty-note">
-                Aucune capture enregistrée pour le moment.
-              </div>
-            )}
-          </div>
+            </div>
+          )}
 
           <div className="game-detail-section">
             <div className="modal-block-title">DLC & Extensions</div>
@@ -6061,6 +6086,7 @@ function GameDetailModal({
             <RatingSlider
               rating={getGameRating(game)}
               onRate={(value) => onSetRating(game.id, value)}
+              onCommit={onRatingCommit}
             />
           </div>
 
@@ -6070,6 +6096,7 @@ function GameDetailModal({
             <DetailedRatingsBlock
               game={game}
               onSetDetailedRating={onSetDetailedRating}
+              onRatingCommit={onRatingCommit}
             />
           </div>
 
@@ -6086,6 +6113,7 @@ function GameDetailModal({
             <RatingSlider
               rating={localOstRating}
               onRate={(value) => setLocalOstRating(value)}
+              onCommit={onRatingCommit}
             />
 
             <button
@@ -6267,8 +6295,8 @@ const PHYSICAL_RARITY_OPTIONS = [
 ];
 
 function PhysicalCollectionPanel({ games, onOpenDetail, onUpdatePhysicalGame }) {
-  const [selectedGameId, setSelectedGameId] = useState(games[0]?.id || "");
-  const selectedGame = games.find((game) => game.id === selectedGameId) || games[0];
+  const [selectedGameId, setSelectedGameId] = useState("");
+  const selectedGame = games.find((game) => game.id === selectedGameId) || null;
   const physicalGames = games.filter((game) => game.physicalOwned);
   const totalEstimatedValue = physicalGames.reduce(
     (total, game) => total + (Number(game.physicalEstimatedValue) || 0),
@@ -6284,8 +6312,8 @@ function PhysicalCollectionPanel({ games, onOpenDetail, onUpdatePhysicalGame }) 
       return;
     }
 
-    if (!games.some((game) => game.id === selectedGameId)) {
-      setSelectedGameId(games[0].id);
+    if (selectedGameId && !games.some((game) => game.id === selectedGameId)) {
+      setSelectedGameId("");
     }
   }, [games, selectedGameId]);
 
@@ -6367,9 +6395,10 @@ function PhysicalCollectionPanel({ games, onOpenDetail, onUpdatePhysicalGame }) 
         <label className="physical-field full">
           <span>Jeu concerné</span>
           <select
-            value={selectedGame?.id || ""}
+            value={selectedGameId}
             onChange={(event) => setSelectedGameId(event.target.value)}
           >
+            <option value="">Choisir un jeu à renseigner</option>
             {games.map((game) => (
               <option key={game.id} value={game.id}>
                 {game.name}
@@ -6454,9 +6483,9 @@ function PhysicalCollectionPanel({ games, onOpenDetail, onUpdatePhysicalGame }) 
 
             <div className="physical-photo-row">
               <div className="physical-photo-preview">
-                {selectedGame.physicalPhoto || selectedGame.image ? (
+                {selectedGame.physicalPhoto ? (
                   <img
-                    src={selectedGame.physicalPhoto || selectedGame.image}
+                    src={selectedGame.physicalPhoto}
                     alt={selectedGame.name}
                   />
                 ) : (
@@ -9972,9 +10001,9 @@ function HomeTab({
       <div className="home-card home-activity-card home-pulse-panel">
         <div className="home-section-head">
           <div>
-            <div className="home-card-title">Pulse social</div>
+            <div className="home-card-title">Activité récente</div>
             <p className="home-section-subtitle">
-              Ce qui vient de bouger dans ton univers Checkpoint.
+              Les derniers ajouts, notes et moments importants.
             </p>
           </div>
 
@@ -10491,13 +10520,14 @@ function AddEventForm({ editingEvent, onCancelEdit }) {
   );
 }
 
-function ConsoleXPSection({ games }) {
+function ConsoleXPSection({ games, compact = false }) {
   const consoleStats = getConsoleXPStats(games);
+  const visibleConsoleStats = compact ? consoleStats.slice(0, 4) : consoleStats;
 
   if (!consoleStats.length) {
     return (
-      <div className="search-panel">
-        <h2 className="panel-title">XP par console</h2>
+      <div className={`search-panel console-xp-panel ${compact ? "compact" : ""}`}>
+        <h2 className="panel-title">XP plateformes</h2>
 
         <EmptyState
           title="Aucune donnée console"
@@ -10508,11 +10538,18 @@ function ConsoleXPSection({ games }) {
   }
 
   return (
-    <div className="search-panel">
-      <h2 className="panel-title">XP par console</h2>
+    <div className={`search-panel console-xp-panel ${compact ? "compact" : ""}`}>
+      <div className="profile-section-header">
+        <div>
+          <h2 className="panel-title">XP plateformes</h2>
+          <div className="option-value">
+            Les plateformes où ton profil a le plus de vécu.
+          </div>
+        </div>
+      </div>
 
       <div className="console-xp-list">
-        {consoleStats.map((item) => {
+        {visibleConsoleStats.map((item) => {
           const level = Math.max(1, Math.floor(item.xp / 500) + 1);
 
           let rank = "Débutant";
@@ -10554,25 +10591,27 @@ function ConsoleXPSection({ games }) {
                 <strong>{item.xp} XP</strong>
               </div>
 
-              <div className="console-badges">
-                {item.games >= 5 && (
-                  <span className="console-badge">
-                    📚 Collectionneur
-                  </span>
-                )}
+              {!compact && (
+                <div className="console-badges">
+                  {item.games >= 5 && (
+                    <span className="console-badge">
+                      📚 Collectionneur
+                    </span>
+                  )}
 
-                {item.games >= 15 && (
-                  <span className="console-badge">
-                    🏆 Vétéran
-                  </span>
-                )}
+                  {item.games >= 15 && (
+                    <span className="console-badge">
+                      🏆 Vétéran
+                    </span>
+                  )}
 
-                {item.xp >= 3000 && (
-                  <span className="console-badge legendary">
-                    👑 Maître
-                  </span>
-                )}
-              </div>
+                  {item.xp >= 3000 && (
+                    <span className="console-badge legendary">
+                      👑 Maître
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
@@ -10706,6 +10745,13 @@ function ProfileTab({
           title: "Profil complet",
           detail: "Ton profil a deja atteint les principaux paliers visibles.",
         };
+  const activeRankIndex = RANKS.findIndex(
+    (rank) => level >= rank.min && level <= rank.max
+  );
+  const visibleRanks = RANKS.filter((rank, index) => {
+    if (activeRankIndex < 0) return index < 4;
+    return Math.abs(index - activeRankIndex) <= 2 || rank.title === nextRank?.title;
+  }).slice(0, 5);
 
   return (
     <div className="progression-stack profile-tab">
@@ -10762,6 +10808,12 @@ function ProfileTab({
             <div className="profile-living-bar">
               <div style={{ width: `${profilePowerScore}%` }} />
             </div>
+          </div>
+
+          <div className="player-analysis-meta profile-living-analysis-meta">
+            <small>{playerAnalysis.title}</small>
+            <small>{playerAnalysis.confidence}% de confiance</small>
+            <small>{playerAnalysis.vibe}</small>
           </div>
         </div>
 
@@ -10956,6 +11008,8 @@ function ProfileTab({
         </div>
       </div>
 
+      <ConsoleXPSection games={games} compact />
+
       {hasProfileShowcase && (
         <div className="search-panel profile-showcase-panel">
           <div className="profile-section-header">
@@ -11092,7 +11146,7 @@ function ProfileTab({
         </div>
 
         <div className="rank-list compact-ranks">
-          {RANKS.map((rank) => {
+          {visibleRanks.map((rank) => {
             const unlocked = level >= rank.min;
             const active = level >= rank.min && level <= rank.max;
 
@@ -11220,7 +11274,6 @@ function ProfileTab({
             })}
         </div>
       </div>
-      <ConsoleXPSection games={games} />
     </div>
   );
 }
@@ -15124,10 +15177,11 @@ function OptionsTab({
     },
     rating: {
       title: "Notation",
-      lead: "Change seulement la façon d'afficher les notes.",
+      lead: "Change l'affichage des notes et le comportement des fiches après notation.",
       bullets: [
         "Le calcul interne reste toujours sur 10 pour éviter les erreurs.",
         "Les étoiles et le mode compact sont uniquement des affichages.",
+        "Après une note permet de rester dans la fiche ou de revenir directement à la liste.",
       ],
     },
     deals: {
@@ -15607,6 +15661,29 @@ function OptionsTab({
                   onClick={() => onOptionChange("ratingDisplay", "compact")}
                 >
                   Compact
+                </button>
+              </div>
+            </div>
+
+            <div className="option-setting-card">
+              <div>
+                <strong>Après une note</strong>
+                <span>Choisis le comportement des fiches détaillées quand tu viens de noter un jeu.</span>
+              </div>
+              <div className="option-pill-grid two compact rating-flow-grid">
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.afterRatingAction !== "list" ? "active" : ""}`}
+                  onClick={() => onOptionChange("afterRatingAction", "stay")}
+                >
+                  Rester sur la fiche
+                </button>
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.afterRatingAction === "list" ? "active" : ""}`}
+                  onClick={() => onOptionChange("afterRatingAction", "list")}
+                >
+                  Retour liste
                 </button>
               </div>
             </div>
@@ -17908,7 +17985,7 @@ const completeCheckpointTrial = async (trial, result = {}) => {
     );
   } catch (error) {
     console.error("Erreur sync Salle des Epreuves :", error);
-    showToast("Rang debloque localement. Sync Firebase a revoir.", 3200);
+    showToast("Rang débloqué localement. Synchronisation à vérifier.", 3200);
   }
 };
 
@@ -19037,6 +19114,14 @@ useEffect(() => {
 
     setSelectedGame(getFreshGame(detailSourceGames[nextIndex]));
   };
+
+  const handleGameRatingCommit = useCallback(() => {
+    if (appOptions.afterRatingAction !== "list") return;
+
+    window.setTimeout(() => {
+      setSelectedGame(null);
+    }, 180);
+  }, [appOptions.afterRatingAction]);
 
   const gameExists = (name) =>
     games.some(
@@ -20846,6 +20931,7 @@ const setPlayedPlatforms = async (id, platforms) => {
         onDelete={deleteGame}
         onSetStatus={setStatus}
         onSetRating={setRating}
+        onRatingCommit={handleGameRatingCommit}
         onToggleFavorite={toggleFavorite}
         onSetDifficulty={setDifficulty}
         onSetReview={setReview}

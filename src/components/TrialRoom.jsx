@@ -275,7 +275,7 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
             <h1>{passed ? trial.rewardRank : "Rang toujours verrouillé"}</h1>
             <p>
               {passed
-                ? "Le sceau s'ouvre. Le rang est révélé, la progression reprend et Firebase reçoit la validation."
+                ? "Le sceau s'ouvre. Le rang est révélé et la progression reprend."
                 : "Le Gardien referme la porte. Le rang reste verrouillé, mais l'épreuve pourra être retentée."}
             </p>
 

@@ -38,6 +38,8 @@ const IGDB_GAME_FIELDS = [
   "summary",
   "first_release_date",
   "cover.image_id",
+  "artworks.image_id",
+  "screenshots.image_id",
   "platforms.id",
   "platforms.name",
   "genres.id",
@@ -46,8 +48,6 @@ const IGDB_GAME_FIELDS = [
 
 const IGDB_GAME_DETAIL_FIELDS = [
   IGDB_GAME_FIELDS,
-  "artworks.image_id",
-  "screenshots.image_id",
   "videos.video_id",
   "videos.name",
   "category",

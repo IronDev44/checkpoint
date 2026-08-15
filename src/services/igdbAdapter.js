@@ -43,13 +43,18 @@ function getPrimaryImage(igdbGame = {}) {
   );
 }
 
+function getWideImage(igdbGame = {}) {
+  return (
+    igdbImageUrl(igdbGame.artworks?.[0]?.image_id, "screenshot_big") ||
+    igdbImageUrl(igdbGame.screenshots?.[0]?.image_id, "screenshot_big")
+  );
+}
+
 export function normalizeIgdbGame(igdbGame = {}) {
   const id = igdbGame.id ?? null;
   const title = cleanText(igdbGame.name || igdbGame.title);
-  const backgroundImage =
-    igdbImageUrl(igdbGame.artworks?.[0]?.image_id, "screenshot_big") ||
-    igdbImageUrl(igdbGame.screenshots?.[0]?.image_id, "screenshot_big") ||
-    getPrimaryImage(igdbGame);
+  const cover = getPrimaryImage(igdbGame);
+  const backgroundImage = getWideImage(igdbGame) || cover;
 
   return {
     canonicalId: id ? `${GAME_SOURCE.IGDB}:${id}` : `${GAME_SOURCE.IGDB}:${igdbGame.slug || title}`,
@@ -58,7 +63,7 @@ export function normalizeIgdbGame(igdbGame = {}) {
     title,
     slug: cleanText(igdbGame.slug),
     releaseDate: releaseDateFromTimestamp(igdbGame.first_release_date),
-    cover: getPrimaryImage(igdbGame),
+    cover,
     backgroundImage,
     platforms: namesFromIgdbList(igdbGame.platforms),
     genres: namesFromIgdbList(igdbGame.genres),
@@ -98,6 +103,7 @@ export function toRawgCompatibleIgdbGame(igdbGame = {}) {
     released: normalized.releaseDate,
     background_image: normalized.backgroundImage || normalized.cover,
     image: normalized.cover || normalized.backgroundImage,
+    cover_image: normalized.cover,
     rating: normalized.rating,
     ratings_count: normalized.ratingCount,
     metacritic: normalized.metacritic,
@@ -158,4 +164,3 @@ export function normalizeIgdbPayload(payload, path = "") {
 
   return toRawgCompatibleIgdbGame(payload);
 }
-
