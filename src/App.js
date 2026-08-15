@@ -868,6 +868,12 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
   });
 
   const trailer = movies[0]?.data?.max || movies[0]?.data?.["480"];
+  const youtubeMatch = String(trailer || "").match(
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/]+)/
+  );
+  const youtubeEmbedUrl = youtubeMatch
+    ? `https://www.youtube.com/embed/${youtubeMatch[1]}`
+    : "";
 
   return (
     <div className="search-detail-backdrop" onClick={onClose}>
@@ -941,12 +947,22 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
                 </div>
               )}
 
-              {trailer && (
+              {(youtubeEmbedUrl || trailer) && (
                 <div className="search-detail-section">
                   <h3>Bande-annonce</h3>
-                  <video controls className="search-detail-video">
-                    <source src={trailer} />
-                  </video>
+                  {youtubeEmbedUrl ? (
+                    <iframe
+                      className="search-detail-video"
+                      src={youtubeEmbedUrl}
+                      title={`Bande-annonce ${details?.name || game.name}`}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <video controls className="search-detail-video">
+                      <source src={trailer} />
+                    </video>
+                  )}
                 </div>
               )}
 
@@ -3343,6 +3359,16 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
     g.name.toLowerCase() === game.name.toLowerCase()
   );
   const isIgdbResult = game.source === "igdb";
+  const displayImage =
+    game.cover_image ||
+    game.image ||
+    game.background_image ||
+    game.short_screenshots?.[0]?.image ||
+    "";
+  const backdropImage =
+    game.background_image ||
+    game.short_screenshots?.[0]?.image ||
+    displayImage;
 
   return (
     <div className="swipe-wrapper">
@@ -3400,16 +3426,16 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
           : "transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1)",
         }}
       >
-        {game.background_image ? (
+        {displayImage ? (
           <>
             <img
-              src={game.background_image}
+              src={backdropImage}
               alt=""
               className="game-image-backdrop"
               aria-hidden="true"
             />
             <img
-              src={game.background_image}
+              src={displayImage}
               alt={game.name}
               className="game-image"
             />
@@ -3459,11 +3485,22 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
 
 function UpcomingGameCard({ game, onWishlist }) {
   const isIgdbResult = game.source === "igdb";
+  const displayImage =
+    game.cover_image ||
+    game.image ||
+    game.background_image ||
+    game.short_screenshots?.[0]?.image ||
+    "";
+  const backdropImage =
+    game.background_image ||
+    game.short_screenshots?.[0]?.image ||
+    displayImage;
+  const isFallbackArt = String(displayImage).startsWith("data:image/svg+xml");
   const payload = {
     name: game.name,
     rating: 0,
     favorite: false,
-    image: game.background_image || "",
+    image: displayImage || "",
     status: "wishlist",
     released: game.released || "",
     platformNames: game.platforms?.map((p) => p.platform.name) || [],
@@ -3480,11 +3517,11 @@ function UpcomingGameCard({ game, onWishlist }) {
   };
 
   return (
-    <div className={`upcoming-card ${isIgdbResult ? "igdb-upcoming-card" : ""}`}>
-      {game.background_image ? (
+    <div className={`upcoming-card ${isIgdbResult ? "igdb-upcoming-card" : ""} ${isFallbackArt ? "fallback-art" : ""}`}>
+      {displayImage ? (
         <div className="upcoming-image-frame">
-          <img src={game.background_image} alt="" className="upcoming-image-backdrop" aria-hidden="true" />
-          <img src={game.background_image} alt={game.name} className="upcoming-image" />
+          <img src={backdropImage} alt="" className="upcoming-image-backdrop" aria-hidden="true" />
+          <img src={displayImage} alt={game.name} className="upcoming-image" />
         </div>
       ) : (
         <div className="upcoming-image-frame placeholder">🎮</div>
@@ -4655,6 +4692,7 @@ function Top5OverviewPanel({ games = [], hardware = [] }) {
             <div className="top5-overview-bar">
               <div style={{ width: `${gauge.percent}%` }} />
             </div>
+            <small>{gauge.percent}% complet</small>
           </div>
         ))}
       </div>
@@ -6113,20 +6151,11 @@ function GameDetailModal({
             <RatingSlider
               rating={localOstRating}
               onRate={(value) => setLocalOstRating(value)}
-              onCommit={onRatingCommit}
+              onCommit={(value) => {
+                onSetOstInfo(game.id, { ostRating: value });
+                onRatingCommit?.(value);
+              }}
             />
-
-            <button
-              className="save-review-btn"
-              type="button"
-              onClick={() =>
-                onSetOstInfo(game.id, {
-                  ostRating: localOstRating
-                })
-              }
-            >
-              Enregistrer l'OST
-            </button>
           </div>
 
           <div className="game-detail-section game-detail-history-section">
@@ -7046,10 +7075,10 @@ function LibrarySmartPanel({
   );
   const libraryMood =
     libraryPulse >= 80
-      ? "Bibliotheque maitrisee"
+      ? "Ta bibliotheque tourne bien"
       : libraryPulse >= 55
-      ? "Bibliotheque solide"
-      : "Bibliotheque a organiser";
+      ? "Tu as de quoi jouer"
+      : "Quelques jeux t'attendent";
   const collectionPlatforms = new Set(
     collectionGames.flatMap((game) =>
       game.playedPlatforms?.length
@@ -7061,29 +7090,29 @@ function LibrarySmartPanel({
   ).size;
   const premiumMetrics = [
     {
-      label: "Jeux possedes",
+      label: "Collection",
       value: collectionGames.length,
-      detail: `${collectionPlatforms || 0} plateformes`,
+      detail: `${collectionPlatforms || 0} plateformes suivies`,
     },
     {
-      label: "En rotation",
+      label: "En cours",
       value: inProgressGames.length,
       detail: inProgressGames.length ? "parties actives" : "aucune partie",
     },
     {
-      label: "Notes",
+      label: "Notes faites",
       value: `${ratedPercent}%`,
-      detail: "collection evaluee",
+      detail: "jeux deja notes",
     },
     {
-      label: "Finis",
+      label: "Termines",
       value: `${finishedPercent}%`,
-      detail: "completion actuelle",
+      detail: "dans la collection",
     },
   ];
   const smartCards = [
     continueGame && {
-      label: "A reprendre",
+      label: "Reprendre",
       title: continueGame.name,
       detail: `${formatRating10(getGameRating(continueGame), "non note")} - en cours`,
       action: "Ouvrir",
@@ -7091,23 +7120,23 @@ function LibrarySmartPanel({
       game: continueGame,
     },
     launchCandidate && {
-      label: "A lancer",
+      label: "Lancer ensuite",
       title: launchCandidate.name,
-      detail: `${formatRating10(getGameRating(launchCandidate), "non note")} - meilleur candidat`,
+      detail: `${formatRating10(getGameRating(launchCandidate), "non note")} - dans ta collection`,
       action: "Voir",
       view: "collection",
       game: launchCandidate,
     },
     unratedCandidate && {
-      label: "A noter",
+      label: "Note rapide",
       title: unratedCandidate.name,
-      detail: "Une note rendra tes tops plus fiables.",
+      detail: "Une note suffit pour affiner tes tops.",
       action: "Noter",
       view: "collection",
       game: unratedCandidate,
     },
     wishlistCandidate && {
-      label: "Wishlist",
+      label: "Sortie a suivre",
       title: wishlistCandidate.name,
       detail: getReleaseCountdown(wishlistCandidate.released),
       action: "Suivre",
@@ -7122,15 +7151,15 @@ function LibrarySmartPanel({
     <div className="search-panel library-smart-panel">
       <div className="library-smart-head">
         <div>
-          <span>Radar bibliotheque</span>
+          <span>Point bibliotheque</span>
           <h2>{libraryMood}</h2>
           <p>
-            Checkpoint priorise les jeux a reprendre, a lancer, a noter et les sorties a surveiller.
+            Un résumé simple de ce qui mérite ton attention dans ta collection.
           </p>
         </div>
 
         <div className="library-smart-score">
-          <span>Clarte</span>
+          <span>Suivi</span>
           <strong>{libraryPulse}%</strong>
         </div>
       </div>
@@ -8481,10 +8510,34 @@ function SocialTab({
     },
   ];
   const nextSocialActions = [
-    !socialPosts.length ? "Publier une premiere update" : "",
-    identityGames.length < 3 ? "Completer les jeux fondateurs" : "",
-    !publicPhotoCount ? "Ajouter une photo de setup" : "",
-    socialProfile.visibility !== "public" ? "Activer le profil public" : "",
+    !socialPosts.length
+      ? {
+          label: "Publier une premiere update",
+          detail: "Lance ton fil avec une session ou une envie.",
+          action: () => setSocialView("feed"),
+        }
+      : null,
+    identityGames.length < 3
+      ? {
+          label: "Completer les jeux fondateurs",
+          detail: `${identityGames.length}/3 jeux selectionnes`,
+          action: () => setSocialView("profile"),
+        }
+      : null,
+    !publicPhotoCount
+      ? {
+          label: "Ajouter une photo de setup",
+          detail: "Donne une vraie vitrine a ton profil.",
+          action: () => setSocialView("profile"),
+        }
+      : null,
+    socialProfile.visibility !== "public"
+      ? {
+          label: "Activer le profil public",
+          detail: "Pret a partager quand tu veux.",
+          action: () => setSocialView("profile"),
+        }
+      : null,
   ].filter(Boolean);
   const ownPublicPreview = {
     displayName: socialProfile.displayName || DEFAULT_SOCIAL_PROFILE.displayName,
@@ -8663,8 +8716,14 @@ function SocialTab({
   return (
     <div className="progression-stack social-tab">
       <div className="search-panel social-profile-card">
-        <div className="social-avatar">
-          {getInitials(socialProfile.displayName)}
+        <div className="social-profile-side">
+          <div className="social-avatar">
+            {getInitials(socialProfile.displayName)}
+          </div>
+          <div className="social-profile-side-progress">
+            <span>Profil</span>
+            <strong>{profileCompletion}%</strong>
+          </div>
         </div>
 
         <div className="social-profile-main">
@@ -8728,10 +8787,16 @@ function SocialTab({
 
       {nextSocialActions.length > 0 && (
         <div className="social-next-actions">
-          <strong>Pour donner du relief au profil</strong>
+          <div className="social-next-actions-head">
+            <strong>Donner du relief au profil</strong>
+            <span>{nextSocialActions.length} pistes</span>
+          </div>
           <div>
             {nextSocialActions.slice(0, 3).map((action) => (
-              <span key={action}>{action}</span>
+              <button key={action.label} type="button" onClick={action.action}>
+                <strong>{action.label}</strong>
+                <span>{action.detail}</span>
+              </button>
             ))}
           </div>
         </div>
@@ -9741,6 +9806,13 @@ function HomeTab({
 
   return (
     <div className="home-page">
+      <XPCard
+        totalXP={totalXP}
+        level={level}
+        title={getRankTitle(level)}
+        progress={progress}
+      />
+
       <div className="home-hero">
         <div>
           <div className="home-kicker">{homeGreeting}</div>
@@ -9757,13 +9829,6 @@ function HomeTab({
           <strong>{level}</strong>
         </div>
       </div>
-
-      <XPCard
-        totalXP={totalXP}
-        level={level}
-        title={getRankTitle(level)}
-        progress={progress}
-      />
 
       <div className="home-dashboard-panel home-premium-cockpit">
         <div className="home-cockpit-grid">
@@ -11546,9 +11611,11 @@ function createFallbackPoster(title, colorA = "#60a5fa", colorB = "#d6b54a") {
       <rect width="960" height="540" fill="#020813" opacity=".52"/>
       <circle cx="480" cy="230" r="260" fill="url(#glow)"/>
       <path d="M-60 440 C170 330 300 500 520 390 C710 295 830 330 1030 230" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="22"/>
-      <text x="64" y="82" fill="#dbeafe" font-family="Arial, sans-serif" font-size="26" font-weight="800" letter-spacing="8">CHECKPOINT WATCH</text>
+      <circle cx="160" cy="120" r="42" fill="#fff" opacity=".16"/>
+      <circle cx="805" cy="112" r="76" fill="#fff" opacity=".08"/>
+      <path d="M150 396 L805 396" stroke="#fff" stroke-opacity=".24" stroke-width="2"/>
       <text x="64" y="300" fill="#ffffff" font-family="Arial Black, Arial, sans-serif" font-size="58" font-weight="900">${shortTitle}</text>
-      <text x="64" y="350" fill="#dbeafe" font-family="Arial, sans-serif" font-size="28" font-weight="700" opacity=".86">Sortie a suivre</text>
+      <text x="64" y="350" fill="#dbeafe" font-family="Arial, sans-serif" font-size="28" font-weight="700" opacity=".86">Image a venir</text>
     </svg>`;
 
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
