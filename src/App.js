@@ -8219,9 +8219,12 @@ function PublicProfilePreview({
     .slice(0, 5);
   const platformStrengths = (profile.platformStrengths || []).slice(0, 4);
   const identityGames = (profile.identityGames || []).slice(0, 3);
+  const sanctuaryGames = (profile.sanctuaryGames || []).slice(0, 4);
+  const sanctuaryHardware = (profile.sanctuaryHardware || []).slice(0, 3);
   const gamingTimeline = (profile.gamingTimeline || []).slice(0, 8);
   const heroGame =
     identityGames[0] ||
+    sanctuaryGames[0] ||
     profileShowcase.topScores?.[0]?.game ||
     profile.favoriteGames?.[0] ||
     null;
@@ -8408,6 +8411,38 @@ function PublicProfilePreview({
                         ? formatGameRating10(game.rating)
                         : "Jeu marquant"}
                   </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {publicSections.essential &&
+        (sanctuaryGames.length > 0 || sanctuaryHardware.length > 0) && (
+        <div className="public-vitrine-section public-sanctuary-section">
+          <div className="public-vitrine-section-head">
+            <span>Sanctuaire</span>
+            <strong>Ce qui compte vraiment</strong>
+          </div>
+          <div className="public-sanctuary-grid">
+            {sanctuaryGames.map((game) => (
+              <div key={`sanctuary-game-${game.id || game.name}`} className="public-sanctuary-item">
+                {game.image ? <img src={game.image} alt={game.name} /> : <span>Jeu</span>}
+                <div>
+                  <strong>{game.name}</strong>
+                  <small>
+                    {game.rating ? formatGameRating10(game.rating) : "Jeu marquant"}
+                  </small>
+                </div>
+              </div>
+            ))}
+            {sanctuaryHardware.map((item) => (
+              <div key={`sanctuary-hardware-${item.id || item.name}`} className="public-sanctuary-item hardware">
+                {item.image ? <img src={item.image} alt={item.name} /> : <span>Set</span>}
+                <div>
+                  <strong>{item.name}</strong>
+                  <small>{item.type || "Matériel culte"}</small>
                 </div>
               </div>
             ))}
@@ -8693,6 +8728,32 @@ function SocialTab({
   const currentHardware = getCurrentOwnedHardware(hardware);
   const profileShowcase = getProfileShowcase(games, hardware);
   const gamingTimeline = getGamingTimeline(games, hardware, socialProfile);
+  const sanctuaryGames = games.filter((game) => game.sanctuary);
+  const sanctuaryHardware = hardware.filter((item) => item.sanctuary);
+  const sanctuaryHighlights = [
+    ...sanctuaryGames.slice(0, 3).map((game) => ({
+      id: `game-${game.id || game.name}`,
+      type: "Jeu",
+      name: game.name,
+      image: game.image || "",
+      detail: getGameRating(game)
+        ? formatGameRating10(getGameRating(game))
+        : game.status === "wishlist"
+          ? "Wishlist"
+          : "Jeu marquant",
+    })),
+    ...sanctuaryHardware.slice(0, 2).map((item) => ({
+      id: `hardware-${item.id || item.name}`,
+      type: "Matériel",
+      name: item.name,
+      image: item.image || "",
+      detail: item.type || item.brand || "Setup",
+    })),
+  ].slice(0, 4);
+  const missingIdentitySlots = Math.max(0, 3 - identityGames.length);
+  const sanctuaryFounderSuggestions = sanctuaryGames
+    .filter((game) => !identityGameIds.includes(String(game.id)))
+    .slice(0, missingIdentitySlots);
   const activityLikes = socialProfile.activityLikes || {};
   const activityComments = socialProfile.activityComments || {};
   const socialPosts = Array.isArray(socialProfile.posts)
@@ -8806,6 +8867,13 @@ function SocialTab({
     },
   ];
   const nextSocialActions = [
+    identityGames.length < 3 && sanctuaryFounderSuggestions.length > 0
+      ? {
+          label: "Transformer le Sanctuaire en identité",
+          detail: `${sanctuaryFounderSuggestions.length} jeu${sanctuaryFounderSuggestions.length > 1 ? "x" : ""} prêt${sanctuaryFounderSuggestions.length > 1 ? "s" : ""} à rejoindre tes fondateurs`,
+          action: () => setSocialView("profile"),
+        }
+      : null,
     !socialPosts.length
       ? {
           label: "Publier une premiere update",
@@ -8904,6 +8972,21 @@ function SocialTab({
       rating: clampRating(item.rating),
       ratings: item.ratings || {},
       gameCount: getHardwareConsoleGameStats(item, games).games,
+    })),
+    sanctuaryGames: sanctuaryGames.slice(0, 4).map((game) => ({
+      id: game.id,
+      name: game.name,
+      image: game.image || "",
+      rating: getGameRating(game),
+      platforms: game.platforms || [],
+    })),
+    sanctuaryHardware: sanctuaryHardware.slice(0, 3).map((item) => ({
+      id: item.id,
+      name: item.name,
+      image: item.image || "",
+      type: item.type || "",
+      brand: item.brand || "",
+      rating: clampRating(item.rating),
     })),
     recentActivity: allSocialFeedItems.slice(0, 8).map((activity) => {
       const likeState = getActivityLikeState(activityLikes, activity.id);
@@ -9009,6 +9092,21 @@ function SocialTab({
     );
   };
 
+  const handleUseSanctuaryAsFounders = () => {
+    if (!sanctuaryFounderSuggestions.length) return;
+
+    const nextIds = [
+      ...identityGameIds,
+      ...sanctuaryFounderSuggestions.map((game) => String(game.id)),
+    ]
+      .filter(Boolean)
+      .filter((id, index, list) => list.indexOf(id) === index)
+      .slice(0, 3);
+
+    onProfileChange("identityGameIds", nextIds);
+    setSocialView("profile");
+  };
+
   return (
     <div className="progression-stack social-tab">
       <div className="search-panel social-profile-card">
@@ -9083,6 +9181,35 @@ function SocialTab({
           </div>
         ))}
       </div>
+
+      {sanctuaryHighlights.length > 0 && (
+        <div className="search-panel social-sanctuary-bridge">
+          <div className="social-sanctuary-copy">
+            <span>Sanctuaire</span>
+            <strong>Ce que ton profil raconte vraiment</strong>
+            <p>
+              Ces jeux et objets ne sont pas forcément les mieux notés. Ce sont ceux que tu as choisi de mettre en avant.
+            </p>
+          </div>
+          <div className="social-sanctuary-strip">
+            {sanctuaryHighlights.map((item) => (
+              <div key={item.id} className="social-sanctuary-tile">
+                {item.image ? <img src={item.image} alt={item.name} /> : <span>{item.type}</span>}
+                <div>
+                  <small>{item.type}</small>
+                  <strong>{item.name}</strong>
+                  <em>{item.detail}</em>
+                </div>
+              </div>
+            ))}
+          </div>
+          {sanctuaryFounderSuggestions.length > 0 && (
+            <button type="button" onClick={handleUseSanctuaryAsFounders}>
+              Compléter mes jeux fondateurs avec le Sanctuaire
+            </button>
+          )}
+        </div>
+      )}
 
       {nextSocialActions.length > 0 && (
         <div className="social-next-actions">
@@ -9305,6 +9432,29 @@ function SocialTab({
           </div>
         ) : (
           <div className="empty-small">Aucun jeu fondateur choisi.</div>
+        )}
+
+        {sanctuaryFounderSuggestions.length > 0 && (
+          <div className="social-founder-suggestions">
+            <div>
+              <strong>Depuis ton Sanctuaire</strong>
+              <span>
+                Tu peux reprendre ces jeux marquants comme base de ton identité joueur.
+              </span>
+            </div>
+            <div>
+              {sanctuaryFounderSuggestions.map((game) => (
+                <button
+                  key={game.id}
+                  type="button"
+                  onClick={handleUseSanctuaryAsFounders}
+                >
+                  {game.image ? <img src={game.image} alt={game.name} /> : null}
+                  <span>{game.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         )}
       </div>
 
