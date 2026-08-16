@@ -36,6 +36,432 @@
   --ui-section-title-size: 24px;
 }
 
+.sanctuary-tab {
+  gap: 18px;
+}
+
+.sanctuary-hero,
+.sanctuary-feature,
+.sanctuary-section {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(132, 177, 255, 0.22);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 18% 10%, rgba(var(--accent-rgb), 0.22), transparent 34%),
+    linear-gradient(145deg, rgba(15, 22, 38, 0.96), rgba(9, 13, 24, 0.94));
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.28);
+}
+
+.sanctuary-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 28px;
+}
+
+.sanctuary-kicker,
+.sanctuary-section-head span,
+.sanctuary-feature span {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(216, 226, 255, 0.68);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sanctuary-hero h1,
+.sanctuary-section h2,
+.sanctuary-feature h2 {
+  margin: 0;
+  color: #fff;
+  letter-spacing: 0;
+}
+
+.sanctuary-hero h1 {
+  font-size: clamp(2.1rem, 7vw, 3.2rem);
+  line-height: 0.98;
+}
+
+.sanctuary-hero p,
+.sanctuary-feature p {
+  margin: 12px 0 0;
+  color: rgba(242, 246, 255, 0.78);
+  font-size: 1.02rem;
+  line-height: 1.45;
+}
+
+.sanctuary-seal {
+  display: grid;
+  place-items: center;
+  width: 92px;
+  height: 92px;
+  border-radius: 28px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.45), transparent 22%),
+    linear-gradient(135deg, rgba(var(--accent-rgb), 0.98), rgba(218, 181, 68, 0.92));
+  box-shadow: 0 0 38px rgba(var(--accent-rgb), 0.32);
+}
+
+.sanctuary-seal span {
+  font-size: 1.6rem;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.sanctuary-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sanctuary-stat-grid div {
+  min-height: 96px;
+  padding: 18px 14px;
+  border: 1px solid rgba(132, 177, 255, 0.18);
+  border-radius: 22px;
+  background: rgba(18, 27, 45, 0.82);
+  text-align: center;
+}
+
+.sanctuary-stat-grid strong {
+  display: block;
+  color: #fff;
+  font-size: 1.7rem;
+  line-height: 1;
+}
+
+.sanctuary-stat-grid span {
+  display: block;
+  margin-top: 8px;
+  color: rgba(235, 241, 255, 0.7);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.sanctuary-feature {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 18px;
+  align-items: center;
+  padding: 20px;
+}
+
+.sanctuary-feature-media {
+  width: 132px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.sanctuary-feature-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sanctuary-feature-media span,
+.sanctuary-cover span,
+.sanctuary-relic-image span {
+  color: rgba(255, 255, 255, 0.88);
+  font-weight: 950;
+}
+
+.sanctuary-feature button,
+.sanctuary-todo-list button,
+.sanctuary-relic-grid button,
+.sanctuary-game-tile,
+.sanctuary-chip-list button {
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sanctuary-feature button {
+  margin-top: 14px;
+  padding: 12px 18px;
+  border-radius: 16px;
+  color: #fff;
+  font-weight: 900;
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.92), rgba(218, 181, 68, 0.84));
+}
+
+.sanctuary-section {
+  padding: 22px;
+}
+
+.sanctuary-section-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.sanctuary-section-head small {
+  min-width: 44px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.08);
+  text-align: center;
+  font-weight: 900;
+}
+
+.sanctuary-game-list {
+  display: grid;
+  gap: 12px;
+}
+
+.sanctuary-game-tile {
+  display: grid;
+  grid-template-columns: 42px 62px 1fr auto;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 86px;
+  padding: 12px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  text-align: left;
+}
+
+.sanctuary-rank {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+  color: #fff;
+  font-weight: 950;
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.95), rgba(218, 181, 68, 0.9));
+}
+
+.sanctuary-cover {
+  width: 62px;
+  height: 62px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sanctuary-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sanctuary-game-copy {
+  min-width: 0;
+}
+
+.sanctuary-game-copy strong,
+.sanctuary-relic-grid strong,
+.sanctuary-todo-list strong {
+  display: block;
+  color: #fff;
+  font-weight: 950;
+  letter-spacing: 0;
+}
+
+.sanctuary-game-copy strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sanctuary-game-copy small,
+.sanctuary-relic-grid small,
+.sanctuary-todo-list span {
+  display: block;
+  margin-top: 4px;
+  color: rgba(235, 241, 255, 0.66);
+  font-weight: 700;
+}
+
+.sanctuary-heart {
+  color: #ff6b8a;
+}
+
+.sanctuary-relic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sanctuary-relic-grid button {
+  min-height: 190px;
+  padding: 14px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.06);
+  text-align: left;
+}
+
+.sanctuary-relic-image {
+  width: 100%;
+  height: 96px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  margin-bottom: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.sanctuary-relic-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.sanctuary-relic-grid button > span:not(.sanctuary-relic-image) {
+  display: block;
+  margin-bottom: 6px;
+  color: rgba(216, 226, 255, 0.62);
+  font-size: 0.72rem;
+  font-weight: 950;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.sanctuary-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.sanctuary-chip-list button {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  max-width: 100%;
+  padding: 10px 14px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 900;
+}
+
+.sanctuary-chip-list span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sanctuary-todo-list {
+  display: grid;
+  gap: 12px;
+}
+
+.sanctuary-todo-list button {
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.06);
+  text-align: left;
+}
+
+.sanctuary-todo-list small {
+  display: inline-block;
+  margin-top: 12px;
+  color: rgb(var(--accent-rgb));
+  font-weight: 950;
+}
+
+.sanctuary-empty {
+  display: grid;
+  gap: 6px;
+  padding: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  color: rgba(235, 241, 255, 0.68);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sanctuary-empty strong {
+  color: #fff;
+}
+
+.section-human-note {
+  max-width: 620px;
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  color: rgba(238, 244, 255, 0.72);
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 0.92rem;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.sanctuary-note {
+  max-width: 560px;
+}
+
+@media (max-width: 700px) {
+  .sanctuary-tab {
+    gap: 14px;
+  }
+
+  .sanctuary-hero {
+    grid-template-columns: 1fr;
+    padding: 24px;
+  }
+
+  .sanctuary-seal {
+    width: 76px;
+    height: 76px;
+    border-radius: 24px;
+  }
+
+  .sanctuary-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .sanctuary-feature {
+    grid-template-columns: 96px 1fr;
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .sanctuary-feature-media {
+    width: 96px;
+    border-radius: 20px;
+  }
+
+  .sanctuary-section {
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .sanctuary-game-tile {
+    grid-template-columns: 34px 56px 1fr;
+  }
+
+  .sanctuary-heart {
+    display: none;
+  }
+
+  .sanctuary-relic-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tab-btn .tab-label {
+    max-width: 72px;
+  }
+}
+
 /* Definitive mobile polish pass for the current screens. */
 @media (max-width: 700px) {
   .notification-center {
@@ -7591,7 +8017,7 @@ body[data-ui="modern"] .chip.active {
   gap: 14px;
   background:
     radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--accent), transparent 76%), transparent 34%),
-    linear-gradient(135deg, rgba(255,255,255,0.072), rgba(255,255,255,0.032));
+    linear-gradient(135deg, rgba(255,255,255,0.065), rgba(255,255,255,0.026));
 }
 
 .profile-living-main,
@@ -7612,10 +8038,10 @@ body[data-ui="modern"] .chip.active {
 .profile-living-mission span,
 .profile-living-card span {
   display: block;
-  color: var(--text-muted);
+  color: color-mix(in srgb, var(--accent-solid) 42%, var(--text-muted));
   font-size: 0.72rem;
   font-weight: 950;
-  letter-spacing: 0.045em;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
 }
 
@@ -7648,7 +8074,7 @@ body[data-ui="modern"] .chip.active {
 }
 
 .profile-living-meter span {
-  color: var(--text-muted);
+  color: var(--text-soft);
   font-size: 0.78rem;
   font-weight: 900;
 }
@@ -38384,7 +38810,7 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 @media (max-width: 700px) {
   body .notification-center {
     position: fixed !important;
-    top: calc(env(safe-area-inset-top) + 34px) !important;
+    top: calc(env(safe-area-inset-top) + 4px) !important;
     right: 14px !important;
     transform: none !important;
     z-index: 12000 !important;
@@ -38397,7 +38823,7 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 
   body .notification-panel {
     position: fixed !important;
-    top: calc(env(safe-area-inset-top) + 80px) !important;
+    top: calc(env(safe-area-inset-top) + 58px) !important;
     left: 14px !important;
     right: 14px !important;
     width: auto !important;
@@ -38535,6 +38961,17 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
     height: 42px !important;
   }
 
+  body .hardware-inline-close {
+    top: 14px !important;
+    left: 14px !important;
+    right: auto !important;
+    transform: none !important;
+    z-index: 90 !important;
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 14px !important;
+  }
+
   body .profile-tab > .search-panel.profile-hero {
     min-height: 0 !important;
     height: auto !important;
@@ -38583,5 +39020,81 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
     text-align: center !important;
     line-height: 1.08 !important;
     white-space: normal !important;
+  }
+
+  body .game-modal .game-detail-premium-hero {
+    grid-template-columns: 124px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 18px !important;
+    min-height: 298px !important;
+    padding: 82px 24px 28px !important;
+  }
+
+  body .game-modal .game-detail-premium-cover {
+    width: 112px !important;
+    height: 150px !important;
+    min-width: 112px !important;
+    align-self: center !important;
+    justify-self: start !important;
+    margin: 0 !important;
+  }
+
+  body .game-modal .game-detail-premium-cover img,
+  body .game-modal .game-detail-premium-cover span {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 16px !important;
+  }
+
+  body .game-modal .game-detail-premium-identity {
+    min-width: 0 !important;
+    align-self: center !important;
+    display: grid !important;
+    grid-template-rows: minmax(88px, auto) auto auto !important;
+    gap: 9px !important;
+    padding-bottom: 0 !important;
+  }
+
+  body .game-modal .game-detail-kicker {
+    display: none !important;
+  }
+
+  body .game-modal .game-detail-premium-identity h2 {
+    min-height: 88px !important;
+    max-height: 116px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 3 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    font-size: clamp(1.85rem, 7.7vw, 2.35rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  body .game-modal .game-detail-kicker,
+  body .game-modal .game-detail-premium-actions {
+    min-height: 34px !important;
+    align-content: center !important;
+  }
+
+  body .series-page > .xp-card + .stats-grid.compact,
+  body .series-page > .home-level-card + .stats-grid.compact,
+  body .series-page > .level-card + .stats-grid.compact {
+    margin-top: -4px !important;
+    margin-bottom: 8px !important;
+  }
+
+  body .series-page > .stats-grid.compact {
+    gap: 12px !important;
+  }
+
+  body .series-page > .stats-grid.compact + .series-hub-hero {
+    margin-top: 0 !important;
+  }
+
+  body .series-page .series-stats-grid {
+    margin-top: 0 !important;
+    margin-bottom: 6px !important;
   }
 }

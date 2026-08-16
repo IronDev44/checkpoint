@@ -3185,7 +3185,7 @@ function BottomTabs({ activeTab, setActiveTab, soundStyle }) {
   { id: "library", Icon: Library, label: "Bibliothèque" },
   { id: "series", Icon: Puzzle, label: "Séries" },
   { id: "hardware", Icon: Joystick, label: "Matériel" },
-  { id: "favorites", Icon: Heart, label: "Favoris" },
+  { id: "favorites", Icon: Heart, label: "Sanctuaire" },
   { id: "top5", Icon: Trophy, label: "Top 5" },
   { id: "profile", Icon: Medal, label: "Profil" },
   { id: "options", Icon: Settings, label: "Options" },
@@ -5191,6 +5191,10 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
           <div className="option-value">
             Classe tes jeux, ton matériel, tes OST et tes GOTY sans mélanger les usages.
           </div>
+          <p className="section-human-note">
+            Ici, on classe ce qui ressort le plus fort. Pour les jeux et objets qui comptent
+            surtout pour toi, c'est le Sanctuaire.
+          </p>
         </div>
 
         <div className="top5-control-block">
@@ -6596,6 +6600,275 @@ function PhysicalCollectionPanel({ games, onOpenDetail, onUpdatePhysicalGame }) 
           ))
         )}
       </div>
+    </div>
+  );
+}
+
+function SanctuaryTab({
+  games = [],
+  hardware = [],
+  onOpenGameDetail,
+  onToggleFavorite,
+  onGoLibrary,
+  onGoHardware,
+}) {
+  const favoriteGames = games.filter((game) => game.favorite);
+  const physicalGames = games.filter((game) => game.physicalOwned);
+  const favoriteHardware = hardware.filter((item) => item.favorite);
+  const finishedFavorites = favoriteGames.filter(isGameFinishedStatus);
+
+  const hallOfFameGames = [...favoriteGames]
+    .sort((a, b) => {
+      const scoreA =
+        getGameRating(a) * 10 +
+        (isGameFinishedStatus(a) ? 8 : 0) +
+        (a.physicalOwned ? 5 : 0);
+      const scoreB =
+        getGameRating(b) * 10 +
+        (isGameFinishedStatus(b) ? 8 : 0) +
+        (b.physicalOwned ? 5 : 0);
+
+      return scoreB - scoreA;
+    })
+    .slice(0, 4);
+
+  const recentHeartGames = [...favoriteGames]
+    .sort((a, b) => (b.createdAt || b.updatedAt || "").localeCompare(a.createdAt || a.updatedAt || ""))
+    .slice(0, 4);
+
+  const relics = [
+    ...physicalGames.map((game) => ({
+      id: `game-${game.id}`,
+      type: "Jeu physique",
+      title: game.name,
+      subtitle: game.physicalEdition || game.physicalCondition || "Piece de collection",
+      image: game.physicalPhoto || game.image,
+      onClick: () => onOpenGameDetail(game, physicalGames),
+    })),
+    ...favoriteHardware.map((item) => ({
+      id: `hardware-${item.id}`,
+      type: "Materiel favori",
+      title: item.name,
+      subtitle: item.brand || getHardwareTypeLabel(item.type),
+      image: item.image,
+      onClick: onGoHardware,
+    })),
+  ].slice(0, 6);
+
+  const signatureGame = hallOfFameGames[0] || favoriteGames[0] || games[0];
+  const bestHardware = favoriteHardware[0];
+  const completionIdeas = [
+    {
+      title: favoriteGames.length ? "Raconter pourquoi" : "Ajouter ton premier favori",
+      text: favoriteGames.length
+        ? "Ajoute une note perso dans tes fiches pour donner une vraie mémoire au Sanctuaire."
+        : "Marque un jeu avec le coeur pour commencer ton Sanctuaire.",
+      action: favoriteGames.length ? "Ouvrir la bibliotheque" : "Choisir un jeu",
+      onClick: onGoLibrary,
+    },
+    {
+      title: physicalGames.length ? "Mettre les reliques en valeur" : "Ajouter une relique",
+      text: physicalGames.length
+        ? "Photos, edition et etat transforment ta collection physique en vraie vitrine."
+        : "Les jeux boite, collectors et objets importants auront leur place ici.",
+      action: "Collection physique",
+      onClick: onGoLibrary,
+    },
+    {
+      title: favoriteHardware.length ? "Completer le setup" : "Choisir ton materiel culte",
+      text: favoriteHardware.length
+        ? "Ton materiel favori donne une signature plus personnelle a ton profil."
+        : "Ajoute un coeur sur ton materiel prefere pour remplir cette zone.",
+      action: "Voir le materiel",
+      onClick: onGoHardware,
+    },
+  ];
+
+  const renderGameTile = (game, index) => (
+    <button
+      type="button"
+      className="sanctuary-game-tile"
+      key={game.id}
+      onClick={() => onOpenGameDetail(game, favoriteGames)}
+    >
+      <span className="sanctuary-rank">{index + 1}</span>
+      <span className="sanctuary-cover">
+        {game.image ? <img src={game.image} alt={game.name} /> : <span>CP</span>}
+      </span>
+      <span className="sanctuary-game-copy">
+        <strong>{game.name}</strong>
+        <small>
+          {game.released?.split("-")[0] || "Annee inconnue"} · ⭐{" "}
+          {formatRating10(getGameRating(game), "-")}
+        </small>
+      </span>
+      <span className="sanctuary-heart">
+        <Heart size={16} fill="currentColor" />
+      </span>
+    </button>
+  );
+
+  return (
+    <div className="progression-stack sanctuary-tab">
+      <section className="sanctuary-hero">
+        <div>
+          <span className="sanctuary-kicker">Sanctuaire</span>
+          <h1>Ce qui compte vraiment</h1>
+          <p>
+            Pas un classement. Une vitrine personnelle pour tes jeux cultes, tes
+            reliques, ton setup et les souvenirs qui te definissent.
+          </p>
+          <p className="section-human-note sanctuary-note">
+            Le Top 5 compare. Le Sanctuaire garde ce qui t'a marque, meme si ce
+            n'est pas toujours le mieux note.
+          </p>
+        </div>
+        <div className="sanctuary-seal">
+          <Heart size={28} fill="currentColor" />
+          <span>{favoriteGames.length}</span>
+        </div>
+      </section>
+
+      <div className="sanctuary-stat-grid">
+        <div>
+          <strong>{favoriteGames.length}</strong>
+          <span>coups de coeur</span>
+        </div>
+        <div>
+          <strong>{finishedFavorites.length}</strong>
+          <span>termines</span>
+        </div>
+        <div>
+          <strong>{physicalGames.length}</strong>
+          <span>reliques</span>
+        </div>
+        <div>
+          <strong>{favoriteHardware.length}</strong>
+          <span>materiels</span>
+        </div>
+      </div>
+
+      <section className="sanctuary-feature">
+        <div className="sanctuary-feature-media">
+          {signatureGame?.image ? (
+            <img src={signatureGame.image} alt={signatureGame.name} />
+          ) : (
+            <span>CP</span>
+          )}
+        </div>
+        <div>
+          <span>Hall of Fame</span>
+          <h2>{signatureGame?.name || "Ton premier jeu culte"}</h2>
+          <p>
+            {signatureGame
+              ? `${formatRating10(getGameRating(signatureGame), "Non note")}/10 · ${
+                  signatureGame.genreNames?.[0] || "jeu marquant"
+                }`
+              : "Ajoute un coeur a un jeu pour commencer a construire cette vitrine."}
+          </p>
+          <button type="button" onClick={signatureGame ? () => onOpenGameDetail(signatureGame, favoriteGames) : onGoLibrary}>
+            {signatureGame ? "Ouvrir la fiche" : "Choisir un favori"}
+          </button>
+        </div>
+      </section>
+
+      <section className="sanctuary-section">
+        <div className="sanctuary-section-head">
+          <div>
+            <span>Hall of Fame</span>
+            <h2>Jeux intouchables</h2>
+          </div>
+          <small>{hallOfFameGames.length}/4</small>
+        </div>
+
+        {hallOfFameGames.length ? (
+          <div className="sanctuary-game-list">
+            {hallOfFameGames.map(renderGameTile)}
+          </div>
+        ) : (
+          <div className="sanctuary-empty">
+            <strong>Aucun jeu sacralise pour l'instant.</strong>
+            <span>Ajoute un coeur depuis une fiche jeu pour remplir cette zone.</span>
+          </div>
+        )}
+      </section>
+
+      <section className="sanctuary-section">
+        <div className="sanctuary-section-head">
+          <div>
+            <span>Reliques</span>
+            <h2>Objets et souvenirs</h2>
+          </div>
+          <small>{relics.length}</small>
+        </div>
+
+        {relics.length ? (
+          <div className="sanctuary-relic-grid">
+            {relics.map((item) => (
+              <button type="button" key={item.id} onClick={item.onClick}>
+                <span className="sanctuary-relic-image">
+                  {item.image ? <img src={item.image} alt={item.title} /> : <span>CP</span>}
+                </span>
+                <span>{item.type}</span>
+                <strong>{item.title}</strong>
+                <small>{item.subtitle}</small>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="sanctuary-empty">
+            <strong>Pas encore de relique.</strong>
+            <span>Les jeux physiques et le materiel favori apparaitront ici.</span>
+          </div>
+        )}
+      </section>
+
+      <section className="sanctuary-section">
+        <div className="sanctuary-section-head">
+          <div>
+            <span>Coups de coeur</span>
+            <h2>Dernieres etoiles</h2>
+          </div>
+          <small>{recentHeartGames.length}</small>
+        </div>
+
+        {recentHeartGames.length ? (
+          <div className="sanctuary-chip-list">
+            {recentHeartGames.map((game) => (
+              <button
+                type="button"
+                key={`recent-${game.id}`}
+                onClick={() => onOpenGameDetail(game, favoriteGames)}
+              >
+                <Heart size={14} fill="currentColor" />
+                <span>{game.name}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="sanctuary-empty compact">
+            <span>Tes derniers coups de coeur apparaitront ici.</span>
+          </div>
+        )}
+      </section>
+
+      <section className="sanctuary-section">
+        <div className="sanctuary-section-head">
+          <div>
+            <span>Vitrine</span>
+            <h2>A completer</h2>
+          </div>
+        </div>
+        <div className="sanctuary-todo-list">
+          {completionIdeas.map((item) => (
+            <button type="button" key={item.title} onClick={item.onClick}>
+              <strong>{item.title}</strong>
+              <span>{item.text}</span>
+              <small>{item.action}</small>
+            </button>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
@@ -9286,6 +9559,15 @@ function HomeTab({
       : total > 0
       ? "Ton univers prend forme"
       : "Bienvenue dans ton hub";
+  const homeHeroCopy = nextPlayCandidate
+    ? `${nextPlayCandidate.name} t'attend. Checkpoint garde le fil de ta collection, de tes notes et de tes prochaines envies.`
+    : total > 0
+      ? "Ta collection commence a raconter quelque chose. Ajoute tes jeux, tes notes et ton materiel pour lui donner encore plus de relief."
+      : "Commence par ajouter quelques jeux, puis Checkpoint deviendra ton carnet de bord gaming.";
+  const homeHeroTags = [
+    level >= 50 ? "Joueur installe" : "Profil en construction",
+    inProgressCount ? `${inProgressCount} partie${inProgressCount > 1 ? "s" : ""} en cours` : "Pret pour une nouvelle session",
+  ];
 
   const dashboardAction = !quizLocked
     ? {
@@ -9827,10 +10109,11 @@ function HomeTab({
         <div>
           <div className="home-kicker">{homeGreeting}</div>
           <h2>{playerAnalysis.title}</h2>
-          <p>{playerAnalysis.subtitle}</p>
+          <p>{homeHeroCopy}</p>
           <div className="home-analysis-tags">
-            <span>{playerAnalysis.maturity}</span>
-            <span>{playerAnalysis.vibe}</span>
+            {homeHeroTags.map((tag) => (
+              <span key={tag}>{tag}</span>
+            ))}
           </div>
         </div>
 
@@ -10779,28 +11062,28 @@ function ProfileTab({
   );
   const profileLivingCards = [
     {
-      label: "Jeu repere",
+      label: "Jeu qui te ressemble",
       value: identityGame?.name || "A definir",
       detail: identityGame
         ? `${identityGame.released || "Annee inconnue"} - ${formatRating10(
             getGameRating(identityGame),
             "non note"
           )}`
-        : "Ajoute quelques notes pour faire ressortir un jeu signature.",
+        : "Note quelques jeux pour faire ressortir une vraie signature.",
     },
     {
-      label: "Plateforme dominante",
+      label: "Terrain de jeu",
       value: stats.topPlatforms[0]?.[0] || "Multi-plateforme",
       detail: stats.topPlatforms[0]
-        ? `${stats.topPlatforms[0][1]} jeux lies a cette plateforme`
-        : "Tes plateformes ressortiront avec plus de jeux classes.",
+        ? `${stats.topPlatforms[0][1]} jeux qui reviennent souvent`
+        : "Tes plateformes se préciseront avec ta collection.",
     },
     {
-      label: "Setup repere",
+      label: "Setup du moment",
       value: ratedHardware[0]?.name || currentHardware[0]?.name || "A calibrer",
       detail: ratedHardware[0]
-        ? `${formatRating10(ratedHardware[0].average, "-")} de moyenne materiel`
-        : `${currentHardware.length} materiels actuellement en possession`,
+        ? `${formatRating10(ratedHardware[0].average, "-")} de ressenti materiel`
+        : `${currentHardware.length} materiels dans ta collection actuelle`,
     },
   ];
   const profileMission = nextBadges[0]
@@ -10871,13 +11154,13 @@ function ProfileTab({
 
       <div className="search-panel profile-living-panel">
         <div className="profile-living-main">
-          <span>Identite active</span>
+          <span>Ta signature joueur</span>
           <strong>{profileInsights.headline}</strong>
           <p>{profileInsights.summary}</p>
 
           <div className="profile-living-meter">
             <div>
-              <span>Puissance du profil</span>
+              <span>Profil renseigné</span>
               <strong>{profilePowerScore}%</strong>
             </div>
             <div className="profile-living-bar">
@@ -10887,7 +11170,7 @@ function ProfileTab({
 
           <div className="player-analysis-meta profile-living-analysis-meta">
             <small>{playerAnalysis.title}</small>
-            <small>{playerAnalysis.confidence}% de confiance</small>
+            <small>{playerAnalysis.confidence}% de repères</small>
             <small>{playerAnalysis.vibe}</small>
           </div>
         </div>
@@ -20853,32 +21136,14 @@ const setPlayedPlatforms = async (id, platforms) => {
 )}
 
           {activeTab === "favorites" && (
-            <>
-              <div className="search-panel">
-                <div className="input-container">
-                  <input
-                    value={librarySearch}
-                    onChange={(e) => setLibrarySearch(e.target.value)}
-                    placeholder="Rechercher dans tes favoris"
-                  />
-                  <button type="button" onClick={() => setLibrarySearch("")}>
-                    Effacer
-                  </button>
-                </div>
-              </div>
-
-              <LibrarySection
-                title="Coups de cœur"
-                games={favoriteGames}
-                onDelete={deleteGame}
-                onSetStatus={setStatus}
-                onSetRating={setRating}
-                onToggleFavorite={toggleFavorite}
-                onOpenDetail={(game) => openGameDetail(game, favoriteGames)}
-                libraryCardMode={libraryCardMode}
-                setLibraryCardMode={setLibraryCardMode}
-              />
-            </>
+            <SanctuaryTab
+              games={games}
+              hardware={hardware}
+              onOpenGameDetail={openGameDetail}
+              onToggleFavorite={toggleFavorite}
+              onGoLibrary={() => setActiveTab("library")}
+              onGoHardware={() => setActiveTab("hardware")}
+            />
           )}
 
           {activeTab === "live" && (
