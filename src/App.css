@@ -37965,3 +37965,203 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
     grid-template-columns: 1fr !important;
   }
 }
+
+/* Final iPhone polish: search cards, releases, social header and modal ergonomics. */
+@media (max-width: 700px) {
+  .game-card.swipe-card,
+  .upcoming-card {
+    overflow: hidden !important;
+    border-radius: 22px !important;
+  }
+
+  .game-card.swipe-card {
+    grid-template-columns: 126px minmax(0, 1fr) !important;
+    min-height: 178px !important;
+  }
+
+  .game-card.swipe-card .game-image,
+  .game-card.swipe-card .game-image.placeholder {
+    min-height: 178px !important;
+    border-radius: 22px 0 0 22px !important;
+    box-shadow: 18px 0 34px rgba(0, 0, 0, 0.32) !important;
+  }
+
+  .game-card.swipe-card .game-overlay {
+    padding: 16px 14px 14px !important;
+    background:
+      linear-gradient(90deg, rgba(3, 7, 18, 0.46), rgba(3, 7, 18, 0.88)) !important;
+  }
+
+  .game-card.swipe-card .game-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .upcoming-card {
+    grid-template-columns: 126px minmax(0, 1fr) !important;
+    min-height: 188px !important;
+    align-items: stretch !important;
+  }
+
+  .upcoming-image-frame,
+  .upcoming-image-frame.placeholder {
+    min-height: 188px !important;
+    height: 100% !important;
+    border-radius: 22px 0 0 22px !important;
+    overflow: hidden !important;
+  }
+
+  .upcoming-image-frame .upcoming-image,
+  .igdb-upcoming-card .upcoming-image,
+  .upcoming-card.fallback-art .upcoming-image,
+  .upcoming-card .upcoming-image-backdrop {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 22px 0 0 22px !important;
+    object-fit: cover !important;
+    object-position: center !important;
+  }
+
+  .upcoming-image-frame .upcoming-image-backdrop {
+    display: none !important;
+  }
+
+  .upcoming-content {
+    padding: 15px 14px !important;
+  }
+
+  .library-switch {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    gap: 8px !important;
+    margin: 18px 0 16px !important;
+  }
+
+  .library-switch > .library-switch-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 50px !important;
+    padding: 8px 6px !important;
+    border-radius: 18px !important;
+    display: grid !important;
+    place-items: center !important;
+    text-align: center !important;
+    line-height: 1.08 !important;
+    white-space: normal !important;
+  }
+
+  .library-switch > .library-switch-btn.active {
+    transform: none !important;
+  }
+
+  .notification-center {
+    top: calc(env(safe-area-inset-top) + 58px) !important;
+    right: 18px !important;
+  }
+
+  .notification-panel {
+    top: calc(env(safe-area-inset-top) + 86px) !important;
+  }
+
+  .social-profile-card {
+    grid-template-columns: 88px minmax(0, 1fr) !important;
+    gap: 14px !important;
+  }
+
+  .social-profile-side {
+    gap: 8px !important;
+    align-self: stretch;
+  }
+
+  .social-profile-side .social-avatar {
+    width: 88px !important;
+    height: 88px !important;
+  }
+
+  .social-profile-side-progress,
+  .social-profile-side-facts {
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--accent-solid) 24%, rgba(255,255,255,0.12));
+    background:
+      linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.025)),
+      rgba(8, 13, 26, 0.82);
+  }
+
+  .social-profile-side-facts {
+    display: grid;
+    gap: 4px;
+    padding: 9px 10px;
+  }
+
+  .social-profile-side-facts span {
+    color: var(--text-soft);
+    font-size: 0.72rem;
+    font-weight: 900;
+    line-height: 1.1;
+  }
+
+  .profile-tab .profile-hero {
+    min-height: 0 !important;
+    padding-bottom: 18px !important;
+  }
+
+  .profile-tab .profile-hero-side {
+    margin-bottom: 0 !important;
+  }
+
+  .profile-tab .profile-hero + .profile-section,
+  .profile-tab .profile-hero + .search-panel {
+    margin-top: 0 !important;
+  }
+
+  .game-detail-nav-btn {
+    top: 108px !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 999px !important;
+    background:
+      linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04)),
+      rgba(4, 8, 18, 0.78) !important;
+    backdrop-filter: blur(14px) !important;
+    -webkit-backdrop-filter: blur(14px) !important;
+  }
+
+  .game-detail-nav-btn.prev {
+    left: 16px !important;
+  }
+
+  .game-detail-nav-btn.next {
+    right: 72px !important;
+  }
+
+  .game-detail-nav-btn::before {
+    font-size: 20px !important;
+  }
+
+  .hardware-inline-detail {
+    padding-bottom: calc(118px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .hardware-inline-detail-panel {
+    max-height: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  .hardware-inline-detail-panel .modal-content {
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+    padding-bottom: calc(126px + env(safe-area-inset-bottom)) !important;
+  }
+
+  .hardware-inline-detail-panel .modal-image.hardware-detail-image,
+  .hardware-inline-detail-panel .modal-image.placeholder {
+    position: relative !important;
+    top: auto !important;
+  }
+}

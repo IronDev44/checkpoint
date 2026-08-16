@@ -8724,6 +8724,10 @@ function SocialTab({
             <span>Profil</span>
             <strong>{profileCompletion}%</strong>
           </div>
+          <div className="social-profile-side-facts">
+            <span>Niv. {level}</span>
+            <span>{socialProfile.platform || "Multi-plateforme"}</span>
+          </div>
         </div>
 
         <div className="social-profile-main">
@@ -11595,30 +11599,38 @@ function createFallbackPoster(title, colorA = "#60a5fa", colorB = "#d6b54a") {
     .slice(0, 3)
     .join(" ");
   const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540">
+    <svg xmlns="http://www.w3.org/2000/svg" width="720" height="960" viewBox="0 0 720 960">
       <defs>
         <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stop-color="#07111f"/>
           <stop offset="0.52" stop-color="${colorA}"/>
           <stop offset="1" stop-color="${colorB}"/>
         </linearGradient>
-        <radialGradient id="glow" cx="50%" cy="44%" r="55%">
-          <stop offset="0" stop-color="#ffffff" stop-opacity=".28"/>
+        <radialGradient id="glow" cx="50%" cy="38%" r="56%">
+          <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/>
           <stop offset="1" stop-color="#000000" stop-opacity="0"/>
         </radialGradient>
       </defs>
-      <rect width="960" height="540" fill="url(#bg)"/>
-      <rect width="960" height="540" fill="#020813" opacity=".52"/>
-      <circle cx="480" cy="230" r="260" fill="url(#glow)"/>
-      <path d="M-60 440 C170 330 300 500 520 390 C710 295 830 330 1030 230" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="22"/>
-      <circle cx="160" cy="120" r="42" fill="#fff" opacity=".16"/>
-      <circle cx="805" cy="112" r="76" fill="#fff" opacity=".08"/>
-      <path d="M150 396 L805 396" stroke="#fff" stroke-opacity=".24" stroke-width="2"/>
-      <text x="64" y="300" fill="#ffffff" font-family="Arial Black, Arial, sans-serif" font-size="58" font-weight="900">${shortTitle}</text>
-      <text x="64" y="350" fill="#dbeafe" font-family="Arial, sans-serif" font-size="28" font-weight="700" opacity=".86">Image a venir</text>
+      <rect width="720" height="960" fill="url(#bg)"/>
+      <rect width="720" height="960" fill="#020813" opacity=".58"/>
+      <circle cx="360" cy="315" r="285" fill="url(#glow)"/>
+      <path d="M-80 690 C120 590 235 760 430 635 C565 548 635 560 780 452" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="22"/>
+      <path d="M-50 730 C155 645 270 790 455 680 C585 602 650 626 770 538" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="10"/>
+      <circle cx="145" cy="175" r="46" fill="#fff" opacity=".13"/>
+      <circle cx="602" cy="155" r="78" fill="#fff" opacity=".07"/>
+      <rect x="58" y="720" width="604" height="2" fill="#fff" opacity=".18"/>
+      <text x="58" y="650" fill="#ffffff" font-family="Arial Black, Arial, sans-serif" font-size="54" font-weight="900">${shortTitle}</text>
+      <text x="58" y="698" fill="#dbeafe" font-family="Arial, sans-serif" font-size="25" font-weight="700" opacity=".78">Sortie a suivre</text>
     </svg>`;
 
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+}
+
+function getUpcomingFallbackGames() {
+  const today = new Date();
+  return UPCOMING_GAMES_FALLBACK.filter(
+    (game) => game.tba || isFutureReleaseDate(game.released, today)
+  );
 }
 
 const UPCOMING_GAMES_FALLBACK = [
@@ -18919,14 +18931,14 @@ useEffect(() => {
 
         setUpcomingGames((previousGames) => {
           if (results.length) return results;
-          return previousGames.length ? previousGames : UPCOMING_GAMES_FALLBACK;
+          return previousGames.length ? previousGames : getUpcomingFallbackGames();
         });
         setUpcomingSourceStatus(data.sourceStatus || "ok");
       } catch (e) {
         if (isAbortError(e)) return;
         console.error("Erreur chargement sorties :", e);
         setUpcomingGames((previousGames) =>
-          previousGames.length ? previousGames : UPCOMING_GAMES_FALLBACK
+          previousGames.length ? previousGames : getUpcomingFallbackGames()
         );
         setUpcomingSourceStatus("unavailable");
       } finally {
@@ -19235,7 +19247,6 @@ useEffect(() => {
     } catch (e) {
       if (isAbortError(e)) return;
       console.error("Erreur pagination :", e);
-      setToast("RAWG est temporairement indisponible, les resultats deja charges restent affiches.");
     }
   };
 
