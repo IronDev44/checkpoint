@@ -36,6 +36,220 @@
   --ui-section-title-size: 24px;
 }
 
+/* Definitive mobile polish pass for the current screens. */
+@media (max-width: 700px) {
+  .notification-center {
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top) + 34px) !important;
+    right: 14px !important;
+    transform: none !important;
+    z-index: 12000 !important;
+  }
+
+  .notification-trigger {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .notification-panel {
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top) + 80px) !important;
+    left: 14px !important;
+    right: 14px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  .home-page,
+  .home-shell,
+  .home-content {
+    gap: 12px !important;
+  }
+
+  .home-page .xp-card,
+  .home-page .level-card,
+  .home-page .home-level-card {
+    margin-bottom: 0 !important;
+  }
+
+  .home-page .player-analysis-hero,
+  .home-page .home-identity-card {
+    margin-top: 0 !important;
+  }
+
+  .game-card.swipe-card {
+    grid-template-columns: 126px minmax(0, 1fr) !important;
+    min-height: 174px !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+  }
+
+  .game-card.swipe-card .game-image,
+  .game-card.swipe-card .game-image.placeholder {
+    width: calc(100% - 18px) !important;
+    height: calc(100% - 18px) !important;
+    min-height: 0 !important;
+    margin: 9px !important;
+    align-self: stretch !important;
+    border-radius: 12px !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    box-shadow: 10px 0 26px rgba(0, 0, 0, 0.32) !important;
+  }
+
+  .game-card.swipe-card .game-image-backdrop {
+    border-radius: 22px !important;
+  }
+
+  .game-card.swipe-card .game-overlay {
+    background:
+      linear-gradient(90deg, rgba(3, 7, 18, 0.18), rgba(3, 7, 18, 0.88)) !important;
+  }
+
+  .upcoming-card {
+    grid-template-columns: 126px minmax(0, 1fr) !important;
+    min-height: 184px !important;
+    align-items: stretch !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+  }
+
+  .upcoming-image-frame,
+  .upcoming-image-frame.placeholder {
+    width: calc(100% - 18px) !important;
+    height: calc(100% - 18px) !important;
+    min-height: 0 !important;
+    margin: 9px !important;
+    align-self: stretch !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+  }
+
+  .upcoming-image-frame .upcoming-image,
+  .igdb-upcoming-card .upcoming-image,
+  .upcoming-card.fallback-art .upcoming-image,
+  .upcoming-card .upcoming-image-backdrop {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 12px !important;
+    object-fit: cover !important;
+    object-position: center !important;
+  }
+
+  .upcoming-image-frame .upcoming-image-backdrop {
+    display: none !important;
+  }
+
+  .social-profile-tags span:nth-child(n+5) {
+    display: none !important;
+  }
+
+  .game-detail-nav-btn {
+    top: 132px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 12px !important;
+    font-size: 0 !important;
+    opacity: 0.92 !important;
+  }
+
+  .game-detail-nav-btn.prev {
+    left: 18px !important;
+    right: auto !important;
+  }
+
+  .game-detail-nav-btn.next {
+    right: 18px !important;
+  }
+
+  .game-detail-nav-btn::before {
+    font-size: 18px !important;
+    line-height: 1 !important;
+  }
+
+  .series-page .series-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+  }
+
+  .series-page .series-stats-grid > div {
+    min-height: 88px !important;
+    height: 88px !important;
+    padding: 12px 10px !important;
+    display: grid !important;
+    place-items: center !important;
+    align-content: center !important;
+    gap: 4px !important;
+  }
+
+  .hardware-inline-detail .modal-close-btn,
+  .hardware-inline-detail-panel .modal-close-btn,
+  .hardware-modal-panel .modal-close-btn {
+    top: 12px !important;
+    right: 12px !important;
+    left: auto !important;
+    z-index: 70 !important;
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  .profile-tab > .search-panel.profile-hero {
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 18px !important;
+    gap: 14px !important;
+  }
+
+  .profile-tab .profile-hero {
+    align-items: flex-start !important;
+  }
+
+  .profile-tab .profile-hero-main,
+  .profile-tab .profile-hero-side {
+    flex: 0 1 auto !important;
+  }
+
+  .profile-tab .profile-hero-side {
+    width: 100% !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .profile-tab .profile-badge-count,
+  .profile-tab .profile-hero-xp {
+    min-height: 0 !important;
+    padding: 12px !important;
+  }
+
+  .profile-tab .profile-hero + .profile-section,
+  .profile-tab .profile-hero + .search-panel {
+    margin-top: 0 !important;
+  }
+
+  .library-switch {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    gap: 8px !important;
+    margin: 14px 0 14px !important;
+  }
+
+  .library-switch > .library-switch-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    padding: 8px 6px !important;
+    border-radius: 16px !important;
+    display: grid !important;
+    place-items: center !important;
+    text-align: center !important;
+    line-height: 1.08 !important;
+    white-space: normal !important;
+  }
+}
+
 html,
 body {
   margin: 0;
@@ -38163,5 +38377,211 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   .hardware-inline-detail-panel .modal-image.placeholder {
     position: relative !important;
     top: auto !important;
+  }
+}
+
+/* Final override guard: keep these after every previous mobile patch. */
+@media (max-width: 700px) {
+  body .notification-center {
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top) + 34px) !important;
+    right: 14px !important;
+    transform: none !important;
+    z-index: 12000 !important;
+  }
+
+  body .notification-trigger {
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  body .notification-panel {
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top) + 80px) !important;
+    left: 14px !important;
+    right: 14px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  body .home-page,
+  body .home-shell,
+  body .home-content {
+    gap: 12px !important;
+  }
+
+  body .home-page .xp-card,
+  body .home-page .level-card,
+  body .home-page .home-level-card {
+    margin-bottom: 0 !important;
+  }
+
+  body .home-page .player-analysis-hero,
+  body .home-page .home-identity-card {
+    margin-top: 0 !important;
+  }
+
+  body .game-card.swipe-card {
+    grid-template-columns: 126px minmax(0, 1fr) !important;
+    min-height: 174px !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+  }
+
+  body .game-card.swipe-card .game-image,
+  body .game-card.swipe-card .game-image.placeholder {
+    width: calc(100% - 18px) !important;
+    height: calc(100% - 18px) !important;
+    min-height: 0 !important;
+    margin: 9px !important;
+    align-self: stretch !important;
+    border-radius: 12px !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    box-shadow: 10px 0 26px rgba(0, 0, 0, 0.32) !important;
+  }
+
+  body .game-card.swipe-card .game-image-backdrop {
+    border-radius: 22px !important;
+  }
+
+  body .game-card.swipe-card .game-overlay {
+    background:
+      linear-gradient(90deg, rgba(3, 7, 18, 0.18), rgba(3, 7, 18, 0.88)) !important;
+  }
+
+  body .upcoming-card {
+    grid-template-columns: 126px minmax(0, 1fr) !important;
+    min-height: 184px !important;
+    align-items: stretch !important;
+    border-radius: 22px !important;
+    overflow: hidden !important;
+  }
+
+  body .upcoming-image-frame,
+  body .upcoming-image-frame.placeholder {
+    width: calc(100% - 18px) !important;
+    height: calc(100% - 18px) !important;
+    min-height: 0 !important;
+    margin: 9px !important;
+    align-self: stretch !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+  }
+
+  body .upcoming-image-frame .upcoming-image,
+  body .igdb-upcoming-card .upcoming-image,
+  body .upcoming-card.fallback-art .upcoming-image,
+  body .upcoming-card .upcoming-image-backdrop {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 12px !important;
+    object-fit: cover !important;
+    object-position: center !important;
+  }
+
+  body .upcoming-image-frame .upcoming-image-backdrop {
+    display: none !important;
+  }
+
+  body .game-detail-nav-btn {
+    top: 132px !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    border-radius: 12px !important;
+    font-size: 0 !important;
+    opacity: 0.92 !important;
+  }
+
+  body .game-detail-nav-btn.prev {
+    left: 18px !important;
+    right: auto !important;
+  }
+
+  body .game-detail-nav-btn.next {
+    right: 18px !important;
+  }
+
+  body .game-detail-nav-btn::before {
+    font-size: 18px !important;
+    line-height: 1 !important;
+  }
+
+  body .series-page .series-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+  }
+
+  body .series-page .series-stats-grid > div {
+    min-height: 88px !important;
+    height: 88px !important;
+    padding: 12px 10px !important;
+    display: grid !important;
+    place-items: center !important;
+    align-content: center !important;
+    gap: 4px !important;
+  }
+
+  body .hardware-inline-detail .modal-close-btn,
+  body .hardware-inline-detail-panel .modal-close-btn,
+  body .hardware-modal-panel .modal-close-btn {
+    top: 12px !important;
+    right: 12px !important;
+    left: auto !important;
+    z-index: 70 !important;
+    width: 42px !important;
+    height: 42px !important;
+  }
+
+  body .profile-tab > .search-panel.profile-hero {
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 18px !important;
+    gap: 14px !important;
+  }
+
+  body .profile-tab .profile-hero-main,
+  body .profile-tab .profile-hero-side {
+    flex: 0 1 auto !important;
+  }
+
+  body .profile-tab .profile-hero-side {
+    width: 100% !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  body .profile-tab .profile-badge-count,
+  body .profile-tab .profile-hero-xp {
+    min-height: 0 !important;
+    padding: 12px !important;
+  }
+
+  body .profile-tab .profile-hero + .profile-section,
+  body .profile-tab .profile-hero + .search-panel {
+    margin-top: 0 !important;
+  }
+
+  body .library-switch {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    width: 100% !important;
+    gap: 8px !important;
+    margin: 14px 0 14px !important;
+  }
+
+  body .library-switch > .library-switch-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    padding: 8px 6px !important;
+    border-radius: 16px !important;
+    display: grid !important;
+    place-items: center !important;
+    text-align: center !important;
+    line-height: 1.08 !important;
+    white-space: normal !important;
   }
 }

@@ -16,6 +16,7 @@ import TrialRoom from "./components/TrialRoom";
 import {
   GameService,
   RawgRequestError,
+  buildIgdbApiUrl,
   buildRawgApiUrl,
   fetchJsonWithTimeout,
 } from "./services/gameService";
@@ -75,6 +76,10 @@ import {
 } from "lucide-react";
 
 async function rawgApiRequest(path, params = {}, options = {}) {
+  if (typeof path === "string" && path.startsWith("/api/igdb")) {
+    return GameService.igdb(path, params, options);
+  }
+
   return GameService.rawg(path, params, options);
 }
 
@@ -8381,6 +8386,8 @@ function SocialTab({
   const activities = getSocialActivityFeed(games, hardware, badges);
   const stats = getAdvancedStats(games);
   const favorites = games.filter((game) => game.favorite).slice(0, 3);
+  const finishedGames = games.filter(isGameFinishedStatus);
+  const favoriteGames = games.filter((game) => game.favorite);
   const identityGameIds = Array.isArray(socialProfile.identityGameIds)
     ? socialProfile.identityGameIds.slice(0, 3).map(String)
     : [];
@@ -8740,12 +8747,11 @@ function SocialTab({
           <p>{socialProfile.bio}</p>
 
           <div className="social-profile-tags">
-            <span>Niveau {level}</span>
-            <span>{socialProfile.platform}</span>
             <span>
               {socialProfile.visibility === "public" ? "Public" : "Privé"}
             </span>
-            <span>Profil {profileCompletion}%</span>
+            <span>{finishedGames.length} terminés</span>
+            <span>{favoriteGames.length} favoris</span>
           </div>
 
           <div className="social-profile-actions">
@@ -18916,7 +18922,7 @@ useEffect(() => {
         setIsUpcomingLoading(true);
         setUpcomingSourceStatus("loading");
 
-        const data = await rawgApiRequest("/upcoming", { months: "6", limit: "40" }, {
+        const data = await GameService.igdb("/upcoming", { months: "6", limit: "40" }, {
           timeout: 7000,
         });
         const today = new Date();
@@ -19751,12 +19757,15 @@ useEffect(() => {
 
     setResults(resultsList);
 
-    setNextPage(
+    const nextSearchUrl =
       data.next ||
-        (resultsList.length === 20
-          ? buildRawgApiUrl("/games", nextParams)
-          : null)
-    );
+      (resultsList.length === 20
+        ? data?.meta?.source === "igdb"
+          ? buildIgdbApiUrl("/games", nextParams)
+          : buildRawgApiUrl("/games", nextParams)
+        : null);
+
+    setNextPage(nextSearchUrl);
 
     setShowFilters(false);
   } catch (e) {
