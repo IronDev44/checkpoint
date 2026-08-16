@@ -1,6 +1,5 @@
 import { normalizeRawgPayload } from "./rawgAdapter";
 import { normalizeIgdbPayload } from "./igdbAdapter";
-import { apiUrl } from "./apiBase";
 
 const RAWG_PROXY_BASE = "/api/rawg";
 const IGDB_PROXY_BASE = "/api/igdb";
@@ -33,7 +32,7 @@ function getRawgProxyPath(path) {
 function buildProxyUrl(base, path, params = {}) {
   const searchParams = createSearchParams(params);
   const query = searchParams.toString();
-  return apiUrl(`${base}${path}${query ? `?${query}` : ""}`);
+  return `${base}${path}${query ? `?${query}` : ""}`;
 }
 
 export function buildRawgApiUrl(path, params = {}) {
@@ -41,7 +40,7 @@ export function buildRawgApiUrl(path, params = {}) {
   const normalizedPath = getRawgProxyPath(path);
   const query = searchParams.toString();
 
-  return apiUrl(`${RAWG_PROXY_BASE}${normalizedPath}${query ? `?${query}` : ""}`);
+  return `${RAWG_PROXY_BASE}${normalizedPath}${query ? `?${query}` : ""}`;
 }
 
 export function buildIgdbApiUrl(path, params = {}) {
@@ -222,15 +221,12 @@ function shouldUseFallbackFirst(options = {}, fallbackUrl = "") {
 }
 
 function parseProxyRequest(path, params = {}) {
-  const pathValue = String(path || "");
   const url =
-    pathValue.startsWith("/api/") || /^https?:\/\//.test(pathValue)
-      ? new URL(pathValue, window.location.origin)
+    typeof path === "string" && path.startsWith("/api/")
+      ? new URL(path, window.location.origin)
       : null;
   const searchParams = url ? url.searchParams : createSearchParams(params);
-  const pathname = url
-    ? url.pathname
-    : `${RAWG_PROXY_BASE}${getRawgProxyPath(pathValue)}`;
+  const pathname = url ? url.pathname : buildRawgApiUrl(path, {}).split("?")[0];
 
   return { pathname, searchParams };
 }

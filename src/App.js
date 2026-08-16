@@ -20,7 +20,6 @@ import {
   buildRawgApiUrl,
   fetchJsonWithTimeout,
 } from "./services/gameService";
-import { apiUrl } from "./services/apiBase";
 import {
   collection,
   addDoc,
@@ -15417,7 +15416,7 @@ function OptionsTab({
 
     try {
       const response = await fetch(
-        apiUrl(`/api/steam/owned-games?profile=${encodeURIComponent(profileInput)}`)
+        `/api/steam/owned-games?profile=${encodeURIComponent(profileInput)}`
       );
       const contentType = response.headers.get("content-type") || "";
 
@@ -15483,7 +15482,7 @@ function OptionsTab({
 
     try {
       const response = await fetch(
-        apiUrl(`/api/steam/wishlist?profile=${encodeURIComponent(profileInput)}`)
+        `/api/steam/wishlist?profile=${encodeURIComponent(profileInput)}`
       );
       const contentType = response.headers.get("content-type") || "";
 
@@ -15543,7 +15542,7 @@ function OptionsTab({
     setXboxError("");
 
     try {
-      const response = await fetch(apiUrl("/api/xbox/session"));
+      const response = await fetch("/api/xbox/session");
       const contentType = response.headers.get("content-type") || "";
 
       if (!contentType.includes("application/json")) {
@@ -15579,14 +15578,14 @@ function OptionsTab({
     }
   };
   const connectXbox = () => {
-    window.location.href = apiUrl("/api/xbox/auth/start");
+    window.location.href = "/api/xbox/auth/start";
   };
   const disconnectXbox = async () => {
     setIsXboxLoading(true);
     setXboxError("");
 
     try {
-      await fetch(apiUrl("/api/xbox/logout"), { method: "POST" });
+      await fetch("/api/xbox/logout", { method: "POST" });
       setXboxSession({ connected: false });
       updateXboxProfile({
         connected: false,
@@ -15607,7 +15606,7 @@ function OptionsTab({
     setXboxError("");
 
     try {
-      const response = await fetch(apiUrl("/api/xbox/library"));
+      const response = await fetch("/api/xbox/library");
       const contentType = response.headers.get("content-type") || "";
 
       if (!contentType.includes("application/json")) {
@@ -17464,7 +17463,7 @@ function HomeDealsPreview({
 
     try {
       const apiResponse = await fetchWithTimeout(
-        apiUrl(`/api/deals?cc=${region.country}&locale=${region.locale}&lang=${region.steamLang}&currency=${region.currency}`)
+        `/api/deals?cc=${region.country}&locale=${region.locale}&lang=${region.steamLang}&currency=${region.currency}`
       );
       const contentType = apiResponse.headers.get("content-type") || "";
 
@@ -17669,7 +17668,7 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
 
     try {
       const apiResponse = await fetchWithTimeout(
-        apiUrl(`/api/deals?cc=${region.country}&locale=${region.locale}&lang=${region.steamLang}&currency=${region.currency}`)
+        `/api/deals?cc=${region.country}&locale=${region.locale}&lang=${region.steamLang}&currency=${region.currency}`
       );
       const contentType = apiResponse.headers.get("content-type") || "";
 
