@@ -6734,12 +6734,9 @@ function SanctuaryTab({
           <span className="sanctuary-kicker">Sanctuaire</span>
           <h1>Ce qui compte vraiment</h1>
           <p>
-            Garde ici les jeux, objets et souvenirs que tu choisis vraiment de
-            mettre en avant.
-          </p>
-          <p className="section-human-note sanctuary-note">
-            Le Top 5 sert à classer. Le Sanctuaire sert à raconter ce qui t'a
-            marqué.
+            Ici, tu gardes ce qui t'a vraiment marqué : jeux cultes, objets,
+            souvenirs et matériel important. Le Top 5 classe, le Sanctuaire
+            raconte ton histoire.
           </p>
         </div>
         <div className="sanctuary-seal">
@@ -6780,7 +6777,7 @@ function SanctuaryTab({
           <h2>{signatureGame?.name || "Ton premier jeu culte"}</h2>
           <p>
             {signatureGame
-              ? `${formatRating10(getGameRating(signatureGame), "Non note")}/10 · ${
+              ? `${formatRating10(getGameRating(signatureGame), "Non note")} · ${
                   signatureGame.genreNames?.[0] || "jeu marquant"
                 }`
               : "Ajoute un jeu au Sanctuaire depuis sa fiche pour commencer cette vitrine."}
@@ -9574,18 +9571,18 @@ function HomeTab({
   const nextPlayCandidate = inProgressGames[0] || backlogCandidates[0] || null;
   const homeGreeting =
     inProgressGames.length > 0
-      ? "Content de te revoir"
+      ? "Ravi de te revoir"
       : total > 0
-      ? "Ton univers prend forme"
+      ? "Ton univers avance bien"
       : "Bienvenue dans ton hub";
   const homeHeroCopy = nextPlayCandidate
-    ? `${nextPlayCandidate.name} t'attend. Checkpoint garde le fil de ta collection, de tes notes et de tes prochaines envies.`
+    ? `Tu peux reprendre ${nextPlayCandidate.name} quand tu veux. J'ai gardé le fil de ta collection, de tes notes et de ce qui mérite ton attention.`
     : total > 0
-      ? "Ta collection commence a raconter quelque chose. Ajoute tes jeux, tes notes et ton materiel pour lui donner encore plus de relief."
-      : "Commence par ajouter quelques jeux, puis Checkpoint deviendra ton carnet de bord gaming.";
+      ? "Ta collection commence à raconter ton parcours. Continue à ajouter tes jeux, tes notes et ton matériel, petit à petit."
+      : "Ajoute quelques jeux pour commencer. Checkpoint deviendra ensuite ton carnet de bord gaming.";
   const homeHeroTags = [
-    level >= 50 ? "Joueur installe" : "Profil en construction",
-    inProgressCount ? `${inProgressCount} partie${inProgressCount > 1 ? "s" : ""} en cours` : "Pret pour une nouvelle session",
+    level >= 50 ? "Profil solide" : "Profil en construction",
+    inProgressCount ? `${inProgressCount} partie${inProgressCount > 1 ? "s" : ""} en cours` : "Prêt pour une nouvelle session",
   ];
 
   const dashboardAction = !quizLocked
