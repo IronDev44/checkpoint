@@ -444,6 +444,7 @@ function normalizeGameRatings(game = {}) {
     status: normalizedGame.status || "wishlist",
     completed: Boolean(normalizedGame.completed),
     favorite: Boolean(normalizedGame.favorite),
+    sanctuary: Boolean(normalizedGame.sanctuary),
     physicalOwned: Boolean(normalizedGame.physicalOwned),
     physicalEdition: normalizedGame.physicalEdition || "",
     physicalCondition: normalizedGame.physicalCondition || "",
@@ -847,6 +848,7 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
     name: game.name,
     rating: 0,
     favorite: false,
+    sanctuary: false,
     image: game.background_image || details?.background_image || "",
     status,
     released: game.released || details?.released || "",
@@ -3185,7 +3187,7 @@ function BottomTabs({ activeTab, setActiveTab, soundStyle }) {
   { id: "library", Icon: Library, label: "Bibliothèque" },
   { id: "series", Icon: Puzzle, label: "Séries" },
   { id: "hardware", Icon: Joystick, label: "Matériel" },
-  { id: "favorites", Icon: Heart, label: "Sanctuaire" },
+  { id: "favorites", Icon: Landmark, label: "Sanctuaire" },
   { id: "top5", Icon: Trophy, label: "Top 5" },
   { id: "profile", Icon: Medal, label: "Profil" },
   { id: "options", Icon: Settings, label: "Options" },
@@ -3292,6 +3294,7 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
     name: game.name,
     rating: 0,
     favorite: false,
+    sanctuary: false,
     image: game.background_image || "",
     status,
     released: game.released || "",
@@ -3505,6 +3508,7 @@ function UpcomingGameCard({ game, onWishlist }) {
     name: game.name,
     rating: 0,
     favorite: false,
+    sanctuary: false,
     image: displayImage || "",
     status: "wishlist",
     released: game.released || "",
@@ -5479,6 +5483,7 @@ function GameDetailModal({
   onSetRating,
   onRatingCommit,
   onToggleFavorite,
+  onSetGameSanctuary,
   onSetDifficulty,
   onSetReview,
   onSetOstInfo,
@@ -5922,6 +5927,21 @@ function GameDetailModal({
             </div>
           </div>
 
+          <div className="game-detail-section sanctuary-picker-section">
+            <div className="modal-block-title">Sanctuaire</div>
+
+            <label className="sanctuary-select-row">
+              <span>Vitrine personnelle</span>
+              <select
+                value={game.sanctuary ? "in" : "out"}
+                onChange={(e) => onSetGameSanctuary?.(game.id, e.target.value === "in")}
+              >
+                <option value="out">Ne pas afficher</option>
+                <option value="in">Dans le Sanctuaire</option>
+              </select>
+            </label>
+          </div>
+
           <div className="game-detail-section">
             <div className="modal-block-title">Plateforme utilisée</div>
 
@@ -6014,6 +6034,7 @@ function GameDetailModal({
                                 name: dlc.name,
                                 rating: 0,
                                 favorite: false,
+                                sanctuary: false,
                                 image: dlc.background_image || "",
                                 status: "collection",
                                 released: dlc.released || "",
@@ -6608,16 +6629,15 @@ function SanctuaryTab({
   games = [],
   hardware = [],
   onOpenGameDetail,
-  onToggleFavorite,
   onGoLibrary,
   onGoHardware,
 }) {
-  const favoriteGames = games.filter((game) => game.favorite);
-  const physicalGames = games.filter((game) => game.physicalOwned);
-  const favoriteHardware = hardware.filter((item) => item.favorite);
-  const finishedFavorites = favoriteGames.filter(isGameFinishedStatus);
+  const sanctuaryGames = games.filter((game) => game.sanctuary);
+  const sanctuaryPhysicalGames = sanctuaryGames.filter((game) => game.physicalOwned);
+  const sanctuaryHardware = hardware.filter((item) => item.sanctuary);
+  const finishedSanctuaryGames = sanctuaryGames.filter(isGameFinishedStatus);
 
-  const hallOfFameGames = [...favoriteGames]
+  const hallOfFameGames = [...sanctuaryGames]
     .sort((a, b) => {
       const scoreA =
         getGameRating(a) * 10 +
@@ -6632,22 +6652,22 @@ function SanctuaryTab({
     })
     .slice(0, 4);
 
-  const recentHeartGames = [...favoriteGames]
+  const recentSanctuaryGames = [...sanctuaryGames]
     .sort((a, b) => (b.createdAt || b.updatedAt || "").localeCompare(a.createdAt || a.updatedAt || ""))
     .slice(0, 4);
 
   const relics = [
-    ...physicalGames.map((game) => ({
+    ...sanctuaryPhysicalGames.map((game) => ({
       id: `game-${game.id}`,
       type: "Jeu physique",
       title: game.name,
-      subtitle: game.physicalEdition || game.physicalCondition || "Piece de collection",
+      subtitle: game.physicalEdition || game.physicalCondition || "Pièce de collection",
       image: game.physicalPhoto || game.image,
-      onClick: () => onOpenGameDetail(game, physicalGames),
+      onClick: () => onOpenGameDetail(game, sanctuaryGames),
     })),
-    ...favoriteHardware.map((item) => ({
+    ...sanctuaryHardware.map((item) => ({
       id: `hardware-${item.id}`,
-      type: "Materiel favori",
+      type: "Materiel choisi",
       title: item.name,
       subtitle: item.brand || getHardwareTypeLabel(item.type),
       image: item.image,
@@ -6655,31 +6675,30 @@ function SanctuaryTab({
     })),
   ].slice(0, 6);
 
-  const signatureGame = hallOfFameGames[0] || favoriteGames[0] || games[0];
-  const bestHardware = favoriteHardware[0];
+  const signatureGame = hallOfFameGames[0] || sanctuaryGames[0];
   const completionIdeas = [
     {
-      title: favoriteGames.length ? "Raconter pourquoi" : "Ajouter ton premier favori",
-      text: favoriteGames.length
+      title: sanctuaryGames.length ? "Raconter pourquoi" : "Choisir ton premier jeu",
+      text: sanctuaryGames.length
         ? "Ajoute une note perso dans tes fiches pour donner une vraie mémoire au Sanctuaire."
-        : "Marque un jeu avec le coeur pour commencer ton Sanctuaire.",
-      action: favoriteGames.length ? "Ouvrir la bibliotheque" : "Choisir un jeu",
+        : "Ouvre une fiche jeu et place-la volontairement dans le Sanctuaire.",
+      action: sanctuaryGames.length ? "Ouvrir la bibliothèque" : "Choisir un jeu",
       onClick: onGoLibrary,
     },
     {
-      title: physicalGames.length ? "Mettre les reliques en valeur" : "Ajouter une relique",
-      text: physicalGames.length
-        ? "Photos, edition et etat transforment ta collection physique en vraie vitrine."
-        : "Les jeux boite, collectors et objets importants auront leur place ici.",
+      title: sanctuaryPhysicalGames.length ? "Mettre les reliques en valeur" : "Ajouter une relique",
+      text: sanctuaryPhysicalGames.length
+        ? "Photos, édition et état transforment ta collection physique en vraie vitrine."
+        : "Les jeux boîte et collectors choisis depuis leur fiche auront leur place ici.",
       action: "Collection physique",
       onClick: onGoLibrary,
     },
     {
-      title: favoriteHardware.length ? "Completer le setup" : "Choisir ton materiel culte",
-      text: favoriteHardware.length
-        ? "Ton materiel favori donne une signature plus personnelle a ton profil."
-        : "Ajoute un coeur sur ton materiel prefere pour remplir cette zone.",
-      action: "Voir le materiel",
+      title: sanctuaryHardware.length ? "Compléter le setup" : "Choisir ton matériel culte",
+      text: sanctuaryHardware.length
+        ? "Ton matériel choisi donne une signature plus personnelle à ton profil."
+        : "Ouvre une fiche matériel et ajoute-la au Sanctuaire.",
+      action: "Voir le matériel",
       onClick: onGoHardware,
     },
   ];
@@ -6689,7 +6708,7 @@ function SanctuaryTab({
       type="button"
       className="sanctuary-game-tile"
       key={game.id}
-      onClick={() => onOpenGameDetail(game, favoriteGames)}
+      onClick={() => onOpenGameDetail(game, sanctuaryGames)}
     >
       <span className="sanctuary-rank">{index + 1}</span>
       <span className="sanctuary-cover">
@@ -6703,7 +6722,7 @@ function SanctuaryTab({
         </small>
       </span>
       <span className="sanctuary-heart">
-        <Heart size={16} fill="currentColor" />
+        <Landmark size={16} />
       </span>
     </button>
   );
@@ -6715,36 +6734,36 @@ function SanctuaryTab({
           <span className="sanctuary-kicker">Sanctuaire</span>
           <h1>Ce qui compte vraiment</h1>
           <p>
-            Pas un classement. Une vitrine personnelle pour tes jeux cultes, tes
-            reliques, ton setup et les souvenirs qui te definissent.
+            Garde ici les jeux, objets et souvenirs que tu choisis vraiment de
+            mettre en avant.
           </p>
           <p className="section-human-note sanctuary-note">
-            Le Top 5 compare. Le Sanctuaire garde ce qui t'a marque, meme si ce
-            n'est pas toujours le mieux note.
+            Le Top 5 sert à classer. Le Sanctuaire sert à raconter ce qui t'a
+            marqué.
           </p>
         </div>
         <div className="sanctuary-seal">
-          <Heart size={28} fill="currentColor" />
-          <span>{favoriteGames.length}</span>
+          <Landmark size={28} />
+          <span>{sanctuaryGames.length + sanctuaryHardware.length}</span>
         </div>
       </section>
 
       <div className="sanctuary-stat-grid">
         <div>
-          <strong>{favoriteGames.length}</strong>
-          <span>coups de coeur</span>
+          <strong>{sanctuaryGames.length}</strong>
+          <span>jeux choisis</span>
         </div>
         <div>
-          <strong>{finishedFavorites.length}</strong>
-          <span>termines</span>
+          <strong>{finishedSanctuaryGames.length}</strong>
+          <span>terminés</span>
         </div>
         <div>
-          <strong>{physicalGames.length}</strong>
+          <strong>{sanctuaryPhysicalGames.length}</strong>
           <span>reliques</span>
         </div>
         <div>
-          <strong>{favoriteHardware.length}</strong>
-          <span>materiels</span>
+          <strong>{sanctuaryHardware.length}</strong>
+          <span>matériels</span>
         </div>
       </div>
 
@@ -6764,10 +6783,10 @@ function SanctuaryTab({
               ? `${formatRating10(getGameRating(signatureGame), "Non note")}/10 · ${
                   signatureGame.genreNames?.[0] || "jeu marquant"
                 }`
-              : "Ajoute un coeur a un jeu pour commencer a construire cette vitrine."}
+              : "Ajoute un jeu au Sanctuaire depuis sa fiche pour commencer cette vitrine."}
           </p>
-          <button type="button" onClick={signatureGame ? () => onOpenGameDetail(signatureGame, favoriteGames) : onGoLibrary}>
-            {signatureGame ? "Ouvrir la fiche" : "Choisir un favori"}
+          <button type="button" onClick={signatureGame ? () => onOpenGameDetail(signatureGame, sanctuaryGames) : onGoLibrary}>
+            {signatureGame ? "Ouvrir la fiche" : "Choisir un jeu"}
           </button>
         </div>
       </section>
@@ -6787,8 +6806,8 @@ function SanctuaryTab({
           </div>
         ) : (
           <div className="sanctuary-empty">
-            <strong>Aucun jeu sacralise pour l'instant.</strong>
-            <span>Ajoute un coeur depuis une fiche jeu pour remplir cette zone.</span>
+            <strong>Aucun jeu sacralisé pour l'instant.</strong>
+            <span>Ajoute un jeu au Sanctuaire depuis sa fiche pour remplir cette zone.</span>
           </div>
         )}
       </section>
@@ -6818,7 +6837,7 @@ function SanctuaryTab({
         ) : (
           <div className="sanctuary-empty">
             <strong>Pas encore de relique.</strong>
-            <span>Les jeux physiques et le materiel favori apparaitront ici.</span>
+            <span>Les jeux physiques et le matériel choisis apparaîtront ici.</span>
           </div>
         )}
       </section>
@@ -6826,28 +6845,28 @@ function SanctuaryTab({
       <section className="sanctuary-section">
         <div className="sanctuary-section-head">
           <div>
-            <span>Coups de coeur</span>
-            <h2>Dernieres etoiles</h2>
+            <span>Sélection</span>
+            <h2>Derniers ajouts</h2>
           </div>
-          <small>{recentHeartGames.length}</small>
+          <small>{recentSanctuaryGames.length}</small>
         </div>
 
-        {recentHeartGames.length ? (
+        {recentSanctuaryGames.length ? (
           <div className="sanctuary-chip-list">
-            {recentHeartGames.map((game) => (
+            {recentSanctuaryGames.map((game) => (
               <button
                 type="button"
                 key={`recent-${game.id}`}
-                onClick={() => onOpenGameDetail(game, favoriteGames)}
+                onClick={() => onOpenGameDetail(game, sanctuaryGames)}
               >
-                <Heart size={14} fill="currentColor" />
+                <Landmark size={14} />
                 <span>{game.name}</span>
               </button>
             ))}
           </div>
         ) : (
           <div className="sanctuary-empty compact">
-            <span>Tes derniers coups de coeur apparaitront ici.</span>
+            <span>Tes derniers choix apparaîtront ici.</span>
           </div>
         )}
       </section>
@@ -6856,7 +6875,7 @@ function SanctuaryTab({
         <div className="sanctuary-section-head">
           <div>
             <span>Vitrine</span>
-            <h2>A completer</h2>
+            <h2>À compléter</h2>
           </div>
         </div>
         <div className="sanctuary-todo-list">
@@ -12531,6 +12550,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
                                 name: rawgGame.name,
                                 rating: 0,
                                 favorite: false,
+                                sanctuary: false,
                                 image: rawgGame.background_image || "",
                                 status: "wishlist",
                                 progressStatus: "not_started",
@@ -12564,6 +12584,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
                                 name: rawgGame.name,
                                 rating: 0,
                                 favorite: false,
+                                sanctuary: false,
                                 image: rawgGame.background_image || "",
                                 status: "collection",
                                 progressStatus: "not_started",
@@ -12942,6 +12963,7 @@ function normalizeHardwareRatings(item = {}) {
     type: normalizedItem.type || "other",
     status: normalizedItem.status || "",
     condition: normalizedItem.condition || "",
+    sanctuary: Boolean(normalizedItem.sanctuary),
     image: normalizedItem.image || "",
     displaySizes: normalizeArray(normalizedItem.displaySizes).map(String),
     components: normalizeObject(normalizedItem.components),
@@ -12999,6 +13021,7 @@ function HardwareDetailModal({
   conditionOptions,
   displaySizeOptions = [],
   onUpdateHardwareStatus,
+  onUpdateHardwareSanctuary,
   onUpdateHardwareCondition,
   onUpdateHardwareDisplaySize,
   onUpdateHardwareComponent,
@@ -13209,6 +13232,19 @@ function HardwareDetailModal({
                 setOpenedDropdown={setOpenedDropdown}
                 onChange={(value) => onUpdateHardwareStatus?.(item.id, value)}
               />
+
+              <HardwareDropdown
+                id={`detail-sanctuary-${item.id}`}
+                label="Sanctuaire"
+                value={item.sanctuary ? "in" : "out"}
+                options={[
+                  { id: "out", label: "Ne pas afficher" },
+                  { id: "in", label: "Dans le Sanctuaire" },
+                ]}
+                openedDropdown={openedDropdown}
+                setOpenedDropdown={setOpenedDropdown}
+                onChange={(value) => onUpdateHardwareSanctuary?.(item.id, value === "in")}
+              />
             </div>
           </div>
 
@@ -13310,6 +13346,7 @@ function HardwareTab({
   onDeleteHardware,
   onToggleHardwareFavorite,
   onUpdateHardwareStatus,
+  onUpdateHardwareSanctuary,
   onUpdateHardwareCondition,
   onUpdateHardwareDisplaySize,
   onUpdateHardwareRank,
@@ -13669,6 +13706,7 @@ function HardwareTab({
             ratings: {},
             review: "",
             favorite: false,
+            sanctuary: false,
             source:
               controllerStatus === ownedStatusId
                 ? "auto-controller"
@@ -13880,6 +13918,7 @@ function HardwareTab({
       ratings: {},
       review: "",
       favorite: false,
+      sanctuary: false,
       source: "local-catalog",
       createdAt: Date.now(),
     });
@@ -14518,6 +14557,7 @@ function HardwareTab({
                                         conditionOptions={CONDITION_OPTIONS}
                                         displaySizeOptions={DISPLAY_SIZE_OPTIONS}
                                         onUpdateHardwareStatus={onUpdateHardwareStatus}
+                                        onUpdateHardwareSanctuary={onUpdateHardwareSanctuary}
                                         onUpdateHardwareCondition={onUpdateHardwareCondition}
                                         onUpdateHardwareDisplaySize={onUpdateHardwareDisplaySize}
                                         onUpdateHardwareComponent={onUpdateHardwareComponent}
@@ -14865,6 +14905,7 @@ function HardwareTab({
                           conditionOptions={CONDITION_OPTIONS}
                           displaySizeOptions={DISPLAY_SIZE_OPTIONS}
                           onUpdateHardwareStatus={onUpdateHardwareStatus}
+                          onUpdateHardwareSanctuary={onUpdateHardwareSanctuary}
                           onUpdateHardwareCondition={onUpdateHardwareCondition}
                           onUpdateHardwareDisplaySize={onUpdateHardwareDisplaySize}
                           onUpdateHardwareComponent={onUpdateHardwareComponent}
@@ -18235,6 +18276,11 @@ const deleteHardware = async (id) => {
 
 const toggleHardwareFavorite = async (id, currentFavorite) => {
   try {
+    setHardware((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, favorite: !currentFavorite } : item
+      )
+    );
     await updateDoc(doc(db, "hardware", id), {
       favorite: !currentFavorite,
     });
@@ -18920,6 +18966,24 @@ const updateHardwareStatus = async (id, status) => {
   }
 };
 
+const updateHardwareSanctuary = async (id, sanctuary) => {
+  try {
+    setHardware((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, sanctuary } : item))
+    );
+    await updateDoc(doc(db, "hardware", id), { sanctuary });
+    setToast(
+      sanctuary
+        ? "Matériel ajouté au Sanctuaire."
+        : "Matériel retiré du Sanctuaire."
+    );
+  } catch (error) {
+    if (isAbortError(error)) return;
+    console.error("Erreur Sanctuaire matériel :", error);
+    setToast("Impossible de mettre à jour le Sanctuaire.");
+  }
+};
+
 const updateHardwareCondition = async (id, condition) => {
   try {
     await updateDoc(doc(db, "hardware", id), { condition });
@@ -19553,6 +19617,7 @@ useEffect(() => {
         completed: game.completed || isFinished || false,
         rating: getGameRating(game),
         favorite: game.favorite || false,
+        sanctuary: Boolean(game.sanctuary),
         image: game.image || "",
         status: isFinished ? "collection" : game.status || "wishlist",
         released: game.released || "",
@@ -19650,6 +19715,7 @@ useEffect(() => {
         completed: false,
         rating: 0,
         favorite: false,
+        sanctuary: false,
         image: steamGame.image || "",
         status: steamStatus === "wishlist" || importingWishlist ? "wishlist" : "collection",
         released: "",
@@ -19738,6 +19804,7 @@ useEffect(() => {
         completed: false,
         rating: 0,
         favorite: false,
+        sanctuary: false,
         image: xboxGame.image || "",
         status: "collection",
         released: "",
@@ -20207,11 +20274,34 @@ const setRating = (id, rating) => {
   const toggleFavorite = async (id, currentValue) => {
     try {
       await updateDoc(doc(db, "games", id), { favorite: !currentValue });
+      setGames((prev) =>
+        prev.map((game) =>
+          game.id === id ? { ...game, favorite: !currentValue } : game
+        )
+      );
       if (selectedGame?.id === id) {
         setSelectedGame((prev) => ({ ...prev, favorite: !currentValue }));
       }
     } catch (e) {
       console.error("Erreur mise à jour favori :", e);
+    }
+  };
+
+  const setGameSanctuary = async (id, sanctuary) => {
+    try {
+      await updateDoc(doc(db, "games", id), { sanctuary });
+      setGames((prev) =>
+        prev.map((game) => (game.id === id ? { ...game, sanctuary } : game))
+      );
+      if (selectedGame?.id === id) {
+        setSelectedGame((prev) => ({ ...prev, sanctuary }));
+      }
+      setToast(
+        sanctuary ? "Jeu ajouté au Sanctuaire." : "Jeu retiré du Sanctuaire."
+      );
+    } catch (e) {
+      console.error("Erreur Sanctuaire jeu :", e);
+      setToast("Impossible de mettre à jour le Sanctuaire.");
     }
   };
 
@@ -21126,6 +21216,7 @@ const setPlayedPlatforms = async (id, platforms) => {
     onToggleHardwareFavorite={toggleHardwareFavorite}
     games={games}
     onUpdateHardwareStatus={updateHardwareStatus}
+    onUpdateHardwareSanctuary={updateHardwareSanctuary}
     onUpdateHardwareCondition={updateHardwareCondition}
     onUpdateHardwareDisplaySize={updateHardwareDisplaySize}
     onUpdateHardwareRank={updateHardwareRank}
@@ -21140,7 +21231,6 @@ const setPlayedPlatforms = async (id, platforms) => {
               games={games}
               hardware={hardware}
               onOpenGameDetail={openGameDetail}
-              onToggleFavorite={toggleFavorite}
               onGoLibrary={() => setActiveTab("library")}
               onGoHardware={() => setActiveTab("hardware")}
             />
@@ -21285,6 +21375,7 @@ const setPlayedPlatforms = async (id, platforms) => {
         onSetRating={setRating}
         onRatingCommit={handleGameRatingCommit}
         onToggleFavorite={toggleFavorite}
+        onSetGameSanctuary={setGameSanctuary}
         onSetDifficulty={setDifficulty}
         onSetReview={setReview}
         onSetOstInfo={setOstInfo}

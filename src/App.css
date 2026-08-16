@@ -3738,6 +3738,37 @@ button:disabled {
   padding: 14px;
 }
 
+.sanctuary-picker-section {
+  display: grid;
+  gap: 10px;
+}
+
+.sanctuary-select-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, auto);
+  gap: 12px;
+  align-items: center;
+}
+
+.sanctuary-select-row span {
+  color: rgba(255,255,255,0.88);
+  font-weight: 900;
+}
+
+.sanctuary-select-row select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 36px 9px 14px;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  color: #fff;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.11), rgba(255,255,255,0.055)),
+    rgba(13, 18, 30, 0.96);
+  font: inherit;
+  font-weight: 850;
+}
+
 .game-detail-personal-summary {
   border-color: color-mix(in srgb, var(--accent), transparent 66%);
   background:
@@ -15211,6 +15242,10 @@ body[data-ui="modern"] .panel-title {
 
 @media (max-width: 640px) {
   .status-row {
+    grid-template-columns: 1fr;
+  }
+
+  .sanctuary-select-row {
     grid-template-columns: 1fr;
   }
 
