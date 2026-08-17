@@ -299,6 +299,8 @@ const DEFAULT_APP_OPTIONS = {
 
 const APP_OPTIONS_STORAGE_KEY = "checkpoint-app-options";
 const APP_OPTIONS_SCHEMA_VERSION = 2;
+const PRIVATE_SETTINGS_COLLECTION = "playerPrivateSettings";
+const PRIVATE_SETTINGS_DOC_ID = "main";
 
 function normalizeConnectedProfile(profile = {}, defaults = {}) {
   return {
@@ -7676,6 +7678,30 @@ function storeSocialFriends(friends) {
   );
 
   return normalizedFriends;
+}
+
+function getCloudSafeSocialProfile(profile = {}) {
+  const normalizedProfile = normalizeSocialProfile(profile);
+  const { setupPhotos, collectionPhotos, ...cloudProfile } = normalizedProfile;
+
+  return {
+    ...cloudProfile,
+    photoCounts: {
+      setup: setupPhotos.length,
+      collection: collectionPhotos.length,
+    },
+  };
+}
+
+function mergeCloudSocialProfile(remoteProfile = {}, localProfile = {}) {
+  const local = normalizeSocialProfile(localProfile);
+  const remote = normalizeSocialProfile(remoteProfile);
+
+  return {
+    ...remote,
+    setupPhotos: local.setupPhotos,
+    collectionPhotos: local.collectionPhotos,
+  };
 }
 
 function getActivityLikeState(activityLikes = {}, activityId = "") {
@@ -18147,6 +18173,7 @@ export default function App() {
       return storeSocialFriends([]);
     }
   });
+  const [privateSettingsReady, setPrivateSettingsReady] = useState(false);
   const [sharedProfile, setSharedProfile] = useState(null);
   const [miniPlayerLive, setMiniPlayerLive] = useState(null);
   const [miniPlayerCollapsed, setMiniPlayerCollapsed] = useState(false);
@@ -18215,6 +18242,83 @@ const tabOrder = [
 const [soundEnabled, setSoundEnabled] = useState(
   localStorage.getItem("checkpoint-sound-enabled") !== "false"
 );
+
+useEffect(() => {
+  let cancelled = false;
+
+  const loadPrivateSettings = async () => {
+    try {
+      const snap = await getDoc(
+        doc(db, PRIVATE_SETTINGS_COLLECTION, PRIVATE_SETTINGS_DOC_ID)
+      );
+
+      if (cancelled || !snap.exists()) return;
+
+      const remote = snap.data() || {};
+
+      if (remote.theme) {
+        setTheme(remote.theme);
+        localStorage.setItem("checkpoint-theme", remote.theme);
+      }
+
+      if (remote.uiMode) {
+        setUiMode(remote.uiMode);
+        localStorage.setItem("checkpoint-ui-mode", remote.uiMode);
+      }
+
+      if (remote.appOptions) {
+        setAppOptions(storeAppOptions(remote.appOptions));
+      }
+
+      if (remote.socialProfile) {
+        setSocialProfile((currentProfile) =>
+          storeSocialProfile(
+            mergeCloudSocialProfile(remote.socialProfile, currentProfile)
+          )
+        );
+      }
+
+      if (Array.isArray(remote.socialFriends)) {
+        setSocialFriends(storeSocialFriends(remote.socialFriends));
+      }
+    } catch (error) {
+      console.error("Erreur chargement préférences privées :", error);
+    } finally {
+      if (!cancelled) {
+        setPrivateSettingsReady(true);
+      }
+    }
+  };
+
+  loadPrivateSettings();
+
+  return () => {
+    cancelled = true;
+  };
+}, []);
+
+useEffect(() => {
+  if (!privateSettingsReady) return;
+
+  const timeoutId = window.setTimeout(() => {
+    setDoc(
+      doc(db, PRIVATE_SETTINGS_COLLECTION, PRIVATE_SETTINGS_DOC_ID),
+      {
+        theme,
+        uiMode,
+        appOptions: normalizeAppOptions(appOptions),
+        socialProfile: getCloudSafeSocialProfile(socialProfile),
+        socialFriends: normalizeSocialFriends(socialFriends),
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    ).catch((error) => {
+      console.error("Erreur sauvegarde préférences privées :", error);
+    });
+  }, 800);
+
+  return () => window.clearTimeout(timeoutId);
+}, [privateSettingsReady, theme, uiMode, appOptions, socialProfile, socialFriends]);
 
 useEffect(() => {
   localStorage.setItem(
