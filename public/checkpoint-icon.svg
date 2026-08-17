@@ -1,0 +1,45 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" rx="220" fill="#02070E"/>
+  <rect x="72" y="72" width="880" height="880" rx="180" fill="url(#panel)" stroke="#177DFF" stroke-width="7"/>
+  <rect x="72" y="72" width="880" height="880" rx="180" stroke="#2CF4E8" stroke-opacity=".35" stroke-width="20"/>
+  <circle cx="760" cy="190" r="170" fill="#1E82FF" opacity=".22"/>
+  <g filter="url(#cpGlow)">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M560 326H338L244 420V590L338 684H560V585H384L344 545V465L384 425H560V326ZM540 326H727L818 417V499L727 590H626V748L540 672V326ZM626 425H700L727 452V465L700 492H626V425Z" fill="url(#cp)"/>
+  </g>
+  <g opacity=".9">
+    <rect x="318" y="356" width="24" height="24" fill="#35F3E5"/>
+    <rect x="285" y="370" width="18" height="18" fill="#35F3E5"/>
+    <rect x="249" y="382" width="16" height="16" fill="#35F3E5"/>
+    <rect x="210" y="396" width="14" height="14" fill="#35F3E5"/>
+    <rect x="176" y="413" width="11" height="11" fill="#35F3E5"/>
+    <rect x="287" y="412" width="24" height="24" fill="#2EDDE8"/>
+    <rect x="246" y="424" width="18" height="18" fill="#2EDDE8"/>
+    <rect x="203" y="438" width="15" height="15" fill="#2EDDE8"/>
+    <rect x="232" y="472" width="22" height="22" fill="#2095FF"/>
+    <rect x="193" y="488" width="16" height="16" fill="#2095FF"/>
+    <rect x="224" y="524" width="22" height="22" fill="#1982FF"/>
+    <rect x="184" y="543" width="17" height="17" fill="#1982FF"/>
+    <rect x="282" y="556" width="20" height="20" fill="#1982FF"/>
+    <rect x="242" y="572" width="18" height="18" fill="#1982FF"/>
+    <rect x="301" y="606" width="16" height="16" fill="#1E8CFF"/>
+  </g>
+  <defs>
+    <linearGradient id="panel" x1="72" y1="72" x2="952" y2="952" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#08131F"/>
+      <stop offset=".5" stop-color="#050910"/>
+      <stop offset="1" stop-color="#071A2B"/>
+    </linearGradient>
+    <linearGradient id="cp" x1="244" y1="326" x2="818" y2="748" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2CF4E8"/>
+      <stop offset=".48" stop-color="#22D0E8"/>
+      <stop offset="1" stop-color="#1878FF"/>
+    </linearGradient>
+    <filter id="cpGlow" x="130" y="212" width="802" height="650" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="22" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+</svg>
