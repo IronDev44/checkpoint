@@ -7591,12 +7591,18 @@ function normalizeObject(value) {
 
 function normalizeSocialProfile(profile = {}) {
   const source = normalizeObject(profile);
+  const hasDisplayName = Object.prototype.hasOwnProperty.call(
+    source,
+    "displayName"
+  );
+  const hasHandle = Object.prototype.hasOwnProperty.call(source, "handle");
   const displayName =
-    String(source.displayName || DEFAULT_SOCIAL_PROFILE.displayName).trim() ||
-    DEFAULT_SOCIAL_PROFILE.displayName;
-  const handle =
-    normalizeHandle(source.handle || DEFAULT_SOCIAL_PROFILE.handle) ||
-    DEFAULT_SOCIAL_PROFILE.handle;
+    (hasDisplayName
+      ? String(source.displayName).trim()
+      : DEFAULT_SOCIAL_PROFILE.displayName) || "";
+  const handle = hasHandle
+    ? normalizeHandle(source.handle)
+    : DEFAULT_SOCIAL_PROFILE.handle;
   const creatorEnabled =
     DEFAULT_SOCIAL_PROFILE.creatorBadgeEnabled ||
     isCreatorProfile({
@@ -8918,7 +8924,7 @@ function SocialTab({
       ? {
           label: "Ajouter une photo de setup",
           detail: "Donne une vraie vitrine a ton profil.",
-          action: () => setSocialView("profile"),
+          action: () => setSocialView("showcase"),
         }
       : null,
     socialProfile.visibility !== "public"
@@ -9168,11 +9174,23 @@ function SocialTab({
           </div>
 
           <div className="social-profile-actions">
-            <button type="button" onClick={() => setSocialView("profile")}>
+            <button
+              type="button"
+              onClick={() => {
+                setShowPublicPreview(false);
+                setSocialView("profile");
+              }}
+            >
               Modifier
             </button>
-            <button type="button" onClick={() => setShowPublicPreview(true)}>
-              Apercu public
+            <button
+              type="button"
+              onClick={() => {
+                setSocialView("showcase");
+                setShowPublicPreview(false);
+              }}
+            >
+              Vitrine
             </button>
             <button type="button" onClick={() => setSocialView("friends")}>
               Amis
@@ -9185,20 +9203,56 @@ function SocialTab({
         {[
           { key: "feed", label: "Fil" },
           { key: "profile", label: "Profil" },
+          { key: "showcase", label: "Vitrine" },
           { key: "friends", label: "Amis" },
         ].map((item) => (
           <button
             key={item.key}
             type="button"
             className={socialView === item.key ? "active" : ""}
-            onClick={() => setSocialView(item.key)}
+            onClick={() => {
+              setSocialView(item.key);
+              setShowPublicPreview(false);
+            }}
           >
             {item.label}
           </button>
         ))}
       </div>
 
-      <div className="social-command-center">
+      <div className={`search-panel social-section-intro ${socialView === "feed" ? "" : "social-section-hidden"}`}>
+        <span>Fil d'actu</span>
+        <strong>Ce que les autres peuvent suivre</strong>
+        <p>
+          Tes publications, tes ajouts, tes notes et les moments importants de ta collection.
+        </p>
+      </div>
+
+      <div className={`search-panel social-section-intro ${socialView === "profile" ? "" : "social-section-hidden"}`}>
+        <span>Profil</span>
+        <strong>Ton identité joueur</strong>
+        <p>
+          Modifie ton pseudo, ta bio et les jeux fondateurs qui expliquent ton parcours.
+        </p>
+      </div>
+
+      <div className={`search-panel social-section-intro ${socialView === "showcase" ? "" : "social-section-hidden"}`}>
+        <span>Vitrine</span>
+        <strong>Ce que tu choisis de montrer</strong>
+        <p>
+          Aperçu public, photos, Sanctuaire et éléments mis en avant : c'est la partie partageable.
+        </p>
+      </div>
+
+      <div className={`search-panel social-section-intro ${socialView === "friends" ? "" : "social-section-hidden"}`}>
+        <span>Amis</span>
+        <strong>Ton cercle Checkpoint</strong>
+        <p>
+          Ajoute des profils publics et garde sous la main les joueurs que tu veux suivre.
+        </p>
+      </div>
+
+      <div className={`social-command-center ${socialView === "profile" ? "" : "social-section-hidden"}`}>
         {socialMomentumCards.map((card) => (
           <div key={card.label} className="social-command-card">
             <span>{card.label}</span>
@@ -9208,7 +9262,7 @@ function SocialTab({
         ))}
       </div>
 
-      {sanctuaryHighlights.length > 0 && (
+      {socialView === "showcase" && sanctuaryHighlights.length > 0 && (
         <div className="search-panel social-sanctuary-bridge">
           <div className="social-sanctuary-copy">
             <span>Sanctuaire</span>
@@ -9237,7 +9291,7 @@ function SocialTab({
         </div>
       )}
 
-      {nextSocialActions.length > 0 && (
+      {socialView === "showcase" && nextSocialActions.length > 0 && (
         <div className="social-next-actions">
           <div className="social-next-actions-head">
             <strong>Donner du relief au profil</strong>
@@ -9267,11 +9321,15 @@ function SocialTab({
         />
       )}
 
-      {showPublicPreview && (
+      {(showPublicPreview || socialView === "showcase") && (
         <PublicProfilePreview
           profile={ownPublicPreview}
           title="Aperçu de ton profil public"
-          onClose={() => setShowPublicPreview(false)}
+          onClose={
+            showPublicPreview
+              ? () => setShowPublicPreview(false)
+              : undefined
+          }
         />
       )}
 
@@ -9365,7 +9423,7 @@ function SocialTab({
       </div>
 
       <div className={`search-panel social-editor ${socialView === "profile" ? "" : "social-section-hidden"}`}>
-        <h2 className="panel-title">Identite publique</h2>
+        <h2 className="panel-title">Identité publique</h2>
         <div className="social-editor-grid">
           <label>
             Pseudo
@@ -9484,7 +9542,7 @@ function SocialTab({
         )}
       </div>
 
-      <div className={`search-panel social-photo-panel ${socialView === "profile" ? "" : "social-section-hidden"}`}>
+      <div className={`search-panel social-photo-panel ${socialView === "showcase" ? "" : "social-section-hidden"}`}>
         <div className="home-section-head">
           <div>
             <h2 className="panel-title">Photos publiques</h2>
@@ -9617,7 +9675,7 @@ function SocialTab({
         />
       </div>
 
-      <div className={`search-panel social-essential-panel ${socialView === "profile" ? "" : "social-section-hidden"}`}>
+      <div className={`search-panel social-essential-panel ${socialView === "showcase" ? "" : "social-section-hidden"}`}>
         <div className="home-section-head">
           <div>
             <h2 className="panel-title">Essentiel du profil</h2>
