@@ -9352,6 +9352,67 @@ body[data-ui="modern"] .chip.active {
   order: 3;
 }
 
+.social-profile-guidance {
+  display: grid;
+  gap: 7px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.social-profile-guidance span {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.social-profile-guidance strong {
+  color: white;
+  font-size: clamp(23px, 5.2vw, 32px);
+  line-height: 1.05;
+}
+
+.social-profile-guidance p {
+  max-width: 46rem;
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.42;
+}
+
+.social-showcase-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.social-preview-toggle {
+  flex: 0 0 auto;
+  border: 1px solid var(--surface-border);
+  border-radius: var(--ui-radius-md);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-main);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 950;
+  padding: 12px 14px;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+
+.social-preview-toggle.active {
+  color: white;
+  border-color: color-mix(in srgb, var(--accent) 58%, white 12%);
+  background: var(--accent);
+  box-shadow: var(--accent-shadow);
+}
+
+.social-preview-toggle:active {
+  transform: scale(0.97);
+}
+
 .social-stats-grid {
   order: 2;
 }
@@ -9497,6 +9558,15 @@ body[data-ui="modern"] .chip.active {
 }
 
 @media (max-width: 640px) {
+  .social-showcase-control {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .social-preview-toggle {
+    width: 100%;
+  }
+
   .social-badge-choice-grid {
     grid-template-columns: 1fr;
   }
@@ -24476,27 +24546,27 @@ body {
 }
 
 .progression-stack.social-tab .social-public-profile {
-  order: 4;
-}
-
-.progression-stack.social-tab .social-identity-panel {
   order: 5;
 }
 
-.progression-stack.social-tab .social-badge-picker-panel {
+.progression-stack.social-tab .social-identity-panel {
   order: 6;
 }
 
-.progression-stack.social-tab .social-share-panel {
+.progression-stack.social-tab .social-badge-picker-panel {
   order: 7;
 }
 
+.progression-stack.social-tab .social-share-panel {
+  order: 5;
+}
+
 .progression-stack.social-tab .social-editor {
-  order: 8;
+  order: 6;
 }
 
 .progression-stack.social-tab .social-photo-panel {
-  order: 9;
+  order: 8;
 }
 
 .progression-stack.social-tab .social-stats-grid {
@@ -24515,13 +24585,17 @@ body {
   order: 4;
 }
 
+.progression-stack.social-tab .social-showcase-control {
+  order: 4;
+}
+
 .progression-stack.social-tab .social-next-actions {
   order: 10;
 }
 
 .progression-stack.social-tab .social-composer-panel,
 .progression-stack.social-tab .social-friends-panel,
-.progression-stack.social-tab > .search-panel:not(.social-profile-card):not(.social-public-profile):not(.social-badge-picker-panel):not(.social-share-panel):not(.social-editor):not(.social-identity-panel):not(.social-photo-panel):not(.social-composer-panel):not(.social-friends-panel):not(.social-essential-panel):not(.social-sanctuary-bridge) {
+.progression-stack.social-tab > .search-panel:not(.social-profile-card):not(.social-public-profile):not(.social-badge-picker-panel):not(.social-share-panel):not(.social-editor):not(.social-identity-panel):not(.social-photo-panel):not(.social-composer-panel):not(.social-friends-panel):not(.social-showcase-control):not(.social-essential-panel):not(.social-sanctuary-bridge) {
   order: 11;
 }
 

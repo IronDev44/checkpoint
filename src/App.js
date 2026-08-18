@@ -7574,6 +7574,7 @@ const DEFAULT_SOCIAL_PROFILE = {
   setupPhotos: [],
   collectionPhotos: [],
   publicSections: DEFAULT_PUBLIC_SECTIONS,
+  showShowcasePreview: true,
   activityLikes: {},
   activityComments: {},
   posts: [],
@@ -7640,6 +7641,7 @@ function normalizeSocialProfile(profile = {}) {
       ...DEFAULT_PUBLIC_SECTIONS,
       ...normalizeObject(source.publicSections),
     },
+    showShowcasePreview: source.showShowcasePreview !== false,
     activityLikes: normalizeObject(source.activityLikes),
     activityComments: normalizeObject(source.activityComments),
     posts: normalizeArray(source.posts, 50),
@@ -8850,6 +8852,7 @@ function SocialTab({
   const badgeChoices = unlockedBadges.slice(0, 12);
   const finishedCount = games.filter(isGameFinishedStatus).length;
   const shareUrl = getProfileShareUrl(socialProfile.handle);
+  const showShowcasePreview = socialProfile.showShowcasePreview !== false;
   const ownPublicPreview = {
     displayName: socialProfile.displayName || DEFAULT_SOCIAL_PROFILE.displayName,
     handle: normalizeHandle(socialProfile.handle),
@@ -8990,6 +8993,10 @@ function SocialTab({
       : [...selectedBadgeIds, id].slice(0, 4);
 
     onProfileChange("selectedBadgeIds", nextIds);
+  };
+
+  const handleShowcasePreviewToggle = () => {
+    onProfileChange("showShowcasePreview", !showShowcasePreview);
   };
 
   const handleAddComment = (activityId, text) => {
@@ -9155,14 +9162,6 @@ function SocialTab({
         </p>
       </div>
 
-      <div className={`search-panel social-section-intro ${socialView === "profile" ? "" : "social-section-hidden"}`}>
-        <span>Profil</span>
-        <strong>Ton identité joueur</strong>
-        <p>
-          Modifie ton pseudo, ta bio, ton identifiant et la visibilité de ton profil.
-        </p>
-      </div>
-
       <div className={`search-panel social-section-intro ${socialView === "showcase" ? "" : "social-section-hidden"}`}>
         <span>Vitrine</span>
         <strong>Ce que tu choisis de montrer</strong>
@@ -9192,7 +9191,25 @@ function SocialTab({
         />
       )}
 
-      {(showPublicPreview || socialView === "showcase") && (
+      {socialView === "showcase" && (
+        <div className="search-panel social-showcase-control">
+          <div>
+            <h2 className="panel-title">Aperçu public</h2>
+            <div className="option-value">
+              Affiche ou masque l'aperçu pendant que tu personnalises ta vitrine.
+            </div>
+          </div>
+          <button
+            type="button"
+            className={`social-preview-toggle ${showShowcasePreview ? "active" : ""}`}
+            onClick={handleShowcasePreviewToggle}
+          >
+            {showShowcasePreview ? "Aperçu affiché" : "Aperçu masqué"}
+          </button>
+        </div>
+      )}
+
+      {(showPublicPreview || (socialView === "showcase" && showShowcasePreview)) && (
         <PublicProfilePreview
           profile={ownPublicPreview}
           title="Aperçu de ton profil public"
@@ -9300,6 +9317,14 @@ function SocialTab({
       )}
 
       <div className={`search-panel social-share-panel ${socialView === "profile" ? "" : "social-section-hidden"}`}>
+        <div className="social-profile-guidance">
+          <span>Profil</span>
+          <strong>Ton identité joueur</strong>
+          <p>
+            Modifie ton pseudo, ta bio, ton identifiant et choisis comment ton profil peut être visible.
+          </p>
+        </div>
+
         <div>
           <h2 className="panel-title">Visibilité du profil</h2>
           <div className="option-value">
