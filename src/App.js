@@ -9077,8 +9077,8 @@ function SocialTab({
     <div className="progression-stack social-tab">
       <div className="search-panel social-profile-card">
         <div className="social-profile-side">
-          <div className="social-avatar">
-            {getInitials(socialProfile.displayName)}
+          <div className="social-avatar social-avatar-brand" aria-hidden="true">
+            <span>CP</span>
           </div>
           <div className="social-profile-side-progress">
             <span>Profil</span>
@@ -9096,7 +9096,7 @@ function SocialTab({
             <h2 className="profile-title">{socialProfile.displayName}</h2>
             <FeaturedBadgePill badge={featuredBadge} />
           </div>
-          <div className="social-handle">@{socialProfile.handle}</div>
+          <div className="social-handle">Lien public @{socialProfile.handle}</div>
           <p>{socialProfile.bio}</p>
 
           <div className="social-profile-tags">
@@ -9366,16 +9366,17 @@ function SocialTab({
         <h2 className="panel-title">Identité publique</h2>
         <div className="social-editor-grid">
           <label>
-            Pseudo
+            Nom affiché
             <input
               value={socialProfile.displayName}
               onChange={(e) => onProfileChange("displayName", e.target.value)}
-              placeholder="Ton pseudo"
+              placeholder="Le nom visible sur ton profil"
             />
+            <span className="field-hint">C'est le nom que les autres voient dans le fil et sur ton profil.</span>
           </label>
 
           <label>
-            Identifiant
+            Identifiant public
             <input
               value={socialProfile.handle}
               onChange={(e) =>
@@ -9386,6 +9387,7 @@ function SocialTab({
               }
               placeholder="checkpoint"
             />
+            <span className="field-hint">Il sert au lien de partage, comme une adresse courte : @{socialProfile.handle || "checkpoint"}.</span>
           </label>
 
           <label>
