@@ -9378,6 +9378,134 @@ body[data-ui="modern"] .chip.active {
   gap: 14px;
 }
 
+.social-badge-picker-panel {
+  display: grid;
+  gap: 16px;
+}
+
+.social-selected-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.045);
+}
+
+.social-selected-badge > span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.social-badge-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.social-badge-choice-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 18px;
+  background: rgba(255,255,255,0.04);
+}
+
+.social-badge-choice-card.selected,
+.social-badge-choice-card.featured {
+  border-color: rgba(var(--accent-rgb, 97, 132, 255), 0.46);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(var(--accent-rgb, 97, 132, 255), 0.18), transparent 48%),
+    rgba(255,255,255,0.055);
+}
+
+.social-badge-main-choice,
+.social-badge-toggle-choice {
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.social-badge-main-choice {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+  background: transparent;
+}
+
+.social-badge-choice-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  color: #fff;
+  background:
+    linear-gradient(135deg, rgba(var(--accent-rgb, 97, 132, 255), 0.34), rgba(255,255,255,0.08));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+}
+
+.social-badge-main-choice strong,
+.social-badge-main-choice small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.social-badge-main-choice strong {
+  font-size: 0.92rem;
+  font-weight: 950;
+}
+
+.social-badge-main-choice small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.social-badge-toggle-choice {
+  min-width: 74px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.social-badge-toggle-choice:disabled {
+  cursor: default;
+  opacity: 0.64;
+}
+
+@media (max-width: 640px) {
+  .social-badge-choice-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .social-badge-choice-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
 .social-public-profile-v2 {
   gap: 16px;
   overflow: hidden;
@@ -24351,28 +24479,28 @@ body {
   order: 4;
 }
 
-.progression-stack.social-tab .social-share-panel {
+.progression-stack.social-tab .social-identity-panel {
   order: 5;
 }
 
-.progression-stack.social-tab .social-editor {
+.progression-stack.social-tab .social-badge-picker-panel {
   order: 6;
 }
 
-.progression-stack.social-tab .social-identity-panel {
+.progression-stack.social-tab .social-share-panel {
   order: 7;
 }
 
-.progression-stack.social-tab .social-essential-panel {
-  order: 5;
-}
-
-.progression-stack.social-tab .social-photo-panel {
+.progression-stack.social-tab .social-editor {
   order: 8;
 }
 
-.progression-stack.social-tab .social-stats-grid {
+.progression-stack.social-tab .social-photo-panel {
   order: 9;
+}
+
+.progression-stack.social-tab .social-stats-grid {
+  order: 10;
 }
 
 .progression-stack.social-tab .social-view-tabs {
@@ -24387,17 +24515,13 @@ body {
   order: 4;
 }
 
-.progression-stack.social-tab .social-sanctuary-bridge {
-  order: 6;
-}
-
 .progression-stack.social-tab .social-next-actions {
   order: 10;
 }
 
 .progression-stack.social-tab .social-composer-panel,
 .progression-stack.social-tab .social-friends-panel,
-.progression-stack.social-tab > .search-panel:not(.social-profile-card):not(.social-public-profile):not(.social-share-panel):not(.social-editor):not(.social-identity-panel):not(.social-photo-panel):not(.social-composer-panel):not(.social-friends-panel):not(.social-essential-panel):not(.social-sanctuary-bridge) {
+.progression-stack.social-tab > .search-panel:not(.social-profile-card):not(.social-public-profile):not(.social-badge-picker-panel):not(.social-share-panel):not(.social-editor):not(.social-identity-panel):not(.social-photo-panel):not(.social-composer-panel):not(.social-friends-panel):not(.social-essential-panel):not(.social-sanctuary-bridge) {
   order: 11;
 }
 
@@ -39462,5 +39586,59 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 
   .public-sanctuary-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Social feed refinement */
+.social-feed-item.no-media {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.social-feed-item.no-media .social-feed-main {
+  width: 100%;
+}
+
+.social-tab .social-feed-filters {
+  display: flex !important;
+  flex-wrap: nowrap;
+  gap: 7px !important;
+  overflow-x: auto;
+  padding: 0 0 8px !important;
+}
+
+.social-tab .social-feed-filters button {
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 34px !important;
+  gap: 6px !important;
+  padding: 7px 10px !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  white-space: nowrap;
+}
+
+.social-tab .social-feed-filters button strong {
+  min-width: 18px !important;
+  padding: 3px 5px !important;
+  font-size: 10px !important;
+}
+
+@media (max-width: 640px) {
+  .social-feed.compact {
+    gap: 9px !important;
+  }
+
+  .social-feed.compact .social-feed-item {
+    padding: 12px !important;
+  }
+
+  .social-feed-item.no-media {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .social-feed-main strong {
+    font-size: 14px;
   }
 }

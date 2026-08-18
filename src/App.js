@@ -7567,6 +7567,7 @@ const DEFAULT_SOCIAL_PROFILE = {
   platform: "Multi-plateforme",
   visibility: "prive",
   featuredBadgeId: "",
+  selectedBadgeIds: [],
   isCreator: true,
   creatorBadgeEnabled: true,
   identityGameIds: [],
@@ -7629,6 +7630,7 @@ function normalizeSocialProfile(profile = {}) {
     visibility: source.visibility === "public" ? "public" : "prive",
     featuredBadgeId:
       source.featuredBadgeId || (creatorEnabled ? "creator_checkpoint" : ""),
+    selectedBadgeIds: normalizeArray(source.selectedBadgeIds, 4).map(String),
     isCreator: creatorEnabled,
     creatorBadgeEnabled: creatorEnabled,
     identityGameIds: normalizeArray(source.identityGameIds, 3).map(String),
@@ -8055,7 +8057,7 @@ function ActivityFeed({
         return (
           <div
             key={activity.id}
-            className={`social-feed-item source-${activity.source || "generic"}`}
+            className={`social-feed-item source-${activity.source || "generic"} ${activity.image ? "" : "no-media"}`}
           >
             {activity.image ? (
               <img
@@ -8064,11 +8066,7 @@ function ActivityFeed({
                 loading="lazy"
                 decoding="async"
               />
-            ) : (
-              <div className={`social-feed-placeholder source-${activity.source || "generic"}`}>
-                {activity.type === "Badge" ? "B" : "C"}
-              </div>
-            )}
+            ) : null}
 
             <div className="social-feed-main">
               <div className="social-feed-top">
@@ -8762,26 +8760,6 @@ function SocialTab({
   const gamingTimeline = getGamingTimeline(games, hardware, socialProfile);
   const sanctuaryGames = games.filter((game) => game.sanctuary);
   const sanctuaryHardware = hardware.filter((item) => item.sanctuary);
-  const sanctuaryHighlights = [
-    ...sanctuaryGames.slice(0, 3).map((game) => ({
-      id: `game-${game.id || game.name}`,
-      type: "Jeu",
-      name: game.name,
-      image: game.image || "",
-      detail: getGameRating(game)
-        ? formatGameRating10(getGameRating(game))
-        : game.status === "wishlist"
-          ? "Wishlist"
-          : "Jeu marquant",
-    })),
-    ...sanctuaryHardware.slice(0, 2).map((item) => ({
-      id: `hardware-${item.id || item.name}`,
-      type: "Matériel",
-      name: item.name,
-      image: item.image || "",
-      detail: item.type || item.brand || "Setup",
-    })),
-  ].slice(0, 4);
   const missingIdentitySlots = Math.max(0, 3 - identityGames.length);
   const sanctuaryFounderSuggestions = sanctuaryGames
     .filter((game) => !identityGameIds.includes(String(game.id)))
@@ -8858,83 +8836,20 @@ function SocialTab({
     badges,
     socialProfile.featuredBadgeId
   );
+  const unlockedBadges = badges.filter((badge) => badge.unlocked);
+  const selectedBadgeIds = Array.isArray(socialProfile.selectedBadgeIds)
+    ? socialProfile.selectedBadgeIds
+        .map(String)
+        .filter((id, index, list) => id && list.indexOf(id) === index)
+        .filter((id) => id !== String(featuredBadge?.id || ""))
+        .slice(0, 4)
+    : [];
+  const selectedBadgeList = selectedBadgeIds
+    .map((id) => unlockedBadges.find((badge) => String(badge.id) === id))
+    .filter(Boolean);
+  const badgeChoices = unlockedBadges.slice(0, 12);
   const finishedCount = games.filter(isGameFinishedStatus).length;
-  const avgRating = stats.avgRating ? stats.avgRating.toFixed(1) : "-";
   const shareUrl = getProfileShareUrl(socialProfile.handle);
-  const profileQuickStats = [
-    { label: "Jeux", value: games.length },
-    { label: "Termines", value: finishedCount },
-    { label: "Note moy.", value: avgRating },
-    { label: "Materiel", value: currentHardware.length },
-  ];
-  const totalSocialLikes = allSocialFeedItems.reduce((total, activity) => {
-    const likeState = getActivityLikeState(activityLikes, activity.id);
-    return total + Math.max(likeState.count, Number(activity.likes || 0));
-  }, 0);
-  const totalSocialComments = Object.values(activityComments).reduce(
-    (total, comments) => total + (Array.isArray(comments) ? comments.length : 0),
-    0
-  );
-  const publicPhotoCount =
-    (socialProfile.setupPhotos || []).length +
-    (socialProfile.collectionPhotos || []).length;
-  const socialMomentumCards = [
-    {
-      label: "Profil",
-      value: `${profileCompletion}%`,
-      detail:
-        socialProfile.visibility === "public"
-          ? "visible par lien"
-          : "prive pour le moment",
-    },
-    {
-      label: "Engagement",
-      value: totalSocialLikes + totalSocialComments,
-      detail: `${totalSocialLikes} likes - ${totalSocialComments} com.`,
-    },
-    {
-      label: "Reseau",
-      value: socialFriends.length,
-      detail: socialFriends.length > 1 ? "amis ajoutes" : "ami ajoute",
-    },
-  ];
-  const nextSocialActions = [
-    identityGames.length < 3 && sanctuaryFounderSuggestions.length > 0
-      ? {
-          label: "Transformer le Sanctuaire en identité",
-          detail: `${sanctuaryFounderSuggestions.length} jeu${sanctuaryFounderSuggestions.length > 1 ? "x" : ""} prêt${sanctuaryFounderSuggestions.length > 1 ? "s" : ""} à rejoindre tes fondateurs`,
-          action: () => setSocialView("profile"),
-        }
-      : null,
-    !socialPosts.length
-      ? {
-          label: "Publier une premiere update",
-          detail: "Lance ton fil avec une session ou une envie.",
-          action: () => setSocialView("feed"),
-        }
-      : null,
-    identityGames.length < 3
-      ? {
-          label: "Completer les jeux fondateurs",
-          detail: `${identityGames.length}/3 jeux selectionnes`,
-          action: () => setSocialView("profile"),
-        }
-      : null,
-    !publicPhotoCount
-      ? {
-          label: "Ajouter une photo de setup",
-          detail: "Donne une vraie vitrine a ton profil.",
-          action: () => setSocialView("showcase"),
-        }
-      : null,
-    socialProfile.visibility !== "public"
-      ? {
-          label: "Activer le profil public",
-          detail: "Pret a partager quand tu veux.",
-          action: () => setSocialView("profile"),
-        }
-      : null,
-  ].filter(Boolean);
   const ownPublicPreview = {
     displayName: socialProfile.displayName || DEFAULT_SOCIAL_PROFILE.displayName,
     handle: normalizeHandle(socialProfile.handle),
@@ -8946,9 +8861,7 @@ function SocialTab({
       ...(socialProfile.publicSections || {}),
     },
     featuredBadge,
-    selectedBadges: badges
-      .filter((badge) => badge.unlocked)
-      .slice(0, 5)
+    selectedBadges: selectedBadgeList
       .map((badge) => ({
         id: badge.id,
         icon: badge.icon,
@@ -9065,6 +8978,20 @@ function SocialTab({
     onProfileChange("activityLikes", nextLikes);
   };
 
+  const handleFeaturedBadgeSelect = (badgeId) => {
+    onProfileChange("featuredBadgeId", String(badgeId));
+  };
+
+  const handlePublicBadgeToggle = (badgeId) => {
+    const id = String(badgeId);
+    const exists = selectedBadgeIds.includes(id);
+    const nextIds = exists
+      ? selectedBadgeIds.filter((item) => item !== id)
+      : [...selectedBadgeIds, id].slice(0, 4);
+
+    onProfileChange("selectedBadgeIds", nextIds);
+  };
+
   const handleAddComment = (activityId, text) => {
     const nextComments = {
       ...activityComments,
@@ -9136,7 +9063,7 @@ function SocialTab({
       .slice(0, 3);
 
     onProfileChange("identityGameIds", nextIds);
-    setSocialView("profile");
+    setSocialView("showcase");
   };
 
   return (
@@ -9232,7 +9159,7 @@ function SocialTab({
         <span>Profil</span>
         <strong>Ton identité joueur</strong>
         <p>
-          Modifie ton pseudo, ta bio et les jeux fondateurs qui expliquent ton parcours.
+          Modifie ton pseudo, ta bio, ton identifiant et la visibilité de ton profil.
         </p>
       </div>
 
@@ -9240,7 +9167,7 @@ function SocialTab({
         <span>Vitrine</span>
         <strong>Ce que tu choisis de montrer</strong>
         <p>
-          Aperçu public, photos, Sanctuaire et éléments mis en avant : c'est la partie partageable.
+          Choisis les jeux fondateurs, les badges, les photos et les éléments visibles sur ton profil public.
         </p>
       </div>
 
@@ -9251,62 +9178,6 @@ function SocialTab({
           Ajoute des profils publics et garde sous la main les joueurs que tu veux suivre.
         </p>
       </div>
-
-      <div className={`social-command-center ${socialView === "profile" ? "" : "social-section-hidden"}`}>
-        {socialMomentumCards.map((card) => (
-          <div key={card.label} className="social-command-card">
-            <span>{card.label}</span>
-            <strong>{card.value}</strong>
-            <p>{card.detail}</p>
-          </div>
-        ))}
-      </div>
-
-      {socialView === "showcase" && sanctuaryHighlights.length > 0 && (
-        <div className="search-panel social-sanctuary-bridge">
-          <div className="social-sanctuary-copy">
-            <span>Sanctuaire</span>
-            <strong>Ce que ton profil raconte vraiment</strong>
-            <p>
-              Ces jeux et objets ne sont pas forcément les mieux notés. Ce sont ceux que tu as choisi de mettre en avant.
-            </p>
-          </div>
-          <div className="social-sanctuary-strip">
-            {sanctuaryHighlights.map((item) => (
-              <div key={item.id} className="social-sanctuary-tile">
-                {item.image ? <img src={item.image} alt={item.name} /> : <span>{item.type}</span>}
-                <div>
-                  <small>{item.type}</small>
-                  <strong>{item.name}</strong>
-                  <em>{item.detail}</em>
-                </div>
-              </div>
-            ))}
-          </div>
-          {sanctuaryFounderSuggestions.length > 0 && (
-            <button type="button" onClick={handleUseSanctuaryAsFounders}>
-              Compléter mes jeux fondateurs avec le Sanctuaire
-            </button>
-          )}
-        </div>
-      )}
-
-      {socialView === "showcase" && nextSocialActions.length > 0 && (
-        <div className="social-next-actions">
-          <div className="social-next-actions-head">
-            <strong>Donner du relief au profil</strong>
-            <span>{nextSocialActions.length} pistes</span>
-          </div>
-          <div>
-            {nextSocialActions.slice(0, 3).map((action) => (
-              <button key={action.label} type="button" onClick={action.action}>
-                <strong>{action.label}</strong>
-                <span>{action.detail}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {sharedProfile && (
         <PublicProfilePreview
@@ -9331,6 +9202,71 @@ function SocialTab({
               : undefined
           }
         />
+      )}
+
+      {socialView === "showcase" && (
+        <div className="search-panel social-badge-picker-panel">
+          <div className="home-section-head">
+            <div>
+              <h2 className="panel-title">Badges affichés</h2>
+              <div className="option-value">
+                Choisis le badge principal et jusqu'à 4 badges secondaires pour ton profil public.
+              </div>
+            </div>
+            <span className="social-section-count">{selectedBadgeList.length}/4</span>
+          </div>
+
+          {featuredBadge && (
+            <div className="social-selected-badge">
+              <span>Badge principal</span>
+              <FeaturedBadgePill badge={featuredBadge} />
+            </div>
+          )}
+
+          {badgeChoices.length > 0 ? (
+            <div className="social-badge-choice-grid">
+              {badgeChoices.map((badge) => {
+                const isFeatured = String(featuredBadge?.id || "") === String(badge.id);
+                const isSelected = selectedBadgeIds.includes(String(badge.id));
+
+                return (
+                  <div
+                    key={badge.id}
+                    className={`social-badge-choice-card ${isSelected ? "selected" : ""} ${isFeatured ? "featured" : ""}`}
+                  >
+                    <button
+                      type="button"
+                      className="social-badge-main-choice"
+                      onClick={() => handleFeaturedBadgeSelect(badge.id)}
+                    >
+                      <span className={`social-badge-choice-icon ${badge.rarity} ${badge.special ? `badge-special-${badge.special}` : ""}`}>
+                        <BadgeVisualIcon badge={badge} />
+                      </span>
+                      <span>
+                        <strong>{badge.name}</strong>
+                        <small>{isFeatured ? "Affiché à côté du pseudo" : "Définir comme badge principal"}</small>
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="social-badge-toggle-choice"
+                      onClick={() => handlePublicBadgeToggle(badge.id)}
+                      disabled={isFeatured}
+                    >
+                      {isFeatured ? "Principal" : isSelected ? "Retirer" : "Ajouter"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <EmptyState
+              title="Aucun badge débloqué"
+              subtitle="Les badges que tu débloques pourront être affichés ici."
+            />
+          )}
+        </div>
       )}
 
       {socialView === "feed" && (
@@ -9401,27 +9337,6 @@ function SocialTab({
         {socialMessage && <div className="social-message">{socialMessage}</div>}
       </div>
 
-      <div className={`social-stats-grid ${socialView === "profile" ? "" : "social-section-hidden"}`}>
-        {profileQuickStats.map((item) => (
-          <div key={item.label} className="social-mini-stat">
-            <strong>{item.value}</strong>
-            <span>{item.label}</span>
-          </div>
-        ))}
-        <div className="stat-card">
-          <div className="stat-value">{finishedCount}</div>
-          <div className="stat-label">Terminés</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{avgRating}</div>
-          <div className="stat-label">Note moy.</div>
-        </div>
-        <div className="stat-card">
-          <div className="stat-value">{currentHardware.length}</div>
-          <div className="stat-label">Matériel</div>
-        </div>
-      </div>
-
       <div className={`search-panel social-editor ${socialView === "profile" ? "" : "social-section-hidden"}`}>
         <h2 className="panel-title">Identité publique</h2>
         <div className="social-editor-grid">
@@ -9470,7 +9385,7 @@ function SocialTab({
         </label>
       </div>
 
-      <div className={`search-panel social-identity-panel ${socialView === "profile" ? "" : "social-section-hidden"}`}>
+      <div className={`search-panel social-identity-panel ${socialView === "showcase" ? "" : "social-section-hidden"}`}>
         <div>
           <h2 className="panel-title">Jeux fondateurs</h2>
           <div className="option-value">
@@ -9675,66 +9590,6 @@ function SocialTab({
         />
       </div>
 
-      <div className={`search-panel social-essential-panel ${socialView === "showcase" ? "" : "social-section-hidden"}`}>
-        <div className="home-section-head">
-          <div>
-            <h2 className="panel-title">Essentiel du profil</h2>
-            <div className="option-value">
-              Ta signature, tes jeux fondateurs et tes meilleurs tops.
-            </div>
-          </div>
-        </div>
-
-        {identityGames.length || essentialTopSections.length ? (
-          <div className="social-essential-grid">
-            {identityGames.length > 0 && (
-              <div className="social-essential-card signature">
-                <span>Signature</span>
-                <strong>{identityTitle.title}</strong>
-                <p>{identityTitle.subtitle}</p>
-              </div>
-            )}
-
-            {essentialTopSections.map((section) => {
-              const game = section.games[0];
-
-              return (
-                <div key={section.key} className="social-essential-card">
-                  <span>Top {section.label}</span>
-                  <strong>{game.name}</strong>
-                  <p>{formatTopScore(getGameScore(game, section.key), section.key)}</p>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <EmptyState
-            title="Essentiel en construction"
-            subtitle="Choisis tes jeux fondateurs et ajoute quelques notes pour synchroniser ton profil."
-          />
-        )}
-
-        {identityGames.length > 0 && (
-          <div className="social-identity-games compact-essential">
-            {identityGames.map((game, index) => (
-              <div key={game.id} className="social-identity-game">
-                <span className="social-identity-rank">{index + 1}</span>
-                {game.image ? <img src={game.image} alt={game.name} /> : null}
-                <div>
-                  <strong>{game.name}</strong>
-                  <span>
-                    {game.platforms?.length
-                      ? game.platforms.slice(0, 2).join(", ")
-                      : game.rating
-                        ? formatGameRating10(game.rating)
-                        : "Jeu fondateur"}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -18955,6 +18810,17 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
     badges,
     profileOverride.featuredBadgeId
   );
+  const unlockedBadges = badges.filter((badge) => badge.unlocked);
+  const selectedBadgeIds = Array.isArray(profileOverride.selectedBadgeIds)
+    ? profileOverride.selectedBadgeIds
+        .map(String)
+        .filter((id, index, list) => id && list.indexOf(id) === index)
+        .filter((id) => id !== String(featuredBadge?.id || ""))
+        .slice(0, 4)
+    : [];
+  const selectedBadges = selectedBadgeIds
+    .map((id) => unlockedBadges.find((badge) => String(badge.id) === id))
+    .filter(Boolean);
 
   return {
     displayName: profileOverride.displayName || DEFAULT_SOCIAL_PROFILE.displayName,
@@ -18977,9 +18843,7 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
           special: featuredBadge.special || "",
         }
       : null,
-    selectedBadges: badges
-      .filter((badge) => badge.unlocked)
-      .slice(0, 5)
+    selectedBadges: selectedBadges
       .map((badge) => ({
         id: badge.id,
         icon: badge.icon,
