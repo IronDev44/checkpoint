@@ -18092,6 +18092,7 @@ export default function App() {
   const [librarySearch, setLibrarySearch] = useState("");
   const [selectedGame, setSelectedGame] = useState(null);
   const [detailGameList, setDetailGameList] = useState([]);
+  const detailCloseTimerRef = useRef(null);
   const [hardware, setHardware] = useState([]);
   const [socialProfile, setSocialProfile] = useState(() => {
     try {
@@ -19611,11 +19612,18 @@ useEffect(() => {
   return () => clearTimeout(timer);
 }, []);
 
-useEffect(() => {
-  if (!selectedGame && !selectedSearchGame) {
-    document.body.classList.remove("modal-open");
-  }
-}, [selectedGame, selectedSearchGame]);
+  useEffect(() => {
+    if (!selectedGame && !selectedSearchGame) {
+      document.body.classList.remove("modal-open");
+    }
+  }, [selectedGame, selectedSearchGame]);
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(detailCloseTimerRef.current);
+      document.body.classList.remove("modal-open");
+    };
+  }, []);
 
 useEffect(() => {
   const handleWheel = (e) => {
@@ -19732,7 +19740,17 @@ useEffect(() => {
   const getFreshGame = (game) =>
     games.find((currentGame) => currentGame.id === game?.id) || game;
 
+  const closeGameDetail = useCallback(() => {
+    window.clearTimeout(detailCloseTimerRef.current);
+    detailCloseTimerRef.current = null;
+    setSelectedGame(null);
+    setDetailGameList([]);
+    document.body.classList.remove("modal-open");
+  }, []);
+
   const openGameDetail = (game, sourceGames = []) => {
+    window.clearTimeout(detailCloseTimerRef.current);
+    detailCloseTimerRef.current = null;
     const navigationList = sourceGames.length ? sourceGames : games;
     setDetailGameList(navigationList.map(getFreshGame).filter(Boolean));
     setSelectedGame(getFreshGame(game));
@@ -19750,10 +19768,11 @@ useEffect(() => {
   const handleGameRatingCommit = useCallback(() => {
     if (appOptions.afterRatingAction !== "list") return;
 
-    window.setTimeout(() => {
-      setSelectedGame(null);
+    window.clearTimeout(detailCloseTimerRef.current);
+    detailCloseTimerRef.current = window.setTimeout(() => {
+      closeGameDetail();
     }, 180);
-  }, [appOptions.afterRatingAction]);
+  }, [appOptions.afterRatingAction, closeGameDetail]);
 
   const gameExists = (name) =>
     games.some(
