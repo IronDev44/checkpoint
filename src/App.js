@@ -2332,8 +2332,8 @@ function BadgeVisualIcon({ badge, size = 20 }) {
   const rawIcon = badge?.icon || "";
   const compactIcon = String(rawIcon).replace(/\s+/g, "").trim();
   const isNumericSeal = /^\d{2,3}$/.test(compactIcon);
-  const sealSize = size >= 30 ? 88 : size <= 16 ? 34 : 72;
-  const platformSize = size >= 30 ? 76 : size <= 16 ? 32 : 66;
+  const sealSize = size >= 30 ? 56 : size <= 16 ? 30 : 46;
+  const platformSize = size >= 30 ? 54 : size <= 16 ? 30 : 44;
 
   if (badge?.special === "creator") {
     return <span className="badge-creator-mark">C</span>;
