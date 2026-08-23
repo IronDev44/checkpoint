@@ -39833,7 +39833,25 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   }
 
   .options-tab .options-header {
-    padding: 0 4px 6px;
+    margin: 0 0 14px !important;
+    padding: 16px 16px 18px !important;
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 22px;
+    background:
+      radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--genre-color), transparent 78%), transparent 38%),
+      linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  }
+
+  .options-tab .options-header .panel-title {
+    margin-bottom: 6px;
+    line-height: 1;
+  }
+
+  .options-tab .options-header .option-value {
+    max-width: 30ch;
+    color: var(--text-soft);
+    font-size: 1rem;
+    line-height: 1.32;
   }
 
   .options-tab .options-group {
@@ -39871,6 +39889,34 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
     border: 0 !important;
     border-radius: 0 !important;
     background: transparent !important;
+  }
+
+  .options-tab .option-section + .option-section {
+    margin-top: 12px !important;
+    padding-top: 12px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.055) !important;
+  }
+
+  .options-tab .option-section-headline {
+    justify-content: flex-start;
+    gap: 8px;
+    margin: 0 0 9px !important;
+  }
+
+  .options-tab .option-section-headline h3 {
+    color: var(--text-soft);
+    font-size: 0.78rem !important;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .options-tab .option-section-headline .option-help-btn {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    margin-left: auto;
+    opacity: 0.78;
   }
 
   .options-tab .option-setting-card {
