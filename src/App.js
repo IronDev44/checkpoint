@@ -2347,12 +2347,41 @@ function BadgeVisualIcon({ badge, size = 20 }) {
     );
   }
 
-  if (badge?.platformFamily) {
-    return <span className={`badge-platform-mark ${badge.platformFamily}`}>{compactIcon || rawIcon}</span>;
+  if (isNumericSeal) {
+    return (
+      <span className="badge-seal-mark badge-seal-premium" aria-hidden="true">
+        <span className="badge-seal-orbit" />
+        <span className="badge-seal-core">
+          <span className="badge-seal-number" data-digits={compactIcon.length} aria-label={compactIcon}>
+            {compactIcon.split("").map((digit, index) => (
+              <span key={`${compactIcon}-${index}`} className="badge-seal-number-digit">
+                {digit}
+              </span>
+            ))}
+          </span>
+        </span>
+      </span>
+    );
   }
 
-  if (isNumericSeal) {
-    return <span className="badge-platform-mark badge-seal-mark">{compactIcon}</span>;
+  if (badge?.platformFamily) {
+    const playstationMark = compactIcon.match(/^PS(\d+)$/i);
+
+    if (playstationMark) {
+      return (
+        <span
+          className={`badge-platform-mark ${badge.platformFamily} platform-playstation-mark`}
+          aria-hidden="true"
+        >
+          <span className="ps-lockup">
+            <span className="ps-prefix">PS</span>
+            <span className="ps-number">{playstationMark[1]}</span>
+          </span>
+        </span>
+      );
+    }
+
+    return <span className={`badge-platform-mark ${badge.platformFamily}`}>{compactIcon || rawIcon}</span>;
   }
 
   const Icon = BADGE_ICON_COMPONENTS[badge?.id];
