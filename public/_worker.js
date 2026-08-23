@@ -37,6 +37,7 @@ const IGDB_GAME_FIELDS = [
   "slug",
   "summary",
   "first_release_date",
+  "category",
   "cover.image_id",
   "artworks.image_id",
   "screenshots.image_id",
@@ -584,7 +585,11 @@ function buildIgdbWhere(params, { upcoming = false, includeCategory = true } = {
   const to = timestampFromDate(dates[1], true);
 
   if (upcoming) {
+    const months = Math.min(Math.max(Number(params.get("months")) || 6, 1), 24);
+    const until = new Date();
+    until.setMonth(until.getMonth() + months);
     clauses.push(`first_release_date >= ${Math.floor(Date.now() / 1000)}`);
+    clauses.push(`first_release_date <= ${Math.floor(until.getTime() / 1000)}`);
   } else {
     if (from) clauses.push(`first_release_date >= ${from}`);
     if (to) clauses.push(`first_release_date <= ${to}`);
@@ -633,6 +638,14 @@ function buildIgdbSearchQuery(params, { upcoming = false } = {}) {
   return { query, page, pageSize };
 }
 
+function igdbGameHasMedia(game) {
+  return Boolean(
+    game?.cover?.image_id ||
+      game?.artworks?.some((artwork) => artwork?.image_id) ||
+      game?.screenshots?.some((screenshot) => screenshot?.image_id)
+  );
+}
+
 function proxiedIgdbNextUrl(requestUrl, page, pageSize, count) {
   if (count < pageSize) return null;
   const current = new URL(requestUrl);
@@ -673,15 +686,32 @@ async function getIgdbUpcoming(request, env) {
   const requestUrl = new URL(request.url);
   const params = new URLSearchParams(requestUrl.searchParams);
   if (!params.get("page_size")) params.set("page_size", params.get("limit") || "40");
-  const { query, page, pageSize } = buildIgdbSearchQuery(params, { upcoming: true });
+  const { page, pageSize } = buildIgdbSearchQuery(params, { upcoming: true });
 
   try {
-    const results = await fetchIgdb("/games", query, env, { workerRoute: requestUrl.pathname });
+    const collected = [];
+    const seenIds = new Set();
+    const maxPages = 4;
+
+    for (let pageIndex = page; pageIndex < page + maxPages && collected.length < pageSize; pageIndex += 1) {
+      const pageParams = new URLSearchParams(params);
+      pageParams.set("page", String(pageIndex));
+      const { query } = buildIgdbSearchQuery(pageParams, { upcoming: true });
+      const batch = await fetchIgdb("/games", query, env, { workerRoute: requestUrl.pathname });
+
+      batch.forEach((game) => {
+        if (!game?.id || seenIds.has(game.id) || !igdbGameHasMedia(game)) return;
+        seenIds.add(game.id);
+        collected.push(game);
+      });
+
+      if (batch.length < pageSize) break;
+    }
 
     return jsonResponse({
-      results,
-      count: results.length,
-      next: proxiedIgdbNextUrl(request.url, page, pageSize, results.length),
+      results: collected.slice(0, pageSize),
+      count: collected.length,
+      next: proxiedIgdbNextUrl(request.url, page, pageSize, collected.length),
       previous: null,
       page,
       pageSize,

@@ -12060,6 +12060,58 @@ function getUpcomingFallbackGames() {
   );
 }
 
+function getGameVisual(game = {}) {
+  return (
+    game.cover_image ||
+    game.image ||
+    game.background_image ||
+    game.short_screenshots?.[0]?.image ||
+    ""
+  );
+}
+
+function hasRealGameVisual(game = {}) {
+  const visual = getGameVisual(game);
+  return Boolean(visual && !String(visual).startsWith("data:image/svg+xml"));
+}
+
+async function hydrateUpcomingFallbackGames(games = []) {
+  const candidates = games.slice(0, 20);
+  const hydrated = await Promise.all(
+    candidates.map(async (game) => {
+      try {
+        const data = await GameService.igdb(
+          "/games",
+          { search: game.name, page_size: "3" },
+          { timeout: 4500 }
+        );
+        const match = (data.results || []).find(
+          (result) => result?.name && hasRealGameVisual(result)
+        );
+
+        if (!match) return game;
+
+        return {
+          ...game,
+          source: "igdb",
+          background_image: match.background_image || match.image || game.background_image,
+          image: match.image || match.cover_image || match.background_image || game.image,
+          cover_image: match.cover_image || match.image || "",
+          short_screenshots: match.short_screenshots?.length
+            ? match.short_screenshots
+            : game.short_screenshots,
+          platforms: match.platforms?.length ? match.platforms : game.platforms,
+          genres: match.genres?.length ? match.genres : game.genres,
+        };
+      } catch (error) {
+        return game;
+      }
+    })
+  );
+
+  return [...hydrated, ...games.slice(candidates.length)];
+}
+
 const UPCOMING_GAMES_FALLBACK = [
   {
     id: "fallback-upcoming-beast-of-reincarnation",
@@ -19493,21 +19545,40 @@ useEffect(() => {
             (game) =>
               game?.name &&
               isMainGameResult(game) &&
-              isFutureReleaseDate(game.released, today)
+              isFutureReleaseDate(game.released, today) &&
+              hasRealGameVisual(game)
           )
           .sort((a, b) => new Date(a.released) - new Date(b.released));
 
-        setUpcomingGames((previousGames) => {
-          if (results.length) return results;
-          return previousGames.length ? previousGames : getUpcomingFallbackGames();
-        });
+        if (results.length) {
+          setUpcomingGames(results);
+        } else {
+          const fallbackGames = getUpcomingFallbackGames();
+          const hydratedFallbackGames = await hydrateUpcomingFallbackGames(fallbackGames);
+
+          setUpcomingGames((previousGames) => {
+            if (previousGames.some(hasRealGameVisual)) return previousGames;
+            return hydratedFallbackGames.length
+              ? hydratedFallbackGames
+              : previousGames.length
+                ? previousGames
+                : fallbackGames;
+          });
+        }
         setUpcomingSourceStatus(data.sourceStatus || "ok");
       } catch (e) {
         if (isAbortError(e)) return;
         console.error("Erreur chargement sorties :", e);
-        setUpcomingGames((previousGames) =>
-          previousGames.length ? previousGames : getUpcomingFallbackGames()
-        );
+        const fallbackGames = getUpcomingFallbackGames();
+        const hydratedFallbackGames = await hydrateUpcomingFallbackGames(fallbackGames);
+        setUpcomingGames((previousGames) => {
+          if (previousGames.some(hasRealGameVisual)) return previousGames;
+          return hydratedFallbackGames.length
+            ? hydratedFallbackGames
+            : previousGames.length
+              ? previousGames
+              : fallbackGames;
+        });
         setUpcomingSourceStatus("unavailable");
       } finally {
         setIsUpcomingLoading(false);
