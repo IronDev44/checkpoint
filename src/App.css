@@ -39818,6 +39818,16 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   width: 100%;
 }
 
+.social-feed-item.no-media .social-feed-actions {
+  justify-content: center;
+}
+
+.social-feed-item.no-media .social-comment-form {
+  max-width: 360px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
 .social-tab .social-feed-media,
 .social-tab .social-feed-placeholder {
   width: 92px;

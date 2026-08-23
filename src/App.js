@@ -7817,8 +7817,8 @@ function getSocialActivityFeed(games = [], hardware = [], badges = []) {
       activities.push({
         ...base,
         type: "Wishlist",
-        text: `a ajouté ${game.name} à sa wishlist`,
-        detail: game.released?.split("-")[0] || "Jeu à suivre",
+        text: `${game.name} passe dans la wishlist`,
+        detail: game.released?.split("-")[0] || "Jeu à surveiller",
         priority: base.priority + 10,
       });
       return;
@@ -7838,8 +7838,8 @@ function getSocialActivityFeed(games = [], hardware = [], badges = []) {
     activities.push({
       ...base,
       type: "Collection",
-      text: `a ajouté ${game.name} à sa collection`,
-      detail: game.released?.split("-")[0] || "Jeu ajouté",
+      text: `${game.name} rejoint la collection`,
+      detail: game.released?.split("-")[0] || "Nouvelle entrée",
       priority: base.priority + 15,
     });
   });
@@ -7854,8 +7854,8 @@ function getSocialActivityFeed(games = [], hardware = [], badges = []) {
       type: itemRating ? "Matériel noté" : "Matériel",
       text: itemRating
         ? `a noté ${item.name}`
-        : `a ajouté ${item.name} à son matériel`,
-      detail: itemRating ? formatRating10(itemRating) : item.status || "Collection",
+        : `${item.name} rejoint le setup`,
+      detail: itemRating ? formatRating10(itemRating) : item.status || "Nouveau matériel",
       date: item.updatedAt || item.createdAt,
       sortTime: date?.getTime() || 0,
       priority: 8 - index,
