@@ -2371,6 +2371,32 @@ function getBadgeRarityLabel(badge) {
   return labels[badge.rarity] || "Badge";
 }
 
+function getLibraryGamePlatforms(game = {}) {
+  if (Array.isArray(game.playedPlatforms) && game.playedPlatforms.length > 0) {
+    return game.playedPlatforms.filter(Boolean);
+  }
+
+  if (Array.isArray(game.platformNames) && game.platformNames.length > 0) {
+    return game.platformNames.filter(Boolean);
+  }
+
+  if (Array.isArray(game.platforms) && game.platforms.length > 0) {
+    return game.platforms
+      .map((platform) =>
+        typeof platform === "string"
+          ? platform
+          : platform?.name || platform?.platform?.name
+      )
+      .filter(Boolean);
+  }
+
+  return [];
+}
+
+function getPrimaryLibraryGamePlatform(game = {}) {
+  return getLibraryGamePlatforms(game)[0] || "Plateforme inconnue";
+}
+
 function getFeaturedBadgeFromSelection(badges = [], featuredBadgeId = "") {
   const unlockedBadges = badges.filter((badge) => badge.unlocked);
   const exactBadge = unlockedBadges.find((badge) => badge.id === featuredBadgeId);
@@ -7424,8 +7450,13 @@ function LibrarySection({
     }
 
     if (sortBy === "platform") {
-      return (a.platformNames?.[0] || "Plateforme inconnue").localeCompare(
-        b.platformNames?.[0] || "Plateforme inconnue"
+      return getPrimaryLibraryGamePlatform(a).localeCompare(
+        getPrimaryLibraryGamePlatform(b),
+        "fr",
+        {
+          numeric: true,
+          sensitivity: "base",
+        }
       );
     }
 
@@ -7446,7 +7477,7 @@ function LibrarySection({
     }
 
     if (sortBy === "platform") {
-      group = game.platformNames?.[0] || "Plateforme inconnue";
+      group = getPrimaryLibraryGamePlatform(game);
     }
 
     if (sortBy === "genre") {
@@ -7799,7 +7830,9 @@ function LibrarySection({
       ) : (
         <div
           className={
-            libraryCardMode === "compact"
+            sortBy !== "recent"
+              ? "library-grouped-list"
+              : libraryCardMode === "compact"
               ? "games-grid library-compact-grid"
               : "games-list"
           }
@@ -7813,7 +7846,15 @@ function LibrarySection({
                     <span>{groupGames.length}</span>
                   </div>
 
-                  {groupGames.map((game) => renderGameCard(game))}
+                  <div
+                    className={
+                      libraryCardMode === "compact"
+                        ? "games-grid library-compact-grid"
+                        : "games-list"
+                    }
+                  >
+                    {groupGames.map((game) => renderGameCard(game))}
+                  </div>
                 </div>
               ))}
         </div>
@@ -12294,7 +12335,7 @@ function ProfileTab({
                     <BadgeVisualIcon badge={b} />
                   </span>
                 </div>
-                <span className="badge-rarity-chip">{b.rarity}</span>
+                <span className="badge-rarity-chip">{getBadgeRarityLabel(b)}</span>
               </div>
               <div className="badge-name">{b.name}</div>
               <div className="badge-desc">{b.desc}</div>
@@ -12324,7 +12365,7 @@ function ProfileTab({
                         <BadgeVisualIcon badge={b} />
                       </span>
                     </div>
-                    <span className="badge-rarity-chip">{b.rarity}</span>
+                    <span className="badge-rarity-chip">{getBadgeRarityLabel(b)}</span>
                   </div>
                   <div className="badge-name">{b.name}</div>
                   <div className="badge-desc">{b.desc}</div>

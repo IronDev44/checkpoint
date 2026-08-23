@@ -8291,9 +8291,16 @@ body[data-ui="modern"] .chip.active {
 }
 
 .library-group {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
+}
+
+.library-grouped-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
 }
 
 .library-group-title {
@@ -25855,12 +25862,16 @@ button.badge-card {
 .badge-platform-mark {
   display: grid;
   place-items: center;
-  min-width: 22px;
-  height: 22px;
+  width: 26px;
+  min-width: 26px;
+  height: 24px;
   font-size: 10px;
   font-weight: 1000;
   line-height: 1;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  overflow: visible;
 }
 
 .badge-brand-logo {
