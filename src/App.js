@@ -2332,6 +2332,8 @@ function BadgeVisualIcon({ badge, size = 20 }) {
   const rawIcon = badge?.icon || "";
   const compactIcon = String(rawIcon).replace(/\s+/g, "").trim();
   const isNumericSeal = /^\d{2,3}$/.test(compactIcon);
+  const sealSize = size >= 30 ? 88 : size <= 16 ? 34 : 72;
+  const platformSize = size >= 30 ? 76 : size <= 16 ? 32 : 66;
 
   if (badge?.special === "creator") {
     return <span className="badge-creator-mark">C</span>;
@@ -2349,17 +2351,14 @@ function BadgeVisualIcon({ badge, size = 20 }) {
 
   if (isNumericSeal) {
     return (
-      <span className="badge-seal-mark badge-seal-premium" aria-hidden="true">
-        <span className="badge-seal-orbit" />
-        <span className="badge-seal-core">
-          <span className="badge-seal-number" data-digits={compactIcon.length} aria-label={compactIcon}>
-            {compactIcon.split("").map((digit, index) => (
-              <span key={`${compactIcon}-${index}`} className="badge-seal-number-digit">
-                {digit}
-              </span>
-            ))}
-          </span>
-        </span>
+      <span
+        className={`checkpoint-seal-badge checkpoint-seal-badge-${badge?.rarity || "epic"}`}
+        aria-label={compactIcon}
+        style={{ "--badge-visual-size": `${sealSize}px` }}
+      >
+        <span className="checkpoint-seal-facet" />
+        <span className="checkpoint-seal-glass" />
+        <span className="checkpoint-seal-value">{compactIcon}</span>
       </span>
     );
   }
@@ -2368,15 +2367,16 @@ function BadgeVisualIcon({ badge, size = 20 }) {
     const playstationMark = compactIcon.match(/^PS(\d+)$/i);
 
     if (playstationMark) {
+      const psLabel = `PS${playstationMark[1]}`;
+
       return (
         <span
-          className={`badge-platform-mark ${badge.platformFamily} platform-playstation-mark`}
-          aria-hidden="true"
+          className="checkpoint-platform-badge checkpoint-platform-badge-playstation"
+          aria-label={psLabel}
+          style={{ "--badge-visual-size": `${platformSize}px` }}
         >
-          <span className="ps-lockup">
-            <span className="ps-prefix">PS</span>
-            <span className="ps-number">{playstationMark[1]}</span>
-          </span>
+          <span className="checkpoint-platform-shine" />
+          <span className="checkpoint-platform-label">{psLabel}</span>
         </span>
       );
     }
