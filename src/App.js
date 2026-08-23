@@ -8069,6 +8069,7 @@ function ActivityFeed({
           >
             {activity.image ? (
               <img
+                className="social-feed-media"
                 src={activity.image}
                 alt={activity.title}
                 loading="lazy"
