@@ -2152,18 +2152,25 @@ const BADGES = [
   { id: "collector_10", icon: "📚", name: "Collectionneur", desc: "Avoir 10 jeux", rarity: "common", condition: (s) => s.total >= 10 },
   { id: "collector_25", icon: "🗂️", name: "Archiviste", desc: "Avoir 25 jeux", rarity: "rare", condition: (s) => s.total >= 25 },
   { id: "collector_50", icon: "🏛️", name: "Bibliothèque vivante", desc: "Avoir 50 jeux", rarity: "epic", condition: (s) => s.total >= 50 },
+  { id: "collector_250", icon: "🏰", name: "Grande bibliothèque", desc: "Avoir 250 jeux", rarity: "legendary", condition: (s) => s.total >= 250 },
+  { id: "collector_500", icon: "🌌", name: "Univers personnel", desc: "Avoir 500 jeux", rarity: "mythic", condition: (s) => s.total >= 500 },
 
   { id: "finisher_5", icon: "🏁", name: "Finisseur", desc: "Terminer 5 jeux", rarity: "common", condition: (s) => s.finished >= 5 },
   { id: "finisher_15", icon: "🔥", name: "Joueur sérieux", desc: "Terminer 15 jeux", rarity: "rare", condition: (s) => s.finished >= 15 },
   { id: "finisher_30", icon: "⚔️", name: "Machine à finir", desc: "Terminer 30 jeux", rarity: "epic", condition: (s) => s.finished >= 30 },
+  { id: "finisher_250", icon: "🏆", name: "Backlog dompté", desc: "Terminer 250 jeux", rarity: "legendary", condition: (s) => s.finished >= 250 },
+  { id: "finisher_500", icon: "⚡", name: "Archive absolue", desc: "Terminer 500 jeux", rarity: "mythic", condition: (s) => s.finished >= 500 },
 
   { id: "favorites_3", icon: "💖", name: "Coup de cœur", desc: "Avoir 3 favoris", rarity: "common", condition: (s) => s.favorites >= 3 },
   { id: "favorites_8", icon: "💜", name: "Passionné", desc: "Avoir 8 favoris", rarity: "rare", condition: (s) => s.favorites >= 8 },
   { id: "favorites_15", icon: "🌟", name: "Fan ultime", desc: "Avoir 15 favoris", rarity: "epic", condition: (s) => s.favorites >= 15 },
+  { id: "favorites_25", icon: "💫", name: "Panthéon personnel", desc: "Avoir 25 favoris", rarity: "legendary", condition: (s) => s.favorites >= 25 },
 
   { id: "reviews_3", icon: "✍️", name: "Critique", desc: "Écrire 3 avis", rarity: "common", condition: (s) => s.reviews >= 3 },
   { id: "reviews_10", icon: "📝", name: "Testeur pro", desc: "Écrire 10 avis", rarity: "rare", condition: (s) => s.reviews >= 10 },
   { id: "reviews_25", icon: "📜", name: "Plume légendaire", desc: "Écrire 25 avis", rarity: "legendary", condition: (s) => s.reviews >= 25 },
+  { id: "rated_100", icon: "⭐", name: "Œil critique", desc: "Noter 100 jeux", rarity: "legendary", condition: (s) => s.ratedGames >= 100 },
+  { id: "rated_250", icon: "💎", name: "Juge du Panthéon", desc: "Noter 250 jeux", rarity: "mythic", condition: (s) => s.ratedGames >= 250 },
 
   { id: "hours_50", icon: "⏱️", name: "Session longue", desc: "Cumuler 50 h", rarity: "common", condition: (s) => s.hours >= 50 },
   { id: "hours_100", icon: "⏳", name: "Marathon", desc: "Cumuler 100 h", rarity: "rare", condition: (s) => s.hours >= 100 },
@@ -2177,6 +2184,8 @@ const BADGES = [
   { id: "hardware_3", icon: "\uD83E\uDDF0", name: "Setup lance", desc: "Posseder 3 materiels", rarity: "common", condition: (s) => s.hardware >= 3 },
   { id: "hardware_8", icon: "\uD83D\uDEE0\uFE0F", name: "Coin gaming", desc: "Posseder 8 materiels", rarity: "rare", condition: (s) => s.hardware >= 8 },
   { id: "hardware_15", icon: "\uD83C\uDFC6", name: "Salle d'arcade", desc: "Posseder 15 materiels", rarity: "epic", condition: (s) => s.hardware >= 15 },
+  { id: "hardware_30", icon: "🛡️", name: "Setup signature", desc: "Posseder 30 materiels", rarity: "legendary", condition: (s) => s.hardware >= 30 },
+  { id: "hardware_60", icon: "🔱", name: "Forge personnelle", desc: "Posseder 60 materiels", rarity: "mythic", condition: (s) => s.hardware >= 60 },
 
   { id: "consoles_2", icon: "\uD83D\uDDA5\uFE0F", name: "Multi-console", desc: "Posseder 2 consoles", rarity: "common", condition: (s) => s.consoles >= 2 },
   { id: "consoles_5", icon: "\uD83C\uDF10", name: "Generation ouverte", desc: "Posseder 5 consoles", rarity: "rare", condition: (s) => s.consoles >= 5 },
@@ -2581,6 +2590,7 @@ function calculateBadgeStats(
     total: games.length,
     finished: games.filter(isGameFinishedStatus).length,
     favorites: games.filter(g => g.favorite).length,
+    ratedGames: games.filter((g) => clampRating(g.rating) > 0).length,
     reviews: games.filter(g => g.review && g.review.length > 10).length,
     hours: games.reduce((sum, g) => sum + (Number(g.playtime) || 0), 0),
     level,
@@ -2653,6 +2663,10 @@ function getBadgeProgress(badge, stats) {
 
   if (badge.id.startsWith("reviews_")) {
     return { current: stats.reviews, target: Number(badge.id.split("_")[1]) };
+  }
+
+  if (badge.id.startsWith("rated_")) {
+    return { current: stats.ratedGames, target: Number(badge.id.split("_")[1]) };
   }
 
   if (badge.id === "quiz_first") {
@@ -21089,6 +21103,11 @@ const setPlayedPlatforms = async (id, platforms) => {
   if (badge.id.startsWith("reviews_")) {
     const target = parseInt(badge.id.split("_")[1]);
     return { current: stats.reviews, target };
+  }
+
+  if (badge.id.startsWith("rated_")) {
+    const target = parseInt(badge.id.split("_")[1]);
+    return { current: stats.ratedGames, target };
   }
 
   if (badge.id.startsWith("hours_")) {

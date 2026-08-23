@@ -98,15 +98,15 @@ export const CHECKPOINT_TRIALS = [
   {
     level: 75,
     title: "Noyau des Maîtres",
-    guardian: "Le Gardien du Core",
+    guardian: "Le Gardien du Noyau",
     rewardRank: "Architecte du Checkpoint",
     reward: {
       badgeId: "trial_seal_75",
-      badgeName: "Sceau du Core",
+      badgeName: "Noyau Checkpoint",
       badgeIcon: "75",
       rarity: "mythic",
       title: "Badge exclusif",
-      description: "Un sceau rare pour les profils qui maitrisent leur univers.",
+      description: "Un badge mythique pour les profils qui maitrisent leur univers.",
       accent: "#c084fc",
     },
     intro:
