@@ -3781,7 +3781,7 @@ function getContextualRatingFields(game) {
   );
 }
 
-function DetailedRatingsBlock({ game, onSetDetailedRating, onRatingCommit }) {
+function DetailedRatingsBlock({ game, onSetDetailedRating }) {
   const summary = getGameDetailedRatingSummary(game);
 
   return (
@@ -3832,7 +3832,6 @@ function DetailedRatingsBlock({ game, onSetDetailedRating, onRatingCommit }) {
             <RatingSlider
               rating={item.value}
               onRate={(value) => onSetDetailedRating(game.id, item.key, value)}
-              onCommit={onRatingCommit}
             />
           </div>
         ))}
@@ -3870,7 +3869,6 @@ function DetailedRatingsBlock({ game, onSetDetailedRating, onRatingCommit }) {
                 <RatingSlider
                   rating={item.value}
                   onRate={(value) => onSetDetailedRating(game.id, item.key, value)}
-                  onCommit={onRatingCommit}
                 />
               </div>
             ))}
@@ -5499,6 +5497,7 @@ function GameDetailModal({
   onNavigateGame,
   canGoPrevious,
   canGoNext,
+  closeAfterRating = false,
 }) {
   const [localReview, setLocalReview] = useState("");
   const [localOstRating, setLocalOstRating] = useState(0);
@@ -6156,8 +6155,17 @@ function GameDetailModal({
             <RatingSlider
               rating={getGameRating(game)}
               onRate={(value) => onSetRating(game.id, value)}
-              onCommit={onRatingCommit}
             />
+
+            {closeAfterRating && (
+              <button
+                className="save-review-btn game-rating-save-btn"
+                type="button"
+                onClick={() => onRatingCommit?.()}
+              >
+                Enregistrer la note
+              </button>
+            )}
           </div>
 
           <div className="game-detail-section game-detail-ratings-section">
@@ -6166,7 +6174,6 @@ function GameDetailModal({
             <DetailedRatingsBlock
               game={game}
               onSetDetailedRating={onSetDetailedRating}
-              onRatingCommit={onRatingCommit}
             />
           </div>
 
@@ -6185,7 +6192,6 @@ function GameDetailModal({
               onRate={(value) => setLocalOstRating(value)}
               onCommit={(value) => {
                 onSetOstInfo(game.id, { ostRating: value });
-                onRatingCommit?.(value);
               }}
             />
           </div>
@@ -15221,6 +15227,7 @@ function OptionsTab({
   const [openOptionGroups, setOpenOptionGroups] = useState({
     interface: true,
     behavior: false,
+    rating: false,
     services: false,
     development: false,
     data: false,
@@ -16100,9 +16107,71 @@ function OptionsTab({
         </OptionGroup>
 
         <OptionGroup
+          id="rating"
+          title="Notation"
+          description="Les règles d'affichage et le comportement des fiches quand tu notes."
+          summary={appOptions.afterRatingAction === "list" ? "Retour liste" : "Rester sur fiche"}
+        >
+          <div className="option-section option-section-split">
+            <div className="option-setting-card">
+              <div>
+                <SectionTitle title="Affichage des notes" help="rating" />
+                <span>Le calcul reste sur 10 partout. Ici tu choisis seulement la façon de l'afficher.</span>
+              </div>
+              <div className="option-pill-grid three compact rating-display-grid">
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.ratingDisplay === "number" ? "active" : ""}`}
+                  onClick={() => onOptionChange("ratingDisplay", "number")}
+                >
+                  8.5/10
+                </button>
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.ratingDisplay === "stars" ? "active" : ""}`}
+                  onClick={() => onOptionChange("ratingDisplay", "stars")}
+                >
+                  Étoiles
+                </button>
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.ratingDisplay === "compact" ? "active" : ""}`}
+                  onClick={() => onOptionChange("ratingDisplay", "compact")}
+                >
+                  Compact
+                </button>
+              </div>
+            </div>
+
+            <div className="option-setting-card">
+              <div>
+                <strong>Après une note</strong>
+                <span>Décide si la fiche reste ouverte ou si elle revient à la liste après validation.</span>
+              </div>
+              <div className="option-pill-grid two compact rating-flow-grid">
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.afterRatingAction !== "list" ? "active" : ""}`}
+                  onClick={() => onOptionChange("afterRatingAction", "stay")}
+                >
+                  Rester sur la fiche
+                </button>
+                <button
+                  type="button"
+                  className={`option-pill ${appOptions.afterRatingAction === "list" ? "active" : ""}`}
+                  onClick={() => onOptionChange("afterRatingAction", "list")}
+                >
+                  Retour liste
+                </button>
+              </div>
+            </div>
+          </div>
+        </OptionGroup>
+
+        <OptionGroup
           id="services"
           title="Profil & services"
-          description="Ce qui sort de ta bibliothèque personnelle : profil public, notes et promos."
+          description="Profil public, comptes liés et sources externes."
           summary={`${socialProfile.visibility === "public" ? "Public" : "Privé"} · Steam ${steamProfile.steamId ? "lié" : "off"}`}
         >
 
@@ -16152,61 +16221,6 @@ function OptionsTab({
                     {label}
                   </button>
                 ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="option-section option-section-split">
-            <div className="option-setting-card">
-              <div>
-                <SectionTitle title="Notation" help="rating" />
-                <span>Définis comment les notes sont affichées dans les cartes et les tops.</span>
-              </div>
-              <div className="option-pill-grid three compact rating-display-grid">
-                <button
-                  type="button"
-                  className={`option-pill ${appOptions.ratingDisplay === "number" ? "active" : ""}`}
-                  onClick={() => onOptionChange("ratingDisplay", "number")}
-                >
-                  8.5/10
-                </button>
-                <button
-                  type="button"
-                  className={`option-pill ${appOptions.ratingDisplay === "stars" ? "active" : ""}`}
-                  onClick={() => onOptionChange("ratingDisplay", "stars")}
-                >
-                  Étoiles
-                </button>
-                <button
-                  type="button"
-                  className={`option-pill ${appOptions.ratingDisplay === "compact" ? "active" : ""}`}
-                  onClick={() => onOptionChange("ratingDisplay", "compact")}
-                >
-                  Compact
-                </button>
-              </div>
-            </div>
-
-            <div className="option-setting-card">
-              <div>
-                <strong>Après une note</strong>
-                <span>Choisis le comportement des fiches détaillées quand tu viens de noter un jeu.</span>
-              </div>
-              <div className="option-pill-grid two compact rating-flow-grid">
-                <button
-                  type="button"
-                  className={`option-pill ${appOptions.afterRatingAction !== "list" ? "active" : ""}`}
-                  onClick={() => onOptionChange("afterRatingAction", "stay")}
-                >
-                  Rester sur la fiche
-                </button>
-                <button
-                  type="button"
-                  className={`option-pill ${appOptions.afterRatingAction === "list" ? "active" : ""}`}
-                  onClick={() => onOptionChange("afterRatingAction", "list")}
-                >
-                  Retour liste
-                </button>
               </div>
             </div>
           </div>
@@ -16681,7 +16695,7 @@ function OptionsTab({
         >
 
           <div className="option-section">
-            <div className="option-setting-card option-setting-card-featured">
+            <div className="option-setting-card option-setting-card-featured data-options-card">
               <div>
                 <SectionTitle title="Données" help="data" />
                 <span>Contrôle la cohérence de la bibliothèque et prépare les sauvegardes.</span>
@@ -21609,6 +21623,7 @@ const setPlayedPlatforms = async (id, platforms) => {
         onNavigateGame={navigateSelectedGame}
         canGoPrevious={canGoPreviousGame}
         canGoNext={canGoNextGame}
+        closeAfterRating={appOptions.afterRatingAction === "list"}
       />
     </>
   );

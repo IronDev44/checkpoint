@@ -4006,6 +4006,10 @@ button:disabled {
   filter: brightness(1.05);
 }
 
+.game-rating-save-btn {
+  margin-top: 14px;
+}
+
 .delete-large-btn {
   width: 100%;
   margin-top: 18px;
@@ -16985,9 +16989,9 @@ html body[data-theme="theme-indigo"] {
 
 .options-group {
   margin-top: 14px;
-  padding: 12px;
+  padding: 14px;
   border: 1px solid rgba(255, 255, 255, 0.065);
-  border-radius: 20px;
+  border-radius: 22px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
     rgba(0, 0, 0, 0.08);
@@ -17008,9 +17012,9 @@ html body[data-theme="theme-indigo"] {
 }
 
 .options-accordion > .options-group-head {
-  width: calc(100% + 24px);
-  margin: -12px -12px 0;
-  padding: 14px 14px 12px;
+  width: calc(100% + 28px);
+  margin: -14px -14px 0;
+  padding: 16px 16px 14px;
   cursor: pointer;
   list-style: none;
   border-top: 0;
@@ -17026,12 +17030,12 @@ html body[data-theme="theme-indigo"] {
 }
 
 .options-accordion:not(.open) > .options-group-head {
-  margin-bottom: -12px;
+  margin-bottom: -14px;
   border-bottom-color: transparent;
 }
 
 .options-accordion.open > .options-group-head {
-  margin-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .options-group-head span {
@@ -17092,15 +17096,15 @@ html body[data-theme="theme-indigo"] {
 
 .options-group-body {
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 
 .option-section {
-  margin-top: 10px;
-  padding: 12px;
-  border: 1px solid var(--surface-border);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.035);
+  margin-top: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .options-group .option-section:first-of-type {
@@ -17109,7 +17113,7 @@ html body[data-theme="theme-indigo"] {
 
 .option-section-split {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 @media (min-width: 860px) {
@@ -17232,11 +17236,13 @@ html body[data-theme="theme-indigo"] {
 
 .option-setting-card {
   display: grid;
-  gap: 10px;
-  padding: 12px;
+  gap: 12px;
+  padding: 14px;
   border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 16px;
-  background: rgba(0, 0, 0, 0.11);
+  border-radius: 18px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    rgba(0, 0, 0, 0.12);
 }
 
 .option-setting-card + .option-setting-card {
@@ -17297,8 +17303,8 @@ html body[data-theme="theme-indigo"] {
 
   .options-group {
     margin-top: 12px;
-    padding: 10px;
-    border-radius: 18px;
+    padding: 12px;
+    border-radius: 20px;
   }
 
   .options-group-head {
@@ -17322,13 +17328,13 @@ html body[data-theme="theme-indigo"] {
   }
 
   .options-tab .option-section {
-    padding: 10px;
-    border-radius: 16px;
+    padding: 0;
+    border-radius: 0;
   }
 
   .options-tab .option-setting-card {
-    padding: 11px;
-    border-radius: 15px;
+    padding: 13px;
+    border-radius: 17px;
   }
 
   .options-tab .option-pill-grid.themes {
@@ -17380,11 +17386,25 @@ html body[data-theme="theme-indigo"] {
 .data-health-card {
   display: grid;
   gap: 12px;
-  margin-bottom: 12px;
-  padding: 14px;
+  margin-bottom: 0;
+  padding: 13px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.055);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.038);
+}
+
+.data-options-card {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.data-options-card > div:first-child {
+  padding-inline: 2px;
+}
+
+.data-options-card .data-health-card {
+  margin-top: 2px;
 }
 
 .steam-sync-card {
@@ -17718,8 +17738,8 @@ html body[data-theme="theme-indigo"] {
 .data-health-card.needs-action {
   border-color: color-mix(in srgb, var(--genre-color), transparent 45%);
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--genre-color), transparent 86%), transparent),
-    rgba(255, 255, 255, 0.055);
+    linear-gradient(135deg, color-mix(in srgb, var(--genre-color), transparent 90%), transparent),
+    rgba(255, 255, 255, 0.04);
 }
 
 .data-health-main {
@@ -17862,6 +17882,15 @@ html body[data-theme="theme-indigo"] {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .options-tab .option-pill-grid.three,
+  .options-tab .option-pill-grid.rating-display-grid,
+  .options-tab .option-pill-grid.deal-region-grid,
+  .options-tab .option-pill-grid.deal-source-grid,
+  .options-tab .option-pill-grid.public-section-grid,
+  .options-tab .option-pill-grid.trial-dev-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .data-health-main {
     align-items: stretch;
     flex-direction: column;
@@ -17877,6 +17906,8 @@ html body[data-theme="theme-indigo"] {
 
   .data-health-flow {
     justify-content: flex-start;
+    flex-wrap: wrap;
+    white-space: normal;
   }
 }
 
