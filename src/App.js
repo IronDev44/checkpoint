@@ -7495,6 +7495,7 @@ function LibrarySection({
   }, {});
 
   const renderGameCard = (game) => {
+    const gameVisual = getLibraryFallbackVisual(game);
     const progressLabel = getProgressLabel(
       game.progressStatus ||
         (isGameFinishedStatus(game) ? "completed" : "not_started")
@@ -7509,11 +7510,7 @@ function LibrarySection({
           className="game-grid-item"
           onClick={() => onOpenDetail(game)}
         >
-          {game.image ? (
-            <img src={game.image} alt={game.name} />
-          ) : (
-            <div className="game-grid-placeholder">🎮</div>
-          )}
+          <img src={gameVisual} alt={game.name} />
 
           <div className="grid-top-actions">
             <button
@@ -7565,11 +7562,7 @@ function LibrarySection({
           className="game-item clickable library-simple-card"
           onClick={() => onOpenDetail(game)}
         >
-          {game.image ? (
-            <img src={game.image} alt={game.name} className="library-game-cover" />
-          ) : (
-            <div className="game-thumb placeholder">🎮</div>
-          )}
+          <img src={gameVisual} alt={game.name} className="library-game-cover" />
 
           <div className="game-item-content">
             <div className="game-name">{game.name}</div>
@@ -7620,11 +7613,7 @@ function LibrarySection({
 
         <div className="game-card-head">
           <div className="game-item-left">
-            {game.image ? (
-              <img src={game.image} alt={game.name} className="game-thumb" />
-            ) : (
-              <div className="game-thumb placeholder">🎮</div>
-            )}
+            <img src={gameVisual} alt={game.name} className="game-thumb" />
           </div>
 
           <div className="game-head-main">
@@ -12427,6 +12416,70 @@ function getXboxGameKey(game) {
   return game?.xboxTitleId ? String(game.xboxTitleId) : "";
 }
 
+function flattenPlatformHints(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.flatMap(flattenPlatformHints);
+  if (typeof value === "string") return [value];
+  if (typeof value === "object") {
+    return [
+      value.name,
+      value.slug,
+      value.value,
+      value.id,
+      value.platform?.name,
+      value.deviceName,
+      value.family,
+    ]
+      .filter(Boolean)
+      .map(String);
+  }
+  return [String(value)];
+}
+
+function inferMicrosoftImportPlatforms(game = {}) {
+  const hints = [
+    ...flattenPlatformHints(game.playedPlatforms),
+    ...flattenPlatformHints(game.platformNames),
+    ...flattenPlatformHints(game.platforms),
+    ...flattenPlatformHints(game.platform),
+    ...flattenPlatformHints(game.devices),
+    ...flattenPlatformHints(game.deviceFamilies),
+    ...flattenPlatformHints(game.sourcePlatform),
+    ...flattenPlatformHints(game.sourceStore),
+  ];
+  const hintText = normalizeSearchText(hints.join(" "));
+
+  if (/\b(pc|windows|win32|desktop)\b/.test(hintText) || hintText.includes("game pass pc")) {
+    return ["PC"];
+  }
+  if (hintText.includes("series")) return ["Xbox Series X/S"];
+  if (hintText.includes("xbox one")) return ["Xbox One"];
+  if (hintText.includes("360")) return ["Xbox 360"];
+  if (hintText.includes("xbox") && hintText !== "xbox") return ["Xbox"];
+
+  return ["PC"];
+}
+
+function mergeMicrosoftImportPlatforms(existingGame = {}, importedPlatforms = []) {
+  const existingPlatforms = (existingGame.platformNames || []).filter(Boolean);
+  const isOnlyGenericXbox =
+    existingPlatforms.length === 0 ||
+    (existingPlatforms.length === 1 && normalizeSearchText(existingPlatforms[0]) === "xbox");
+
+  if (isOnlyGenericXbox) return importedPlatforms;
+
+  return Array.from(new Set([...existingPlatforms, ...importedPlatforms]));
+}
+
+function mergeMicrosoftPlayedPlatforms(existingGame = {}, importedPlatforms = []) {
+  const existingPlatforms = (existingGame.playedPlatforms || []).filter(Boolean);
+  const isOnlyGenericXbox =
+    existingPlatforms.length === 0 ||
+    (existingPlatforms.length === 1 && normalizeSearchText(existingPlatforms[0]) === "xbox");
+
+  return isOnlyGenericXbox ? importedPlatforms : existingPlatforms;
+}
+
 function formatSteamPlaytime(minutes = 0) {
   const safeMinutes = Number(minutes) || 0;
   if (safeMinutes < 60) return `${safeMinutes} min`;
@@ -12693,6 +12746,10 @@ function getGameVisual(game = {}) {
     game.short_screenshots?.[0]?.image ||
     ""
   );
+}
+
+function getLibraryFallbackVisual(game = {}) {
+  return getGameVisual(game) || createFallbackPoster(game.name || "Jeu", "#1d4ed8", "#22c55e");
 }
 
 function hasRealGameVisual(game = {}) {
@@ -20697,6 +20754,11 @@ useEffect(() => {
       const existingGame =
         (xboxKey && existingByXboxId.get(xboxKey)) ||
         (nameKey && existingByName.get(nameKey));
+      const importedPlatforms = inferMicrosoftImportPlatforms(xboxGame);
+      const importedImage =
+        getGameVisual(existingGame || {}) ||
+        getGameVisual(xboxGame) ||
+        createFallbackPoster(xboxGame.name || existingGame?.name || "Jeu Microsoft", "#16a34a", "#60a5fa");
 
       const xboxPatch = {
         xboxTitleId: xboxGame.xboxTitleId,
@@ -20713,10 +20775,11 @@ useEffect(() => {
       if (existingGame?.id) {
         await updateDoc(doc(db, "games", existingGame.id), {
           ...xboxPatch,
-          image: existingGame.image || xboxGame.image || "",
-          platformNames: Array.from(
-            new Set([...(existingGame.platformNames || []), "Xbox"])
-          ),
+          image: importedImage,
+          background_image: existingGame.background_image || xboxGame.background_image || "",
+          cover_image: existingGame.cover_image || xboxGame.cover_image || "",
+          platformNames: mergeMicrosoftImportPlatforms(existingGame, importedPlatforms),
+          playedPlatforms: mergeMicrosoftPlayedPlatforms(existingGame, importedPlatforms),
         });
         updated++;
         continue;
@@ -20734,10 +20797,13 @@ useEffect(() => {
         rating: 0,
         favorite: false,
         sanctuary: false,
-        image: xboxGame.image || "",
+        image: importedImage,
+        background_image: xboxGame.background_image || "",
+        cover_image: xboxGame.cover_image || "",
         status: "collection",
         released: "",
-        platformNames: ["Xbox"],
+        platformNames: importedPlatforms,
+        playedPlatforms: importedPlatforms,
         genreNames: [],
         playtime: null,
         difficulty: "normal",

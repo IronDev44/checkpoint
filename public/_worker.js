@@ -1057,6 +1057,86 @@ async function refreshMicrosoftXboxToken(session, env) {
   return data;
 }
 
+function collectXboxTitleHints(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.flatMap(collectXboxTitleHints);
+  if (typeof value === "string") return [value];
+  if (typeof value === "object") {
+    return [
+      value.name,
+      value.slug,
+      value.value,
+      value.id,
+      value.platform?.name,
+      value.deviceName,
+      value.family,
+      value.deviceFamily,
+      value.platformName,
+      value.productFamily,
+    ]
+      .filter(Boolean)
+      .map(String);
+  }
+  return [String(value)];
+}
+
+function normalizePlatformHintText(values = []) {
+  return values
+    .join(" ")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function inferXboxTitlePlatformNames(title = {}) {
+  const hints = [
+    ...collectXboxTitleHints(title.platformNames),
+    ...collectXboxTitleHints(title.platforms),
+    ...collectXboxTitleHints(title.platform),
+    ...collectXboxTitleHints(title.devices),
+    ...collectXboxTitleHints(title.deviceFamilies),
+    ...collectXboxTitleHints(title.deviceFamily),
+    ...collectXboxTitleHints(title.availableOn),
+    ...collectXboxTitleHints(title.productFamilies),
+    ...collectXboxTitleHints(title.titleDevices),
+    ...collectXboxTitleHints(title.titleType),
+    ...collectXboxTitleHints(title.type),
+  ];
+  const hintText = normalizePlatformHintText(hints);
+
+  if (/\b(pc|windows|win32|desktop)\b/.test(hintText) || hintText.includes("game pass pc")) {
+    return ["PC"];
+  }
+  if (hintText.includes("series")) return ["Xbox Series X/S"];
+  if (hintText.includes("xbox one")) return ["Xbox One"];
+  if (hintText.includes("360")) return ["Xbox 360"];
+  if (hintText.includes("xbox") && hintText !== "xbox") return ["Xbox"];
+
+  return ["PC"];
+}
+
+function getXboxTitleImage(title = {}) {
+  const imageCandidates = [
+    title.displayImage,
+    title.image,
+    title.titleImageUrl,
+    title.tileImage,
+    title.coverImage,
+    title.backgroundImage,
+    ...(Array.isArray(title.images)
+      ? title.images.flatMap((image) => [image?.url, image?.uri, image?.imageUrl])
+      : []),
+    ...(Array.isArray(title.assets)
+      ? title.assets.flatMap((asset) => [asset?.url, asset?.uri, asset?.imageUrl])
+      : []),
+  ];
+
+  return imageCandidates.find(Boolean) || "";
+}
+
 function normalizeXboxTitle(title = {}) {
   const titleId =
     title.titleId ||
@@ -1071,14 +1151,8 @@ function normalizeXboxTitle(title = {}) {
     title.title ||
     "";
   const achievement = title.achievement || title.achievements || {};
-  const image =
-    title.displayImage ||
-    title.image ||
-    title.titleImageUrl ||
-    title.tileImage ||
-    title?.images?.[0]?.url ||
-    title?.assets?.[0]?.url ||
-    "";
+  const image = getXboxTitleImage(title);
+  const platformNames = inferXboxTitlePlatformNames(title);
 
   return {
     xboxTitleId: String(titleId || name || "").trim(),
@@ -1094,7 +1168,9 @@ function normalizeXboxTitle(title = {}) {
     xboxMaxGamerscore: Number(achievement.totalGamerscore || achievement.maxGamerscore || title.maxGamerscore || 0),
     xboxCurrentAchievements: Number(achievement.currentAchievements || title.currentAchievements || 0),
     xboxTotalAchievements: Number(achievement.totalAchievements || title.totalAchievements || 0),
-    platformNames: ["Xbox"],
+    platformNames,
+    sourcePlatform: platformNames.join(", "),
+    sourceStore: "microsoft",
   };
 }
 
