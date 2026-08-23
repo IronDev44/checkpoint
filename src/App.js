@@ -5513,6 +5513,7 @@ function GameDetailModal({
   onRatingCommit,
   onToggleFavorite,
   onSetGameSanctuary,
+  onSetSanctuaryFigures,
   onSetDifficulty,
   onSetReview,
   onSetOstInfo,
@@ -5793,6 +5794,15 @@ function GameDetailModal({
     { label: "Dernière mise à jour", value: formatGameHistoryDate(game.updatedAt) },
     { label: "Statut actuel", value: getGameProgressStateLabel(getGameProgressState(game)) },
   ];
+  const figureOptions = getGameFigureOptions(game);
+  const selectedFigureIds = getSelectedGameFigureIds(game);
+  const toggleSanctuaryFigure = (figureId) => {
+    const nextIds = selectedFigureIds.includes(figureId)
+      ? selectedFigureIds.filter((id) => id !== figureId)
+      : [...selectedFigureIds, figureId];
+
+    onSetSanctuaryFigures?.(game.id, nextIds);
+  };
 
   return (
     <div
@@ -5970,6 +5980,40 @@ function GameDetailModal({
                 <option value="in">Dans le Sanctuaire</option>
               </select>
             </label>
+
+            <div className="sanctuary-figure-picker">
+              <div>
+                <strong>Figures cultes</strong>
+                <p>
+                  Tu peux mettre un personnage en avant sans ajouter le jeu entier au Sanctuaire.
+                </p>
+              </div>
+
+              {figureOptions.length ? (
+                <div className="sanctuary-figure-chip-grid">
+                  {figureOptions.map((figure) => {
+                    const selected = selectedFigureIds.includes(figure.id);
+
+                    return (
+                      <button
+                        key={figure.id}
+                        type="button"
+                        className={`sanctuary-figure-chip ${figure.role} ${selected ? "active" : ""}`}
+                        onClick={() => toggleSanctuaryFigure(figure.id)}
+                      >
+                        <span>{figure.emblem}</span>
+                        <strong>{figure.name}</strong>
+                        <small>{figure.role === "hero" ? "Héros" : "Antagoniste"}</small>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="sanctuary-figure-picker-empty">
+                  Aucune figure culte reliée automatiquement à ce jeu pour l'instant.
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="game-detail-section">
@@ -6696,6 +6740,26 @@ const SANCTUARY_FIGURE_CATALOG = [
   { id: "pyramid-head", name: "Pyramid Head", role: "villain", universe: "Silent Hill", emblem: "PH", keywords: ["silent hill", "pyramid head"] },
 ];
 
+function getGameFigureOptions(game = {}) {
+  const haystack = normalizeSearchText(
+    [game.name, game.series, game.genre, ...(game.genreNames || []), ...(game.platformNames || [])]
+      .filter(Boolean)
+      .join(" ")
+  );
+
+  if (!haystack) return [];
+
+  return SANCTUARY_FIGURE_CATALOG.filter((figure) =>
+    figure.keywords.some((keyword) => haystack.includes(normalizeSearchText(keyword)))
+  );
+}
+
+function getSelectedGameFigureIds(game = {}) {
+  if (Array.isArray(game.sanctuaryFigureIds)) return game.sanctuaryFigureIds;
+  if (Array.isArray(game.cultFigureIds)) return game.cultFigureIds;
+  return [];
+}
+
 function getSanctuaryFigureMatches(games = [], sanctuaryGames = []) {
   const sourceGames = sanctuaryGames.length
     ? sanctuaryGames
@@ -6712,21 +6776,55 @@ function getSanctuaryFigureMatches(games = [], sanctuaryGames = []) {
       score:
         getGameRating(game) * 10 +
         (game.sanctuary ? 30 : 0) +
+        (getSelectedGameFigureIds(game).length ? 22 : 0) +
         (game.favorite ? 18 : 0) +
         (isGameFinishedStatus(game) ? 8 : 0),
     }))
     .sort((a, b) => b.score - a.score);
 
-  return SANCTUARY_FIGURE_CATALOG.map((figure) => {
+  const automaticMatches = SANCTUARY_FIGURE_CATALOG.map((figure) => {
     const match = rankedGames.find(({ haystack }) =>
       figure.keywords.some((keyword) => haystack.includes(normalizeSearchText(keyword)))
     );
 
     if (!match) return null;
-    return { ...figure, sourceGame: match.game, score: match.score };
+    return { ...figure, sourceGame: match.game, score: match.score, manual: false };
   })
-    .filter(Boolean)
-    .sort((a, b) => b.score - a.score);
+    .filter(Boolean);
+
+  const manualMatches = games.flatMap((game) =>
+    getSelectedGameFigureIds(game)
+      .map((figureId) => {
+        const figure = SANCTUARY_FIGURE_CATALOG.find((entry) => entry.id === figureId);
+        if (!figure) return null;
+
+        return {
+          ...figure,
+          sourceGame: game,
+          score:
+            200 +
+            getGameRating(game) * 10 +
+            (game.favorite ? 8 : 0) +
+            (isGameFinishedStatus(game) ? 4 : 0),
+          manual: true,
+        };
+      })
+      .filter(Boolean)
+  );
+
+  const merged = new Map();
+
+  [...automaticMatches, ...manualMatches].forEach((match) => {
+    const current = merged.get(match.id);
+
+    if (!current || (match.manual && !current.manual) || match.score > current.score) {
+      merged.set(match.id, match);
+    }
+  });
+
+  return Array.from(merged.values()).sort(
+    (a, b) => Number(b.manual) - Number(a.manual) || b.score - a.score
+  );
 }
 
 function SanctuaryTab({
@@ -6925,8 +7023,8 @@ function SanctuaryTab({
           <small>{heroFigures.length + villainFigures.length}</small>
         </div>
         <p className="sanctuary-note">
-          Des personnages liés à tes jeux marquants. Ils ne classent rien :
-          ils donnent un visage à ce que ton Sanctuaire raconte.
+          Mets en avant les personnages qui t'ont marqué, même si leur jeu
+          n'est pas dans ton Hall of Fame.
         </p>
 
         {heroFigures.length || villainFigures.length ? (
@@ -6977,8 +7075,8 @@ function SanctuaryTab({
           <div className="sanctuary-empty">
             <strong>Aucune figure repérée pour l'instant.</strong>
             <span>
-              Ajoute un jeu culte au Sanctuaire pour faire apparaître ses héros
-              et ses grands antagonistes.
+              Ouvre une fiche jeu et choisis ses figures cultes pour les faire
+              apparaître ici.
             </span>
           </div>
         )}
@@ -20859,6 +20957,32 @@ const setRating = (id, rating) => {
     }
   };
 
+  const setSanctuaryFigures = async (id, sanctuaryFigureIds) => {
+    const nextFigureIds = Array.isArray(sanctuaryFigureIds)
+      ? sanctuaryFigureIds.filter(Boolean)
+      : [];
+
+    try {
+      await updateDoc(doc(db, "games", id), { sanctuaryFigureIds: nextFigureIds });
+      setGames((prev) =>
+        prev.map((game) =>
+          game.id === id ? { ...game, sanctuaryFigureIds: nextFigureIds } : game
+        )
+      );
+      if (selectedGame?.id === id) {
+        setSelectedGame((prev) => ({ ...prev, sanctuaryFigureIds: nextFigureIds }));
+      }
+      setToast(
+        nextFigureIds.length
+          ? "Figure culte ajoutée au Sanctuaire."
+          : "Figure culte retirée du Sanctuaire."
+      );
+    } catch (e) {
+      console.error("Erreur figures cultes :", e);
+      setToast("Impossible de mettre à jour les figures cultes.");
+    }
+  };
+
   const setStatus = async (id, status) => {
     try {
       const progressStatus =
@@ -21935,6 +22059,7 @@ const setPlayedPlatforms = async (id, platforms) => {
         onRatingCommit={handleGameRatingCommit}
         onToggleFavorite={toggleFavorite}
         onSetGameSanctuary={setGameSanctuary}
+        onSetSanctuaryFigures={setSanctuaryFigures}
         onSetDifficulty={setDifficulty}
         onSetReview={setReview}
         onSetOstInfo={setOstInfo}

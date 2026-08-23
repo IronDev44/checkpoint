@@ -3905,6 +3905,101 @@ button:disabled {
   font-weight: 850;
 }
 
+.sanctuary-figure-picker {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--accent), transparent 84%), transparent 48%),
+    rgba(255,255,255,0.035);
+}
+
+.sanctuary-figure-picker strong {
+  display: block;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 950;
+}
+
+.sanctuary-figure-picker p {
+  margin: 4px 0 0;
+  color: rgba(255,255,255,0.66);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.sanctuary-figure-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.sanctuary-figure-chip {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  grid-template-areas:
+    "emblem name"
+    "emblem role";
+  gap: 2px 9px;
+  align-items: center;
+  min-height: 58px;
+  padding: 9px 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  color: rgba(255,255,255,0.9);
+  text-align: left;
+  background: linear-gradient(145deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035));
+}
+
+.sanctuary-figure-chip span {
+  grid-area: emblem;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 12px;
+  color: #06111d;
+  font-size: 0.78rem;
+  font-weight: 1000;
+  background: linear-gradient(135deg, #7cf7ff, #5ce189);
+}
+
+.sanctuary-figure-chip.villain span {
+  background: linear-gradient(135deg, #ff5d86, #f2b34d);
+}
+
+.sanctuary-figure-chip strong {
+  grid-area: name;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.86rem;
+}
+
+.sanctuary-figure-chip small {
+  grid-area: role;
+  color: rgba(255,255,255,0.58);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+.sanctuary-figure-chip.active {
+  border-color: color-mix(in srgb, var(--accent), white 20%);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent), transparent 62%),
+    0 14px 32px color-mix(in srgb, var(--accent), transparent 82%);
+}
+
+.sanctuary-figure-picker-empty {
+  padding: 10px 12px;
+  border: 1px dashed rgba(255,255,255,0.11);
+  border-radius: 14px;
+  background: rgba(0,0,0,0.14);
+}
+
 .game-detail-personal-summary {
   border-color: color-mix(in srgb, var(--accent), transparent 66%);
   background:
