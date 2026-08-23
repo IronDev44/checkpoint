@@ -6718,26 +6718,130 @@ function PhysicalCollectionPanel({ games, onOpenDetail, onUpdatePhysicalGame }) 
 
 const SANCTUARY_FIGURE_CATALOG = [
   { id: "mario", name: "Mario", role: "hero", universe: "Super Mario", emblem: "M", keywords: ["mario", "super mario", "mario kart"] },
+  { id: "luigi", name: "Luigi", role: "hero", universe: "Super Mario", emblem: "L", keywords: ["mario", "super mario", "luigi", "luigi's mansion"] },
+  { id: "peach", name: "Princesse Peach", role: "hero", universe: "Super Mario", emblem: "P", keywords: ["mario", "super mario", "peach", "mario kart"] },
+  { id: "yoshi", name: "Yoshi", role: "hero", universe: "Super Mario", emblem: "Y", keywords: ["mario", "super mario", "yoshi", "mario kart"] },
   { id: "link", name: "Link", role: "hero", universe: "The Legend of Zelda", emblem: "L", keywords: ["zelda", "link", "ocarina of time", "breath of the wild", "tears of the kingdom"] },
+  { id: "zelda", name: "Zelda", role: "hero", universe: "The Legend of Zelda", emblem: "Z", keywords: ["zelda", "princess zelda", "ocarina of time", "breath of the wild", "tears of the kingdom"] },
   { id: "samus", name: "Samus Aran", role: "hero", universe: "Metroid", emblem: "S", keywords: ["metroid", "samus"] },
   { id: "sonic", name: "Sonic", role: "hero", universe: "Sonic", emblem: "S", keywords: ["sonic"] },
+  { id: "tails", name: "Tails", role: "hero", universe: "Sonic", emblem: "T", keywords: ["sonic", "tails"] },
+  { id: "knuckles", name: "Knuckles", role: "hero", universe: "Sonic", emblem: "K", keywords: ["sonic", "knuckles"] },
   { id: "lara", name: "Lara Croft", role: "hero", universe: "Tomb Raider", emblem: "L", keywords: ["tomb raider", "lara croft"] },
   { id: "master-chief", name: "Master Chief", role: "hero", universe: "Halo", emblem: "117", keywords: ["halo"] },
+  { id: "cortana", name: "Cortana", role: "hero", universe: "Halo", emblem: "AI", keywords: ["halo", "cortana"] },
   { id: "kratos", name: "Kratos", role: "hero", universe: "God of War", emblem: "K", keywords: ["god of war", "kratos"] },
+  { id: "atreus", name: "Atreus", role: "hero", universe: "God of War", emblem: "A", keywords: ["god of war", "atreus", "ragnarok"] },
   { id: "snake", name: "Solid Snake", role: "hero", universe: "Metal Gear", emblem: "S", keywords: ["metal gear", "solid snake"] },
   { id: "geralt", name: "Geralt de Riv", role: "hero", universe: "The Witcher", emblem: "G", keywords: ["witcher", "geralt"] },
+  { id: "ciri", name: "Ciri", role: "hero", universe: "The Witcher", emblem: "C", keywords: ["witcher", "ciri"] },
   { id: "aloy", name: "Aloy", role: "hero", universe: "Horizon", emblem: "A", keywords: ["horizon zero dawn", "horizon forbidden west", "aloy"] },
+  { id: "nathan-drake", name: "Nathan Drake", role: "hero", universe: "Uncharted", emblem: "ND", keywords: ["uncharted", "nathan drake"] },
+  { id: "chloe-frazer", name: "Chloe Frazer", role: "hero", universe: "Uncharted", emblem: "CF", keywords: ["uncharted", "chloe frazer", "lost legacy"] },
   { id: "ellie", name: "Ellie", role: "hero", universe: "The Last of Us", emblem: "E", keywords: ["the last of us", "last of us"] },
+  { id: "joel", name: "Joel Miller", role: "hero", universe: "The Last of Us", emblem: "J", keywords: ["the last of us", "last of us", "joel"] },
   { id: "arthur", name: "Arthur Morgan", role: "hero", universe: "Red Dead Redemption", emblem: "A", keywords: ["red dead redemption"] },
+  { id: "john-marston", name: "John Marston", role: "hero", universe: "Red Dead Redemption", emblem: "JM", keywords: ["red dead redemption", "john marston"] },
   { id: "jin", name: "Jin Sakai", role: "hero", universe: "Ghost", emblem: "J", keywords: ["ghost of tsushima", "ghost of yotei"] },
+  { id: "atsus", name: "Atsu", role: "hero", universe: "Ghost", emblem: "A", keywords: ["ghost of yotei", "yotei", "atsu"] },
+  { id: "ezio", name: "Ezio Auditore", role: "hero", universe: "Assassin's Creed", emblem: "E", keywords: ["assassin's creed", "assassins creed", "ezio", "brotherhood", "revelations"] },
+  { id: "bayek", name: "Bayek", role: "hero", universe: "Assassin's Creed", emblem: "B", keywords: ["assassin's creed origins", "assassins creed origins", "bayek"] },
+  { id: "kassandra", name: "Kassandra", role: "hero", universe: "Assassin's Creed", emblem: "K", keywords: ["assassin's creed odyssey", "assassins creed odyssey", "kassandra"] },
+  { id: "commander-shepard", name: "Commandant Shepard", role: "hero", universe: "Mass Effect", emblem: "N7", keywords: ["mass effect", "shepard"] },
+  { id: "garrus", name: "Garrus Vakarian", role: "hero", universe: "Mass Effect", emblem: "GV", keywords: ["mass effect", "garrus"] },
+  { id: "commander-shepard-fem", name: "FemShep", role: "hero", universe: "Mass Effect", emblem: "N7", keywords: ["mass effect", "femshep"] },
+  { id: "doom-slayer", name: "Doom Slayer", role: "hero", universe: "DOOM", emblem: "D", keywords: ["doom", "doom eternal", "doom slayer"] },
+  { id: "dante", name: "Dante", role: "hero", universe: "Devil May Cry", emblem: "D", keywords: ["devil may cry", "dante"] },
+  { id: "vergil", name: "Vergil", role: "villain", universe: "Devil May Cry", emblem: "V", keywords: ["devil may cry", "vergil"] },
+  { id: "leon-kennedy", name: "Leon S. Kennedy", role: "hero", universe: "Resident Evil", emblem: "L", keywords: ["resident evil", "leon kennedy", "leon s kennedy"] },
+  { id: "jill-valentine", name: "Jill Valentine", role: "hero", universe: "Resident Evil", emblem: "J", keywords: ["resident evil", "jill valentine"] },
+  { id: "chris-redfield", name: "Chris Redfield", role: "hero", universe: "Resident Evil", emblem: "C", keywords: ["resident evil", "chris redfield"] },
+  { id: "isaac-clarke", name: "Isaac Clarke", role: "hero", universe: "Dead Space", emblem: "I", keywords: ["dead space", "isaac clarke"] },
+  { id: "alan-wake", name: "Alan Wake", role: "hero", universe: "Alan Wake", emblem: "AW", keywords: ["alan wake"] },
+  { id: "saga-anderson", name: "Saga Anderson", role: "hero", universe: "Alan Wake", emblem: "SA", keywords: ["alan wake 2", "saga anderson"] },
+  { id: "max-payne", name: "Max Payne", role: "hero", universe: "Max Payne", emblem: "MP", keywords: ["max payne"] },
+  { id: "agent-47", name: "Agent 47", role: "hero", universe: "Hitman", emblem: "47", keywords: ["hitman", "agent 47"] },
+  { id: "sam-fisher", name: "Sam Fisher", role: "hero", universe: "Splinter Cell", emblem: "SF", keywords: ["splinter cell", "sam fisher"] },
+  { id: "cj", name: "CJ", role: "hero", universe: "Grand Theft Auto", emblem: "CJ", keywords: ["grand theft auto san andreas", "gta san andreas", "san andreas"] },
+  { id: "niko-bellic", name: "Niko Bellic", role: "hero", universe: "Grand Theft Auto", emblem: "NB", keywords: ["grand theft auto iv", "gta iv", "gta 4", "niko bellic"] },
+  { id: "trevor", name: "Trevor Philips", role: "hero", universe: "Grand Theft Auto", emblem: "T", keywords: ["grand theft auto v", "gta v", "gta 5", "trevor"] },
+  { id: "cloud", name: "Cloud Strife", role: "hero", universe: "Final Fantasy VII", emblem: "C", keywords: ["final fantasy vii", "final fantasy 7", "cloud strife"] },
+  { id: "tifa", name: "Tifa Lockhart", role: "hero", universe: "Final Fantasy VII", emblem: "T", keywords: ["final fantasy vii", "final fantasy 7", "tifa"] },
+  { id: "aerith", name: "Aerith Gainsborough", role: "hero", universe: "Final Fantasy VII", emblem: "A", keywords: ["final fantasy vii", "final fantasy 7", "aerith"] },
+  { id: "tidus", name: "Tidus", role: "hero", universe: "Final Fantasy X", emblem: "T", keywords: ["final fantasy x", "final fantasy 10", "tidus"] },
+  { id: "yuna", name: "Yuna", role: "hero", universe: "Final Fantasy X", emblem: "Y", keywords: ["final fantasy x", "final fantasy 10", "yuna"] },
+  { id: "sora", name: "Sora", role: "hero", universe: "Kingdom Hearts", emblem: "S", keywords: ["kingdom hearts", "sora"] },
+  { id: "roxas", name: "Roxas", role: "hero", universe: "Kingdom Hearts", emblem: "R", keywords: ["kingdom hearts", "roxas"] },
+  { id: "ryu", name: "Ryu", role: "hero", universe: "Street Fighter", emblem: "R", keywords: ["street fighter", "ryu"] },
+  { id: "chun-li", name: "Chun-Li", role: "hero", universe: "Street Fighter", emblem: "CL", keywords: ["street fighter", "chun-li", "chun li"] },
+  { id: "scorpion", name: "Scorpion", role: "hero", universe: "Mortal Kombat", emblem: "S", keywords: ["mortal kombat", "scorpion"] },
+  { id: "sub-zero", name: "Sub-Zero", role: "hero", universe: "Mortal Kombat", emblem: "SZ", keywords: ["mortal kombat", "sub-zero", "sub zero"] },
+  { id: "kiryu", name: "Kazuma Kiryu", role: "hero", universe: "Yakuza", emblem: "K", keywords: ["yakuza", "like a dragon", "kazuma kiryu"] },
+  { id: "ichiban", name: "Ichiban Kasuga", role: "hero", universe: "Like a Dragon", emblem: "I", keywords: ["like a dragon", "ichiban", "yakuza like a dragon"] },
+  { id: "joker-persona", name: "Joker", role: "hero", universe: "Persona 5", emblem: "J", keywords: ["persona 5", "persona 5 royal", "joker"] },
+  { id: "yu-narukami", name: "Yu Narukami", role: "hero", universe: "Persona 4", emblem: "Y", keywords: ["persona 4", "yu narukami"] },
+  { id: "makoto-yuki", name: "Makoto Yuki", role: "hero", universe: "Persona 3", emblem: "M", keywords: ["persona 3", "makoto yuki"] },
+  { id: "2b", name: "2B", role: "hero", universe: "NieR", emblem: "2B", keywords: ["nier automata", "nier: automata", "2b"] },
+  { id: "a2", name: "A2", role: "hero", universe: "NieR", emblem: "A2", keywords: ["nier automata", "nier: automata", "a2"] },
+  { id: "amicia", name: "Amicia de Rune", role: "hero", universe: "A Plague Tale", emblem: "A", keywords: ["a plague tale", "amicia"] },
+  { id: "cal-kestis", name: "Cal Kestis", role: "hero", universe: "Star Wars Jedi", emblem: "CK", keywords: ["star wars jedi", "fallen order", "survivor", "cal kestis"] },
+  { id: "kay-vess", name: "Kay Vess", role: "hero", universe: "Star Wars Outlaws", emblem: "KV", keywords: ["star wars outlaws", "kay vess"] },
+  { id: "clive", name: "Clive Rosfield", role: "hero", universe: "Final Fantasy XVI", emblem: "C", keywords: ["final fantasy xvi", "final fantasy 16", "clive"] },
+  { id: "jill-warrick", name: "Jill Warrick", role: "hero", universe: "Final Fantasy XVI", emblem: "JW", keywords: ["final fantasy xvi", "final fantasy 16", "jill warrick"] },
+  { id: "kirby", name: "Kirby", role: "hero", universe: "Kirby", emblem: "K", keywords: ["kirby"] },
+  { id: "donkey-kong", name: "Donkey Kong", role: "hero", universe: "Donkey Kong", emblem: "DK", keywords: ["donkey kong"] },
+  { id: "fox-mccloud", name: "Fox McCloud", role: "hero", universe: "Star Fox", emblem: "F", keywords: ["star fox", "fox mccloud"] },
+  { id: "mega-man", name: "Mega Man", role: "hero", universe: "Mega Man", emblem: "MM", keywords: ["mega man", "megaman"] },
+  { id: "pac-man", name: "Pac-Man", role: "hero", universe: "Pac-Man", emblem: "PM", keywords: ["pac-man", "pac man"] },
+  { id: "crash", name: "Crash Bandicoot", role: "hero", universe: "Crash Bandicoot", emblem: "C", keywords: ["crash bandicoot"] },
+  { id: "spyro", name: "Spyro", role: "hero", universe: "Spyro", emblem: "S", keywords: ["spyro"] },
+  { id: "ratchet", name: "Ratchet", role: "hero", universe: "Ratchet & Clank", emblem: "R", keywords: ["ratchet", "ratchet & clank", "ratchet and clank"] },
+  { id: "clank", name: "Clank", role: "hero", universe: "Ratchet & Clank", emblem: "C", keywords: ["ratchet", "clank", "ratchet & clank", "ratchet and clank"] },
+  { id: "sly-cooper", name: "Sly Cooper", role: "hero", universe: "Sly Cooper", emblem: "S", keywords: ["sly cooper"] },
+  { id: "jak", name: "Jak", role: "hero", universe: "Jak and Daxter", emblem: "J", keywords: ["jak and daxter", "jak & daxter"] },
+  { id: "daxter", name: "Daxter", role: "hero", universe: "Jak and Daxter", emblem: "D", keywords: ["jak and daxter", "jak & daxter", "daxter"] },
+  { id: "commander-keen", name: "Commander Keen", role: "hero", universe: "Commander Keen", emblem: "CK", keywords: ["commander keen"] },
+  { id: "gordon-freeman", name: "Gordon Freeman", role: "hero", universe: "Half-Life", emblem: "GF", keywords: ["half-life", "half life", "gordon freeman"] },
+  { id: "alyx-vance", name: "Alyx Vance", role: "hero", universe: "Half-Life", emblem: "AV", keywords: ["half-life", "half life", "alyx"] },
+  { id: "chell", name: "Chell", role: "hero", universe: "Portal", emblem: "C", keywords: ["portal", "chell"] },
+  { id: "elizabeth", name: "Elizabeth", role: "hero", universe: "BioShock", emblem: "E", keywords: ["bioshock infinite", "elizabeth"] },
+  { id: "booker", name: "Booker DeWitt", role: "hero", universe: "BioShock", emblem: "BD", keywords: ["bioshock infinite", "booker dewitt"] },
+  { id: "big-daddy", name: "Big Daddy", role: "hero", universe: "BioShock", emblem: "BD", keywords: ["bioshock", "big daddy"] },
+  { id: "corvo", name: "Corvo Attano", role: "hero", universe: "Dishonored", emblem: "C", keywords: ["dishonored", "corvo"] },
+  { id: "emily-kaldwin", name: "Emily Kaldwin", role: "hero", universe: "Dishonored", emblem: "E", keywords: ["dishonored 2", "emily kaldwin"] },
+  { id: "alexios", name: "Alexios", role: "hero", universe: "Assassin's Creed", emblem: "A", keywords: ["assassin's creed odyssey", "assassins creed odyssey", "alexios"] },
   { id: "bowser", name: "Bowser", role: "villain", universe: "Super Mario", emblem: "B", keywords: ["mario", "super mario", "mario kart", "bowser"] },
+  { id: "wario", name: "Wario", role: "villain", universe: "Super Mario", emblem: "W", keywords: ["mario", "wario", "mario kart"] },
   { id: "ganondorf", name: "Ganondorf", role: "villain", universe: "The Legend of Zelda", emblem: "G", keywords: ["zelda", "ganon", "ganondorf", "ocarina of time", "tears of the kingdom"] },
+  { id: "dr-eggman", name: "Dr Eggman", role: "villain", universe: "Sonic", emblem: "E", keywords: ["sonic", "eggman", "robotnik"] },
   { id: "sephiroth", name: "Sephiroth", role: "villain", universe: "Final Fantasy VII", emblem: "S", keywords: ["final fantasy vii", "final fantasy 7", "sephiroth"] },
   { id: "vader", name: "Dark Vador", role: "villain", universe: "Star Wars", emblem: "DV", keywords: ["star wars", "vador", "vader", "lego star wars"] },
+  { id: "darth-maul", name: "Dark Maul", role: "villain", universe: "Star Wars", emblem: "DM", keywords: ["star wars", "darth maul", "dark maul", "lego star wars"] },
   { id: "wesker", name: "Albert Wesker", role: "villain", universe: "Resident Evil", emblem: "W", keywords: ["resident evil", "wesker"] },
+  { id: "nemesis", name: "Nemesis", role: "villain", universe: "Resident Evil", emblem: "N", keywords: ["resident evil 3", "nemesis"] },
+  { id: "lady-dimitrescu", name: "Lady Dimitrescu", role: "villain", universe: "Resident Evil", emblem: "LD", keywords: ["resident evil village", "dimitrescu"] },
   { id: "vaas", name: "Vaas Montenegro", role: "villain", universe: "Far Cry", emblem: "V", keywords: ["far cry 3", "vaas"] },
+  { id: "pagan-min", name: "Pagan Min", role: "villain", universe: "Far Cry", emblem: "PM", keywords: ["far cry 4", "pagan min"] },
+  { id: "joseph-seed", name: "Joseph Seed", role: "villain", universe: "Far Cry", emblem: "JS", keywords: ["far cry 5", "joseph seed"] },
   { id: "glados", name: "GLaDOS", role: "villain", universe: "Portal", emblem: "G", keywords: ["portal", "glados"] },
   { id: "pyramid-head", name: "Pyramid Head", role: "villain", universe: "Silent Hill", emblem: "PH", keywords: ["silent hill", "pyramid head"] },
+  { id: "big-boss", name: "Big Boss", role: "villain", universe: "Metal Gear", emblem: "BB", keywords: ["metal gear", "big boss", "phantom pain"] },
+  { id: "skull-face", name: "Skull Face", role: "villain", universe: "Metal Gear", emblem: "SF", keywords: ["metal gear solid v", "phantom pain", "skull face"] },
+  { id: "the-illusive-man", name: "L'Homme Trouble", role: "villain", universe: "Mass Effect", emblem: "IM", keywords: ["mass effect", "illusive man", "homme trouble"] },
+  { id: "saren", name: "Saren Arterius", role: "villain", universe: "Mass Effect", emblem: "SA", keywords: ["mass effect", "saren"] },
+  { id: "handsome-jack", name: "Handsome Jack", role: "villain", universe: "Borderlands", emblem: "HJ", keywords: ["borderlands 2", "handsome jack"] },
+  { id: "andrew-ryan", name: "Andrew Ryan", role: "villain", universe: "BioShock", emblem: "AR", keywords: ["bioshock", "andrew ryan"] },
+  { id: "fontaine", name: "Frank Fontaine", role: "villain", universe: "BioShock", emblem: "FF", keywords: ["bioshock", "fontaine"] },
+  { id: "hades", name: "Hadès", role: "villain", universe: "Hades", emblem: "H", keywords: ["hades"] },
+  { id: "senator-armstrong", name: "Senator Armstrong", role: "villain", universe: "Metal Gear", emblem: "SA", keywords: ["metal gear rising", "revengeance", "armstrong"] },
+  { id: "micah-bell", name: "Micah Bell", role: "villain", universe: "Red Dead Redemption", emblem: "MB", keywords: ["red dead redemption 2", "micah"] },
+  { id: "m-bison", name: "M. Bison", role: "villain", universe: "Street Fighter", emblem: "MB", keywords: ["street fighter", "m bison", "bison"] },
+  { id: "shao-kahn", name: "Shao Kahn", role: "villain", universe: "Mortal Kombat", emblem: "SK", keywords: ["mortal kombat", "shao kahn"] },
+  { id: "kefka", name: "Kefka Palazzo", role: "villain", universe: "Final Fantasy VI", emblem: "K", keywords: ["final fantasy vi", "final fantasy 6", "kefka"] },
+  { id: "ardyn", name: "Ardyn Izunia", role: "villain", universe: "Final Fantasy XV", emblem: "A", keywords: ["final fantasy xv", "final fantasy 15", "ardyn"] },
+  { id: "xehanort", name: "Xehanort", role: "villain", universe: "Kingdom Hearts", emblem: "X", keywords: ["kingdom hearts", "xehanort"] },
+  { id: "majima", name: "Goro Majima", role: "villain", universe: "Yakuza", emblem: "GM", keywords: ["yakuza", "like a dragon", "majima"] },
+  { id: "tyr", name: "Tyran", role: "villain", universe: "Gaming", emblem: "!", keywords: ["boss final", "final boss"] },
 ];
 
 function getGameFigureOptions(game = {}) {
@@ -6833,7 +6937,10 @@ function SanctuaryTab({
   onOpenGameDetail,
   onGoLibrary,
   onGoHardware,
+  onSetSanctuaryFigures,
 }) {
+  const [figureSearch, setFigureSearch] = useState("");
+  const [figureRoleFilter, setFigureRoleFilter] = useState("all");
   const sanctuaryGames = games.filter((game) => game.sanctuary);
   const sanctuaryPhysicalGames = sanctuaryGames.filter((game) => game.physicalOwned);
   const sanctuaryHardware = hardware.filter((item) => item.sanctuary);
@@ -6841,6 +6948,69 @@ function SanctuaryTab({
   const sanctuaryFigures = getSanctuaryFigureMatches(games, sanctuaryGames);
   const heroFigures = sanctuaryFigures.filter((figure) => figure.role === "hero").slice(0, 4);
   const villainFigures = sanctuaryFigures.filter((figure) => figure.role === "villain").slice(0, 4);
+  const figureCandidates = useMemo(() => {
+    const query = normalizeSearchText(figureSearch);
+    const byFigure = new Map();
+
+    games.forEach((game) => {
+      const selectedIds = getSelectedGameFigureIds(game);
+      const optionsById = new Map(getGameFigureOptions(game).map((figure) => [figure.id, figure]));
+
+      selectedIds.forEach((figureId) => {
+        const manualFigure =
+          optionsById.get(figureId) ||
+          SANCTUARY_FIGURE_CATALOG.find((figure) => figure.id === figureId);
+        if (manualFigure) optionsById.set(figureId, manualFigure);
+      });
+
+      optionsById.forEach((figure) => {
+        const selected = selectedIds.includes(figure.id);
+        const score =
+          (selected ? 1000 : 0) +
+          getGameRating(game) * 10 +
+          (game.sanctuary ? 30 : 0) +
+          (game.favorite ? 14 : 0) +
+          (isGameFinishedStatus(game) ? 8 : 0);
+        const entry = {
+          ...figure,
+          sourceGame: game,
+          selected,
+          score,
+        };
+        const current = byFigure.get(figure.id);
+
+        if (!current || entry.score > current.score) {
+          byFigure.set(figure.id, entry);
+        }
+      });
+    });
+
+    return Array.from(byFigure.values())
+      .filter((figure) => figureRoleFilter === "all" || figure.role === figureRoleFilter)
+      .filter((figure) => {
+        if (!query) return true;
+        return normalizeSearchText(
+          [figure.name, figure.universe, figure.sourceGame?.name].filter(Boolean).join(" ")
+        ).includes(query);
+      })
+      .sort(
+        (a, b) =>
+          Number(b.selected) - Number(a.selected) ||
+          b.score - a.score ||
+          a.name.localeCompare(b.name)
+      );
+  }, [figureSearch, figureRoleFilter, games]);
+
+  const toggleSanctuaryFigure = (figure) => {
+    if (!figure?.sourceGame?.id || !onSetSanctuaryFigures) return;
+
+    const currentIds = getSelectedGameFigureIds(figure.sourceGame);
+    const nextIds = currentIds.includes(figure.id)
+      ? currentIds.filter((figureId) => figureId !== figure.id)
+      : [...currentIds, figure.id];
+
+    onSetSanctuaryFigures(figure.sourceGame.id, nextIds);
+  };
 
   const hallOfFameGames = [...sanctuaryGames]
     .sort((a, b) => {
@@ -7026,6 +7196,72 @@ function SanctuaryTab({
           Mets en avant les personnages qui t'ont marqué, même si leur jeu
           n'est pas dans ton Hall of Fame.
         </p>
+
+        <div className="sanctuary-figure-manager">
+          <div className="sanctuary-figure-manager-head">
+            <div>
+              <strong>Ajouter une figure</strong>
+              <span>
+                Choisis directement parmi les personnages repérés dans ta bibliothèque.
+              </span>
+            </div>
+            <small>{figureCandidates.length}</small>
+          </div>
+
+          <input
+            type="search"
+            value={figureSearch}
+            onChange={(event) => setFigureSearch(event.target.value)}
+            placeholder="Chercher un personnage ou un jeu..."
+            className="sanctuary-figure-search"
+          />
+
+          <div className="sanctuary-figure-filter-row">
+            {[
+              ["all", "Tout"],
+              ["hero", "Héros"],
+              ["villain", "Antagonistes"],
+            ].map(([value, label]) => (
+              <button
+                type="button"
+                key={value}
+                className={figureRoleFilter === value ? "active" : ""}
+                onClick={() => setFigureRoleFilter(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="sanctuary-figure-candidate-list">
+            {figureCandidates.length ? (
+              figureCandidates.map((figure) => (
+                <button
+                  type="button"
+                  key={`${figure.id}-${figure.sourceGame?.id}`}
+                  className={`sanctuary-figure-candidate ${figure.role} ${
+                    figure.selected ? "selected" : ""
+                  }`}
+                  onClick={() => toggleSanctuaryFigure(figure)}
+                >
+                  <span className="sanctuary-figure-emblem">{figure.emblem}</span>
+                  <span className="sanctuary-figure-copy">
+                    <strong>{figure.name}</strong>
+                    <small>{figure.universe}</small>
+                    <em>{figure.sourceGame?.name}</em>
+                  </span>
+                  <span className="sanctuary-figure-candidate-action">
+                    {figure.selected ? "Retirer" : "Ajouter"}
+                  </span>
+                </button>
+              ))
+            ) : (
+              <div className="sanctuary-empty compact">
+                <span>Aucune figure trouvée dans ta bibliothèque.</span>
+              </div>
+            )}
+          </div>
+        </div>
 
         {heroFigures.length || villainFigures.length ? (
           <div className="sanctuary-figure-columns">
@@ -21916,6 +22152,7 @@ const setPlayedPlatforms = async (id, platforms) => {
               onOpenGameDetail={openGameDetail}
               onGoLibrary={() => setActiveTab("library")}
               onGoHardware={() => setActiveTab("hardware")}
+              onSetSanctuaryFigures={setSanctuaryFigures}
             />
           )}
 

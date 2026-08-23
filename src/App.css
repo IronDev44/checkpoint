@@ -310,6 +310,151 @@
   line-height: 1.42;
 }
 
+.sanctuary-figure-manager {
+  margin: 0 0 18px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 12% 0%, rgba(var(--accent-rgb), 0.16), transparent 34%),
+    rgba(255, 255, 255, 0.045);
+}
+
+.sanctuary-figure-manager-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sanctuary-figure-manager-head strong,
+.sanctuary-figure-manager-head span {
+  display: block;
+}
+
+.sanctuary-figure-manager-head strong {
+  color: #fff;
+  font-weight: 950;
+}
+
+.sanctuary-figure-manager-head span {
+  margin-top: 3px;
+  color: rgba(235, 241, 255, 0.62);
+  font-size: 0.88rem;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.sanctuary-figure-manager-head small {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 950;
+}
+
+.sanctuary-figure-search {
+  width: 100%;
+  min-height: 48px;
+  margin: 0 0 10px;
+  padding: 0 15px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  outline: none;
+  color: #fff;
+  background: rgba(4, 9, 22, 0.48);
+  font: inherit;
+  font-weight: 850;
+}
+
+.sanctuary-figure-search::placeholder {
+  color: rgba(235, 241, 255, 0.48);
+}
+
+.sanctuary-figure-filter-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.sanctuary-figure-filter-row button {
+  min-height: 38px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.74);
+  background: rgba(255, 255, 255, 0.07);
+  font-weight: 950;
+}
+
+.sanctuary-figure-filter-row button.active {
+  color: #fff;
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.86), rgba(218, 181, 68, 0.76));
+  box-shadow: 0 10px 28px rgba(var(--accent-rgb), 0.18);
+}
+
+.sanctuary-figure-candidate-list {
+  display: grid;
+  gap: 10px;
+  max-height: 390px;
+  padding-right: 3px;
+  overflow-y: auto;
+}
+
+.sanctuary-figure-candidate {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  min-height: 72px;
+  padding: 10px;
+  border: 1px solid rgba(var(--accent-rgb), 0.24);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 8% 16%, rgba(var(--accent-rgb), 0.16), transparent 34%),
+    rgba(255, 255, 255, 0.052);
+  text-align: left;
+}
+
+.sanctuary-figure-candidate.villain {
+  border-color: rgba(255, 126, 98, 0.24);
+  background:
+    radial-gradient(circle at 8% 16%, rgba(255, 92, 92, 0.14), transparent 34%),
+    rgba(255, 255, 255, 0.052);
+}
+
+.sanctuary-figure-candidate.selected {
+  border-color: rgba(255, 255, 255, 0.34);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 24px rgba(var(--accent-rgb), 0.14);
+}
+
+.sanctuary-figure-candidate .sanctuary-figure-emblem {
+  width: 48px;
+  height: 48px;
+  border-radius: 15px;
+}
+
+.sanctuary-figure-candidate-action {
+  display: grid;
+  place-items: center;
+  min-width: 78px;
+  min-height: 38px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.sanctuary-figure-candidate.selected .sanctuary-figure-candidate-action {
+  background: rgba(var(--accent-rgb), 0.24);
+}
+
 .sanctuary-figure-columns {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
