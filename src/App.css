@@ -182,7 +182,8 @@
 .sanctuary-todo-list button,
 .sanctuary-relic-grid button,
 .sanctuary-game-tile,
-.sanctuary-chip-list button {
+.sanctuary-chip-list button,
+.sanctuary-figure-card {
   border: 0;
   color: inherit;
   font: inherit;
@@ -297,6 +298,133 @@
   color: #ff6b8a;
 }
 
+.sanctuary-figures-section {
+  overflow: visible;
+}
+
+.sanctuary-note {
+  max-width: 620px;
+  margin: -4px 0 18px;
+  color: rgba(235, 241, 255, 0.72);
+  font-weight: 750;
+  line-height: 1.42;
+}
+
+.sanctuary-figure-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.sanctuary-figure-column {
+  min-width: 0;
+}
+
+.sanctuary-figure-column h3 {
+  margin: 0 0 10px;
+  color: rgba(244, 248, 255, 0.9);
+  font-size: 0.9rem;
+  font-weight: 950;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.sanctuary-figure-list {
+  display: grid;
+  gap: 10px;
+}
+
+.sanctuary-figure-card {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: 54px 1fr;
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-height: 86px;
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(var(--accent-rgb), 0.24), transparent 36%),
+    rgba(255, 255, 255, 0.055);
+  text-align: left;
+}
+
+.sanctuary-figure-card::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  z-index: -1;
+  opacity: 0.72;
+  background: radial-gradient(circle, rgba(var(--accent-rgb), 0.24), transparent 58%);
+  filter: blur(18px);
+}
+
+.sanctuary-figure-card.villain {
+  border-color: rgba(255, 141, 93, 0.28);
+}
+
+.sanctuary-figure-card.villain::before {
+  background: radial-gradient(circle, rgba(255, 92, 92, 0.24), transparent 58%);
+}
+
+.sanctuary-figure-emblem {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  border-radius: 17px;
+  color: #fff;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.36), transparent 24%),
+    linear-gradient(135deg, rgba(var(--accent-rgb), 0.94), rgba(218, 181, 68, 0.88));
+  box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.22);
+  font-size: 0.92rem;
+  font-weight: 950;
+}
+
+.sanctuary-figure-card.villain .sanctuary-figure-emblem {
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.28), transparent 24%),
+    linear-gradient(135deg, rgba(255, 69, 105, 0.92), rgba(218, 181, 68, 0.84));
+  box-shadow: 0 0 24px rgba(255, 92, 92, 0.2);
+}
+
+.sanctuary-figure-copy {
+  min-width: 0;
+}
+
+.sanctuary-figure-copy strong,
+.sanctuary-figure-copy small,
+.sanctuary-figure-copy em {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sanctuary-figure-copy strong {
+  color: #fff;
+  font-weight: 950;
+}
+
+.sanctuary-figure-copy small {
+  margin-top: 3px;
+  color: rgba(235, 241, 255, 0.7);
+  font-weight: 850;
+}
+
+.sanctuary-figure-copy em {
+  margin-top: 5px;
+  color: rgba(235, 241, 255, 0.48);
+  font-size: 0.78rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
 .sanctuary-relic-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -408,10 +536,6 @@
   line-height: 1.35;
 }
 
-.sanctuary-note {
-  max-width: 560px;
-}
-
 @media (max-width: 700px) {
   .sanctuary-tab {
     gap: 24px;
@@ -462,6 +586,10 @@
   }
 
   .sanctuary-relic-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sanctuary-figure-columns {
     grid-template-columns: 1fr;
   }
 
@@ -9555,9 +9683,10 @@ body[data-ui="modern"] .chip.active {
 .social-badge-scroll-row {
   display: flex;
   gap: 10px;
-  margin: 0 -2px;
-  padding: 2px 2px 8px;
+  margin: -8px -8px 0;
+  padding: 10px 8px 14px;
   overflow-x: auto;
+  overflow-y: visible;
   overscroll-behavior-x: contain;
   scroll-snap-type: x proximity;
   scrollbar-width: thin;
@@ -9673,14 +9802,42 @@ body[data-ui="modern"] .chip.active {
 .social-badge-secondary-card.legendary,
 .social-badge-secondary-card.mythic,
 .social-badge-secondary-card.badge-special-creator {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
   border-color: rgba(var(--badge-rarity-a), 0.3);
   background:
     radial-gradient(circle at 18% 0%, rgba(var(--badge-rarity-a), 0.18), transparent 50%),
     linear-gradient(135deg, rgba(var(--badge-rarity-a), 0.07), rgba(var(--badge-rarity-b), 0.045)),
     rgba(255, 255, 255, 0.04);
   box-shadow:
-    inset 0 0 0 1px rgba(var(--badge-rarity-a), 0.05),
-    0 12px 28px rgba(var(--badge-rarity-b), var(--badge-rarity-glow));
+    inset 0 0 0 1px rgba(var(--badge-rarity-a), 0.06),
+    inset 0 0 30px rgba(var(--badge-rarity-a), calc(var(--badge-rarity-glow) * 0.5)),
+    0 8px 18px rgba(var(--badge-rarity-b), calc(var(--badge-rarity-glow) * 0.42));
+}
+
+.social-badge-primary-card.common::before,
+.social-badge-primary-card.rare::before,
+.social-badge-primary-card.epic::before,
+.social-badge-primary-card.legendary::before,
+.social-badge-primary-card.mythic::before,
+.social-badge-primary-card.badge-special-creator::before,
+.social-badge-secondary-card.common::before,
+.social-badge-secondary-card.rare::before,
+.social-badge-secondary-card.epic::before,
+.social-badge-secondary-card.legendary::before,
+.social-badge-secondary-card.mythic::before,
+.social-badge-secondary-card.badge-special-creator::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 14% 18%, rgba(var(--badge-rarity-a), calc(var(--badge-rarity-glow) + 0.18)), transparent 34%),
+    radial-gradient(circle at 96% 64%, rgba(var(--badge-rarity-b), calc(var(--badge-rarity-glow) * 0.44)), transparent 44%);
+  opacity: 0.78;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .social-badge-primary-card.featured,
@@ -9688,7 +9845,8 @@ body[data-ui="modern"] .chip.active {
   border-color: rgba(var(--badge-rarity-a, var(--accent-rgb, 97, 132, 255)), 0.62);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 16px 42px rgba(var(--badge-rarity-b, var(--accent-rgb, 97, 132, 255)), 0.24);
+    inset 0 0 36px rgba(var(--badge-rarity-a, var(--accent-rgb, 97, 132, 255)), 0.18),
+    0 10px 24px rgba(var(--badge-rarity-b, var(--accent-rgb, 97, 132, 255)), 0.14);
 }
 
 .social-badge-primary-card.legendary small,
@@ -9711,7 +9869,8 @@ body[data-ui="modern"] .chip.active {
   gap: 12px;
   max-height: 360px;
   overflow-y: auto;
-  padding: 8px 4px 10px 0;
+  margin: -8px -6px 0;
+  padding: 12px 8px 18px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
 }

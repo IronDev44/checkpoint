@@ -6672,6 +6672,63 @@ function PhysicalCollectionPanel({ games, onOpenDetail, onUpdatePhysicalGame }) 
   );
 }
 
+const SANCTUARY_FIGURE_CATALOG = [
+  { id: "mario", name: "Mario", role: "hero", universe: "Super Mario", emblem: "M", keywords: ["mario", "super mario", "mario kart"] },
+  { id: "link", name: "Link", role: "hero", universe: "The Legend of Zelda", emblem: "L", keywords: ["zelda", "link", "ocarina of time", "breath of the wild", "tears of the kingdom"] },
+  { id: "samus", name: "Samus Aran", role: "hero", universe: "Metroid", emblem: "S", keywords: ["metroid", "samus"] },
+  { id: "sonic", name: "Sonic", role: "hero", universe: "Sonic", emblem: "S", keywords: ["sonic"] },
+  { id: "lara", name: "Lara Croft", role: "hero", universe: "Tomb Raider", emblem: "L", keywords: ["tomb raider", "lara croft"] },
+  { id: "master-chief", name: "Master Chief", role: "hero", universe: "Halo", emblem: "117", keywords: ["halo"] },
+  { id: "kratos", name: "Kratos", role: "hero", universe: "God of War", emblem: "K", keywords: ["god of war", "kratos"] },
+  { id: "snake", name: "Solid Snake", role: "hero", universe: "Metal Gear", emblem: "S", keywords: ["metal gear", "solid snake"] },
+  { id: "geralt", name: "Geralt de Riv", role: "hero", universe: "The Witcher", emblem: "G", keywords: ["witcher", "geralt"] },
+  { id: "aloy", name: "Aloy", role: "hero", universe: "Horizon", emblem: "A", keywords: ["horizon zero dawn", "horizon forbidden west", "aloy"] },
+  { id: "ellie", name: "Ellie", role: "hero", universe: "The Last of Us", emblem: "E", keywords: ["the last of us", "last of us"] },
+  { id: "arthur", name: "Arthur Morgan", role: "hero", universe: "Red Dead Redemption", emblem: "A", keywords: ["red dead redemption"] },
+  { id: "jin", name: "Jin Sakai", role: "hero", universe: "Ghost", emblem: "J", keywords: ["ghost of tsushima", "ghost of yotei"] },
+  { id: "bowser", name: "Bowser", role: "villain", universe: "Super Mario", emblem: "B", keywords: ["mario", "super mario", "mario kart", "bowser"] },
+  { id: "ganondorf", name: "Ganondorf", role: "villain", universe: "The Legend of Zelda", emblem: "G", keywords: ["zelda", "ganon", "ganondorf", "ocarina of time", "tears of the kingdom"] },
+  { id: "sephiroth", name: "Sephiroth", role: "villain", universe: "Final Fantasy VII", emblem: "S", keywords: ["final fantasy vii", "final fantasy 7", "sephiroth"] },
+  { id: "vader", name: "Dark Vador", role: "villain", universe: "Star Wars", emblem: "DV", keywords: ["star wars", "vador", "vader", "lego star wars"] },
+  { id: "wesker", name: "Albert Wesker", role: "villain", universe: "Resident Evil", emblem: "W", keywords: ["resident evil", "wesker"] },
+  { id: "vaas", name: "Vaas Montenegro", role: "villain", universe: "Far Cry", emblem: "V", keywords: ["far cry 3", "vaas"] },
+  { id: "glados", name: "GLaDOS", role: "villain", universe: "Portal", emblem: "G", keywords: ["portal", "glados"] },
+  { id: "pyramid-head", name: "Pyramid Head", role: "villain", universe: "Silent Hill", emblem: "PH", keywords: ["silent hill", "pyramid head"] },
+];
+
+function getSanctuaryFigureMatches(games = [], sanctuaryGames = []) {
+  const sourceGames = sanctuaryGames.length
+    ? sanctuaryGames
+    : games.filter((game) => game.favorite || game.sanctuary || getGameRating(game) >= 8 || isGameFinishedStatus(game));
+
+  const rankedGames = sourceGames
+    .map((game) => ({
+      game,
+      haystack: normalizeSearchText(
+        [game.name, game.series, game.genre, ...(game.genreNames || []), ...(game.platformNames || [])]
+          .filter(Boolean)
+          .join(" ")
+      ),
+      score:
+        getGameRating(game) * 10 +
+        (game.sanctuary ? 30 : 0) +
+        (game.favorite ? 18 : 0) +
+        (isGameFinishedStatus(game) ? 8 : 0),
+    }))
+    .sort((a, b) => b.score - a.score);
+
+  return SANCTUARY_FIGURE_CATALOG.map((figure) => {
+    const match = rankedGames.find(({ haystack }) =>
+      figure.keywords.some((keyword) => haystack.includes(normalizeSearchText(keyword)))
+    );
+
+    if (!match) return null;
+    return { ...figure, sourceGame: match.game, score: match.score };
+  })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score);
+}
+
 function SanctuaryTab({
   games = [],
   hardware = [],
@@ -6683,6 +6740,9 @@ function SanctuaryTab({
   const sanctuaryPhysicalGames = sanctuaryGames.filter((game) => game.physicalOwned);
   const sanctuaryHardware = hardware.filter((item) => item.sanctuary);
   const finishedSanctuaryGames = sanctuaryGames.filter(isGameFinishedStatus);
+  const sanctuaryFigures = getSanctuaryFigureMatches(games, sanctuaryGames);
+  const heroFigures = sanctuaryFigures.filter((figure) => figure.role === "hero").slice(0, 4);
+  const villainFigures = sanctuaryFigures.filter((figure) => figure.role === "villain").slice(0, 4);
 
   const hallOfFameGames = [...sanctuaryGames]
     .sort((a, b) => {
@@ -6852,6 +6912,74 @@ function SanctuaryTab({
           <div className="sanctuary-empty">
             <strong>Aucun jeu sacralisé pour l'instant.</strong>
             <span>Ajoute un jeu au Sanctuaire depuis sa fiche pour remplir cette zone.</span>
+          </div>
+        )}
+      </section>
+
+      <section className="sanctuary-section sanctuary-figures-section">
+        <div className="sanctuary-section-head">
+          <div>
+            <span>Figures cultes</span>
+            <h2>Héros et antagonistes</h2>
+          </div>
+          <small>{heroFigures.length + villainFigures.length}</small>
+        </div>
+        <p className="sanctuary-note">
+          Des personnages liés à tes jeux marquants. Ils ne classent rien :
+          ils donnent un visage à ce que ton Sanctuaire raconte.
+        </p>
+
+        {heroFigures.length || villainFigures.length ? (
+          <div className="sanctuary-figure-columns">
+            <div className="sanctuary-figure-column">
+              <h3>Héros</h3>
+              <div className="sanctuary-figure-list">
+                {heroFigures.map((figure) => (
+                  <button
+                    type="button"
+                    className="sanctuary-figure-card hero"
+                    key={figure.id}
+                    onClick={() => onOpenGameDetail(figure.sourceGame, sanctuaryGames)}
+                  >
+                    <span className="sanctuary-figure-emblem">{figure.emblem}</span>
+                    <span className="sanctuary-figure-copy">
+                      <strong>{figure.name}</strong>
+                      <small>{figure.universe}</small>
+                      <em>{figure.sourceGame?.name}</em>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="sanctuary-figure-column">
+              <h3>Antagonistes</h3>
+              <div className="sanctuary-figure-list">
+                {villainFigures.map((figure) => (
+                  <button
+                    type="button"
+                    className="sanctuary-figure-card villain"
+                    key={figure.id}
+                    onClick={() => onOpenGameDetail(figure.sourceGame, sanctuaryGames)}
+                  >
+                    <span className="sanctuary-figure-emblem">{figure.emblem}</span>
+                    <span className="sanctuary-figure-copy">
+                      <strong>{figure.name}</strong>
+                      <small>{figure.universe}</small>
+                      <em>{figure.sourceGame?.name}</em>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="sanctuary-empty">
+            <strong>Aucune figure repérée pour l'instant.</strong>
+            <span>
+              Ajoute un jeu culte au Sanctuaire pour faire apparaître ses héros
+              et ses grands antagonistes.
+            </span>
           </div>
         )}
       </section>
