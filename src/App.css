@@ -376,20 +376,20 @@
 }
 
 .sanctuary-figure-filter-row {
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: 0.78fr 0.88fr 1.34fr;
+  gap: 7px;
   margin-bottom: 12px;
 }
 
 .sanctuary-figure-filter-row button {
-  flex: 1 1 0;
   min-width: 0;
   min-height: 38px;
-  padding: 0 8px;
+  padding: 0 6px;
   border-radius: 999px;
   color: rgba(255, 255, 255, 0.74);
   background: rgba(255, 255, 255, 0.07);
-  font-size: clamp(0.76rem, 3.05vw, 0.95rem);
+  font-size: clamp(0.72rem, 2.75vw, 0.9rem);
   font-weight: 950;
   line-height: 1;
   white-space: nowrap;
@@ -9928,8 +9928,8 @@ body[data-ui="modern"] .chip.active {
 .social-badge-scroll-row {
   display: flex;
   gap: 10px;
-  margin: -8px -8px 0;
-  padding: 10px 8px 14px;
+  margin: -10px -14px 0;
+  padding: 16px 14px 20px;
   overflow-x: auto;
   overflow-y: visible;
   overscroll-behavior-x: contain;
@@ -10048,17 +10048,18 @@ body[data-ui="modern"] .chip.active {
 .social-badge-secondary-card.mythic,
 .social-badge-secondary-card.badge-special-creator {
   position: relative;
-  overflow: hidden;
+  overflow: clip;
   isolation: isolate;
   border-color: rgba(var(--badge-rarity-a), 0.3);
   background:
-    radial-gradient(circle at 18% 0%, rgba(var(--badge-rarity-a), 0.18), transparent 50%),
-    linear-gradient(135deg, rgba(var(--badge-rarity-a), 0.07), rgba(var(--badge-rarity-b), 0.045)),
+    radial-gradient(circle at 20% 22%, rgba(var(--badge-rarity-a), calc(var(--badge-rarity-glow) + 0.18)), transparent 38%),
+    radial-gradient(circle at 88% 56%, rgba(var(--badge-rarity-b), calc(var(--badge-rarity-glow) * 0.72)), transparent 48%),
+    linear-gradient(135deg, rgba(var(--badge-rarity-a), 0.09), rgba(var(--badge-rarity-b), 0.055)),
     rgba(255, 255, 255, 0.04);
   box-shadow:
     inset 0 0 0 1px rgba(var(--badge-rarity-a), 0.06),
-    inset 0 0 30px rgba(var(--badge-rarity-a), calc(var(--badge-rarity-glow) * 0.5)),
-    0 8px 18px rgba(var(--badge-rarity-b), calc(var(--badge-rarity-glow) * 0.42));
+    inset 0 0 34px rgba(var(--badge-rarity-a), calc(var(--badge-rarity-glow) * 0.54)),
+    0 8px 18px rgba(0, 0, 0, 0.16);
 }
 
 .social-badge-primary-card.common::before,
@@ -10078,9 +10079,9 @@ body[data-ui="modern"] .chip.active {
   inset: 0;
   border-radius: inherit;
   background:
-    radial-gradient(circle at 14% 18%, rgba(var(--badge-rarity-a), calc(var(--badge-rarity-glow) + 0.18)), transparent 34%),
-    radial-gradient(circle at 96% 64%, rgba(var(--badge-rarity-b), calc(var(--badge-rarity-glow) * 0.44)), transparent 44%);
-  opacity: 0.78;
+    radial-gradient(circle at 14% 18%, rgba(255, 255, 255, 0.16), transparent 26%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.04), transparent 46%);
+  opacity: 0.82;
   pointer-events: none;
   z-index: 0;
 }
@@ -10111,11 +10112,11 @@ body[data-ui="modern"] .chip.active {
 
 .social-badge-secondary-list {
   display: grid;
-  gap: 12px;
+  gap: 14px;
   max-height: 360px;
   overflow-y: auto;
-  margin: -8px -6px 0;
-  padding: 12px 8px 18px;
+  margin: -10px -12px 0;
+  padding: 16px 12px 22px;
   overscroll-behavior: contain;
   scrollbar-width: thin;
 }
@@ -10135,8 +10136,8 @@ body[data-ui="modern"] .chip.active {
 .social-badge-secondary-card {
   grid-template-columns: 42px minmax(0, 1fr) auto;
   width: 100%;
-  min-height: 74px;
-  padding: 12px 12px;
+  min-height: 70px;
+  padding: 11px 12px;
   color: var(--text-main);
   cursor: pointer;
   font: inherit;
@@ -10293,13 +10294,13 @@ body[data-ui="modern"] .chip.active {
 
 .social-badge-toggle-choice {
   justify-self: end;
-  min-width: 82px;
-  padding: 9px 12px;
+  min-width: 72px;
+  padding: 8px 11px;
   border: 0;
   border-radius: 999px;
   background: rgba(255,255,255,0.08);
   color: rgba(255,255,255,0.9);
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 900;
   text-align: center;
 }
@@ -10325,7 +10326,7 @@ body[data-ui="modern"] .chip.active {
 
   .social-badge-secondary-card {
     grid-template-columns: 42px minmax(0, 1fr) auto;
-    min-height: 72px;
+    min-height: 68px;
     padding: 11px 10px;
   }
 
@@ -10333,6 +10334,8 @@ body[data-ui="modern"] .chip.active {
     grid-column: auto;
     justify-self: end;
     margin-top: 0;
+    min-width: 68px;
+    padding-inline: 10px;
   }
 
   .social-badge-subhead {
