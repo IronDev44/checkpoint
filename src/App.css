@@ -25860,15 +25860,18 @@ button.badge-card {
 }
 
 .badge-platform-mark {
-  display: inline-grid;
-  place-items: center;
-  width: 30px;
-  min-width: 30px;
-  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0 2px;
+  box-sizing: border-box;
   font-size: 10px;
   font-weight: 1000;
   line-height: 1;
-  letter-spacing: 0;
+  letter-spacing: -0.02em;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
   overflow: visible;
@@ -25906,8 +25909,13 @@ button.badge-card {
 }
 
 .profile-tab .badge-card.platform-specific .badge-platform-mark {
-  font-size: 10px;
-  transform: none;
+  font-size: 10.5px;
+  transform: translateY(-0.5px);
+}
+
+.profile-tab .badge-card.platform-specific.platform-playstation .badge-platform-mark {
+  letter-spacing: -0.04em;
+  transform: translateY(-1px);
 }
 
 .profile-tab .badge-card.platform-specific.platform-playstation .badge-emblem {
@@ -26100,6 +26108,32 @@ button.badge-card {
 
 .profile-tab .badge-card.platform-playstation .badge-platform-mark {
   color: #dbeafe;
+}
+
+.profile-tab .badge-card.badge-numeric-seal .badge-emblem {
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  clip-path: none;
+  overflow: visible;
+}
+
+.profile-tab .badge-card.badge-numeric-seal .badge-icon {
+  transform: none !important;
+}
+
+.profile-tab .badge-card.badge-numeric-seal .badge-platform-mark {
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: -0.08em;
+  transform: translateY(-1px);
+  color: rgba(255,255,255,0.92);
+}
+
+.profile-tab .badge-card.epic.badge-numeric-seal .badge-emblem,
+.profile-tab .badge-card.legendary.badge-numeric-seal .badge-emblem,
+.profile-tab .badge-card.mythic.badge-numeric-seal .badge-emblem {
+  transform: none;
 }
 
 .profile-tab .badge-card.platform-xbox .badge-platform-mark {

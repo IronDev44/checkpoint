@@ -2329,6 +2329,10 @@ function isCreatorProfile(profile = {}) {
 }
 
 function BadgeVisualIcon({ badge, size = 20 }) {
+  const rawIcon = badge?.icon || "";
+  const compactIcon = String(rawIcon).replace(/\s+/g, "").trim();
+  const isNumericSeal = /^\d{2,3}$/.test(compactIcon);
+
   if (badge?.special === "creator") {
     return <span className="badge-creator-mark">C</span>;
   }
@@ -2344,7 +2348,11 @@ function BadgeVisualIcon({ badge, size = 20 }) {
   }
 
   if (badge?.platformFamily) {
-    return <span className={`badge-platform-mark ${badge.platformFamily}`}>{badge.icon}</span>;
+    return <span className={`badge-platform-mark ${badge.platformFamily}`}>{compactIcon || rawIcon}</span>;
+  }
+
+  if (isNumericSeal) {
+    return <span className="badge-platform-mark badge-seal-mark">{compactIcon}</span>;
   }
 
   const Icon = BADGE_ICON_COMPONENTS[badge?.id];
@@ -2354,6 +2362,10 @@ function BadgeVisualIcon({ badge, size = 20 }) {
   }
 
   return <span>{badge?.icon}</span>;
+}
+
+function isBadgeNumericSeal(badge) {
+  return /^\d{2,3}$/.test(String(badge?.icon || "").replace(/\s+/g, "").trim());
 }
 
 function getBadgeRarityLabel(badge) {
@@ -12313,7 +12325,9 @@ function ProfileTab({
                 featuredBadgeId === b.id ? "featured" : ""
               }${b.platformFamily ? ` platform-${b.platformFamily}` : ""}${
                 b.platformKey ? " platform-specific" : " brand-family"
-              }${b.special ? ` badge-special-${b.special}` : ""}`}
+              }${isBadgeNumericSeal(b) ? " badge-numeric-seal" : ""}${
+                b.special ? ` badge-special-${b.special}` : ""
+              }`}
               onClick={() => onSelectFeaturedBadge?.(b.id)}
             >
               <span className="badge-sheen" aria-hidden="true" />
@@ -12343,7 +12357,8 @@ function ProfileTab({
                   className={`badge-card locked ${b.rarity}${
                     b.platformFamily ? ` platform-${b.platformFamily}` : ""
                   }${b.platformKey ? " platform-specific" : " brand-family"}${
-                    b.special ? ` badge-special-${b.special}` : ""
+                    isBadgeNumericSeal(b) ? " badge-numeric-seal" : ""
+                  }${b.special ? ` badge-special-${b.special}` : ""
                   }`}
                 >
                   <span className="badge-sheen" aria-hidden="true" />
