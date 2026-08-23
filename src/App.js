@@ -6364,6 +6364,16 @@ const PHYSICAL_RARITY_OPTIONS = [
 function PhysicalCollectionPanel({ games, onOpenDetail, onUpdatePhysicalGame }) {
   const [selectedGameId, setSelectedGameId] = useState("");
   const selectedGame = games.find((game) => game.id === selectedGameId) || null;
+  const alphabeticGames = useMemo(
+    () =>
+      [...games].sort((a, b) =>
+        (a.name || "").localeCompare(b.name || "", "fr", {
+          numeric: true,
+          sensitivity: "base",
+        })
+      ),
+    [games]
+  );
   const physicalGames = games.filter((game) => game.physicalOwned);
   const totalEstimatedValue = physicalGames.reduce(
     (total, game) => total + (Number(game.physicalEstimatedValue) || 0),
@@ -6466,7 +6476,7 @@ function PhysicalCollectionPanel({ games, onOpenDetail, onUpdatePhysicalGame }) 
             onChange={(event) => setSelectedGameId(event.target.value)}
           >
             <option value="">Choisir un jeu à renseigner</option>
-            {games.map((game) => (
+            {alphabeticGames.map((game) => (
               <option key={game.id} value={game.id}>
                 {game.name}
               </option>
@@ -6911,6 +6921,13 @@ function LibrarySection({
   const [sortBy, setSortBy] = useState("recent");
 
   const sortedGames = [...games].sort((a, b) => {
+    if (sortBy === "alphabetical") {
+      return (a.name || "").localeCompare(b.name || "", "fr", {
+        numeric: true,
+        sensitivity: "base",
+      });
+    }
+
     if (sortBy === "year") {
       return (b.released || "").localeCompare(a.released || "");
     }
@@ -6943,6 +6960,10 @@ function LibrarySection({
 
     if (sortBy === "genre") {
       group = game.genreNames?.[0] || "Genre inconnu";
+    }
+
+    if (sortBy === "alphabetical") {
+      group = (game.name || "#").trim().charAt(0).toUpperCase() || "#";
     }
 
     if (!acc[group]) acc[group] = [];
@@ -7247,6 +7268,14 @@ function LibrarySection({
           onClick={() => setSortBy("year")}
         >
           Année
+        </button>
+
+        <button
+          type="button"
+          className={sortBy === "alphabetical" ? "active" : ""}
+          onClick={() => setSortBy("alphabetical")}
+        >
+          A-Z
         </button>
 
         <button
@@ -8753,6 +8782,16 @@ function SocialTab({
   const favorites = games.filter((game) => game.favorite).slice(0, 3);
   const finishedGames = games.filter(isGameFinishedStatus);
   const favoriteGames = games.filter((game) => game.favorite);
+  const alphabeticGames = useMemo(
+    () =>
+      [...games].sort((a, b) =>
+        (a.name || "").localeCompare(b.name || "", "fr", {
+          numeric: true,
+          sensitivity: "base",
+        })
+      ),
+    [games]
+  );
   const identityGameIds = Array.isArray(socialProfile.identityGameIds)
     ? socialProfile.identityGameIds.slice(0, 3).map(String)
     : [];
@@ -8858,7 +8897,28 @@ function SocialTab({
   const selectedBadgeList = selectedBadgeIds
     .map((id) => unlockedBadges.find((badge) => String(badge.id) === id))
     .filter(Boolean);
-  const badgeChoices = unlockedBadges.slice(0, 12);
+  const badgeChoices = [...unlockedBadges].sort((a, b) => {
+    const rarityOrder = {
+      creator: 0,
+      mythic: 1,
+      legendary: 2,
+      epic: 3,
+      rare: 4,
+      common: 5,
+    };
+    const aRank = a.special === "creator" ? rarityOrder.creator : rarityOrder[a.rarity] ?? 9;
+    const bRank = b.special === "creator" ? rarityOrder.creator : rarityOrder[b.rarity] ?? 9;
+
+    if (aRank !== bRank) return aRank - bRank;
+
+    return (a.name || "").localeCompare(b.name || "", "fr", {
+      numeric: true,
+      sensitivity: "base",
+    });
+  });
+  const secondaryBadgeChoices = badgeChoices.filter(
+    (badge) => String(badge.id) !== String(featuredBadge?.id || "")
+  );
   const finishedCount = games.filter(isGameFinishedStatus).length;
   const shareUrl = getProfileShareUrl(socialProfile.handle);
   const showShowcasePreview = socialProfile.showShowcasePreview !== false;
@@ -9236,56 +9296,84 @@ function SocialTab({
             <div>
               <h2 className="panel-title">Badges affichés</h2>
               <div className="option-value">
-                Choisis le badge principal et jusqu'à 4 badges secondaires pour ton profil public.
+                Le badge principal apparaît près de ton pseudo. Les secondaires complètent ta vitrine publique.
               </div>
             </div>
-            <span className="social-section-count">{selectedBadgeList.length}/4</span>
+            <span className="social-section-count">{selectedBadgeList.length}/4 secondaires</span>
           </div>
 
-          {featuredBadge && (
-            <div className="social-selected-badge">
-              <span>Badge principal</span>
-              <FeaturedBadgePill badge={featuredBadge} />
-            </div>
-          )}
-
           {badgeChoices.length > 0 ? (
-            <div className="social-badge-choice-grid">
-              {badgeChoices.map((badge) => {
-                const isFeatured = String(featuredBadge?.id || "") === String(badge.id);
-                const isSelected = selectedBadgeIds.includes(String(badge.id));
+            <>
+              <div className="social-badge-subsection">
+                <div className="social-badge-subhead">
+                  <span>Badge principal</span>
+                  <small>{featuredBadge ? "Visible à côté du pseudo" : "Aucun badge choisi"}</small>
+                </div>
 
-                return (
-                  <div
-                    key={badge.id}
-                    className={`social-badge-choice-card ${isSelected ? "selected" : ""} ${isFeatured ? "featured" : ""}`}
-                  >
-                    <button
-                      type="button"
-                      className="social-badge-main-choice"
-                      onClick={() => handleFeaturedBadgeSelect(badge.id)}
-                    >
-                      <span className={`social-badge-choice-icon ${badge.rarity} ${badge.special ? `badge-special-${badge.special}` : ""}`}>
-                        <BadgeVisualIcon badge={badge} />
-                      </span>
-                      <span>
-                        <strong>{badge.name}</strong>
-                        <small>{isFeatured ? "Affiché à côté du pseudo" : "Définir comme badge principal"}</small>
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className="social-badge-toggle-choice"
-                      onClick={() => handlePublicBadgeToggle(badge.id)}
-                      disabled={isFeatured}
-                    >
-                      {isFeatured ? "Principal" : isSelected ? "Retirer" : "Ajouter"}
-                    </button>
+                {featuredBadge && (
+                  <div className="social-selected-badge">
+                    <span>Sélection actuelle</span>
+                    <FeaturedBadgePill badge={featuredBadge} />
                   </div>
-                );
-              })}
-            </div>
+                )}
+
+                <div className="social-badge-scroll-row" aria-label="Choisir le badge principal">
+                  {badgeChoices.map((badge) => {
+                    const isFeatured = String(featuredBadge?.id || "") === String(badge.id);
+
+                    return (
+                      <button
+                        key={badge.id}
+                        type="button"
+                        className={`social-badge-primary-card ${isFeatured ? "featured" : ""}`}
+                        onClick={() => handleFeaturedBadgeSelect(badge.id)}
+                        aria-pressed={isFeatured}
+                      >
+                        <span className={`social-badge-choice-icon ${badge.rarity} ${badge.special ? `badge-special-${badge.special}` : ""}`}>
+                          <BadgeVisualIcon badge={badge} />
+                        </span>
+                        <strong>{badge.name}</strong>
+                        <small>{isFeatured ? "Principal" : "Choisir"}</small>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="social-badge-subsection">
+                <div className="social-badge-subhead">
+                  <span>Badges secondaires</span>
+                  <small>Jusqu'à 4 badges dans la vitrine</small>
+                </div>
+
+                <div className="social-badge-secondary-list" aria-label="Choisir les badges secondaires">
+                  {secondaryBadgeChoices.map((badge) => {
+                    const isSelected = selectedBadgeIds.includes(String(badge.id));
+
+                    return (
+                      <button
+                        key={badge.id}
+                        type="button"
+                        className={`social-badge-choice-card social-badge-secondary-card ${isSelected ? "selected" : ""}`}
+                        onClick={() => handlePublicBadgeToggle(badge.id)}
+                        aria-pressed={isSelected}
+                      >
+                        <span className={`social-badge-choice-icon ${badge.rarity} ${badge.special ? `badge-special-${badge.special}` : ""}`}>
+                          <BadgeVisualIcon badge={badge} />
+                        </span>
+                        <span className="social-badge-secondary-copy">
+                          <strong>{badge.name}</strong>
+                          <small>{isSelected ? "Affiché dans la vitrine" : "Disponible"}</small>
+                        </span>
+                        <span className="social-badge-toggle-choice">
+                          {isSelected ? "Retirer" : "Ajouter"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
           ) : (
             <EmptyState
               title="Aucun badge débloqué"
@@ -9440,7 +9528,7 @@ function SocialTab({
                 }
               >
                 <option value="">Choisir un jeu</option>
-                {games.map((game) => {
+                {alphabeticGames.map((game) => {
                   const gameId = String(game.id);
                   const alreadySelected =
                     identityGameIds.includes(gameId) &&

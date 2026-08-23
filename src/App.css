@@ -9504,7 +9504,33 @@ body[data-ui="modern"] .chip.active {
 
 .social-badge-picker-panel {
   display: grid;
-  gap: 16px;
+  gap: 18px;
+}
+
+.social-badge-subsection {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.social-badge-subhead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.social-badge-subhead span {
+  color: var(--text-main);
+  font-size: 1rem;
+  font-weight: 950;
+}
+
+.social-badge-subhead small {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 850;
+  text-align: right;
 }
 
 .social-selected-badge {
@@ -9526,10 +9552,81 @@ body[data-ui="modern"] .chip.active {
   text-transform: uppercase;
 }
 
+.social-badge-scroll-row {
+  display: flex;
+  gap: 10px;
+  margin: 0 -2px;
+  padding: 2px 2px 8px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+}
+
+.social-badge-primary-card {
+  flex: 0 0 132px;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-height: 142px;
+  padding: 12px 10px;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.035));
+  color: var(--text-main);
+  cursor: pointer;
+  font: inherit;
+  text-align: center;
+  scroll-snap-align: start;
+}
+
+.social-badge-primary-card.featured {
+  border-color: rgba(var(--accent-rgb, 97, 132, 255), 0.58);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(var(--accent-rgb, 97, 132, 255), 0.24), transparent 58%),
+    rgba(255,255,255,0.075);
+  box-shadow: 0 14px 34px rgba(var(--accent-rgb, 97, 132, 255), 0.18);
+}
+
+.social-badge-primary-card strong,
+.social-badge-primary-card small {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.social-badge-primary-card strong {
+  font-size: 0.86rem;
+  font-weight: 950;
+}
+
+.social-badge-primary-card small {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.social-badge-primary-card.featured small {
+  color: color-mix(in srgb, var(--accent) 72%, white 24%);
+}
+
 .social-badge-choice-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+}
+
+.social-badge-secondary-list {
+  display: grid;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
 }
 
 .social-badge-choice-card {
@@ -9542,6 +9639,40 @@ body[data-ui="modern"] .chip.active {
   border: 1px solid rgba(255,255,255,0.09);
   border-radius: 18px;
   background: rgba(255,255,255,0.04);
+}
+
+.social-badge-secondary-card {
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  width: 100%;
+  color: var(--text-main);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.social-badge-secondary-copy {
+  min-width: 0;
+}
+
+.social-badge-secondary-copy strong,
+.social-badge-secondary-copy small {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.social-badge-secondary-copy strong {
+  font-size: 0.92rem;
+  font-weight: 950;
+}
+
+.social-badge-secondary-copy small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
 }
 
 .social-badge-choice-card.selected,
@@ -9608,11 +9739,13 @@ body[data-ui="modern"] .chip.active {
 .social-badge-toggle-choice {
   min-width: 74px;
   padding: 8px 10px;
+  border: 0;
   border-radius: 999px;
   background: rgba(255,255,255,0.08);
   color: rgba(255,255,255,0.9);
   font-size: 0.76rem;
   font-weight: 900;
+  text-align: center;
 }
 
 .social-badge-toggle-choice:disabled {
@@ -9636,6 +9769,26 @@ body[data-ui="modern"] .chip.active {
 
   .social-badge-choice-card {
     grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .social-badge-secondary-card {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .social-badge-secondary-card .social-badge-toggle-choice {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: 4px;
+  }
+
+  .social-badge-subhead {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .social-badge-subhead small {
+    text-align: left;
   }
 }
 
@@ -39818,10 +39971,6 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   width: 100%;
 }
 
-.social-feed-item.no-media .social-feed-actions {
-  justify-content: center;
-}
-
 .social-feed-item.no-media .social-comment-form {
   margin-right: auto;
   margin-left: auto;
@@ -39872,6 +40021,7 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 
 .social-tab .social-feed-actions {
   margin-top: 12px;
+  justify-content: center;
 }
 
 .social-tab .social-like-btn {
