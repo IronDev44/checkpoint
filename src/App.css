@@ -17298,19 +17298,38 @@ html body[data-theme="theme-indigo"] {
 
 @media (max-width: 640px) {
   .options-tab .options-panel {
-    padding-inline: 14px;
+    padding-inline: 6px;
+    padding-block: 12px;
   }
 
   .options-group {
-    margin-top: 12px;
-    padding: 12px;
-    border-radius: 20px;
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 18px;
   }
 
   .options-group-head {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 8px;
+  }
+
+  .options-accordion > .options-group-head {
+    width: calc(100% + 20px);
+    margin: -10px -10px 0;
+    padding: 14px 14px 12px;
+  }
+
+  .options-accordion:not(.open) > .options-group-head {
+    margin-bottom: -10px;
+  }
+
+  .options-accordion.open > .options-group-head {
+    margin-bottom: 10px;
+  }
+
+  .options-group-body {
+    gap: 10px;
   }
 
   .options-group-head p {
@@ -17333,8 +17352,8 @@ html body[data-theme="theme-indigo"] {
   }
 
   .options-tab .option-setting-card {
-    padding: 13px;
-    border-radius: 17px;
+    padding: 11px;
+    border-radius: 15px;
   }
 
   .options-tab .option-pill-grid.themes {
