@@ -9708,10 +9708,10 @@ body[data-ui="modern"] .chip.active {
 
 .social-badge-secondary-list {
   display: grid;
-  gap: 10px;
+  gap: 12px;
   max-height: 360px;
   overflow-y: auto;
-  padding-right: 4px;
+  padding: 8px 4px 10px 0;
   overscroll-behavior: contain;
   scrollbar-width: thin;
 }
@@ -9731,6 +9731,8 @@ body[data-ui="modern"] .chip.active {
 .social-badge-secondary-card {
   grid-template-columns: 42px minmax(0, 1fr) auto;
   width: 100%;
+  min-height: 74px;
+  padding: 12px 12px;
   color: var(--text-main);
   cursor: pointer;
   font: inherit;
@@ -9739,6 +9741,7 @@ body[data-ui="modern"] .chip.active {
 
 .social-badge-secondary-copy {
   min-width: 0;
+  align-self: center;
 }
 
 .social-badge-secondary-copy strong,
@@ -9837,6 +9840,13 @@ body[data-ui="modern"] .chip.active {
   transform: rotate(18deg);
   animation: badge-rarity-sheen 4.8s ease-in-out infinite;
   pointer-events: none;
+  z-index: 0;
+}
+
+.social-badge-primary-card > *,
+.social-badge-secondary-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 @keyframes badge-rarity-sheen {
@@ -9878,8 +9888,9 @@ body[data-ui="modern"] .chip.active {
 }
 
 .social-badge-toggle-choice {
-  min-width: 74px;
-  padding: 8px 10px;
+  justify-self: end;
+  min-width: 82px;
+  padding: 9px 12px;
   border: 0;
   border-radius: 999px;
   background: rgba(255,255,255,0.08);
@@ -9908,18 +9919,16 @@ body[data-ui="modern"] .chip.active {
     grid-template-columns: 1fr;
   }
 
-  .social-badge-choice-card {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
   .social-badge-secondary-card {
-    grid-template-columns: 40px minmax(0, 1fr);
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    min-height: 72px;
+    padding: 11px 10px;
   }
 
   .social-badge-secondary-card .social-badge-toggle-choice {
-    grid-column: 2;
-    justify-self: start;
-    margin-top: 4px;
+    grid-column: auto;
+    justify-self: end;
+    margin-top: 0;
   }
 
   .social-badge-subhead {
