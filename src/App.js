@@ -2347,6 +2347,21 @@ function BadgeVisualIcon({ badge, size = 20 }) {
   return <span>{badge?.icon}</span>;
 }
 
+function getBadgeRarityLabel(badge) {
+  if (!badge) return "Badge";
+  if (badge.special === "creator") return "Créateur";
+
+  const labels = {
+    mythic: "Mythique",
+    legendary: "Légendaire",
+    epic: "Épique",
+    rare: "Rare",
+    common: "Commun",
+  };
+
+  return labels[badge.rarity] || "Badge";
+}
+
 function getFeaturedBadgeFromSelection(badges = [], featuredBadgeId = "") {
   const unlockedBadges = badges.filter((badge) => badge.unlocked);
   const exactBadge = unlockedBadges.find((badge) => badge.id === featuredBadgeId);
@@ -9320,12 +9335,13 @@ function SocialTab({
                 <div className="social-badge-scroll-row" aria-label="Choisir le badge principal">
                   {badgeChoices.map((badge) => {
                     const isFeatured = String(featuredBadge?.id || "") === String(badge.id);
+                    const rarityLabel = getBadgeRarityLabel(badge);
 
                     return (
                       <button
                         key={badge.id}
                         type="button"
-                        className={`social-badge-primary-card ${isFeatured ? "featured" : ""}`}
+                        className={`social-badge-primary-card ${badge.rarity || ""} ${badge.special ? `badge-special-${badge.special}` : ""} ${isFeatured ? "featured" : ""}`}
                         onClick={() => handleFeaturedBadgeSelect(badge.id)}
                         aria-pressed={isFeatured}
                       >
@@ -9333,7 +9349,7 @@ function SocialTab({
                           <BadgeVisualIcon badge={badge} />
                         </span>
                         <strong>{badge.name}</strong>
-                        <small>{isFeatured ? "Principal" : "Choisir"}</small>
+                        <small>{isFeatured ? `Principal • ${rarityLabel}` : rarityLabel}</small>
                       </button>
                     );
                   })}
@@ -9349,12 +9365,13 @@ function SocialTab({
                 <div className="social-badge-secondary-list" aria-label="Choisir les badges secondaires">
                   {secondaryBadgeChoices.map((badge) => {
                     const isSelected = selectedBadgeIds.includes(String(badge.id));
+                    const rarityLabel = getBadgeRarityLabel(badge);
 
                     return (
                       <button
                         key={badge.id}
                         type="button"
-                        className={`social-badge-choice-card social-badge-secondary-card ${isSelected ? "selected" : ""}`}
+                        className={`social-badge-choice-card social-badge-secondary-card ${badge.rarity || ""} ${badge.special ? `badge-special-${badge.special}` : ""} ${isSelected ? "selected" : ""}`}
                         onClick={() => handlePublicBadgeToggle(badge.id)}
                         aria-pressed={isSelected}
                       >
@@ -9363,7 +9380,7 @@ function SocialTab({
                         </span>
                         <span className="social-badge-secondary-copy">
                           <strong>{badge.name}</strong>
-                          <small>{isSelected ? "Affiché dans la vitrine" : "Disponible"}</small>
+                          <small>{isSelected ? `Affiché • ${rarityLabel}` : rarityLabel}</small>
                         </span>
                         <span className="social-badge-toggle-choice">
                           {isSelected ? "Retirer" : "Ajouter"}
