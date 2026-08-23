@@ -39820,3 +39820,67 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
     font-size: 14px;
   }
 }
+
+/* Options mobile: moins de cadres imbriqués, plus de largeur utile */
+@media (max-width: 640px) {
+  .options-tab .options-panel {
+    padding: 0 6px 12px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+
+  .options-tab .options-header {
+    padding: 0 4px 6px;
+  }
+
+  .options-tab .options-group {
+    margin-top: 10px !important;
+    padding: 0 !important;
+    border-radius: 20px !important;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.044), rgba(255, 255, 255, 0.018)),
+      rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden;
+  }
+
+  .options-tab .options-accordion > .options-group-head {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 16px 16px 14px !important;
+  }
+
+  .options-tab .options-accordion:not(.open) > .options-group-head {
+    margin-bottom: 0 !important;
+  }
+
+  .options-tab .options-accordion.open > .options-group-head {
+    margin-bottom: 0 !important;
+  }
+
+  .options-tab .options-group-body {
+    gap: 10px !important;
+    padding: 12px 10px 14px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+  }
+
+  .options-tab .option-section {
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  .options-tab .option-setting-card {
+    padding: 11px !important;
+    border-radius: 16px !important;
+  }
+
+  .options-tab .data-options-card {
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+}
