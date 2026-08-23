@@ -6996,8 +6996,8 @@ function SanctuaryTab({
       .sort(
         (a, b) =>
           Number(b.selected) - Number(a.selected) ||
-          b.score - a.score ||
-          a.name.localeCompare(b.name)
+          a.name.localeCompare(b.name, "fr", { sensitivity: "base" }) ||
+          a.universe.localeCompare(b.universe, "fr", { sensitivity: "base" })
       );
   }, [figureSearch, figureRoleFilter, games]);
 

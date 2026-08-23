@@ -376,18 +376,23 @@
 }
 
 .sanctuary-figure-filter-row {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
   gap: 8px;
   margin-bottom: 12px;
 }
 
 .sanctuary-figure-filter-row button {
+  flex: 1 1 0;
+  min-width: 0;
   min-height: 38px;
+  padding: 0 8px;
   border-radius: 999px;
   color: rgba(255, 255, 255, 0.74);
   background: rgba(255, 255, 255, 0.07);
+  font-size: clamp(0.76rem, 3.05vw, 0.95rem);
   font-weight: 950;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .sanctuary-figure-filter-row button.active {
