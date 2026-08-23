@@ -8135,27 +8135,27 @@ function ActivityFeed({
                 </div>
               )}
 
-              {canComment && (
-                <form className="social-comment-form" onSubmit={submitComment}>
-                  <input
-                    value={commentDraft}
-                    onChange={(event) =>
-                      setCommentDrafts((current) => ({
-                        ...current,
-                        [activity.id]: event.target.value,
-                      }))
-                    }
-                    placeholder="Ajouter un commentaire"
-                    maxLength={160}
-                  />
-                  {commentDraft.trim() && (
-                    <button type="submit">
-                      Envoyer
-                    </button>
-                  )}
-                </form>
-              )}
             </div>
+            {canComment && (
+              <form className="social-comment-form" onSubmit={submitComment}>
+                <input
+                  value={commentDraft}
+                  onChange={(event) =>
+                    setCommentDrafts((current) => ({
+                      ...current,
+                      [activity.id]: event.target.value,
+                    }))
+                  }
+                  placeholder="Ajouter un commentaire"
+                  maxLength={160}
+                />
+                {commentDraft.trim() && (
+                  <button type="submit">
+                    Envoyer
+                  </button>
+                )}
+              </form>
+            )}
           </div>
         );
       })}
