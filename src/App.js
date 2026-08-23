@@ -8148,9 +8148,11 @@ function ActivityFeed({
                     placeholder="Ajouter un commentaire"
                     maxLength={160}
                   />
-                  <button type="submit" disabled={!commentDraft.trim()}>
-                    Envoyer
-                  </button>
+                  {commentDraft.trim() && (
+                    <button type="submit">
+                      Envoyer
+                    </button>
+                  )}
                 </form>
               )}
             </div>
