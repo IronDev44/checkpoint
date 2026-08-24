@@ -42157,47 +42157,59 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 }
 
 .checkpoint-platform-badge-playstation {
-  border-radius: 14px;
-  background:
-    radial-gradient(circle at 32% 24%, rgba(155, 207, 255, 0.32), transparent 33%),
-    linear-gradient(145deg, rgba(58, 126, 255, 0.3), rgba(20, 35, 82, 0.82) 55%, rgba(6, 11, 28, 0.9));
-  border: 1px solid rgba(156, 199, 255, 0.58);
-  box-shadow:
-    0 10px 20px rgba(20, 70, 190, 0.22),
-    0 0 14px rgba(70, 142, 255, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.32),
-    inset 0 -12px 22px rgba(0, 0, 0, 0.28);
+  border-radius: 50%;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 
 .checkpoint-platform-badge-playstation::before {
   content: "";
   position: absolute;
-  inset: 5px;
+  width: calc(var(--badge-visual-size) * 0.72);
+  height: calc(var(--badge-visual-size) * 0.72);
+  left: 50%;
+  top: 50%;
   border-radius: 11px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), transparent 45%);
+  border: 1px solid rgba(156, 199, 255, 0.5);
+  background:
+    radial-gradient(circle at 34% 24%, rgba(184, 220, 255, 0.34), transparent 38%),
+    linear-gradient(145deg, rgba(60, 132, 255, 0.34), rgba(16, 31, 76, 0.82) 58%, rgba(6, 11, 28, 0.88));
+  box-shadow:
+    0 8px 16px rgba(20, 70, 190, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -10px 18px rgba(0, 0, 0, 0.24);
+  transform: translate(-50%, -50%);
   z-index: 1;
 }
 
 .checkpoint-platform-badge-playstation::after {
   content: "";
   position: absolute;
-  inset: -5px;
-  border-radius: 18px;
-  background: radial-gradient(circle, rgba(83, 155, 255, 0.18), transparent 66%);
-  filter: blur(4px);
-  opacity: 0.62;
+  width: calc(var(--badge-visual-size) * 0.9);
+  height: calc(var(--badge-visual-size) * 0.9);
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(83, 155, 255, 0.16), transparent 68%);
+  filter: blur(5px);
+  opacity: 0.45;
+  transform: translate(-50%, -50%);
   z-index: -1;
 }
 
 .checkpoint-platform-shine {
   position: absolute;
-  inset: 0;
-  border-radius: inherit;
+  width: calc(var(--badge-visual-size) * 0.72);
+  height: calc(var(--badge-visual-size) * 0.72);
+  left: 50%;
+  top: 50%;
+  border-radius: 11px;
   background:
     linear-gradient(115deg, transparent 12%, rgba(255, 255, 255, 0.24) 42%, transparent 62%),
     radial-gradient(circle at 72% 72%, rgba(46, 220, 255, 0.16), transparent 34%);
   opacity: 0.72;
+  transform: translate(-50%, -50%);
   z-index: 2;
   pointer-events: none;
 }
@@ -42302,6 +42314,56 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
     0 0 16px rgba(255, 255, 255, 0.32);
   transform: none !important;
   white-space: nowrap;
+}
+
+.checkpoint-seal-badge-numeric {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+  overflow: visible;
+  background:
+    radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0) 30%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 46%),
+    conic-gradient(from 218deg, var(--seal-c), var(--seal-a), var(--seal-b), var(--seal-c));
+}
+
+.checkpoint-seal-badge-numeric::before,
+.checkpoint-seal-badge-numeric::after {
+  content: none;
+  display: none;
+}
+
+.checkpoint-seal-badge-numeric .checkpoint-seal-glass {
+  display: none !important;
+}
+
+.checkpoint-seal-badge-numeric .checkpoint-seal-facet {
+  display: none !important;
+}
+
+.checkpoint-seal-badge-numeric .checkpoint-seal-value {
+  position: relative;
+  inset: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 6;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  transform: none !important;
+  color: #fff;
+  font-size: clamp(18px, calc(var(--badge-visual-size) * 0.36), 28px);
+  font-weight: 950;
+  line-height: 1;
+  letter-spacing: 0;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.78),
+    0 0 16px rgba(255, 255, 255, 0.26);
+  mix-blend-mode: normal;
 }
 
 .checkpoint-seal-badge-rare {

@@ -2352,12 +2352,10 @@ function BadgeVisualIcon({ badge, size = 20 }) {
   if (isNumericSeal) {
     return (
       <span
-        className={`checkpoint-seal-badge checkpoint-seal-badge-${badge?.rarity || "epic"}`}
+        className={`checkpoint-seal-badge checkpoint-seal-badge-${badge?.rarity || "epic"} checkpoint-seal-badge-numeric`}
         aria-label={compactIcon}
         style={{ "--badge-visual-size": `${sealSize}px` }}
       >
-        <span className="checkpoint-seal-facet" />
-        <span className="checkpoint-seal-glass" />
         <span className="checkpoint-seal-value">{compactIcon}</span>
       </span>
     );
