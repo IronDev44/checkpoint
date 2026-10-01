@@ -700,7 +700,7 @@ async function getIgdbUpcoming(request, env) {
       const batch = await fetchIgdb("/games", query, env, { workerRoute: requestUrl.pathname });
 
       batch.forEach((game) => {
-        if (!game?.id || seenIds.has(game.id) || !igdbGameHasMedia(game)) return;
+        if (!game?.id || seenIds.has(game.id)) return;
         seenIds.add(game.id);
         collected.push(game);
       });
@@ -715,7 +715,7 @@ async function getIgdbUpcoming(request, env) {
       previous: null,
       page,
       pageSize,
-      hasNextPage: results.length === pageSize,
+      hasNextPage: collected.length >= pageSize,
       sourceStatus: "ok",
       source: "igdb",
       updatedAt: new Date().toISOString(),
