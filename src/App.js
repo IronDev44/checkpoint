@@ -12,6 +12,7 @@ import {
   getCheckpointTrial,
 } from "./data/checkpointTrials";
 import { getOfficialGotyForSeason } from "./data/officialGoty";
+import { localDateKey, selectUpcomingReleases } from "./services/upcomingReleases";
 import GameExperiencePanel from "./components/GameExperiencePanel";
 import { getGameExperience, getExperienceRatingFields } from "./services/gameExperience";
 import RatingSliderControl from "./components/RatingSlider";
@@ -5730,13 +5731,9 @@ function GameDetailModal({
   };
 
   const experience = getGameExperience(game);
-  const ratingSummary = getGameDetailedRatingSummary(game);
-  const detailedAverage = averageDetailedRating(game);
-  const hasSpecificCriteria = ratingSummary.contextualFields.length > 0;
   const progressStatus =
     game.progressStatus || (isGameFinishedStatus(game) ? "completed" : "not_started");
   const progressLabel = getProgressLabel(progressStatus);
-  const playtimeLabel = getPlaytimeRangeLabel(game.playtimeRange);
   const selectedPlatforms = game.playedPlatforms?.length
     ? game.playedPlatforms
     : game.platformNames || [];
@@ -5859,64 +5856,200 @@ function GameDetailModal({
         </div>
 
         <div className="modal-content game-detail-premium-content">
-          <div className="game-detail-meta-grid">
-            <div>
-              <span>Série</span>
-              <strong>{seriesLabel}</strong>
-            </div>
-            <div>
-              <span>Édition</span>
-              <strong>{editionLabel}</strong>
-            </div>
-            <div>
-              <span>Temps joué</span>
-              <strong>{playtimeLabel}</strong>
-            </div>
-            <div>
-              <span>Difficulté</span>
-              <strong>{difficultyLabel(game.difficulty)}</strong>
-            </div>
-          </div>
-
-          <div className="game-detail-scoreboard premium">
-            <div className="game-detail-score-main">
-              <span>Note globale</span>
-              <strong>{formatRating10(getGameRating(game), "À noter")}</strong>
-              <small>Note principale</small>
-            </div>
-
-            <div className="game-detail-score-card">
-              <span>Moyenne critères</span>
-              <strong>{formatRating10(detailedAverage, "En attente de la note complète")}</strong>
-              <small>
-                {ratingSummary.ratedBaseFields.length}/{ratingSummary.baseFields.length} essentiels
-              </small>
-            </div>
-
-            <div className="game-detail-score-card">
-              <span>Critères spécifiques</span>
-              <strong>{ratingSummary.contextualFields.length || "-"}</strong>
-              <small>
-                {hasSpecificCriteria ? "Détectés pour ce jeu" : "Aucun critère en plus"}
-              </small>
-            </div>
-          </div>
-
           <GameExperiencePanel key={game.id} game={game} onChange={onSetExperienceInfo} />
 
-          <div className="game-detail-section game-detail-personal-summary">
-            <div>
-              <span>Résumé perso</span>
-              <strong>
-                {localReview.trim()
-                  ? localReview.trim()
-                  : "Ajoute ton ressenti pour donner une vraie mémoire à cette fiche."}
-              </strong>
+          {experience && <div className="game-detail-section">
+            <div className="modal-block-title">{experience === "completed" ? "Note globale" : experience === "tried" ? "Ton ressenti (facultatif)" : "Ressenti général · Avis partiel"}</div>
+
+            <RatingSlider
+              rating={getGameRating(game)}
+              onRate={(value) => onSetRating(game.id, value)}
+            />
+
+            {closeAfterRating && (
+              <button
+                className="save-review-btn game-rating-save-btn"
+                type="button"
+                onClick={() => onRatingCommit?.()}
+              >
+                Enregistrer la note
+              </button>
+            )}
+          </div>}
+
+          {(experience === "completed" || experience === "partial") && <div className="game-detail-section game-detail-ratings-section">
+            <div className="modal-block-title">Notes détaillées</div>
+
+            <DetailedRatingsBlock
+              game={game}
+              onSetDetailedRating={onSetDetailedRating}
+            />
+          </div>}
+
+          {experience === "completed" && <div className="game-detail-section ost-block">
+            <div className="modal-block-title">OST / Musique</div>
+
+            <RatingSlider
+              rating={localOstRating}
+              onRate={(value) => setLocalOstRating(value)}
+              onCommit={(value) => {
+                onSetOstInfo(game.id, { ostRating: value });
+              }}
+            />
+          </div>
+
+          }
+
+          <div className="game-detail-section">
+            <div className="modal-block-title">{experience === "tried" ? "Un petit mot sur ton expérience ?" : "Avis personnel"}</div>
+
+            <textarea
+              className="review-textarea"
+              value={localReview}
+              onChange={(e) => setLocalReview(e.target.value)}
+              placeholder={experience === "tried" ? "Une impression, un souvenir… si tu en as envie." : "Ton avis sur ce jeu..."}
+            />
+
+            <button
+              className="save-review-btn"
+              type="button"
+              onClick={() => {
+                onSetReview(game.id, localReview);
+
+                setTimeout(() => {
+                  onClose();
+                }, 150);
+              }}
+            >
+              Enregistrer
+            </button>
+          </div>
+
+          <details className="game-detail-organized-group">
+            <summary>Ta session de jeu</summary>
+            <div className="game-detail-group-content">
+          {experience === "partial" && <>
+          <div className="game-detail-section">
+            <div className="modal-block-title">Où tu en es</div>
+
+            <div className="choice-grid progress-choice-grid">
+              {PROGRESS_OPTIONS.filter((option) => ["playing", "deep_play"].includes(option.id)).map((option) => (
+                <button
+                  key={option.id}
+                  className={`choice-pill ${
+                    (game.progressStatus ||
+                      (isGameFinishedStatus(game) ? "completed" : "not_started")) === option.id
+                      ? "active"
+                      : ""
+                  }`}
+                  onClick={() => onSetProgressStatus(game.id, option.id)}
+                  type="button"
+                >
+                  <span className="choice-icon">{option.icon}</span>
+                  <span>{option.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          </>}
+
+          <div className="game-detail-section">
+            <div className="modal-block-title">Plateforme utilisée</div>
+
+            <div className="choice-grid platform-choice-grid">
+              {(game.platformNames || []).map((platform) => {
+                const selected = (game.playedPlatforms || []).includes(platform);
+
+                return (
+                  <button
+                    key={platform}
+                    type="button"
+                    className={`choice-pill small ${selected ? "active" : ""}`}
+                    onClick={() => {
+                      const current = game.playedPlatforms || [];
+                      const next = selected
+                        ? current.filter((p) => p !== platform)
+                        : [...current, platform];
+
+                      onSetPlayedPlatforms(game.id, next);
+                    }}
+                  >
+                    {selected ? "✓ " : ""}
+                    {platform}
+                  </button>
+                );
+              })}
+            </div>
+
+            {(!game.platformNames || game.platformNames.length === 0) && (
+              <div className="option-value">Aucune plateforme détectée pour ce jeu.</div>
+            )}
+          </div>
+
+          <div className="game-detail-section">
+            <div className="modal-block-title">Temps joué estimé</div>
+
+            <div className="choice-grid time-choice-grid">
+              {PLAYTIME_RANGE_OPTIONS.map((option) => (
+                <button
+                  key={option.id}
+                  className={`choice-pill small ${
+                    (game.playtimeRange || "none") === option.id ? "active" : ""
+                  }`}
+                  onClick={() => onSetPlaytimeRange(game.id, option.id)}
+                  type="button"
+                >
+                  {option.label}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="game-detail-section">
-            <div className="modal-block-title">Statut</div>
+            <div className="modal-block-title">Difficulté</div>
+
+            <div className="status-row">
+              <button
+                className={`status-btn ${game.difficulty === "casual" ? "active" : ""}`}
+                onClick={() => onSetDifficulty(game.id, "casual")}
+                type="button"
+              >
+                Casual
+              </button>
+
+              <button
+                className={`status-btn ${game.difficulty === "normal" ? "active" : ""}`}
+                onClick={() => onSetDifficulty(game.id, "normal")}
+                type="button"
+              >
+                Normal
+              </button>
+
+              <button
+                className={`status-btn ${game.difficulty === "hard" ? "active" : ""}`}
+                onClick={() => onSetDifficulty(game.id, "hard")}
+                type="button"
+              >
+                Hard
+              </button>
+
+              <button
+                className={`status-btn ${game.difficulty === "hardcore" ? "active" : ""}`}
+                onClick={() => onSetDifficulty(game.id, "hardcore")}
+                type="button"
+              >
+                Hardcore
+              </button>
+            </div>
+          </div>
+            </div>
+          </details>
+
+          <details className="game-detail-organized-group">
+            <summary>Dans ta bibliothèque</summary>
+            <div className="game-detail-group-content">
+          <div className="game-detail-section">
+            <div className="modal-block-title">Rangement</div>
 
             <div className="status-row">
               <button
@@ -5993,39 +6126,23 @@ function GameDetailModal({
               )}
             </div>
           </div>
-
-          <div className="game-detail-section">
-            <div className="modal-block-title">Plateforme utilisée</div>
-
-            <div className="choice-grid platform-choice-grid">
-              {(game.platformNames || []).map((platform) => {
-                const selected = (game.playedPlatforms || []).includes(platform);
-
-                return (
-                  <button
-                    key={platform}
-                    type="button"
-                    className={`choice-pill small ${selected ? "active" : ""}`}
-                    onClick={() => {
-                      const current = game.playedPlatforms || [];
-                      const next = selected
-                        ? current.filter((p) => p !== platform)
-                        : [...current, platform];
-
-                      onSetPlayedPlatforms(game.id, next);
-                    }}
-                  >
-                    {selected ? "✓ " : ""}
-                    {platform}
-                  </button>
-                );
-              })}
             </div>
+          </details>
 
-            {(!game.platformNames || game.platformNames.length === 0) && (
-              <div className="option-value">Aucune plateforme détectée pour ce jeu.</div>
-            )}
+          <details className="game-detail-organized-group">
+            <summary>Autour du jeu</summary>
+            <div className="game-detail-group-content">
+          <div className="game-detail-meta-grid">
+            <div>
+              <span>Série</span>
+              <strong>{seriesLabel}</strong>
+            </div>
+            <div>
+              <span>Édition</span>
+              <strong>{editionLabel}</strong>
+            </div>
           </div>
+
 
           {captureImages.length > 0 && (
             <div className="game-detail-section game-detail-media-section">
@@ -6120,135 +6237,6 @@ function GameDetailModal({
             )}
           </div>
 
-          <div className="game-detail-section">
-            <div className="modal-block-title">Progression</div>
-
-            <div className="choice-grid progress-choice-grid">
-              {PROGRESS_OPTIONS.map((option) => (
-                <button
-                  key={option.id}
-                  className={`choice-pill ${
-                    (game.progressStatus ||
-                      (isGameFinishedStatus(game) ? "completed" : "not_started")) === option.id
-                      ? "active"
-                      : ""
-                  }`}
-                  onClick={() => onSetProgressStatus(game.id, option.id)}
-                  type="button"
-                >
-                  <span className="choice-icon">{option.icon}</span>
-                  <span>{option.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="game-detail-section">
-            <div className="modal-block-title">Temps joué estimé</div>
-
-            <div className="choice-grid time-choice-grid">
-              {PLAYTIME_RANGE_OPTIONS.map((option) => (
-                <button
-                  key={option.id}
-                  className={`choice-pill small ${
-                    (game.playtimeRange || "none") === option.id ? "active" : ""
-                  }`}
-                  onClick={() => onSetPlaytimeRange(game.id, option.id)}
-                  type="button"
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="game-detail-section">
-            <div className="modal-block-title">Difficulté</div>
-
-            <div className="status-row">
-              <button
-                className={`status-btn ${game.difficulty === "casual" ? "active" : ""}`}
-                onClick={() => onSetDifficulty(game.id, "casual")}
-                type="button"
-              >
-                Casual
-              </button>
-
-              <button
-                className={`status-btn ${game.difficulty === "normal" ? "active" : ""}`}
-                onClick={() => onSetDifficulty(game.id, "normal")}
-                type="button"
-              >
-                Normal
-              </button>
-
-              <button
-                className={`status-btn ${game.difficulty === "hard" ? "active" : ""}`}
-                onClick={() => onSetDifficulty(game.id, "hard")}
-                type="button"
-              >
-                Hard
-              </button>
-
-              <button
-                className={`status-btn ${game.difficulty === "hardcore" ? "active" : ""}`}
-                onClick={() => onSetDifficulty(game.id, "hardcore")}
-                type="button"
-              >
-                Hardcore
-              </button>
-            </div>
-          </div>
-
-          {experience && <div className="game-detail-section">
-            <div className="modal-block-title">{experience === "completed" ? "Note globale" : experience === "tried" ? "Ton ressenti (facultatif)" : "Ressenti général · Avis partiel"}</div>
-
-            <RatingSlider
-              rating={getGameRating(game)}
-              onRate={(value) => onSetRating(game.id, value)}
-            />
-
-            {closeAfterRating && (
-              <button
-                className="save-review-btn game-rating-save-btn"
-                type="button"
-                onClick={() => onRatingCommit?.()}
-              >
-                Enregistrer la note
-              </button>
-            )}
-          </div>}
-
-          {(experience === "completed" || experience === "partial") && <div className="game-detail-section game-detail-ratings-section">
-            <div className="modal-block-title">Notes détaillées</div>
-
-            <DetailedRatingsBlock
-              game={game}
-              onSetDetailedRating={onSetDetailedRating}
-            />
-          </div>}
-
-          {experience === "completed" && <div className="game-detail-section ost-block">
-            <div className="modal-block-title">OST / Musique</div>
-
-            <div className="ost-summary">
-              <div>
-                <span>Note OST</span>
-                <strong>{formatRating10(localOstRating, "Pas notée")}</strong>
-              </div>
-            </div>
-
-            <RatingSlider
-              rating={localOstRating}
-              onRate={(value) => setLocalOstRating(value)}
-              onCommit={(value) => {
-                onSetOstInfo(game.id, { ostRating: value });
-              }}
-            />
-          </div>
-
-          }
-
           <div className="game-detail-section game-detail-history-section">
             <div className="modal-block-title">Historique</div>
             <div className="game-detail-history-list">
@@ -6260,31 +6248,8 @@ function GameDetailModal({
               ))}
             </div>
           </div>
-
-          <div className="game-detail-section">
-            <div className="modal-block-title">{experience === "tried" ? "Un petit mot sur ton expérience ?" : "Avis personnel"}</div>
-
-            <textarea
-              className="review-textarea"
-              value={localReview}
-              onChange={(e) => setLocalReview(e.target.value)}
-              placeholder={experience === "tried" ? "Une impression, un souvenir… si tu en as envie." : "Ton avis sur ce jeu..."}
-            />
-
-            <button
-              className="save-review-btn"
-              type="button"
-              onClick={() => {
-                onSetReview(game.id, localReview);
-
-                setTimeout(() => {
-                  onClose();
-                }, 150);
-              }}
-            >
-              Enregistrer
-            </button>
-          </div>
+            </div>
+          </details>
 
           <button
             className="delete-large-btn"
@@ -12688,12 +12653,7 @@ function createFallbackPoster(title, colorA = "#60a5fa", colorB = "#d6b54a") {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
-function getUpcomingFallbackGames() {
-  const today = new Date();
-  return UPCOMING_GAMES_FALLBACK.filter(
-    (game) => game.tba || isFutureReleaseDate(game.released, today)
-  );
-}
+
 
 function getGameVisual(game = {}) {
   return (
@@ -12714,313 +12674,9 @@ function hasRealGameVisual(game = {}) {
   return Boolean(visual && !String(visual).startsWith("data:image/svg+xml"));
 }
 
-async function hydrateUpcomingFallbackGames(games = []) {
-  const candidates = games.slice(0, 20);
-  const hydrated = await Promise.all(
-    candidates.map(async (game) => {
-      try {
-        const data = await GameService.igdb(
-          "/games",
-          { search: game.name, page_size: "3" },
-          { timeout: 4500 }
-        );
-        const match = (data.results || []).find(
-          (result) => result?.name && hasRealGameVisual(result)
-        );
 
-        if (!match) return game;
 
-        return {
-          ...game,
-          source: "igdb",
-          background_image: match.background_image || match.image || game.background_image,
-          image: match.image || match.cover_image || match.background_image || game.image,
-          cover_image: match.cover_image || match.image || "",
-          short_screenshots: match.short_screenshots?.length
-            ? match.short_screenshots
-            : game.short_screenshots,
-          platforms: match.platforms?.length ? match.platforms : game.platforms,
-          genres: match.genres?.length ? match.genres : game.genres,
-        };
-      } catch (error) {
-        return game;
-      }
-    })
-  );
 
-  return [...hydrated, ...games.slice(candidates.length)];
-}
-
-const UPCOMING_GAMES_FALLBACK = [
-  {
-    id: "fallback-upcoming-beast-of-reincarnation",
-    name: "Beast of Reincarnation",
-    released: "2026-08-04",
-    tba: false,
-    background_image: createFallbackPoster("Beast of Reincarnation", "#16a34a", "#475569"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-    ],
-    genres: [{ name: "Action" }, { name: "Aventure" }],
-  },
-  {
-    id: "fallback-upcoming-big-walk",
-    name: "Big Walk",
-    released: "2026-08-04",
-    tba: false,
-    background_image: createFallbackPoster("Big Walk", "#38bdf8", "#a855f7"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Nintendo Switch 2" } },
-    ],
-    genres: [{ name: "Aventure" }, { name: "Coop" }],
-  },
-  {
-    id: "fallback-upcoming-marvel-tokon",
-    name: "MARVEL Tokon: Fighting Souls",
-    released: "2026-08-06",
-    tba: false,
-    background_image: createFallbackPoster("Marvel Tokon", "#dc2626", "#2563eb"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-    ],
-    genres: [{ name: "Combat" }, { name: "Action" }],
-  },
-  {
-    id: "fallback-upcoming-duskfade",
-    name: "Duskfade",
-    released: "2026-08-13",
-    tba: false,
-    background_image: createFallbackPoster("Duskfade", "#7c3aed", "#0ea5e9"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-      { platform: { name: "Nintendo Switch 2" } },
-    ],
-    genres: [{ name: "Action" }, { name: "Aventure" }],
-  },
-  {
-    id: "fallback-upcoming-hell-let-loose-vietnam",
-    name: "Hell Let Loose: Vietnam",
-    released: "2026-08-13",
-    tba: false,
-    background_image: createFallbackPoster("Hell Let Loose Vietnam", "#14532d", "#f97316"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-    ],
-    genres: [{ name: "Shooter" }, { name: "Action" }],
-  },
-  {
-    id: "fallback-upcoming-the-sinking-city-2",
-    name: "The Sinking City 2",
-    released: "2026-08-18",
-    tba: false,
-    background_image: createFallbackPoster("The Sinking City 2", "#0f172a", "#0891b2"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-    ],
-    genres: [{ name: "Horreur" }, { name: "Aventure" }],
-  },
-  {
-    id: "fallback-upcoming-mortal-shell-2",
-    name: "Mortal Shell II",
-    released: "2026-08-20",
-    tba: false,
-    background_image: createFallbackPoster("Mortal Shell II", "#64748b", "#ef4444"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-    ],
-    genres: [{ name: "Action" }, { name: "RPG" }],
-  },
-  {
-    id: "fallback-upcoming-the-witchs-bakery",
-    name: "The Witch's Bakery",
-    released: "2026-08-20",
-    tba: false,
-    background_image: createFallbackPoster("The Witch's Bakery", "#d946ef", "#f59e0b"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-      { platform: { name: "Nintendo Switch" } },
-      { platform: { name: "Nintendo Switch 2" } },
-    ],
-    genres: [{ name: "Simulation" }, { name: "Aventure" }],
-  },
-  {
-    id: "fallback-upcoming-metal-gear-solid-master-collection-vol-2",
-    name: "Metal Gear Solid: Master Collection Vol. 2",
-    released: "2026-08-27",
-    tba: false,
-    background_image: createFallbackPoster("Metal Gear Solid Vol. 2", "#334155", "#d6b54a"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-      { platform: { name: "Nintendo Switch" } },
-      { platform: { name: "Nintendo Switch 2" } },
-    ],
-    genres: [{ name: "Action" }, { name: "Infiltration" }],
-  },
-  {
-    id: "fallback-upcoming-onimusha-way-of-the-sword",
-    name: "Onimusha: Way of the Sword",
-    released: "2026-09-04",
-    tba: false,
-    background_image: createFallbackPoster("Onimusha", "#991b1b", "#d6b54a"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-      { platform: { name: "Nintendo Switch 2" } },
-    ],
-    genres: [{ name: "Action" }, { name: "Aventure" }],
-  },
-  {
-    id: "fallback-upcoming-minecraft-dungeons-2",
-    name: "Minecraft Dungeons II",
-    released: "2026-09-29",
-    tba: false,
-    background_image: createFallbackPoster("Minecraft Dungeons II", "#22c55e", "#92400e"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-      { platform: { name: "Nintendo Switch" } },
-      { platform: { name: "Nintendo Switch 2" } },
-    ],
-    genres: [{ name: "Action" }, { name: "RPG" }],
-  },
-  {
-    id: "fallback-upcoming-fable",
-    name: "Fable",
-    released: "",
-    tba: true,
-    background_image: createFallbackPoster("Fable", "#22c55e", "#d6b54a"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "Xbox Series X/S" } },
-    ],
-    genres: [{ name: "RPG" }, { name: "Aventure" }],
-  },
-  {
-    id: "fallback-upcoming-intergalactic",
-    name: "Intergalactic: The Heretic Prophet",
-    released: "",
-    tba: true,
-    background_image: createFallbackPoster("Intergalactic", "#4f46e5", "#e879f9"),
-    platforms: [{ platform: { name: "PlayStation 5" } }],
-    genres: [{ name: "Action" }, { name: "Aventure" }],
-  },
-  {
-    id: "fallback-upcoming-pragmata",
-    name: "Pragmata",
-    released: "",
-    tba: true,
-    background_image: createFallbackPoster("Pragmata", "#0891b2", "#94a3b8"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-    ],
-    genres: [{ name: "Action" }],
-  },
-  {
-    id: "fallback-upcoming-marathon",
-    name: "Marathon",
-    released: "",
-    tba: true,
-    background_image: createFallbackPoster("Marathon", "#f97316", "#06b6d4"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-    ],
-    genres: [{ name: "Shooter" }],
-  },
-  {
-    id: "fallback-upcoming-perfect-dark",
-    name: "Perfect Dark",
-    released: "",
-    tba: true,
-    background_image: createFallbackPoster("Perfect Dark", "#10b981", "#111827"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "Xbox Series X/S" } },
-    ],
-    genres: [{ name: "Action" }],
-  },
-  {
-    id: "fallback-upcoming-wolverine",
-    name: "Marvel's Wolverine",
-    released: "",
-    tba: true,
-    background_image: createFallbackPoster("Wolverine", "#facc15", "#1f2937"),
-    platforms: [{ platform: { name: "PlayStation 5" } }],
-    genres: [{ name: "Action" }, { name: "Aventure" }],
-  },
-  {
-    id: "fallback-upcoming-state-of-decay-3",
-    name: "State of Decay 3",
-    released: "",
-    tba: true,
-    background_image: createFallbackPoster("State of Decay 3", "#dc2626", "#14532d"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "Xbox Series X/S" } },
-    ],
-    genres: [{ name: "Survie" }],
-  },
-  {
-    id: "fallback-upcoming-007-first-light",
-    name: "007 First Light",
-    released: "",
-    tba: true,
-    background_image: createFallbackPoster("007 First Light", "#c084fc", "#334155"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-    ],
-    genres: [{ name: "Action" }],
-  },
-  {
-    id: "fallback-upcoming-crimson-desert",
-    name: "Crimson Desert",
-    released: "",
-    tba: true,
-    background_image: createFallbackPoster("Crimson Desert", "#b91c1c", "#d97706"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-      { platform: { name: "Xbox Series X/S" } },
-    ],
-    genres: [{ name: "Action" }, { name: "RPG" }],
-  },
-  {
-    id: "fallback-upcoming-phantom-blade-zero",
-    name: "Phantom Blade Zero",
-    released: "",
-    tba: true,
-    background_image: createFallbackPoster("Phantom Blade Zero", "#64748b", "#ef4444"),
-    platforms: [
-      { platform: { name: "PC" } },
-      { platform: { name: "PlayStation 5" } },
-    ],
-    genres: [{ name: "Action" }],
-  },
-];
 
 function gameMatchesSearchFilters(game, filters = {}) {
   const { yearFilter, platformFilter, genreFilter } = filters;
@@ -18827,6 +18483,8 @@ export default function App() {
   const [isUpcomingLoading, setIsUpcomingLoading] = useState(false);
   const [upcomingSourceStatus, setUpcomingSourceStatus] = useState("idle");
   const [upcomingMonthFilter, setUpcomingMonthFilter] = useState("");
+  const [releaseTodayKey, setReleaseTodayKey] = useState(() => localDateKey());
+  const [upcomingRefreshKey, setUpcomingRefreshKey] = useState(0);
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState(() => {
     try {
@@ -20169,63 +19827,40 @@ useEffect(() => {
   }, [toast]);
 
   useEffect(() => {
+    const updateDay = () => setReleaseTodayKey(localDateKey());
+    const timer = window.setInterval(updateDay, 60000);
+    document.addEventListener("visibilitychange", updateDay);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", updateDay);
+    };
+  }, []);
+
+  useEffect(() => {
     if (showSplash) return;
+    let cancelled = false;
     const fetchUpcomingGames = async () => {
+      setIsUpcomingLoading(true);
+      setUpcomingSourceStatus("loading");
       try {
-        setIsUpcomingLoading(true);
-        setUpcomingSourceStatus("loading");
-
-        const data = await GameService.igdb("/upcoming", { months: "6", limit: "40" }, {
-          timeout: 7000,
-        });
-        const today = new Date();
-        const results = (data.results || [])
-          .filter(
-            (game) =>
-              game?.name &&
-              isMainGameResult(game) &&
-              isFutureReleaseDate(game.released, today) &&
-              hasRealGameVisual(game)
-          )
-          .sort((a, b) => new Date(a.released) - new Date(b.released));
-
-        if (results.length) {
-          setUpcomingGames(results);
-        } else {
-          const fallbackGames = getUpcomingFallbackGames();
-          const hydratedFallbackGames = await hydrateUpcomingFallbackGames(fallbackGames);
-
-          setUpcomingGames((previousGames) => {
-            if (previousGames.some(hasRealGameVisual)) return previousGames;
-            return hydratedFallbackGames.length
-              ? hydratedFallbackGames
-              : previousGames.length
-                ? previousGames
-                : fallbackGames;
-          });
-        }
+        const data = await GameService.igdb("/upcoming", { months: "6", limit: "40" }, { timeout: 7000 });
+        if (cancelled) return;
+        const results = selectUpcomingReleases((data.results || []).filter(isMainGameResult));
+        setUpcomingGames(results);
         setUpcomingSourceStatus(data.sourceStatus || "ok");
-      } catch (e) {
-        if (isAbortError(e)) return;
-        console.error("Erreur chargement sorties :", e);
-        const fallbackGames = getUpcomingFallbackGames();
-        const hydratedFallbackGames = await hydrateUpcomingFallbackGames(fallbackGames);
-        setUpcomingGames((previousGames) => {
-          if (previousGames.some(hasRealGameVisual)) return previousGames;
-          return hydratedFallbackGames.length
-            ? hydratedFallbackGames
-            : previousGames.length
-              ? previousGames
-              : fallbackGames;
-        });
+      } catch (error) {
+        if (cancelled) return;
+        console.error("Erreur chargement sorties :", error);
+        // Preserve only valid dated results from this session, never a static catalogue.
+        setUpcomingGames((previous) => selectUpcomingReleases(previous));
         setUpcomingSourceStatus("unavailable");
       } finally {
-        setIsUpcomingLoading(false);
+        if (!cancelled) setIsUpcomingLoading(false);
       }
     };
-
     fetchUpcomingGames();
-  }, [showSplash]);
+    return () => { cancelled = true; };
+  }, [showSplash, releaseTodayKey, upcomingRefreshKey]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -20377,31 +20012,12 @@ useEffect(() => {
   };
 }, []);
 
-  const upcomingMonthOptions = useMemo(() => {
-    const set = new Set(
-      upcomingGames.map((g) => getMonthKey(g.released)).filter(Boolean)
-    );
-    return Array.from(set).sort();
-  }, [upcomingGames]);
-
-  const filteredUpcomingGames = useMemo(() => {
-    const list = upcomingMonthFilter
-      ? upcomingGames.filter(
-          (g) => getMonthKey(g.released) === upcomingMonthFilter
-        )
-      : upcomingGames;
-
-    return [...list].sort((a, b) => {
-      const dateA = a.released ? new Date(a.released) : null;
-      const dateB = b.released ? new Date(b.released) : null;
-
-      if (dateA && dateB) return dateA - dateB;
-      if (dateA && !dateB) return -1;
-      if (!dateA && dateB) return 1;
-
-      return 0;
-    });
-  }, [upcomingGames, upcomingMonthFilter]);
+  const validUpcomingGames = useMemo(() => selectUpcomingReleases(upcomingGames), [upcomingGames, releaseTodayKey]);
+  const upcomingMonthOptions = useMemo(() => [...new Set(validUpcomingGames.map((game) => game.released.slice(0, 7)))].sort(), [validUpcomingGames]);
+  useEffect(() => {
+    if (upcomingMonthFilter && !upcomingMonthOptions.includes(upcomingMonthFilter)) setUpcomingMonthFilter("");
+  }, [upcomingMonthFilter, upcomingMonthOptions]);
+  const filteredUpcomingGames = useMemo(() => upcomingMonthFilter ? validUpcomingGames.filter((game) => game.released.slice(0, 7) === upcomingMonthFilter) : validUpcomingGames, [validUpcomingGames, upcomingMonthFilter]);
 
   const filteredLibraryGames = useMemo(() => {
     const q = librarySearch.trim().toLowerCase();
@@ -21293,13 +20909,13 @@ const setRating = (id, rating) => {
             : "not_started";
       const completed = progressStatus === "completed";
 
-      await updateDoc(doc(db, "games", id), { status, progressStatus, completed, ratingExperience: completed ? "completed" : status === "en cours" ? "partial" : "" });
+      await updateDoc(doc(db, "games", id), { status, progressStatus, completed, ratingExperience: completed ? "completed" : status === "en cours" ? "partial" : status === "collection" ? (getGameExperience(games.find((game) => game.id === id)) || "") : "" });
       if (selectedGame?.id === id) {
         setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
           status,
           progressStatus,
           completed,
-          ratingExperience: completed ? "completed" : status === "en cours" ? "partial" : "",
+          ratingExperience: completed ? "completed" : status === "en cours" ? "partial" : status === "collection" ? (getGameExperience(prev) || "") : "",
         }));
       }
       if (["wishlist", "en cours", "collection"].includes(status)) {
@@ -22013,8 +21629,10 @@ const setPlayedPlatforms = async (id, platforms) => {
               <div className="search-panel">
                 <h2 className="panel-title">Prochaines sorties</h2>
                 <div className="option-value">
-                  Jeux à venir sur les prochains mois.
+                  Sorties datées à partir d’aujourd’hui, sur les six prochains mois.
                 </div>
+
+                <button type="button" className="profile-toggle-btn" disabled={isUpcomingLoading} onClick={() => setUpcomingRefreshKey((value) => value + 1)}>Actualiser les sorties</button>
 
                 <div className="filter-block month-filter-block">
                   <div className="filter-label">Filtrer par mois</div>
@@ -22045,8 +21663,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
               {!isUpcomingLoading && upcomingSourceStatus === "unavailable" && (
                 <div className="rawg-status-note">
-                  RAWG est temporairement indisponible. Les sorties deja connues restent visibles
-                  et le reste de l'application reste utilisable.
+                  La source des sorties est temporairement indisponible. Seules les sorties datées déjà chargées pendant cette session restent visibles. Tu peux réessayer avec « Actualiser les sorties ».
                 </div>
               )}
 

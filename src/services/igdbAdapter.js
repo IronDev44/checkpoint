@@ -101,6 +101,7 @@ export function toRawgCompatibleIgdbGame(igdbGame = {}) {
     name: normalized.title,
     slug: normalized.slug,
     released: normalized.releaseDate,
+    tba: igdbGame.tba === true,
     background_image: normalized.backgroundImage || normalized.cover,
     image: normalized.cover || normalized.backgroundImage,
     cover_image: normalized.cover,
