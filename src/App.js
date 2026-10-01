@@ -12,6 +12,9 @@ import {
   getCheckpointTrial,
 } from "./data/checkpointTrials";
 import { getOfficialGotyForSeason } from "./data/officialGoty";
+import GameExperiencePanel from "./components/GameExperiencePanel";
+import { getGameExperience, getExperienceRatingFields } from "./services/gameExperience";
+import RatingSliderControl from "./components/RatingSlider";
 import SplashScreen from "./components/SplashScreen";
 import TrialRoom from "./components/TrialRoom";
 import {
@@ -816,7 +819,7 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
   return () => {
     document.body.classList.remove("modal-open");
   };
-}, [game]);
+}, [game?.id, game?.review, game?.ostRating]);
 
   useEffect(() => {
     if (!game) return;
@@ -2034,13 +2037,7 @@ function formatMonthLabel(monthKey) {
 }
 
 function averageDetailedRating(game) {
-  const values = [
-    clampRating(game.ratingGraphics),
-    clampRating(game.ratingGameplay),
-    clampRating(game.ratingStory),
-    clampRating(game.ratingSound),
-    clampRating(game.ratingLongevity),
-  ].filter((v) => v > 0);
+  const values = getGameRatingBreakdown(game).map((field) => field.value).filter((v) => v > 0);
 
   if (values.length === 0) return 0;
   const avg = values.reduce((sum, v) => sum + v, 0) / values.length;
@@ -2056,7 +2053,7 @@ const BASE_GAME_RATING_FIELDS = [
 ];
 
 function getGameRatingBreakdown(game = {}) {
-  return BASE_GAME_RATING_FIELDS.map((field) => ({
+  return getExperienceRatingFields(game, BASE_GAME_RATING_FIELDS).map((field) => ({
     ...field,
     value: clampRating(game[field.key]),
   }));
@@ -2065,7 +2062,7 @@ function getGameRatingBreakdown(game = {}) {
 function getGameDetailedRatingSummary(game = {}) {
   const baseFields = getGameRatingBreakdown(game);
   const ratedBaseFields = baseFields.filter((field) => field.value > 0);
-  const contextualFields = getContextualRatingFields(game).map((field) => ({
+  const contextualFields = (getGameExperience(game) === "completed" ? getContextualRatingFields(game) : []).map((field) => ({
     ...field,
     value: clampRating(game[field.key]),
   }));
@@ -3685,101 +3682,8 @@ function Star({ fill = 0, onHalfClick, onFullClick }) {
   );
 }
 
-function RatingSlider({ rating = 0, onRate, onCommit }) {
-  const safeRating = clampRating(rating);
-  const [draftRating, setDraftRating] = useState(safeRating);
-  const sliderRef = useRef(null);
-  const activePointerIdRef = useRef(null);
-  const latestRatingRef = useRef(safeRating);
-
-  useEffect(() => {
-    setDraftRating(safeRating);
-    latestRatingRef.current = safeRating;
-  }, [safeRating]);
-
-  const commitRating = (value) => {
-    const nextRating = clampRating(value);
-    latestRatingRef.current = nextRating;
-    setDraftRating(nextRating);
-    onRate(nextRating);
-  };
-
-  const commitPointerRating = (clientX) => {
-    const slider = sliderRef.current;
-    if (!slider) return;
-
-    const rect = slider.getBoundingClientRect();
-    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    commitRating(Math.round(ratio * 20) / 2);
-  };
-
-  const stopPointerRating = (e) => {
-    if (activePointerIdRef.current !== e.pointerId) return;
-
-    activePointerIdRef.current = null;
-    e.currentTarget.releasePointerCapture?.(e.pointerId);
-    onCommit?.(latestRatingRef.current);
-  };
-
-  return (
-    <div className="rating-slider-wrap">
-      <div className="rating-slider-top">
-        <span>Note</span>
-        <strong className="rating-live-value">
-          {formatRating10(draftRating, "Pas noté")}
-        </strong>
-      </div>
-
-      <input
-        ref={sliderRef}
-        type="range"
-        min="0"
-        max="10"
-        step="0.5"
-        value={draftRating}
-        className="rating-slider"
-        style={{ "--rating-progress": `${draftRating * 10}%` }}
-        onPointerDown={(e) => {
-          e.preventDefault();
-          activePointerIdRef.current = e.pointerId;
-          e.currentTarget.setPointerCapture?.(e.pointerId);
-          commitPointerRating(e.clientX);
-
-          if (navigator.vibrate) {
-            navigator.vibrate(8);
-          }
-        }}
-        onPointerMove={(e) => {
-          if (activePointerIdRef.current !== e.pointerId) return;
-          e.preventDefault();
-          commitPointerRating(e.clientX);
-        }}
-        onPointerUp={stopPointerRating}
-        onPointerCancel={stopPointerRating}
-        onLostPointerCapture={() => {
-          activePointerIdRef.current = null;
-        }}
-        onChange={(e) => {
-          if (activePointerIdRef.current !== null) return;
-
-          commitRating(e.target.value);
-          onCommit?.(clampRating(e.target.value));
-
-          if (navigator.vibrate) {
-            navigator.vibrate(8);
-          }
-        }}
-      />
-
-      <div className="rating-scale">
-        <span>0</span>
-        <span>2.5</span>
-        <span>5</span>
-        <span>7.5</span>
-        <span>10</span>
-      </div>
-    </div>
-  );
+function RatingSlider(props) {
+  return <RatingSliderControl {...props} formatValue={formatRating10} />;
 }
 
 const CONTEXTUAL_GAME_RATING_FIELDS = [
@@ -4378,7 +4282,7 @@ function isTopFinishedGame(game) {
 
 function isTopEligibleGame(game) {
   const status = getNormalizedStatus(game?.status);
-  return isGameFinishedStatus(game) || status.includes("cours");
+  return ["completed", "partial"].includes(getGameExperience(game));
 }
 
 function formatTopScore(score, scoreKey = "rating") {
@@ -4395,7 +4299,7 @@ function getTopGameMeta(game) {
     : game.platformNames || [];
   const genres = game.genreNames || [];
 
-  return [year, platforms[0], genres[0]].filter(Boolean).join(" - ") || "Jeu classe";
+  return [getGameExperience(game) === "partial" ? "Avis partiel" : "", year, platforms[0], genres[0]].filter(Boolean).join(" - ") || "Jeu classe";
 }
 
 function getTopGroups(games, field) {
@@ -5194,7 +5098,8 @@ function GameOfYearPanel({ games, onSetGameOfYear }) {
 }
 
 function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
-  const scopedGames = games.filter(isTopEligibleGame);
+  const [includePartial, setIncludePartial] = useState(false);
+  const scopedGames = games.filter((game) => getGameExperience(game) === "completed" || (includePartial && getGameExperience(game) === "partial"));
   const scopedHardware = hardware.filter(isTopEligibleHardware);
   const [contentMode, setContentMode] = useState("games");
   const [mode, setMode] = useState("criteria");
@@ -5296,6 +5201,9 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
           </p>
         </div>
 
+        {contentMode !== "hardware" && <label className="game-experience-caption">
+          <input type="checkbox" checked={includePartial} onChange={(event) => setIncludePartial(event.target.checked)} /> Inclure les avis partiels
+        </label>}
         <div className="top5-control-block">
           <span>Section</span>
           <div className="top5-content-tabs">
@@ -5572,6 +5480,7 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
 
 function GameDetailModal({
   game,
+  onSetExperienceInfo,
   onClose,
   onDelete,
   onSetStatus,
@@ -5820,6 +5729,7 @@ function GameDetailModal({
     }
   };
 
+  const experience = getGameExperience(game);
   const ratingSummary = getGameDetailedRatingSummary(game);
   const detailedAverage = averageDetailedRating(game);
   const hasSpecificCriteria = ratingSummary.contextualFields.length > 0;
@@ -5991,6 +5901,8 @@ function GameDetailModal({
               </small>
             </div>
           </div>
+
+          <GameExperiencePanel key={game.id} game={game} onChange={onSetExperienceInfo} />
 
           <div className="game-detail-section game-detail-personal-summary">
             <div>
@@ -6288,8 +6200,8 @@ function GameDetailModal({
             </div>
           </div>
 
-          <div className="game-detail-section">
-            <div className="modal-block-title">Note globale</div>
+          {experience && <div className="game-detail-section">
+            <div className="modal-block-title">{experience === "completed" ? "Note globale" : experience === "tried" ? "Ton ressenti (facultatif)" : "Ressenti général · Avis partiel"}</div>
 
             <RatingSlider
               rating={getGameRating(game)}
@@ -6305,18 +6217,18 @@ function GameDetailModal({
                 Enregistrer la note
               </button>
             )}
-          </div>
+          </div>}
 
-          <div className="game-detail-section game-detail-ratings-section">
+          {(experience === "completed" || experience === "partial") && <div className="game-detail-section game-detail-ratings-section">
             <div className="modal-block-title">Notes détaillées</div>
 
             <DetailedRatingsBlock
               game={game}
               onSetDetailedRating={onSetDetailedRating}
             />
-          </div>
+          </div>}
 
-          <div className="game-detail-section ost-block">
+          {experience === "completed" && <div className="game-detail-section ost-block">
             <div className="modal-block-title">OST / Musique</div>
 
             <div className="ost-summary">
@@ -6335,6 +6247,8 @@ function GameDetailModal({
             />
           </div>
 
+          }
+
           <div className="game-detail-section game-detail-history-section">
             <div className="modal-block-title">Historique</div>
             <div className="game-detail-history-list">
@@ -6348,13 +6262,13 @@ function GameDetailModal({
           </div>
 
           <div className="game-detail-section">
-            <div className="modal-block-title">Avis personnel</div>
+            <div className="modal-block-title">{experience === "tried" ? "Un petit mot sur ton expérience ?" : "Avis personnel"}</div>
 
             <textarea
               className="review-textarea"
               value={localReview}
               onChange={(e) => setLocalReview(e.target.value)}
-              placeholder="Ton avis sur ce jeu..."
+              placeholder={experience === "tried" ? "Une impression, un souvenir… si tu en as envie." : "Ton avis sur ce jeu..."}
             />
 
             <button
@@ -21379,12 +21293,13 @@ const setRating = (id, rating) => {
             : "not_started";
       const completed = progressStatus === "completed";
 
-      await updateDoc(doc(db, "games", id), { status, progressStatus, completed });
+      await updateDoc(doc(db, "games", id), { status, progressStatus, completed, ratingExperience: completed ? "completed" : status === "en cours" ? "partial" : "" });
       if (selectedGame?.id === id) {
         setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
           status,
           progressStatus,
           completed,
+          ratingExperience: completed ? "completed" : status === "en cours" ? "partial" : "",
         }));
       }
       if (["wishlist", "en cours", "collection"].includes(status)) {
@@ -21397,6 +21312,7 @@ const setRating = (id, rating) => {
 
   const setProgressStatus = async (id, progressStatus) => {
   try {
+    const ratingExperience = progressStatus === "completed" ? "completed" : progressStatus === "tried" ? "tried" : progressStatus === "not_started" ? "" : "partial";
     const completed = progressStatus === "completed";
     const currentGame = games.find((game) => game.id === id);
     const status = completed
@@ -21411,6 +21327,7 @@ const setRating = (id, rating) => {
       progressStatus,
       completed,
       status,
+      ratingExperience,
     });
 
     if (selectedGame?.id === id) {
@@ -21418,6 +21335,7 @@ const setRating = (id, rating) => {
         progressStatus,
         completed,
         status,
+        ratingExperience,
       }));
     }
 
@@ -21549,11 +21467,13 @@ const setPlayedPlatforms = async (id, platforms) => {
           ? "collection"
           : currentGame?.status || "collection";
       const progressStatus = completed ? "completed" : "not_started";
+      const ratingExperience = completed ? "completed" : "";
 
       await updateDoc(doc(db, "games", id), {
         completed,
         progressStatus,
         status,
+        ratingExperience,
       });
 
       if (selectedGame?.id === id) {
@@ -21561,6 +21481,7 @@ const setPlayedPlatforms = async (id, platforms) => {
           completed,
           progressStatus,
           status,
+          ratingExperience,
         }));
       }
 
@@ -21579,6 +21500,16 @@ const setPlayedPlatforms = async (id, platforms) => {
       setToast("Difficulté enregistrée.");
     } catch (e) {
       console.error("Erreur mise à jour difficulté :", e);
+    }
+  };
+
+  const setExperienceInfo = async (id, payload) => {
+    setGames((prev) => prev.map((game) => game.id === id ? { ...game, ...payload } : game));
+    setSelectedGame((prev) => applySelectedGamePatch(prev, id, payload));
+    try { await updateDoc(doc(db, "games", id), payload); }
+    catch (error) {
+      console.error("Erreur sauvegarde expérience :", error);
+      setToast("Ton expérience n’a pas pu être enregistrée. Réessaie dans un instant.");
     }
   };
 
@@ -22433,6 +22364,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
       <GameDetailModal
         game={selectedGame}
+        onSetExperienceInfo={setExperienceInfo}
         onClose={closeGameDetail}
         onDelete={deleteGame}
         onSetStatus={setStatus}

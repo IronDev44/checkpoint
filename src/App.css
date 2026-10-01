@@ -42409,6 +42409,35 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   --seal-glow: rgba(255, 187, 75, 0.5);
 }
 
+.game-experience-panel p {
+  color: var(--text-secondary, #aeb8cd);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.game-experience-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.game-experience-options .choice-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  white-space: normal;
+  text-align: left;
+  gap: 6px;
+  padding: 14px;
+}
+
+.game-experience-options small { font-size: 12px; font-weight: 400; }
+.game-discovery-feelings { margin-top: 18px; }
+.game-discovery-feelings h3 { font-size: 15px; margin-bottom: 6px; }
+.game-discovery-feelings .choice-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.game-discovery-feelings .choice-pill { white-space: normal; text-align: left; }
+.game-discovery-feelings .profile-toggle-btn { margin-top: 12px; }
+
 .checkpoint-seal-badge-mythic {
   --seal-a: #dce8ff;
   --seal-b: #74f4ff;
