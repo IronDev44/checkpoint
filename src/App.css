@@ -42129,6 +42129,27 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 }
 
 /* Badge visuals final pass: isolated classes avoid legacy mobile alignment drift. */
+.profile-tab .badge-card.platform-specific .badge-emblem,
+.profile-tab .badge-card.platform-specific .badge-icon,
+.profile-tab .badge-card.badge-numeric-seal .badge-emblem,
+.profile-tab .badge-card.badge-numeric-seal .badge-icon {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  clip-path: none !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
+.profile-tab .badge-card.platform-specific .badge-emblem::before,
+.profile-tab .badge-card.platform-specific .badge-emblem::after,
+.profile-tab .badge-card.platform-specific .badge-icon::before,
+.profile-tab .badge-card.platform-specific .badge-icon::after {
+  content: none !important;
+  display: none !important;
+}
+
 .profile-tab .badge-card.platform-specific.platform-playstation .badge-emblem,
 .profile-tab .badge-card.platform-specific.platform-playstation .badge-icon,
 .profile-tab .badge-card.badge-numeric-seal .badge-emblem,
@@ -42170,7 +42191,7 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   height: calc(var(--badge-visual-size) * 0.72);
   left: 50%;
   top: 50%;
-  border-radius: 11px;
+  border-radius: 50%;
   border: 1px solid rgba(156, 199, 255, 0.5);
   background:
     radial-gradient(circle at 34% 24%, rgba(184, 220, 255, 0.34), transparent 38%),
@@ -42204,7 +42225,7 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   height: calc(var(--badge-visual-size) * 0.72);
   left: 50%;
   top: 50%;
-  border-radius: 11px;
+  border-radius: 50%;
   background:
     linear-gradient(115deg, transparent 12%, rgba(255, 255, 255, 0.24) 42%, transparent 62%),
     radial-gradient(circle at 72% 72%, rgba(46, 220, 255, 0.16), transparent 34%);
@@ -42322,6 +42343,7 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   justify-content: center;
   isolation: isolate;
   overflow: visible;
+  clip-path: polygon(50% 0%, 82% 12%, 100% 50%, 82% 88%, 50% 100%, 18% 88%, 0% 50%, 18% 12%);
   background:
     radial-gradient(circle at 34% 24%, rgba(255, 255, 255, 0.52), rgba(255, 255, 255, 0) 30%),
     linear-gradient(145deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 46%),

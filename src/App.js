@@ -2,6 +2,7 @@ import { Fragment, useState, useEffect, useMemo, useRef, useCallback } from "rea
 import { createPortal } from "react-dom";
 import "./App.css";
 import { db } from "./firebase";
+import { applySelectedGamePatch } from "./services/gameSelection";
 import { HARDWARE_CATALOG } from "./data/hardware";
 import { PC_COMPONENT_FIELDS, getPcComponentOptions } from "./data/pcComponents";
 import { WEEKLY_QUIZ_QUESTIONS, WEEKLY_QUIZ_XP } from "./data/weeklyQuiz";
@@ -21276,7 +21277,7 @@ const setRating = (id, rating) => {
     );
 
     if (selectedGame?.id === id) {
-      setSelectedGame((prev) => ({ ...prev, rating: nextRating }));
+      setSelectedGame((prev) => applySelectedGamePatch(prev, id, { rating: nextRating }));
     }
 
     clearTimeout(ratingUpdateTimeoutRef.current);
@@ -21301,7 +21302,7 @@ const setRating = (id, rating) => {
         )
       );
       if (selectedGame?.id === id) {
-        setSelectedGame((prev) => ({ ...prev, [key]: nextRating }));
+        setSelectedGame((prev) => applySelectedGamePatch(prev, id, { [key]: nextRating }));
       }
     } catch (e) {
       console.error("Erreur note détaillée :", e);
@@ -21317,7 +21318,7 @@ const setRating = (id, rating) => {
         )
       );
       if (selectedGame?.id === id) {
-        setSelectedGame((prev) => ({ ...prev, favorite: !currentValue }));
+        setSelectedGame((prev) => applySelectedGamePatch(prev, id, { favorite: !currentValue }));
       }
     } catch (e) {
       console.error("Erreur mise à jour favori :", e);
@@ -21331,7 +21332,7 @@ const setRating = (id, rating) => {
         prev.map((game) => (game.id === id ? { ...game, sanctuary } : game))
       );
       if (selectedGame?.id === id) {
-        setSelectedGame((prev) => ({ ...prev, sanctuary }));
+        setSelectedGame((prev) => applySelectedGamePatch(prev, id, { sanctuary }));
       }
       setToast(
         sanctuary ? "Jeu ajouté au Sanctuaire." : "Jeu retiré du Sanctuaire."
@@ -21355,7 +21356,7 @@ const setRating = (id, rating) => {
         )
       );
       if (selectedGame?.id === id) {
-        setSelectedGame((prev) => ({ ...prev, sanctuaryFigureIds: nextFigureIds }));
+        setSelectedGame((prev) => applySelectedGamePatch(prev, id, { sanctuaryFigureIds: nextFigureIds }));
       }
       setToast(
         nextFigureIds.length
@@ -21380,8 +21381,7 @@ const setRating = (id, rating) => {
 
       await updateDoc(doc(db, "games", id), { status, progressStatus, completed });
       if (selectedGame?.id === id) {
-        setSelectedGame((prev) => ({
-          ...prev,
+        setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
           status,
           progressStatus,
           completed,
@@ -21414,8 +21414,7 @@ const setRating = (id, rating) => {
     });
 
     if (selectedGame?.id === id) {
-      setSelectedGame((prev) => ({
-        ...prev,
+      setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
         progressStatus,
         completed,
         status,
@@ -21478,8 +21477,7 @@ const setRating = (id, rating) => {
     });
 
     if (selectedGame?.id === id) {
-      setSelectedGame((prev) => ({
-        ...prev,
+      setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
         playtimeRange,
       }));
     }
@@ -21497,8 +21495,7 @@ const setPlayedPlatforms = async (id, platforms) => {
     });
 
     if (selectedGame?.id === id) {
-      setSelectedGame((prev) => ({
-        ...prev,
+      setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
         playedPlatforms: platforms,
       }));
     }
@@ -21560,8 +21557,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       });
 
       if (selectedGame?.id === id) {
-        setSelectedGame((prev) => ({
-          ...prev,
+        setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
           completed,
           progressStatus,
           status,
@@ -21578,7 +21574,7 @@ const setPlayedPlatforms = async (id, platforms) => {
     try {
       await updateDoc(doc(db, "games", id), { difficulty });
       if (selectedGame?.id === id) {
-        setSelectedGame((prev) => ({ ...prev, difficulty }));
+        setSelectedGame((prev) => applySelectedGamePatch(prev, id, { difficulty }));
       }
       setToast("Difficulté enregistrée.");
     } catch (e) {
@@ -21590,7 +21586,7 @@ const setPlayedPlatforms = async (id, platforms) => {
     try {
       await updateDoc(doc(db, "games", id), { review });
       if (selectedGame?.id === id) {
-        setSelectedGame((prev) => ({ ...prev, review }));
+        setSelectedGame((prev) => applySelectedGamePatch(prev, id, { review }));
       }
       setToast("Avis enregistré dans ta fiche.");
     } catch (e) {
@@ -21608,7 +21604,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       prev.map((game) => (game.id === id ? { ...game, ...payload } : game))
     );
     if (selectedGame?.id === id) {
-      setSelectedGame((prev) => ({ ...prev, ...payload }));
+      setSelectedGame((prev) => applySelectedGamePatch(prev, id, { ...payload }));
     }
 
     try {
@@ -21631,7 +21627,7 @@ const setPlayedPlatforms = async (id, platforms) => {
         prev.map((game) => (game.id === id ? { ...game, ...payload } : game))
       );
       if (selectedGame?.id === id) {
-        setSelectedGame((prev) => ({ ...prev, ...payload }));
+        setSelectedGame((prev) => applySelectedGamePatch(prev, id, { ...payload }));
       }
       setToast("OST enregistrée dans ta mémoire de joueur.");
     } catch (e) {
@@ -21645,8 +21641,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       await updateDoc(doc(db, "games", id), { dlcs });
 
       if (selectedGame?.id === id) {
-        setSelectedGame((prev) => ({
-          ...prev,
+        setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
           dlcs,
         }));
       }
@@ -22438,7 +22433,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
       <GameDetailModal
         game={selectedGame}
-        onClose={() => setSelectedGame(null)}
+        onClose={closeGameDetail}
         onDelete={deleteGame}
         onSetStatus={setStatus}
         onSetRating={setRating}
