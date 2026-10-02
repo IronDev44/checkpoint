@@ -12,7 +12,8 @@ import {
   getCheckpointTrial,
 } from "./data/checkpointTrials";
 import { getOfficialGotyForSeason } from "./data/officialGoty";
-import { localDateKey, selectUpcomingReleases } from "./services/upcomingReleases";
+import useUpcomingReleases from "./components/useUpcomingReleases";
+import UpcomingReleasesTab from "./components/UpcomingReleasesTab";
 import GameExperiencePanel from "./components/GameExperiencePanel";
 import { getGameExperience, getExperienceRatingFields } from "./services/gameExperience";
 import RatingSliderControl from "./components/RatingSlider";
@@ -18479,13 +18480,8 @@ export default function App() {
   const [sharedProfile, setSharedProfile] = useState(null);
   const [miniPlayerLive, setMiniPlayerLive] = useState(null);
   const [miniPlayerCollapsed, setMiniPlayerCollapsed] = useState(false);
-  const [upcomingGames, setUpcomingGames] = useState([]);
-  const [isUpcomingLoading, setIsUpcomingLoading] = useState(false);
-  const [upcomingSourceStatus, setUpcomingSourceStatus] = useState("idle");
-  const [upcomingError, setUpcomingError] = useState("");
-  const [upcomingMonthFilter, setUpcomingMonthFilter] = useState("");
-  const [releaseTodayKey, setReleaseTodayKey] = useState(() => localDateKey());
-  const [upcomingRefreshKey, setUpcomingRefreshKey] = useState(0);
+  const upcomingReleases = useUpcomingReleases(!showSplash);
+  const { games: upcomingGames, status: upcomingSourceStatus } = upcomingReleases;
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState(() => {
     try {
@@ -19827,43 +19823,7 @@ useEffect(() => {
     return () => clearTimeout(t);
   }, [toast]);
 
-  useEffect(() => {
-    const updateDay = () => setReleaseTodayKey(localDateKey());
-    const timer = window.setInterval(updateDay, 60000);
-    document.addEventListener("visibilitychange", updateDay);
-    return () => {
-      window.clearInterval(timer);
-      document.removeEventListener("visibilitychange", updateDay);
-    };
-  }, []);
 
-  useEffect(() => {
-    if (showSplash) return;
-    let cancelled = false;
-    const fetchUpcomingGames = async () => {
-      setIsUpcomingLoading(true);
-      setUpcomingSourceStatus("loading");
-      setUpcomingError("");
-      try {
-        const data = await GameService.getUpcomingGames({ months: "6", limit: "40" }, { timeout: 15000 });
-        if (cancelled) return;
-        const results = selectUpcomingReleases(data.results || []);
-        setUpcomingGames(results);
-        setUpcomingSourceStatus(data.sourceStatus || "ok");
-      } catch (error) {
-        if (cancelled) return;
-        console.error("Erreur chargement sorties :", error);
-        setUpcomingError(error.message || "Le chargement des sorties a échoué.");
-        // Preserve only valid dated results from this session, never a static catalogue.
-        setUpcomingGames((previous) => selectUpcomingReleases(previous));
-        setUpcomingSourceStatus("unavailable");
-      } finally {
-        if (!cancelled) setIsUpcomingLoading(false);
-      }
-    };
-    fetchUpcomingGames();
-    return () => { cancelled = true; };
-  }, [showSplash, releaseTodayKey, upcomingRefreshKey]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -20014,13 +19974,6 @@ useEffect(() => {
     window.removeEventListener("wheel", handleWheel);
   };
 }, []);
-
-  const validUpcomingGames = useMemo(() => selectUpcomingReleases(upcomingGames), [upcomingGames, releaseTodayKey]);
-  const upcomingMonthOptions = useMemo(() => [...new Set(validUpcomingGames.map((game) => game.released.slice(0, 7)))].sort(), [validUpcomingGames]);
-  useEffect(() => {
-    if (upcomingMonthFilter && !upcomingMonthOptions.includes(upcomingMonthFilter)) setUpcomingMonthFilter("");
-  }, [upcomingMonthFilter, upcomingMonthOptions]);
-  const filteredUpcomingGames = useMemo(() => upcomingMonthFilter ? validUpcomingGames.filter((game) => game.released.slice(0, 7) === upcomingMonthFilter) : validUpcomingGames, [validUpcomingGames, upcomingMonthFilter]);
 
   const filteredLibraryGames = useMemo(() => {
     const q = librarySearch.trim().toLowerCase();
@@ -21628,71 +21581,7 @@ const setPlayedPlatforms = async (id, platforms) => {
           )}
 
           {activeTab === "upcoming" && (
-            <div className="progression-stack">
-              <div className="search-panel">
-                <h2 className="panel-title">Prochaines sorties</h2>
-                <div className="option-value">
-                  Sorties datées à partir d’aujourd’hui, sur les six prochains mois.
-                </div>
-
-                <button type="button" className="profile-toggle-btn" disabled={isUpcomingLoading} onClick={() => setUpcomingRefreshKey((value) => value + 1)}>Actualiser les sorties</button>
-
-                <div className="filter-block month-filter-block">
-                  <div className="filter-label">Filtrer par mois</div>
-                  <div className="chips-group">
-                    <button
-                      className={`chip ${upcomingMonthFilter === "" ? "active" : ""}`}
-                      type="button"
-                      onClick={() => setUpcomingMonthFilter("")}
-                    >
-                      Tous les mois
-                    </button>
-
-                    {upcomingMonthOptions.map((monthKey) => (
-                      <button
-                        key={monthKey}
-                        className={`chip ${upcomingMonthFilter === monthKey ? "active" : ""}`}
-                        type="button"
-                        onClick={() => setUpcomingMonthFilter(monthKey)}
-                      >
-                        {formatMonthLabel(monthKey)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {isUpcomingLoading && <Loader text="Chargement des sorties..." />}
-
-              {!isUpcomingLoading && upcomingSourceStatus === "unavailable" && (
-                <div className="rawg-status-note">
-                  {upcomingError || "La source des sorties est temporairement indisponible."} Tu peux réessayer avec « Actualiser les sorties ».
-                </div>
-              )}
-
-              {!isUpcomingLoading && filteredUpcomingGames.length > 0 && (
-                <div className="upcoming-list">
-                  {filteredUpcomingGames.map((game) => (
-                    <UpcomingGameCard
-                      key={game.id}
-                      game={game}
-                      onWishlist={addToWishlistFromSearch}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {!isUpcomingLoading && filteredUpcomingGames.length === 0 && (
-                <EmptyState
-                  title="Aucune sortie trouvée"
-                  subtitle={
-                    upcomingSourceStatus === "unavailable"
-                      ? "La source des sorties ne répond pas pour le moment."
-                      : "Aucune sortie datée sur cette période. Tu peux actualiser la liste."
-                  }
-                />
-              )}
-            </div>
+            <UpcomingReleasesTab releases={upcomingReleases} renderGame={(game) => <UpcomingGameCard key={game.id} game={game} onWishlist={addToWishlistFromSearch} />} />
           )}
 
           {activeTab === "library" && (

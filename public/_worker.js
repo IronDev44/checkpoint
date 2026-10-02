@@ -588,8 +588,10 @@ function buildIgdbWhere(params, { upcoming = false, includeCategory = true } = {
     const months = Math.min(Math.max(Number(params.get("months")) || 6, 1), 24);
     const until = new Date();
     until.setMonth(until.getMonth() + months);
-    clauses.push(`first_release_date >= ${Math.floor(Date.now() / 1000)}`);
-    clauses.push(`first_release_date <= ${Math.floor(until.getTime() / 1000)}`);
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    clauses.push(`first_release_date >= ${Math.max(from || 0, Math.floor(today.getTime() / 1000))}`);
+    clauses.push(`first_release_date <= ${Math.min(to || Infinity, Math.floor(until.getTime() / 1000))}`);
   } else {
     if (from) clauses.push(`first_release_date >= ${from}`);
     if (to) clauses.push(`first_release_date <= ${to}`);
@@ -694,33 +696,23 @@ async function getIgdbUpcoming(request, env) {
   const { page, pageSize } = buildIgdbSearchQuery(params, { upcoming: true });
 
   try {
-    const collected = [];
+    const { query } = buildIgdbSearchQuery(params, { upcoming: true });
+    const batch = await fetchIgdb("/games", query, env, { workerRoute: requestUrl.pathname });
     const seenIds = new Set();
-    const maxPages = 4;
-
-    for (let pageIndex = page; pageIndex < page + maxPages && collected.length < pageSize; pageIndex += 1) {
-      const pageParams = new URLSearchParams(params);
-      pageParams.set("page", String(pageIndex));
-      const { query } = buildIgdbSearchQuery(pageParams, { upcoming: true });
-      const batch = await fetchIgdb("/games", query, env, { workerRoute: requestUrl.pathname });
-
-      batch.forEach((game) => {
-        if (!game?.id || seenIds.has(game.id) || !isUpcomingIgdbGameType(game)) return;
-        seenIds.add(game.id);
-        collected.push(game);
-      });
-
-      if (batch.length < pageSize) break;
-    }
+    const collected = batch.filter((game) => {
+      if (!game?.id || seenIds.has(game.id) || !isUpcomingIgdbGameType(game)) return false;
+      seenIds.add(game.id);
+      return true;
+    });
 
     return jsonResponse({
       results: collected.slice(0, pageSize),
       count: collected.length,
-      next: proxiedIgdbNextUrl(request.url, page, pageSize, collected.length),
+      next: proxiedIgdbNextUrl(request.url, page, pageSize, batch.length),
       previous: null,
       page,
       pageSize,
-      hasNextPage: collected.length >= pageSize,
+      hasNextPage: batch.length === pageSize,
       sourceStatus: "ok",
       source: "igdb",
       updatedAt: new Date().toISOString(),
