@@ -3216,7 +3216,7 @@ function NotificationCenter({
         aria-label="Ouvrir les notifications utiles"
       >
         <Bell size={19} strokeWidth={2.5} />
-        {count > 0 && <span>{Math.min(count, 9)}</span>}
+        {count > 0 && <span className="notification-count">{count > 9 ? "9+" : count}</span>}
       </button>
 
       {open && (

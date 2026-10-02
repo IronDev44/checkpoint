@@ -6,7 +6,51 @@ body {
 
 ::selection { background: color-mix(in srgb, var(--accent-solid) 45%, #101827); color: #fff; }
 
-.app-shell .progression-stack { gap: 18px; }
+.app-shell .progression-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px !important;
+}
+.app-shell .progression-stack > * {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+.app-shell .app-title-row {
+  padding-inline: 54px !important;
+  min-height: 48px;
+  margin-bottom: 16px;
+}
+.app-shell .app-title-row .title { max-width: 100%; text-align: center; }
+body .app-title-row .notification-center {
+  position: absolute !important;
+  top: 50% !important;
+  right: 0 !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
+  z-index: 80 !important;
+}
+body .notification-trigger {
+  padding: 0 !important;
+  overflow: visible !important;
+  flex-shrink: 0;
+}
+body .notification-trigger .notification-count {
+  position: absolute !important;
+  top: -4px !important;
+  right: -4px !important;
+  width: auto !important;
+  min-width: 20px;
+  height: 20px !important;
+  padding: 0 4px !important;
+  margin: 0 !important;
+  line-height: 1 !important;
+  border: 2px solid var(--surface, #101827);
+  background: var(--accent-solid) !important;
+  color: #fff !important;
+  font-size: 11px !important;
+  border-radius: 999px;
+  box-sizing: border-box;
+}
 .app-shell :is(.search-panel, .home-card, .social-profile-card, .profile-showcase-card) { min-width: 0; }
 .app-shell :is(.panel-title, .game-name, .hardware-name, .series-title, .deal-title) {
   text-wrap: balance;
@@ -88,5 +132,86 @@ textarea { resize: vertical; }
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+/* One shared vocabulary for controls across every tab. */
+body {
+  --control-bg: color-mix(in srgb, var(--accent-solid) 9%, #101827);
+  --control-border: color-mix(in srgb, var(--accent-solid) 32%, #475569);
+  --control-selected: color-mix(in srgb, var(--accent-solid) 32%, #101827);
+}
+body :is(.chip, .choice-pill, .status-btn, .option-pill, .profile-toggle-btn,
+.filter-toggle-btn, .library-switch-btn, .quick-status-btn, .back-btn,
+.reset-filters-btn, .close-search-btn, .load-more-btn, .deals-refresh-btn,
+.trial-secondary-btn, .hardware-catalog-toggle, .library-dlc-btn,
+.data-health-toggle, .social-preview-toggle, .social-like-btn, .sanctuary-figure-chip,
+.hardware-type-switch button, .hardware-collection-filters button,
+.library-sort-switch button, .library-view-toggle button,
+.top5-score-tabs button, .top5-group-picker button, .goty-year-scroll button,
+.social-feed-filters button, .social-visibility-toggle button) {
+  min-height: 44px !important;
+  padding: 10px 14px !important;
+  border: 1px solid var(--control-border) !important;
+  border-radius: 14px !important;
+  background: var(--control-bg) !important;
+  color: var(--text-main, #f8fafc) !important;
+  font-family: inherit;
+  font-size: 0.875rem !important;
+  font-weight: 750 !important;
+  line-height: 1.35 !important;
+  white-space: normal;
+  box-shadow: none !important;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+body :is(.chip, .choice-pill, .status-btn, .option-pill, .profile-toggle-btn,
+.filter-toggle-btn, .library-switch-btn, .quick-status-btn, .social-preview-toggle, .social-like-btn, .sanctuary-figure-chip,
+.hardware-type-switch button, .hardware-collection-filters button,
+.library-sort-switch button, .library-view-toggle button,
+.top5-score-tabs button, .top5-group-picker button, .goty-year-scroll button,
+.social-feed-filters button, .social-visibility-toggle button):is(.active, .liked, [aria-pressed="true"]) {
+  background: var(--control-selected) !important;
+  border-color: var(--accent-solid) !important;
+  color: #fff !important;
+  box-shadow: inset 0 1px 0 #ffffff1f, 0 3px 12px color-mix(in srgb, var(--accent-solid) 15%, transparent) !important;
+}
+body :is(.save-review-btn, .trial-primary-btn, .wishlist-upcoming-btn,
+.input-container > button, .social-comment-form > button) {
+  min-height: 44px !important;
+  padding: 10px 16px !important;
+  border-radius: 14px !important;
+  border: 1px solid var(--accent-solid) !important;
+  background: var(--control-selected) !important;
+  color: #fff !important;
+  font-family: inherit;
+  font-size: 0.875rem !important;
+  font-weight: 800 !important;
+  line-height: 1.35 !important;
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--accent-solid) 15%, transparent) !important;
+}
+body :is(.delete-large-btn, .physical-remove-btn) {
+  min-height: 44px;
+  border-radius: 14px !important;
+  border: 1px solid #f8717166 !important;
+  background: #7f1d1d33 !important;
+  color: #fecaca !important;
+}
+body :is(.modal-close-btn, .hardware-zoom-close, .notification-trigger, .option-help-btn) {
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 14px !important;
+}
+.hardware-type-switch { display: flex !important; flex-wrap: wrap !important; gap: 8px !important; }
+.hardware-type-switch > button { flex: 1 1 100px; min-width: 0 !important; }
+@media (max-width: 640px) {
+  .hardware-type-switch { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+}
+@media (hover: hover) and (pointer: fine) {
+  body :is(.chip, .choice-pill, .status-btn, .option-pill, .profile-toggle-btn,
+  .filter-toggle-btn, .library-switch-btn, .quick-status-btn, .back-btn,
+  .load-more-btn, .deals-refresh-btn, .hardware-catalog-toggle,
+  .hardware-type-switch button, .hardware-collection-filters button,
+  .library-sort-switch button, .library-view-toggle button):hover:not(:disabled) {
+    border-color: var(--accent-solid) !important;
+    background: var(--control-selected) !important;
   }
 }
