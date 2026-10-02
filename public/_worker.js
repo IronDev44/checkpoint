@@ -37,7 +37,7 @@ const IGDB_GAME_FIELDS = [
   "slug",
   "summary",
   "first_release_date",
-  "category",
+  "game_type.type",
   "cover.image_id",
   "artworks.image_id",
   "screenshots.image_id",
@@ -603,9 +603,8 @@ function buildIgdbWhere(params, { upcoming = false, includeCategory = true } = {
     clauses.push(`genres = (${genreIds.join(",")})`);
   }
 
-  if (includeCategory) {
-    clauses.push("category = (0, 2, 4, 8, 9, 10, 11)");
-  }
+  // category is deprecated and absent on current IGDB records. Filter the
+  // expanded game_type after retrieval instead of excluding all modern games.
 
   return clauses.length ? `where ${clauses.join(" & ")};` : "";
 }
@@ -644,6 +643,12 @@ function igdbGameHasMedia(game) {
       game?.artworks?.some((artwork) => artwork?.image_id) ||
       game?.screenshots?.some((screenshot) => screenshot?.image_id)
   );
+}
+
+function isUpcomingIgdbGameType(game) {
+  const type = String(game?.game_type?.type || "").toLowerCase().replace(/[_-]/g, " ").trim();
+  if (!type) return true;
+  return ["main game", "expansion", "standalone expansion", "remake", "remaster", "expanded game", "port"].includes(type);
 }
 
 function proxiedIgdbNextUrl(requestUrl, page, pageSize, count) {
@@ -700,7 +705,7 @@ async function getIgdbUpcoming(request, env) {
       const batch = await fetchIgdb("/games", query, env, { workerRoute: requestUrl.pathname });
 
       batch.forEach((game) => {
-        if (!game?.id || seenIds.has(game.id)) return;
+        if (!game?.id || seenIds.has(game.id) || !isUpcomingIgdbGameType(game)) return;
         seenIds.add(game.id);
         collected.push(game);
       });

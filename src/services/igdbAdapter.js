@@ -84,6 +84,7 @@ export function normalizeIgdbGame(igdbGame = {}) {
     parentGame: igdbGame.parent_game || null,
     versionParent: igdbGame.version_parent || null,
     category: igdbGame.category ?? 0,
+    gameType: igdbGame.game_type || null,
   };
 }
 

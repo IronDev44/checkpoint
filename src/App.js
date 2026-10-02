@@ -18482,6 +18482,7 @@ export default function App() {
   const [upcomingGames, setUpcomingGames] = useState([]);
   const [isUpcomingLoading, setIsUpcomingLoading] = useState(false);
   const [upcomingSourceStatus, setUpcomingSourceStatus] = useState("idle");
+  const [upcomingError, setUpcomingError] = useState("");
   const [upcomingMonthFilter, setUpcomingMonthFilter] = useState("");
   const [releaseTodayKey, setReleaseTodayKey] = useState(() => localDateKey());
   const [upcomingRefreshKey, setUpcomingRefreshKey] = useState(0);
@@ -19842,15 +19843,17 @@ useEffect(() => {
     const fetchUpcomingGames = async () => {
       setIsUpcomingLoading(true);
       setUpcomingSourceStatus("loading");
+      setUpcomingError("");
       try {
-        const data = await GameService.igdb("/upcoming", { months: "6", limit: "40" }, { timeout: 7000 });
+        const data = await GameService.getUpcomingGames({ months: "6", limit: "40" }, { timeout: 15000 });
         if (cancelled) return;
-        const results = selectUpcomingReleases((data.results || []).filter(isMainGameResult));
+        const results = selectUpcomingReleases(data.results || []);
         setUpcomingGames(results);
         setUpcomingSourceStatus(data.sourceStatus || "ok");
       } catch (error) {
         if (cancelled) return;
         console.error("Erreur chargement sorties :", error);
+        setUpcomingError(error.message || "Le chargement des sorties a échoué.");
         // Preserve only valid dated results from this session, never a static catalogue.
         setUpcomingGames((previous) => selectUpcomingReleases(previous));
         setUpcomingSourceStatus("unavailable");
@@ -21663,7 +21666,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
               {!isUpcomingLoading && upcomingSourceStatus === "unavailable" && (
                 <div className="rawg-status-note">
-                  La source des sorties est temporairement indisponible. Seules les sorties datées déjà chargées pendant cette session restent visibles. Tu peux réessayer avec « Actualiser les sorties ».
+                  {upcomingError || "La source des sorties est temporairement indisponible."} Tu peux réessayer avec « Actualiser les sorties ».
                 </div>
               )}
 
@@ -21685,7 +21688,7 @@ const setPlayedPlatforms = async (id, platforms) => {
                   subtitle={
                     upcomingSourceStatus === "unavailable"
                       ? "La source des sorties ne répond pas pour le moment."
-                      : "Essaie un autre mois."
+                      : "Aucune sortie datée sur cette période. Tu peux actualiser la liste."
                   }
                 />
               )}

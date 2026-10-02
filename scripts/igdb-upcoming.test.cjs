@@ -36,3 +36,19 @@ test('an actual provider failure remains an unavailable response', async () => {
   assert.equal(data.sourceStatus, 'unavailable');
   assert.deepEqual(data.results, []);
 });
+
+test('modern IGDB records work without category, while DLCs stay out', async () => {
+  let sentQuery;
+  const endpoint = loadEndpoint(async (_, query) => {
+    sentQuery = query;
+    return [
+      { id: 1, name: 'Future game', game_type: { id: 1, type: 'Main Game' } },
+      { id: 2, name: 'Extra content', game_type: { id: 2, type: 'DLC / Addon' } },
+    ];
+  });
+  const data = await (await endpoint(new Request('https://checkpoint.test/api/igdb/upcoming?limit=40'), {})).json();
+  assert.equal(data.sourceStatus, 'ok');
+  assert.deepEqual(data.results.map((game) => game.id), [1]);
+  assert.match(sentQuery, /game_type\.type/);
+  assert.doesNotMatch(sentQuery, /category\s*=/);
+});

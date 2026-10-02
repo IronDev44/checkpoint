@@ -290,6 +290,13 @@ async function requestIgdb(path, params = {}, options = {}) {
       });
     }
 
+    if (!data || typeof data !== "object" || (url.includes("/upcoming") && !Array.isArray(data.results))) {
+      throw new GameSourceError("La route IGDB ne renvoie pas une liste de jeux valide. Vérifie le déploiement du serveur.", {
+        source: "igdb",
+        code: "IGDB_INVALID_RESPONSE",
+      });
+    }
+
     return normalize ? normalizeIgdbPayload(data, url) : data;
   } catch (error) {
     if (error?.name === "AbortError") {
@@ -366,7 +373,7 @@ export const GameService = Object.freeze({
     requestGames(`/games/${encodeURIComponent(id)}/movies`, params, options),
   getGameAdditions: (id, params, options) =>
     requestGames(`/games/${encodeURIComponent(id)}/additions`, params, options),
-  getUpcomingGames: (params, options) => requestGames("/upcoming", params, options),
+  getUpcomingGames: (params, options) => requestIgdb("/upcoming", params, options),
   getPlatforms: (params, options) => requestRawg("/platforms", params, options),
   getGenres: (params, options) => requestRawg("/genres", params, options),
 });
