@@ -601,6 +601,11 @@ function buildIgdbWhere(params, { upcoming = false, includeCategory = true } = {
     clauses.push(`platforms = (${platformIds.join(",")})`);
   }
 
+  const platformNames = String(params.get("platform_names") || "").split(",").map((name) => name.trim()).filter(Boolean).slice(0, 10);
+  if (platformNames.length) {
+    clauses.push(`platforms.name = (${platformNames.map((name) => `"${escapeIgdbString(name)}"`).join(",")})`);
+  }
+
   if (genreIds.length) {
     clauses.push(`genres = (${genreIds.join(",")})`);
   }

@@ -5,11 +5,16 @@ import { localDateKey, selectUpcomingReleases } from '../services/upcomingReleas
 export default function useUpcomingReleases(enabled = true) {
   const [day, setDay] = useState(() => localDateKey());
   const [month, setMonth] = useState('');
+  const [platform, setPlatform] = useState('');
+  const [genre, setGenre] = useState('');
   const [revision, setRevision] = useState(0);
   const [state, setState] = useState({ games: [], loading: false, status: 'idle', error: '', hasMore: false });
   const [page, setPage] = useState(1);
   const refresh = useCallback(() => { setPage(1); setRevision((value) => value + 1); }, []);
   const chooseMonth = useCallback((value) => { setPage(1); setMonth(value); }, []);
+  const choosePlatform = useCallback((value) => { setPage(1); setPlatform(value); }, []);
+  const chooseGenre = useCallback((value) => { setPage(1); setGenre(value); }, []);
+  const resetFilters = useCallback(() => { setPage(1); setMonth(''); setPlatform(''); setGenre(''); }, []);
   const loadMore = useCallback(() => setPage((value) => value + 1), []);
   const months = useMemo(() => {
     const today = new Date(`${day}T12:00:00`);
@@ -29,6 +34,10 @@ export default function useUpcomingReleases(enabled = true) {
     let current = true;
     setState((previous) => ({ ...previous, games: page === 1 ? [] : previous.games, loading: true, status: 'loading', error: '' }));
     const params = { months: '6', limit: '50', page: String(page) };
+    if (platform) params.platform_names = platform === 'consoles'
+      ? 'PlayStation 5,PlayStation 4,Xbox Series X|S,Xbox One,Nintendo Switch,Nintendo Switch 2'
+      : platform;
+    if (genre) params.genres = genre;
     if (month) {
       const [year, number] = month.split('-').map(Number);
       params.dates = `${month}-01,${localDateKey(new Date(year, number, 0))}`;
@@ -44,7 +53,7 @@ export default function useUpcomingReleases(enabled = true) {
         setState((previous) => ({ ...previous, loading: false, status: 'unavailable', error: error.message || 'Les sorties ne sont pas disponibles pour le moment.', hasMore: false }));
       });
     return () => { current = false; controller.abort(); };
-  }, [enabled, day, month, page, revision]);
+  }, [enabled, day, month, platform, genre, page, revision]);
 
-  return { ...state, month, months, chooseMonth, refresh, loadMore };
+  return { ...state, month, months, chooseMonth, platform, genre, choosePlatform, chooseGenre, resetFilters, refresh, loadMore };
 }

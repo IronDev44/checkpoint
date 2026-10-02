@@ -1,6 +1,7 @@
 import { Fragment, useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import "./App.css";
+import "./polish.css";
 import { db } from "./firebase";
 import { applySelectedGamePatch } from "./services/gameSelection";
 import { HARDWARE_CATALOG } from "./data/hardware";
@@ -12,6 +13,7 @@ import {
   getCheckpointTrial,
 } from "./data/checkpointTrials";
 import { getOfficialGotyForSeason } from "./data/officialGoty";
+import { selectTimelineEvents } from "./services/gamingTimeline";
 import useUpcomingReleases from "./components/useUpcomingReleases";
 import UpcomingReleasesTab from "./components/UpcomingReleasesTab";
 import GameExperiencePanel from "./components/GameExperiencePanel";
@@ -1303,7 +1305,7 @@ function getPlayerAnalysis(games = [], hardware = [], badges = []) {
     {
       label: "Rythme",
       value: `${completionRate}% termines`,
-      detail: `${finishedGames.length} jeux valides sur ${totalGames || 0}`,
+      detail: `${finishedGames.length} jeux terminés sur ${totalGames || 0}`,
     },
     {
       label: "Exigence",
@@ -1447,6 +1449,7 @@ function getGamingTimeline(games = [], hardware = [], socialProfile = {}) {
     });
 
   const markedGames = games
+    .filter((game) => !identityGameIds.includes(String(game.id)) && !Number(game.gotyYear))
     .filter((game) => game.favorite || getGameRating(game) >= 9 || isGameFinishedStatus(game))
     .map((game) => ({
       game,
@@ -1465,7 +1468,7 @@ function getGamingTimeline(games = [], hardware = [], socialProfile = {}) {
       id: `marked-${year}-${game.id || game.name}`,
       type: "game",
       icon: "J",
-      kicker: game.favorite ? "Favori marquant" : "Jeu valide",
+      kicker: game.favorite ? "Coup de cœur" : isGameFinishedStatus(game) ? "Aventure terminée" : "Belle découverte",
       title: game.name,
       detail: `${formatRating10(getGameRating(game), "non note")} - ${
         game.genres?.[0]?.name || game.genres?.[0] || game.platforms?.[0] || "bibliotheque"
@@ -1534,9 +1537,9 @@ function getGamingTimeline(games = [], hardware = [], socialProfile = {}) {
     .sort((a, b) => {
       if (a.sortYear !== b.sortYear) return a.sortYear - b.sortYear;
       const typeOrder = { hardware: 0, identity: 1, goty: 2, game: 3, checkpoint: 4 };
-      return (typeOrder[a.type] || 9) - (typeOrder[b.type] || 9);
+      return (typeOrder[a.type] ?? 9) - (typeOrder[b.type] ?? 9);
     })
-    .slice(0, 18);
+    .slice(-18);
 }
 
 function getProfileInsights(games = [], hardware = [], badges = []) {
@@ -3156,7 +3159,7 @@ function difficultyLabel(value) {
 
 function Toast({ message }) {
   if (!message) return null;
-  return <div className="toast">{message}</div>;
+  return <div className="toast" role="status" aria-live="polite">{message}</div>;
 }
 
 function BadgeUnlockToast({ badge }) {
@@ -3178,19 +3181,19 @@ function BadgeUnlockToast({ badge }) {
 
 function Loader({ text = "Chargement..." }) {
   return (
-    <div className="loader-wrap">
-      <div className="loader-spinner" />
+    <div className="loader-wrap" role="status" aria-live="polite">
+      <div className="loader-spinner" aria-hidden="true" />
       <div className="loader-text">{text}</div>
     </div>
   );
 }
 
-function EmptyState({ title, subtitle, icon = "✦" }) {
+function EmptyState({ title, subtitle, message, icon = "✦" }) {
   return (
     <div className="empty-state">
-      <div className="empty-state-icon">✦</div>
+      <div className="empty-state-icon" aria-hidden="true">{icon}</div>
       <div className="empty-state-title">{title}</div>
-      {subtitle && <div className="empty-state-subtitle">{subtitle}</div>}
+      {(subtitle || message) && <div className="empty-state-subtitle">{subtitle || message}</div>}
     </div>
   );
 }
@@ -5203,9 +5206,18 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
           </p>
         </div>
 
-        {contentMode !== "hardware" && <label className="game-experience-caption">
-          <input type="checkbox" checked={includePartial} onChange={(event) => setIncludePartial(event.target.checked)} /> Inclure les avis partiels
-        </label>}
+        {contentMode !== "hardware" && (
+          <div className="top5-mode-tabs">
+            <button
+              type="button"
+              className={includePartial ? "active" : ""}
+              aria-pressed={includePartial}
+              onClick={() => setIncludePartial((previous) => !previous)}
+            >
+              Inclure les avis partiels
+            </button>
+          </div>
+        )}
         <div className="top5-control-block">
           <span>Section</span>
           <div className="top5-content-tabs">
@@ -8634,11 +8646,13 @@ function ActivityFeed({
 }
 
 function GamingTimeline({ timeline = [], compact = false }) {
+  const [filter, setFilter] = useState("all");
+  const [newestFirst, setNewestFirst] = useState(false);
   if (!timeline.length) {
     return (
       <EmptyState
-        title="Timeline a construire"
-        message="Ajoute tes jeux fondateurs, tes GOTY et ton materiel pour commencer a raconter ton parcours."
+        title="Ton histoire gaming commence ici"
+        message="Tes jeux marquants, tes GOTY et ton matériel dessinent ton parcours, à ton rythme."
       />
     );
   }
@@ -8649,28 +8663,39 @@ function GamingTimeline({ timeline = [], compact = false }) {
     .sort((a, b) => a - b);
   const firstYear = knownYears[0];
   const lastYear = knownYears[knownYears.length - 1];
-  const visibleTimeline = compact ? timeline.slice(-6) : timeline;
+  const visibleTimeline = compact ? timeline.slice(-6) : selectTimelineEvents(timeline, filter, newestFirst);
 
   return (
     <div className={`gaming-timeline ${compact ? "compact" : ""}`}>
       {!compact && (
         <div className="gaming-timeline-overview">
           <div>
-            <span>Parcours actif</span>
+            <span>Tes repères gaming</span>
             <strong>
               {firstYear && lastYear
                 ? `${firstYear} - ${lastYear}`
-                : "A enrichir"}
+                : "À ton rythme"}
             </strong>
             <small>{timeline.length} moments retenus dans ta frise.</small>
           </div>
           <div>
-            <span>Memoire Checkpoint</span>
+            <span>Tes coups de cœur de l’année</span>
             <strong>{timeline.filter((event) => event.type === "goty").length}</strong>
-            <small>GOTY personnels epingles.</small>
+            <small>GOTY personnels épinglés.</small>
           </div>
         </div>
       )}
+
+      {!compact && <div className="gaming-timeline-controls">
+        <div className="chips-group" role="group" aria-label="Filtrer ton parcours">
+          {[["all", "Tout"], ["games", "Jeux"], ["goty", "GOTY"], ["hardware", "Matériel"]].map(([value, label]) => (
+            <button key={value} type="button" className={`chip ${filter === value ? "active" : ""}`} aria-pressed={filter === value} onClick={() => setFilter(value)}>{label}</button>
+          ))}
+        </div>
+        <button type="button" className="profile-toggle-btn" aria-pressed={newestFirst} onClick={() => setNewestFirst((value) => !value)}>{newestFirst ? "Du plus récent au plus ancien" : "Du plus ancien au plus récent"}</button>
+        <span className="option-value">{visibleTimeline.length} {visibleTimeline.length > 1 ? "moments" : "moment"}</span>
+      </div>}
+      {!visibleTimeline.length && <p className="option-value">Pas encore de moment dans cette catégorie. Ton parcours continue de se dessiner.</p>}
 
       <div className="gaming-timeline-track">
         {visibleTimeline.map((event) => (
@@ -12058,7 +12083,7 @@ function ProfileTab({
       <div className="search-panel profile-timeline-panel">
         <div className="profile-section-header">
           <div>
-            <h2 className="panel-title">Timeline gaming</h2>
+            <h2 className="panel-title">Ton histoire gaming</h2>
             <div className="option-value">
               Tes consoles, jeux fondateurs, GOTY perso et moments marquants.
             </div>
@@ -21057,7 +21082,7 @@ const setPlayedPlatforms = async (id, platforms) => {
         }));
       }
 
-      setToast(!currentValue ? "Jeu validé comme terminé." : "Jeu remis dans la pile à suivre.");
+      setToast(!currentValue ? "Une aventure terminée, un souvenir de plus." : "La suite reste à découvrir, à ton rythme.");
     } catch (e) {
       console.error("Erreur mise à jour terminé :", e);
     }

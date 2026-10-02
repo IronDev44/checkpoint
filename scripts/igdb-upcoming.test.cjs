@@ -52,3 +52,12 @@ test('modern IGDB records work without category, while DLCs stay out', async () 
   assert.match(sentQuery, /game_type\.type/);
   assert.doesNotMatch(sentQuery, /category\s*=/);
 });
+
+test('platform, genre and date filters combine in the upstream query', async () => {
+  let query;
+  const endpoint = loadEndpoint(async (_, value) => { query = value; return []; });
+  await endpoint(new Request('https://checkpoint.test/api/igdb/upcoming?platform_names=PlayStation%205%2CNintendo%20Switch%202&genres=5&dates=2027-01-01%2C2027-01-31'), {});
+  assert.match(query, /platforms\.name = \("PlayStation 5","Nintendo Switch 2"\)/);
+  assert.match(query, /genres = \(12\)/);
+  assert.match(query, /first_release_date >=/);
+});

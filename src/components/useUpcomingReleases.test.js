@@ -45,3 +45,16 @@ test('a provider failure leaves loading state and supports retry', async () => {
   act(() => result.current.refresh());
   await waitFor(() => expect(result.current.status).toBe('ok'));
 });
+
+test('platform and genre filters reach the server and reset pagination', async () => {
+  GameService.getUpcomingGames.mockResolvedValue({ results: [game(1)], hasNextPage: true });
+  const { result } = renderHook(() => useUpcomingReleases());
+  await waitFor(() => expect(result.current.status).toBe('ok'));
+  act(() => result.current.loadMore());
+  await waitFor(() => expect(GameService.getUpcomingGames.mock.calls.at(-1)[0].page).toBe('2'));
+  act(() => { result.current.choosePlatform('PlayStation 5'); result.current.chooseGenre('5'); });
+  await waitFor(() => expect(GameService.getUpcomingGames.mock.calls.at(-1)[0]).toMatchObject({ page: '1', platform_names: 'PlayStation 5', genres: '5' }));
+  act(() => result.current.resetFilters());
+  await waitFor(() => expect(GameService.getUpcomingGames.mock.calls.at(-1)[0]).not.toHaveProperty('platform_names'));
+  expect(GameService.getUpcomingGames.mock.calls.at(-1)[0]).not.toHaveProperty('genres');
+});
