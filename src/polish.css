@@ -136,16 +136,18 @@ textarea { resize: vertical; }
 }
 /* One shared vocabulary for controls across every tab. */
 body {
-  --control-bg: color-mix(in srgb, var(--accent-solid) 9%, #101827);
+  --control-bg: rgba(255, 255, 255, 0.055);
   --control-border: color-mix(in srgb, var(--accent-solid) 32%, #475569);
-  --control-selected: color-mix(in srgb, var(--accent-solid) 32%, #101827);
+  --control-selected: var(--accent);
 }
-body :is(.chip, .choice-pill, .status-btn, .option-pill, .profile-toggle-btn,
+body[data-theme] :is(.chip, .choice-pill, .status-btn, .option-pill, .profile-toggle-btn,
 .filter-toggle-btn, .library-switch-btn, .quick-status-btn, .back-btn,
 .reset-filters-btn, .close-search-btn, .load-more-btn, .deals-refresh-btn,
 .trial-secondary-btn, .hardware-catalog-toggle, .library-dlc-btn,
 .data-health-toggle, .social-preview-toggle, .social-like-btn, .sanctuary-figure-chip,
 .hardware-type-switch button, .hardware-collection-filters button,
+.hardware-status-action, .hardware-rank-btn, .deals-source-tabs button,
+.social-view-tabs button, .series-filter-tabs button, .top5-content-tabs button, .top5-mode-tabs button,
 .library-sort-switch button, .library-view-toggle button,
 .top5-score-tabs button, .top5-group-picker button, .goty-year-scroll button,
 .social-feed-filters button, .social-visibility-toggle button) {
@@ -163,9 +165,11 @@ body :is(.chip, .choice-pill, .status-btn, .option-pill, .profile-toggle-btn,
   box-shadow: none !important;
   transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
-body :is(.chip, .choice-pill, .status-btn, .option-pill, .profile-toggle-btn,
+body[data-theme] :is(.chip, .choice-pill, .status-btn, .option-pill, .profile-toggle-btn,
 .filter-toggle-btn, .library-switch-btn, .quick-status-btn, .social-preview-toggle, .social-like-btn, .sanctuary-figure-chip,
 .hardware-type-switch button, .hardware-collection-filters button,
+.hardware-status-action, .hardware-rank-btn, .deals-source-tabs button,
+.social-view-tabs button, .series-filter-tabs button, .top5-content-tabs button, .top5-mode-tabs button,
 .library-sort-switch button, .library-view-toggle button,
 .top5-score-tabs button, .top5-group-picker button, .goty-year-scroll button,
 .social-feed-filters button, .social-visibility-toggle button):is(.active, .liked, [aria-pressed="true"]) {
@@ -174,7 +178,7 @@ body :is(.chip, .choice-pill, .status-btn, .option-pill, .profile-toggle-btn,
   color: #fff !important;
   box-shadow: inset 0 1px 0 #ffffff1f, 0 3px 12px color-mix(in srgb, var(--accent-solid) 15%, transparent) !important;
 }
-body :is(.save-review-btn, .trial-primary-btn, .wishlist-upcoming-btn,
+body[data-theme] :is(.save-review-btn, .trial-primary-btn, .wishlist-upcoming-btn,
 .input-container > button, .social-comment-form > button) {
   min-height: 44px !important;
   padding: 10px 16px !important;
@@ -188,14 +192,14 @@ body :is(.save-review-btn, .trial-primary-btn, .wishlist-upcoming-btn,
   line-height: 1.35 !important;
   box-shadow: 0 3px 12px color-mix(in srgb, var(--accent-solid) 15%, transparent) !important;
 }
-body :is(.delete-large-btn, .physical-remove-btn) {
+body[data-theme] :is(.delete-large-btn, .physical-remove-btn) {
   min-height: 44px;
   border-radius: 14px !important;
   border: 1px solid #f8717166 !important;
   background: #7f1d1d33 !important;
   color: #fecaca !important;
 }
-body :is(.modal-close-btn, .hardware-zoom-close, .notification-trigger, .option-help-btn) {
+body[data-theme] :is(.modal-close-btn, .hardware-zoom-close, .notification-trigger, .option-help-btn) {
   min-width: 44px;
   min-height: 44px;
   border-radius: 14px !important;
@@ -206,12 +210,42 @@ body :is(.modal-close-btn, .hardware-zoom-close, .notification-trigger, .option-
   .hardware-type-switch { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }
 @media (hover: hover) and (pointer: fine) {
-  body :is(.chip, .choice-pill, .status-btn, .option-pill, .profile-toggle-btn,
+  body[data-theme] :is(.chip, .choice-pill, .status-btn, .option-pill, .profile-toggle-btn,
   .filter-toggle-btn, .library-switch-btn, .quick-status-btn, .back-btn,
   .load-more-btn, .deals-refresh-btn, .hardware-catalog-toggle,
   .hardware-type-switch button, .hardware-collection-filters button,
+.hardware-status-action, .hardware-rank-btn, .deals-source-tabs button,
+.social-view-tabs button, .series-filter-tabs button, .top5-content-tabs button, .top5-mode-tabs button,
   .library-sort-switch button, .library-view-toggle button):hover:not(:disabled) {
     border-color: var(--accent-solid) !important;
     background: var(--control-selected) !important;
   }
+}
+
+
+/* Controls must fit the track or panel that owns them. */
+body[data-theme] :is(.chip, .choice-pill, .status-btn, .option-pill,
+.library-switch-btn, .hardware-type-switch button, .hardware-collection-filters button,
+.top5-content-tabs button, .top5-mode-tabs button, .top5-score-tabs button,
+.top5-group-picker button, .library-sort-switch button) {
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  height: auto !important;
+  overflow-wrap: anywhere;
+}
+body[data-theme] :is(.hardware-collection-filters, .library-sort-switch, .chips-group) {
+  flex-wrap: wrap !important;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: visible !important;
+}
+body[data-theme] .hardware-collection-filters { justify-content: flex-start !important; }
+body[data-theme] .hardware-collection-filters button { flex: 0 1 auto !important; }
+body[data-theme] :is(.top5-content-tabs, .top5-mode-tabs, .top5-score-tabs, .top5-group-picker) {
+  min-width: 0;
+  box-sizing: border-box;
+}
+body[data-theme] :is(.top5-content-tabs, .top5-mode-tabs, .top5-score-tabs) > button {
+  width: 100% !important;
 }
