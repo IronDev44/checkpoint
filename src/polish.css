@@ -339,3 +339,101 @@ body[data-theme] .home-page .home-analysis-tags span {
 .home-level-action span { color: var(--text-soft); font-size: .85rem; line-height: 1.5; }
 .home-level-action em { margin-top: auto; color: var(--accent-solid); font-style: normal; font-weight: 800; }
 @media(max-width: 700px) { .home-level-actions { grid-template-columns: 1fr; } .home-next-level .home-section-head { flex-wrap: wrap; gap: 12px; } }
+/* One current-game card, then a separate compact collection overview. */
+body[data-theme] .home-page .home-hero {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px !important;
+}
+.home-hero > div { grid-column: 1; }
+.home-current-cover { grid-column: 2; grid-row: 1; }
+body[data-theme] .home-hero .home-resume-action {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 0 !important;
+}
+.home-library-preview:empty { display: none; }
+.home-collection-overview { min-width: 0; }
+body[data-theme] .home-collection-overview .home-dashboard-stats {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+body[data-theme] .home-collection-overview .home-dashboard-stat {
+  padding: 14px !important;
+  min-height: 0 !important;
+  background: var(--surface-bg) !important;
+  border: 1px solid var(--surface-border);
+  border-radius: 16px;
+  box-shadow: none !important;
+}
+body[data-theme] .home-collection-overview .home-dashboard-stat strong { font-size: 1.6rem !important; line-height: 1.2; }
+body[data-theme] .home-collection-overview .home-dashboard-stat small { font-size: .75rem; color: var(--text-soft); }
+body[data-theme] .home-collection-overview .home-main-actions {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px;
+  margin-top: 12px;
+}
+body[data-theme] .home-collection-overview .home-main-actions button {
+  min-width: 0 !important;
+  min-height: 44px;
+  padding: 10px !important;
+  border-radius: 14px;
+  border: 1px solid var(--surface-border) !important;
+  background: rgba(255,255,255,.055) !important;
+  color: var(--text-main);
+  font-size: .85rem !important;
+  box-shadow: none !important;
+}
+@media (max-width: 700px) {
+  body[data-theme] .home-collection-overview .home-dashboard-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+/* A quiet, occasional sheen for the main action. Never intercept taps. */
+body[data-theme] :is(.checkpoint-primary-action, .home-resume-action,
+.hardware-catalog-toggle:not(.active), .game-rating-save-btn,
+.game-detail-section > .save-review-btn, .live-open-btn,
+.series-suggestions-btn, .trial-primary-btn) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--accent) !important;
+  border: 1px solid color-mix(in srgb, var(--accent-solid) 65%, white) !important;
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--accent-solid) 20%, transparent) !important;
+}
+body[data-theme] :is(.checkpoint-primary-action, .home-resume-action,
+.hardware-catalog-toggle:not(.active), .game-rating-save-btn,
+.game-detail-section > .save-review-btn, .live-open-btn,
+.series-suggestions-btn, .trial-primary-btn):not(:disabled)::after {
+  content: "";
+  position: absolute;
+  inset: -30% auto -30% -60%;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+  animation: checkpointActionSheen 12s ease-in-out infinite;
+}
+@keyframes checkpointActionSheen {
+  0%, 75% { left: -60%; opacity: 0; }
+  78% { opacity: 1; }
+  92% { left: 130%; opacity: 1; }
+  93%, 100% { left: 130%; opacity: 0; }
+}
+/* Secondary priorities stay still: the next milestone and the active ranking. */
+body[data-theme] :is(.home-next-level, .profile-tab .current-rank-card) {
+  border-color: color-mix(in srgb, var(--accent-solid) 40%, var(--surface-border)) !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  .wishlist-upcoming-btn:hover:not(:disabled) {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-solid) 35%, transparent) !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-theme] :is(.checkpoint-primary-action, .home-resume-action,
+  .hardware-catalog-toggle, .game-rating-save-btn, .game-detail-section > .save-review-btn,
+  .live-open-btn, .series-suggestions-btn, .trial-primary-btn)::after {
+    animation: none !important;
+    content: none;
+  }
+}

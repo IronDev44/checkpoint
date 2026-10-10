@@ -10840,59 +10840,11 @@ function HomeTab({
         </div>
 
         {nextPlayCandidate?.image && <img className="home-current-cover" src={nextPlayCandidate.image} alt="" />}
+        <button type="button" className="save-review-btn home-resume-action" onClick={() => dashboardAction.game ? onOpenDetail(dashboardAction.game) : setActiveTab(dashboardAction.tab)}>{dashboardAction.label}</button>
       </div>
 
-      <div className="home-dashboard-panel home-premium-cockpit">
-        <div className="home-cockpit-grid">
-          <div className="home-focus-card">
-            <div className="home-focus-content">
-              <span className="home-kicker">Un raccourci</span>
-              <h3>{dashboardAction.title}</h3>
-              <p>{dashboardAction.detail}</p>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => {
-                if (dashboardAction.game) {
-                  onOpenDetail(dashboardAction.game);
-                  return;
-                }
-                if (dashboardAction.tab && dashboardAction.tab !== "home") {
-                  setActiveTab(dashboardAction.tab);
-                }
-              }}
-            >
-              {dashboardAction.label}
-            </button>
-          </div>
-
-          <div className="home-cockpit-side">
-            <div className="home-dashboard-stats">
-              {dashboardStats.map((stat) => (
-                <div key={stat.label} className="home-dashboard-stat">
-                  <strong>{stat.value}</strong>
-                  <span>{stat.label}</span>
-                  <small>{stat.detail}</small>
-                </div>
-              ))}
-            </div>
-
-            <div className="home-actions-grid home-main-actions">
-              {homeQuickActions.map((action) => (
-                <button
-                  key={action.tab}
-                  type="button"
-                  onClick={() => setActiveTab(action.tab)}
-                >
-                  {action.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {sessionQueue.length > 0 && (
+      <div className="home-dashboard-panel home-library-preview">
+        {sessionQueue.some((game) => game.id !== nextPlayCandidate?.id) && (
           <div className="home-session-queue">
             <div className="home-section-head">
               <div>
@@ -10908,7 +10860,7 @@ function HomeTab({
             </div>
 
             <div className="home-session-list">
-              {sessionQueue.map((game) => (
+              {sessionQueue.filter((game) => game.id !== nextPlayCandidate?.id).map((game) => (
                 <button
                   key={game.id}
                   type="button"
@@ -10933,6 +10885,33 @@ function HomeTab({
           </div>
         )}
       </div>
+
+      <section className="home-collection-overview" aria-label="Ta collection">
+        <h2 className="panel-title">Ta collection en bref</h2>
+          <div className="home-cockpit-side">
+            <div className="home-dashboard-stats">
+              {dashboardStats.map((stat) => (
+                <div key={stat.label} className="home-dashboard-stat">
+                  <strong>{stat.value}</strong>
+                  <span>{stat.label}</span>
+                  <small>{stat.detail}</small>
+                </div>
+              ))}
+            </div>
+
+            <div className="home-actions-grid home-main-actions">
+              {homeQuickActions.map((action) => (
+                <button
+                  key={action.tab}
+                  type="button"
+                  onClick={() => setActiveTab(action.tab)}
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          </div>
+      </section>
 
       <HomeDealsPreview
         dealPreferences={dealPreferences}
@@ -21429,6 +21408,7 @@ const setPlayedPlatforms = async (id, platforms) => {
                     placeholder="Rechercher un jeu ou utiliser les filtres"
                   />
                   <button
+                    className="checkpoint-primary-action"
                     onClick={() => {
                       playClick(soundStyle);
                       searchGames(search);
