@@ -2887,6 +2887,11 @@ function calculateXP(game) {
   );
 }
 
+function calculateHardwareXP(item) {
+  if (!String(item.status || "").toLowerCase().includes("poss")) return 0;
+  return Number(item.rating) > 0 ? 20 : 0;
+}
+
 function getConsoleXPStats(games) {
   const stats = {};
 
@@ -3214,6 +3219,7 @@ function NotificationCenter({
         className={`notification-trigger ${count > 0 ? "has-items" : ""}`}
         onClick={onToggle}
         aria-label="Ouvrir les notifications utiles"
+        aria-expanded={open}
       >
         <Bell size={19} strokeWidth={2.5} />
         {count > 0 && <span className="notification-count">{count > 9 ? "9+" : count}</span>}
@@ -10205,6 +10211,7 @@ function HomeTab({
   onClaimCheckpointGoal,
 }) {
   const [recommendations, setRecommendations] = useState([]);
+  const [suggestionOffset, setSuggestionOffset] = useState(0);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const [selectedQuizAnswer, setSelectedQuizAnswer] = useState(null);
   const [quizQuestionIndex, setQuizQuestionIndex] = useState(() => {
@@ -10250,40 +10257,46 @@ function HomeTab({
     });
 
   const nextPlayCandidate = inProgressGames[0] || backlogCandidates[0] || null;
+  const availableLevelActions = [
+    ...games.filter((game) => game.status !== "wishlist" && getGameExperience(game) !== "tried" && !(game.review?.trim().length > 20)).map((game) => ({
+      id: `review-${game.id}`, title: `Ton avis sur ${game.name}`, detail: "Écris un avis de plus de 20 caractères sur ce que tu as joué.", xp: 20, game,
+    })),
+    ...games.filter((game) => game.status !== "wishlist" && (!game.playtimeRange || game.playtimeRange === "none")).map((game) => ({
+      id: `time-${game.id}`, title: `Ton temps sur ${game.name}`, detail: "Renseigne le temps que tu y as passé dans « Ta session de jeu ».", xp: null, game,
+    })),
+    ...hardware.filter((item) => isOwnedHardware(item) && !(Number(item.rating) > 0)).map((item) => ({
+      id: `hardware-${item.id}`, title: `Noter ${item.name}`, detail: "Ouvre sa fiche dans Matériel pour donner ton avis.", xp: 20, tab: "hardware",
+    })),
+  ];
+  const actionGroups = ["review-", "hardware-", "time-"].map((prefix) => availableLevelActions.filter((action) => action.id.startsWith(prefix)));
+  const levelActions = Array.from({length: Math.max(0, ...actionGroups.map((group) => group.length))}, (_, index) => actionGroups.map((group) => group[index]).filter(Boolean)).flat();
+  const proposedActions = levelActions.length ? Array.from({length: Math.min(3, levelActions.length)}, (_, index) => levelActions[(suggestionOffset + index) % levelActions.length]) : [];
   const homeGreeting =
     inProgressGames.length > 0
-      ? "Ravi de te revoir"
+      ? "En ce moment"
       : total > 0
-      ? "Ton univers avance bien"
-      : "Bienvenue dans ton hub";
+      ? "Ta collection"
+      : "Bienvenue sur Checkpoint";
   const homeHeroCopy = nextPlayCandidate
-    ? `Tu peux reprendre ${nextPlayCandidate.name} quand tu veux. J'ai gardé le fil de ta collection, de tes notes et de ce qui mérite ton attention.`
+    ? (nextPlayCandidate.status === "en cours" ? "Ta partie en cours, à retrouver quand tu veux." : "Un jeu de ta collection à découvrir.")
     : total > 0
-      ? "Ta collection commence à raconter ton parcours. Continue à ajouter tes jeux, tes notes et ton matériel, petit à petit."
-      : "Ajoute quelques jeux pour commencer. Checkpoint deviendra ensuite ton carnet de bord gaming.";
+      ? "Retrouve tes jeux, tes notes et tes envies dans la bibliothèque."
+      : "Commence par ajouter un jeu que tu aimes.";
   const homeHeroTags = [
-    level >= 50 ? "Profil solide" : "Profil en construction",
-    inProgressCount ? `${inProgressCount} partie${inProgressCount > 1 ? "s" : ""} en cours` : "Prêt pour une nouvelle session",
+    inProgressCount ? `${inProgressCount} jeu${inProgressCount > 1 ? "x" : ""} en cours` : `${total} jeu${total > 1 ? "x" : ""} dans ta collection`,
   ];
 
-  const dashboardAction = !quizLocked
-    ? {
-        label: "Jouer",
-        title: "Question du moment",
-        detail: `Un petit quiz gaming pour garder le rythme. +${WEEKLY_QUIZ_XP.correct} XP à prendre.`,
-        tab: "home",
-      }
-    : nextPlayCandidate
+  const dashboardAction = nextPlayCandidate
     ? {
         label: nextPlayCandidate.status === "en cours" ? "Reprendre" : "Voir la fiche",
-        title: nextPlayCandidate.status === "en cours" ? "Ta partie t’attend" : "Une bonne pioche pour la suite",
+        title: nextPlayCandidate.status === "en cours" ? "Continuer à jouer" : "À découvrir",
         detail: `${nextPlayCandidate.name} · ${formatRating10(getGameRating(nextPlayCandidate), "pas encore noté")}`,
         game: nextPlayCandidate,
       }
     : {
         label: "Ajouter",
-        title: "Commencer ton univers",
-        detail: "Ajoute quelques jeux et Checkpoint pourra te proposer de vraies pistes.",
+        title: "Ton premier jeu",
+        detail: "Cherche un titre pour l’ajouter à ta bibliothèque.",
         tab: "search",
       };
 
@@ -10802,10 +10815,22 @@ function HomeTab({
         progress={progress}
       />
 
+      <section className="search-panel home-next-level">
+        <div className="home-section-head">
+          <div><h2 className="panel-title">{level >= 100 ? "Ton parcours" : "Ton prochain niveau"}</h2><p className="option-value">{level >= 100 ? "Niveau maximum atteint. Ton profil continue d’évoluer avec tes découvertes." : `Encore ${Math.max(0, progress.xpToNext - progress.currentXP)} XP pour le niveau ${level + 1}.`}</p></div>
+          <button type="button" className="profile-toggle-btn" disabled={levelActions.length <= 3} onClick={() => setSuggestionOffset((offset) => (offset + 3) % levelActions.length)}>D’autres idées</button>
+        </div>
+        <div className="home-level-actions">
+          {proposedActions.map((action) => <button type="button" className="home-level-action" key={action.id} onClick={() => action.game ? onOpenDetail(action.game) : setActiveTab(action.tab)}><strong>{action.title}</strong><span>{action.detail}</span><em>{action.xp ? `+${action.xp} XP` : "XP selon la durée"}</em></button>)}
+          {!proposedActions.length && <p>Tout est à jour ici. Tu peux découvrir un autre jeu ou tenter le quiz.</p>}
+        </div>
+        <p className="option-value">Ton profil se dessine avec tes jeux et ton matériel. L’XP dépend des informations enregistrées : les modifier plusieurs fois ne cumule pas les récompenses.</p>
+      </section>
+
       <div className="home-hero">
         <div>
           <div className="home-kicker">{homeGreeting}</div>
-          <h2>{playerAnalysis.title}</h2>
+          <h2>{nextPlayCandidate?.name || (total > 0 ? "Tes jeux, tout simplement" : "On commence ?")}</h2>
           <p>{homeHeroCopy}</p>
           <div className="home-analysis-tags">
             {homeHeroTags.map((tag) => (
@@ -10814,17 +10839,14 @@ function HomeTab({
           </div>
         </div>
 
-        <div className="home-level-pill">
-          <span>Niv.</span>
-          <strong>{level}</strong>
-        </div>
+        {nextPlayCandidate?.image && <img className="home-current-cover" src={nextPlayCandidate.image} alt="" />}
       </div>
 
       <div className="home-dashboard-panel home-premium-cockpit">
         <div className="home-cockpit-grid">
           <div className="home-focus-card">
             <div className="home-focus-content">
-              <span className="home-kicker">Session du jour</span>
+              <span className="home-kicker">Un raccourci</span>
               <h3>{dashboardAction.title}</h3>
               <p>{dashboardAction.detail}</p>
             </div>
@@ -10874,9 +10896,9 @@ function HomeTab({
           <div className="home-session-queue">
             <div className="home-section-head">
               <div>
-                <div className="home-card-title">File de session</div>
+                <div className="home-card-title">À retrouver dans ta bibliothèque</div>
                 <p className="home-section-subtitle">
-                  Les jeux les plus logiques à reprendre ou lancer maintenant.
+                  En cours ou à découvrir, à toi de choisir.
                 </p>
               </div>
 
@@ -10923,7 +10945,7 @@ function HomeTab({
           <div className="weekly-quiz-top">
             <div>
               <div className="home-card-title">Quiz gaming</div>
-              <p>Mode libre pour tester toute la base. Le rythme hebdo pourra être activé au lancement public.</p>
+              <p>Une pause quiz ? Choisis une question et tente ta chance.</p>
             </div>
 
             <div className="weekly-quiz-reward">
@@ -19863,8 +19885,8 @@ useEffect(() => {
       .filter((g) => g.status !== "wishlist")
       .reduce((sum, g) => sum + calculateXP(g), 0);
 
-    return gamesXP + (weeklyQuizProgress.totalXP || 0) + (checkpointGoalProgress.totalXP || 0);
-  }, [games, weeklyQuizProgress.totalXP, checkpointGoalProgress.totalXP]);
+    return gamesXP + hardware.reduce((sum, item) => sum + calculateHardwareXP(item), 0) + (weeklyQuizProgress.totalXP || 0) + (checkpointGoalProgress.totalXP || 0);
+  }, [games, hardware, weeklyQuizProgress.totalXP, checkpointGoalProgress.totalXP]);
 
   const pendingCheckpointLevel = useMemo(
     () => getPendingCheckpoint(rawTotalXP, checkpointTrialProgress.completed),

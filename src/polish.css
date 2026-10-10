@@ -1,4 +1,15 @@
 /* Shared finishing touches; layout and theme choices stay in App.css. */
+/* Keep Aurora's header glow subtle, including the iPhone safe area. */
+html body[data-theme="theme-indigo"] {
+  --bg-main:
+    radial-gradient(circle at 18% 7%, rgba(20, 184, 166, 0.09), transparent 28%),
+    radial-gradient(circle at 82% 4%, rgba(99, 102, 241, 0.12), transparent 24%),
+    radial-gradient(circle at 48% 88%, rgba(236, 72, 153, 0.08), transparent 30%),
+    linear-gradient(180deg, #07091f 0%, #101736 48%, #050714 100%) !important;
+}
+body[data-theme="theme-indigo"] .app-shell::after { opacity: 0.28; }
+html[data-theme="theme-indigo"] { background: #07091f !important; }
+
 body {
   scrollbar-color: color-mix(in srgb, var(--accent-solid) 35%, #334155) transparent;
   scrollbar-width: thin;
@@ -33,7 +44,43 @@ body .notification-trigger {
   padding: 0 !important;
   overflow: visible !important;
   flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: rgba(16, 24, 39, 0.9) !important;
+  background-clip: padding-box;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: none !important;
 }
+body .app-title-row .notification-center {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+body .notification-trigger::before,
+body .notification-trigger::after { content: none !important; }
+/* Anchor the popover to the bell; a transformed parent traps fixed positioning on Safari. */
+body .app-title-row .notification-panel {
+  position: absolute !important;
+  top: calc(100% + 12px) !important;
+  left: auto !important;
+  right: 0 !important;
+  width: min(380px, calc(100vw - 32px)) !important;
+  max-width: calc(100vw - 32px) !important;
+  max-height: min(560px, calc(100svh - 180px - env(safe-area-inset-top))) !important;
+  box-sizing: border-box;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  transform: none !important;
+  overscroll-behavior: contain;
+}
+body .app-title-row .notification-center.open::before { display: none !important; }
+.notification-panel-header > div, .notification-item-main { min-width: 0; }
+.notification-item-main :is(span, small) { overflow-wrap: anywhere; }
 body .notification-trigger .notification-count {
   position: absolute !important;
   top: -4px !important;
@@ -249,3 +296,46 @@ body[data-theme] :is(.top5-content-tabs, .top5-mode-tabs, .top5-score-tabs, .top
 body[data-theme] :is(.top5-content-tabs, .top5-mode-tabs, .top5-score-tabs) > button {
   width: 100% !important;
 }
+/* Home: let the games carry the page instead of decorative profile labels. */
+body[data-theme] .home-page .home-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--surface-bg) !important;
+  border: 1px solid var(--surface-border) !important;
+  box-shadow: none !important;
+}
+.home-hero > div { min-width: 0; flex: 1; }
+.home-current-cover {
+  width: 100px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+body[data-theme] .home-page .home-hero h2 {
+  font-size: clamp(1.4rem, 4.8vw, 2rem) !important;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+body[data-theme] .home-page :is(.home-premium-cockpit, .home-focus-card) {
+  background: var(--surface-bg) !important;
+  box-shadow: none !important;
+  border-color: var(--surface-border) !important;
+}
+body[data-theme] .home-page .home-analysis-tags span {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  color: var(--text-soft);
+}
+@media (max-width: 640px) {
+  .home-current-cover { width: 78px; align-self: flex-start; }
+  body[data-theme] .home-page .home-hero { gap: 14px; }
+}
+.home-level-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-block: 16px; }
+.home-level-action { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; text-align: left; padding: 16px; min-width: 0; border: 1px solid var(--surface-border); border-radius: 16px; background: var(--surface-bg); color: var(--text-main); }
+.home-level-action strong { overflow-wrap: anywhere; }
+.home-level-action span { color: var(--text-soft); font-size: .85rem; line-height: 1.5; }
+.home-level-action em { margin-top: auto; color: var(--accent-solid); font-style: normal; font-weight: 800; }
+@media(max-width: 700px) { .home-level-actions { grid-template-columns: 1fr; } .home-next-level .home-section-head { flex-wrap: wrap; gap: 12px; } }
