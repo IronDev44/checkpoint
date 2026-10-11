@@ -62,3 +62,63 @@
 @media (prefers-reduced-motion: reduce) {
   .checkpoint-theme-transition { display: none; }
 }
+
+/* Stronger theme choreography, with a full exit before the 840 ms cleanup. */
+.checkpoint-theme-transition > span { animation-duration: 680ms; filter: drop-shadow(0 0 9px currentColor); }
+.transition-veil { position:absolute; inset:0; background:radial-gradient(ellipse at center,color-mix(in srgb,var(--motif-color) 20%,transparent),transparent 72%); animation:transitionVeil 780ms ease both; }
+@keyframes transitionVeil { 0%,100%{opacity:0} 35%,65%{opacity:1} }
+.motion-aurora > span { width:180px; height:70px; animation-name:auroraRibbon; filter:blur(3px); }
+@keyframes auroraRibbon { 0%{opacity:0;transform:translate3d(0,0,0) scaleY(.2)} 45%{opacity:1;transform:translate3d(calc(var(--travel)*.45),var(--drift),0) scaleY(1.8)} 100%{opacity:0;transform:translate3d(var(--travel),0,0) scaleY(.3)} }
+.motion-symbols > span { left:var(--column); animation-name:consoleSymbols; }
+@keyframes consoleSymbols { 0%{opacity:0;transform:translateY(100px) rotate(-90deg) scale(.2)} 40%,60%{opacity:.95;transform:translateY(0) rotate(0deg) scale(1.4)} 100%{opacity:0;transform:translateY(-140px) rotate(90deg) scale(.2)} }
+.motion-pulse > span { left:var(--column); animation-name:xboxPulse; }
+@keyframes xboxPulse { 0%{opacity:0;transform:scale(.1) rotate(-45deg)} 40%{opacity:1;transform:scale(2) rotate(0deg)} 100%{opacity:0;transform:scale(4) rotate(45deg)} }
+.motion-mechanical > span { animation-name:mechanicalSlide; animation-timing-function:steps(5,end); }
+@keyframes mechanicalSlide { 0%{opacity:0;transform:translateX(0) rotate(90deg)} 40%{opacity:1;transform:translateX(calc(var(--travel)*.4)) rotate(0deg)} 100%{opacity:0;transform:translateX(var(--travel)) rotate(-90deg)} }
+.motion-spell > span { left:var(--column); animation-name:spellRise; }
+@keyframes spellRise { 0%{opacity:0;transform:translateY(160px) rotate(-90deg) scale(.2)} 45%{opacity:1;transform:translateY(0) rotate(90deg) scale(1.7)} 100%{opacity:0;transform:translateY(-180px) rotate(240deg) scale(.1)} }
+.motion-warp > span { left:50%; top:50%; width:110px; height:5px; transform-origin:0 50%; animation-name:hyperspace; }
+@keyframes hyperspace { 0%{opacity:0;transform:rotate(var(--ray-angle)) translateX(0) scaleX(.1)} 20%{opacity:1} 65%{opacity:1;transform:rotate(var(--ray-angle)) translateX(40vmax) scaleX(2)} 100%{opacity:0;transform:rotate(var(--ray-angle)) translateX(85vmax) scaleX(3)} }
+.motion-warp .transition-veil { background:radial-gradient(circle,#e0f2fe33,transparent 45%); }
+.motion-burst > span { left:var(--column); width:42px; height:42px; animation-name:heroBurst; }
+@keyframes heroBurst { 0%{opacity:0;transform:scale(0) rotate(var(--tilt))} 30%{opacity:1;transform:scale(1.8) rotate(0deg)} 100%{opacity:0;transform:translateY(var(--drift)) scale(3) rotate(var(--tilt))} }
+.motion-relic > span { left:var(--column); animation-name:relicReveal; }
+@keyframes relicReveal { 0%{opacity:0;transform:rotateY(90deg) scale(.2)} 45%,65%{opacity:1;transform:rotateY(0deg) scale(1.6)} 100%{opacity:0;transform:rotateY(-90deg) scale(.2)} }
+.motion-capture > span { animation-name:captureRoll; }
+@keyframes captureRoll { 0%{opacity:0;transform:translate(0,0) rotate(0deg) scale(.6)} 45%{opacity:1;transform:translate(calc(var(--travel)*.45),-70px) rotate(180deg) scale(1.6)} 100%{opacity:0;transform:translate(var(--travel),40px) rotate(540deg) scale(.4)} }
+.motion-jump > span { animation-name:coinJump; }
+@keyframes coinJump { 0%{opacity:0;transform:translate(0,90px) scaleX(.2)} 30%{opacity:1;transform:translate(calc(var(--travel)*.3),-110px) scaleX(1)} 60%{opacity:1;transform:translate(calc(var(--travel)*.6),30px) scaleX(.3)} 100%{opacity:0;transform:translate(var(--travel),-80px) scaleX(1)} }
+.motion-dash > span { animation-name:sonicAcceleration; animation-timing-function:cubic-bezier(.7,0,.95,.6); }
+.motion-dash > span:nth-child(even) { width:180px; height:6px; }
+@keyframes sonicAcceleration { 0%{opacity:0;transform:translateX(0) scale(.5)} 18%{opacity:1} 85%{opacity:1} 100%{opacity:0;transform:translateX(var(--travel)) scaleX(1.8)} }
+.motion-drop > span { width:42px; height:42px; animation-name:blockLock; animation-timing-function:steps(7,end); }
+@keyframes blockLock { 0%{opacity:0;transform:translateY(0) rotate(90deg)} 20%{opacity:1} 65%{opacity:1;transform:translateY(60vh) rotate(0deg)} 80%{opacity:1;transform:translateY(60vh) scale(1.3)} 100%{opacity:0;transform:translateY(calc(100vh + 80px)) scale(.3)} }
+.motion-assemble > span { left:var(--column); animation-name:cubeBuild; animation-timing-function:steps(6,end); }
+@keyframes cubeBuild { 0%{opacity:0;transform:translateY(130px) rotate(45deg) scale(.1)} 50%,70%{opacity:1;transform:translateY(0) rotate(0deg) scale(1.5)} 100%{opacity:0;transform:translateY(-100px) scale(.2)} }
+.motion-scan > span { width:72px; height:32px; animation-name:hunterScan; }
+@keyframes hunterScan { 0%{opacity:0;transform:translateX(0) scaleY(.1)} 30%{opacity:1;transform:translateX(calc(var(--travel)*.3)) scaleY(2)} 70%{opacity:1} 100%{opacity:0;transform:translateX(var(--travel)) scaleY(.1)} }
+.motion-race > span { width:48px; height:40px; animation-name:kartRace; }
+@keyframes kartRace { 0%{opacity:0;transform:translate(0,50px) rotate(-20deg)} 20%{opacity:1} 50%{opacity:1;transform:translate(calc(var(--travel)*.5),-60px) rotate(20deg)} 100%{opacity:0;transform:translate(var(--travel),50px) rotate(-20deg)} }
+.motion-crystal > span { left:var(--column); animation-name:crystalBloom; }
+@keyframes crystalBloom { 0%{opacity:0;transform:translateY(100px) scale(.1) rotate(-30deg)} 50%{opacity:1;transform:translateY(0) scale(2) rotate(0deg)} 100%{opacity:0;transform:translateY(-120px) scale(.2) rotate(30deg)} }
+.motion-chomp > span { animation-timing-function:steps(12,end); }
+.motion-chomp > span:nth-child(even) { width:10px; height:10px; }
+.motion-rain b { font-size:22px; letter-spacing:8px; text-shadow:0 0 12px #4ade80; }
+.motion-dust > span { width:42px; animation-name:dustGust; filter:blur(2px); }
+@keyframes dustGust { 0%{opacity:0;transform:translate(0,80px) rotate(0deg)} 40%{opacity:.8;transform:translate(calc(var(--travel)*.4),var(--drift)) rotate(160deg)} 100%{opacity:0;transform:translate(var(--travel),-120px) rotate(360deg)} }
+.motion-compass > span { left:var(--column); animation-name:compassTurn; }
+@keyframes compassTurn { 0%{opacity:0;transform:rotate(-180deg) scale(.2)} 50%{opacity:1;transform:rotate(0deg) scale(1.8)} 100%{opacity:0;transform:rotate(180deg) scale(.2)} }
+.motion-wings > span { width:54px; animation-name:batFlight; }
+@keyframes batFlight { 0%{opacity:0;transform:translate(0,70px) scaleY(.4)} 25%{opacity:1;transform:translate(calc(var(--travel)*.25),-60px) scaleY(1.3)} 55%{opacity:1;transform:translate(calc(var(--travel)*.55),30px) scaleY(.5)} 100%{opacity:0;transform:translate(var(--travel),-100px) scaleY(1.2)} }
+.motion-circuit > span { width:80px; animation-name:circuitTrace; animation-timing-function:steps(10,end); }
+@keyframes circuitTrace { 0%{opacity:0;transform:translateX(0) scaleX(.2)} 25%{opacity:1;transform:translateX(calc(var(--travel)*.25)) scaleX(1)} 65%{opacity:1;transform:translateX(calc(var(--travel)*.65)) scaleX(1.8)} 100%{opacity:0;transform:translateX(var(--travel)) scaleX(.3)} }
+.motion-redline > span { width:100px; height:40px; animation-name:sonicAcceleration; animation-timing-function:cubic-bezier(.4,0,1,.5); }
+.motion-shutter > span { left:var(--column); width:80px; animation-name:steelShutter; }
+@keyframes steelShutter { 0%{opacity:0;transform:translateY(-100px) scaleX(.1)} 40%,65%{opacity:1;transform:translateY(0) scaleX(1.5)} 100%{opacity:0;transform:translateY(100px) scaleX(.1)} }
+.motion-pixels > span { left:var(--column); animation-name:pixelPop; animation-timing-function:steps(4,end); }
+@keyframes pixelPop { 0%{opacity:0;transform:scale(0)} 30%{opacity:1;transform:scale(1)} 65%{opacity:1;transform:scale(2)} 100%{opacity:0;transform:scale(0)} }
+.motion-glitch > span { width:80px; animation-name:cyberGlitch; animation-timing-function:steps(9,end); }
+@keyframes cyberGlitch { 0%{opacity:0;transform:translate(0,0)} 25%{opacity:1;transform:translate(calc(var(--travel)*.25),-40px) skewX(25deg)} 55%{opacity:1;transform:translate(calc(var(--travel)*.55),40px) skewX(-25deg)} 100%{opacity:0;transform:translate(var(--travel),0)} }
+.effects-calm > span { filter:none; }
+.effects-calm .transition-veil { display:none; }
+@media(prefers-reduced-motion:reduce) { .checkpoint-theme-transition { display:none; } }

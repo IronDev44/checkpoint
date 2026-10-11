@@ -20,7 +20,7 @@ import GameExperiencePanel from "./components/GameExperiencePanel";
 import { getGameExperience, getExperienceRatingFields } from "./services/gameExperience";
 import RatingSliderControl from "./components/RatingSlider";
 import SplashScreen from "./components/SplashScreen";
-import ThemeTransition from "./components/ThemeTransition";
+import ThemeTransition, { THEME_TRANSITION_DURATION } from "./components/ThemeTransition";
 import TrialRoom from "./components/TrialRoom";
 import {
   GameService,
@@ -21199,7 +21199,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
       tabTransitionTimerRef.current = window.setTimeout(() => {
         setPixelTransition(null);
-      }, 540);
+      }, THEME_TRANSITION_DURATION);
     }, 16);
   };
 

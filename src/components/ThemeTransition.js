@@ -2,42 +2,45 @@ import { createPortal } from "react-dom";
 import "./ThemeTransition.css";
 
 // Each theme has its own motif; motion stays short enough to finish before cleanup.
+export const THEME_TRANSITION_DURATION = 840;
+
 const identities = {
   "theme-indigo": ["aurora", "#a78bfa", "M2 18 Q7 2 12 12 T22 6 M2 22 Q7 6 12 16 T22 10"],
-  "theme-playstation": ["glide", "#93c5fd", "M12 3 L22 21 H2 Z"],
+  "theme-playstation": ["symbols", "#93c5fd", "M12 3 L22 21 H2 Z"],
   "theme-xbox": ["pulse", "#86efac", "M4 4 L20 20 M20 4 L4 20"],
-  "theme-steamdeck": ["circuit", "#e2e8f0", "M3 12 H9 V5 H17 V12 H21 M9 12 V19 H17 V12"],
+  "theme-steamdeck": ["mechanical", "#e2e8f0", "M3 12 H9 V5 H17 V12 H21 M9 12 V19 H17 V12"],
   "theme-arcane": ["spell", "#d8b4fe", "M12 2 L14 9 L22 12 L14 15 L12 22 L10 15 L2 12 L10 9 Z"],
   "theme-stellar": ["warp", "#bae6fd", "M2 12 H22 M16 10 L22 12 L16 14"],
   "theme-multiverse": ["burst", "#fb7185", "M13 2 L4 14 H11 L9 22 L21 9 H13 Z"],
-  "theme-relic": ["float", "#fde68a", "M12 2 L21 12 L12 22 L3 12 Z M12 7 V17 M7 12 H17"],
-  "theme-tamer": ["roll", "#fca5a5", "M22 12 A10 10 0 1 1 2 12 A10 10 0 1 1 22 12 M2 12 H8 M16 12 H22 M16 12 A4 4 0 1 1 8 12 A4 4 0 1 1 16 12"],
+  "theme-relic": ["relic", "#fde68a", "M12 2 L21 12 L12 22 L3 12 Z M12 7 V17 M7 12 H17"],
+  "theme-tamer": ["capture", "#fca5a5", "M22 12 A10 10 0 1 1 2 12 A10 10 0 1 1 22 12 M2 12 H8 M16 12 H22 M16 12 A4 4 0 1 1 8 12 A4 4 0 1 1 16 12"],
   "theme-mushroom": ["jump", "#facc15", "M17 12 A5 9 0 1 1 7 12 A5 9 0 1 1 17 12 M12 7 V17"],
   "theme-blueblur": ["dash", "#facc15", "M21 12 A9 9 0 1 1 3 12 A9 9 0 1 1 21 12 M18 12 A6 6 0 1 1 6 12 A6 6 0 1 1 18 12"],
   "theme-blocks": ["drop", "#c084fc", "M2 2 H9 V9 H2 Z M9 2 H16 V9 H9 Z M16 2 H23 V9 H16 Z M9 9 H16 V16 H9 Z"],
   "theme-cubic": ["assemble", "#86efac", "M12 2 L22 7 V17 L12 22 L2 17 V7 Z M2 7 L12 12 L22 7 M12 12 V22"],
   "theme-hunter": ["scan", "#fb923c", "M3 8 V3 H8 M16 3 H21 V8 M21 16 V21 H16 M8 21 H3 V16 M7 12 H17 M12 7 V17"],
   "theme-kart": ["race", "#f472b6", "M3 3 H10 V10 H3 Z M10 10 H17 V17 H10 Z M17 3 H24 V10 H17 Z M3 17 H10 V24 H3 Z M17 17 H24 V24 H17 Z"],
-  "theme-crystal": ["float", "#7dd3fc", "M12 1 L20 7 L16 20 L12 23 L8 20 L4 7 Z M4 7 H20 M12 1 L8 7 L12 23 L16 7 Z"],
+  "theme-crystal": ["crystal", "#7dd3fc", "M12 1 L20 7 L16 20 L12 23 L8 20 L4 7 Z M4 7 H20 M12 1 L8 7 L12 23 L16 7 Z"],
   "theme-ring": ["chomp", "#fde047", "M21 5 A11 11 0 1 0 21 19 L12 12 Z M10 5 H10.1"],
   "theme-matrix": ["rain", "#4ade80", null],
   "theme-wasteland": ["dust", "#fdba74", "M3 16 L8 8 L12 13 L18 4 L21 17 M5 21 H19"],
-  "theme-treasure": ["roll", "#fbbf24", "M12 2 V18 M7 7 H17 M3 14 Q3 22 12 22 Q21 22 21 14 M3 14 L1 17 M21 14 L23 17"],
-  "theme-vigilante": ["glide", "#facc15", "M1 5 L8 9 L10 6 L12 9 L14 6 L16 9 L23 5 L20 16 L15 15 L12 21 L9 15 L4 16 Z"],
+  "theme-treasure": ["compass", "#fbbf24", "M12 2 V18 M7 7 H17 M3 14 Q3 22 12 22 Q21 22 21 14 M3 14 L1 17 M21 14 L23 17"],
+  "theme-vigilante": ["wings", "#facc15", "M1 5 L8 9 L10 6 L12 9 L14 6 L16 9 L23 5 L20 16 L15 15 L12 21 L9 15 L4 16 Z"],
   "theme-emerald": ["circuit", "#6ee7b7", "M2 5 H9 V12 H15 V19 H22 M2 19 H7 V12 M17 12 V5 H22"],
-  "theme-crimson": ["race", "#fb7185", "M2 5 L13 12 L2 19 M11 5 L22 12 L11 19"],
-  "theme-graphite": ["scan", "#cbd5e1", "M2 7 H22 M2 12 H16 M2 17 H10"],
-  "theme-retro": ["assemble", "#fb923c", "M4 4 H9 V9 H15 V4 H20 V20 H15 V15 H9 V20 H4 Z"],
+  "theme-crimson": ["redline", "#fb7185", "M2 5 L13 12 L2 19 M11 5 L22 12 L11 19"],
+  "theme-graphite": ["shutter", "#cbd5e1", "M2 7 H22 M2 12 H16 M2 17 H10"],
+  "theme-retro": ["pixels", "#fb923c", "M4 4 H9 V9 H15 V4 H20 V20 H15 V15 H9 V20 H4 Z"],
   "theme-cyberpunk": ["glitch", "#22d3ee", "M2 8 H10 V3 H22 M2 16 H14 V21 H22 M5 12 H19"],
 };
 
 export default function ThemeTransition({ theme, direction, effects }) {
   const [motion, color, path] = identities[theme] || identities["theme-indigo"];
-  const count = effects === "calm" ? 18 : effects === "boost" ? 42 : 28;
+  const count = effects === "calm" ? 18 : effects === "boost" ? 56 : 36;
   return createPortal(
-    <div className={`checkpoint-theme-transition motion-${motion}`} aria-hidden="true" style={{ "--travel": direction === "left" ? "calc(-100vw - 80px)" : "calc(100vw + 80px)", "--origin": direction === "left" ? "calc(100% + 32px)" : "-32px", "--motif-color": color }}>
+    <div className={`checkpoint-theme-transition motion-${motion} effects-${effects} direction-${direction}`} aria-hidden="true" style={{ "--travel": direction === "left" ? "calc(-100vw - 80px)" : "calc(100vw + 80px)", "--origin": direction === "left" ? "calc(100% + 32px)" : "-32px", "--motif-color": color }}>
+      <i className="transition-veil" />
       {Array.from({ length: count }, (_, i) => (
-        <span key={i} style={{ "--row": `${4 + ((i * 37) % 92)}vh`, "--column": `${(i * 37) % 100}vw`, "--wait": `${(i % 7) * 14}ms`, "--motif-size": `${14 + (i % 4) * 4}px`, "--tilt": `${(i % 2 ? 1 : -1) * 30}deg` }}>
+        <span key={i} style={{ "--row": `${4 + ((i * 37) % 92)}vh`, "--column": `${(i * 37) % 100}vw`, "--wait": `${(i % 8) * 16}ms`, "--motif-size": `${22 + (i % 4) * 6}px`, "--ray-angle": `${(i / count) * 360}deg`, "--drift": `${(i % 2 ? 1 : -1) * 22}vh`, "--tilt": `${(i % 2 ? 1 : -1) * 30}deg` }}>
           {path ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg> : <b>{["01", "10", "001", "110"][i % 4]}</b>}
         </span>
       ))}
