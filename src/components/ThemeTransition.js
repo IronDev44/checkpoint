@@ -35,7 +35,8 @@ const identities = {
 
 export default function ThemeTransition({ theme, direction, effects }) {
   const [motion, color, path] = identities[theme] || identities["theme-indigo"];
-  const count = effects === "calm" ? 18 : effects === "boost" ? 56 : 36;
+  const count = effects === "calm" ? 18 : effects === "boost" ? 112 : 72;
+  const sparkCount = effects === "calm" ? 0 : effects === "boost" ? 144 : 80;
   return createPortal(
     <div className={`checkpoint-theme-transition motion-${motion} effects-${effects} direction-${direction}`} aria-hidden="true" style={{ "--travel": direction === "left" ? "calc(-100vw - 80px)" : "calc(100vw + 80px)", "--origin": direction === "left" ? "calc(100% + 32px)" : "-32px", "--motif-color": color }}>
       <i className="transition-veil" />
@@ -44,6 +45,9 @@ export default function ThemeTransition({ theme, direction, effects }) {
           {path ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg> : <b>{["01", "10", "001", "110"][i % 4]}</b>}
         </span>
       ))}
+      <div className="transition-spark-field">
+        {Array.from({ length: sparkCount }, (_, i) => <i key={i} style={{ "--spark-x": `${(i * 61.803) % 100}vw`, "--spark-y": `${(i * 37.719) % 100}vh`, "--spark-size": `${2 + (i % 4)}px`, "--spark-delay": `${(i % 9) * 12}ms`, "--spark-drift": `${(i % 2 ? 1 : -1) * (35 + i % 50)}px`, "--ray-angle": `${(i / sparkCount) * 360}deg` }} />)}
+      </div>
     </div>, document.body
   );
 }

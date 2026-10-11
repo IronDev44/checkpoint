@@ -122,3 +122,49 @@
 .effects-calm > span { filter:none; }
 .effects-calm .transition-veil { display:none; }
 @media(prefers-reduced-motion:reduce) { .checkpoint-theme-transition { display:none; } }
+
+/* Fine particles add depth around the larger theme motifs. */
+.transition-spark-field { position: absolute; inset: 0; pointer-events: none; }
+.transition-spark-field > i {
+  position: absolute; left: var(--spark-x); top: var(--spark-y);
+  width: var(--spark-size); height: var(--spark-size); border-radius: 50%;
+  background: var(--motif-color); opacity: 0;
+  box-shadow: 0 0 6px currentColor;
+  animation: transitionSparkDrift 700ms ease-out var(--spark-delay) both;
+}
+@keyframes transitionSparkDrift {
+  0% { opacity: 0; transform: translate3d(0,35px,0) scale(.2); }
+  25% { opacity: .9; }
+  65% { opacity: .65; }
+  100% { opacity: 0; transform: translate3d(var(--spark-drift),-85px,0) scale(.1); }
+}
+.motion-dash .transition-spark-field > i,
+.motion-redline .transition-spark-field > i,
+.motion-race .transition-spark-field > i {
+  left: var(--origin); width: 50px; height: 2px;
+  animation-name: transitionSpeedSpark; animation-timing-function: cubic-bezier(.5,0,1,.7);
+}
+@keyframes transitionSpeedSpark {
+  0% { opacity: 0; transform: translateX(0) scaleX(.2); }
+  20%,80% { opacity: .8; }
+  100% { opacity: 0; transform: translateX(var(--travel)) scaleX(2); }
+}
+.motion-warp .transition-spark-field > i {
+  left: 50%; top: 50%; width: 44px; height: 2px; transform-origin: 0 50%;
+  animation-name: hyperspace;
+}
+.motion-rain .transition-spark-field > i,
+.motion-drop .transition-spark-field > i {
+  top: -40px; animation-name: motifDrop;
+}
+.motion-rain .transition-spark-field > i { width: 2px; height: 34px; border-radius: 0; }
+.motion-assemble .transition-spark-field > i,
+.motion-pixels .transition-spark-field > i,
+.motion-glitch .transition-spark-field > i {
+  border-radius: 0; width: 8px; height: 8px;
+  animation-name: pixelPop; animation-timing-function: steps(5,end);
+}
+.motion-spell .transition-spark-field > i,
+.motion-crystal .transition-spark-field > i { border-radius: 0; animation-name: spellRise; }
+.effects-boost .transition-spark-field > i { box-shadow: 0 0 10px currentColor; }
+@media(prefers-reduced-motion:reduce) { .transition-spark-field { display: none; } }
