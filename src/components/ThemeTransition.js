@@ -33,6 +33,15 @@ const identities = {
   "theme-cyberpunk": ["glitch", "#22d3ee", "M2 8 H10 V3 H22 M2 16 H14 V21 H22 M5 12 H19"],
 };
 
+const tetrisPieces = [[0,1,2,3], [0,1,4,5], [1,4,5,6], [0,4,5,6], [2,4,5,6], [1,2,4,5], [0,1,5,6]];
+const tetrisColors = ["#22d3ee", "#facc15", "#c084fc", "#60a5fa", "#fb923c", "#4ade80", "#f87171"];
+function renderMotif(theme, path, index) {
+  if (theme === "theme-cubic") return <b className="dirt-block"><i className="block-crack" /></b>;
+  if (theme === "theme-blocks") return <b className="tetris-piece" style={{ "--piece-color": tetrisColors[index % 7] }}>{Array.from({length: 8}, (_, cell) => <i key={cell} className={tetrisPieces[index % 7].includes(cell) ? "filled" : ""} />)}</b>;
+  if (theme === "theme-matrix") return <b className="matrix-code">{Array.from({length: 16}, (_, row) => <i key={row}>{"01アイウエオカキクケコ789"[(index * 7 + row * 11) % 18]}</i>)}</b>;
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>;
+}
+
 export default function ThemeTransition({ theme, direction, effects }) {
   const [motion, color, path] = identities[theme] || identities["theme-indigo"];
   const count = effects === "calm" ? 18 : effects === "boost" ? 112 : 72;
@@ -41,8 +50,8 @@ export default function ThemeTransition({ theme, direction, effects }) {
     <div className={`checkpoint-theme-transition motion-${motion} effects-${effects} direction-${direction}`} aria-hidden="true" style={{ "--travel": direction === "left" ? "calc(-100vw - 80px)" : "calc(100vw + 80px)", "--origin": direction === "left" ? "calc(100% + 32px)" : "-32px", "--motif-color": color }}>
       <i className="transition-veil" />
       {Array.from({ length: count }, (_, i) => (
-        <span key={i} style={{ "--row": `${4 + ((i * 37) % 92)}vh`, "--column": `${(i * 37) % 100}vw`, "--wait": `${(i % 8) * 16}ms`, "--motif-size": `${22 + (i % 4) * 6}px`, "--ray-angle": `${(i / count) * 360}deg`, "--drift": `${(i % 2 ? 1 : -1) * 22}vh`, "--tilt": `${(i % 2 ? 1 : -1) * 30}deg` }}>
-          {path ? <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg> : <b>{["01", "10", "001", "110"][i % 4]}</b>}
+        <span key={i} style={{ "--row": `${4 + ((i * 37) % 92)}vh`, "--column": `${(i * 37) % 100}vw`, "--wait": `${(i % 8) * 16}ms`, "--motif-size": `${22 + (i % 4) * 6}px`, "--debris-x": `${(i % 2 ? 1 : -1) * (50 + i % 80)}px`, "--ray-angle": `${(i / count) * 360}deg`, "--drift": `${(i % 2 ? 1 : -1) * 22}vh`, "--tilt": `${(i % 2 ? 1 : -1) * 30}deg` }}>
+          {renderMotif(theme, path, i)}
         </span>
       ))}
       <div className="transition-spark-field">

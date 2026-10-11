@@ -571,3 +571,37 @@ body[data-theme] .hardware-acquired-year-field select {
   box-shadow: inset 0 1px 0 #ffffff20, 0 3px 7px #00000030;
 }
 .hardware-acquired-year-field option { background: #172136; color: #fff; }
+
+/* Keep the top glow subtle for every theme and darken iPhone overscroll chrome. */
+html[data-theme="theme-indigo"] { --theme-chrome-bg: #07091f; }
+html[data-theme="theme-emerald"] { --theme-chrome-bg: #031712; }
+html[data-theme="theme-crimson"] { --theme-chrome-bg: #16060b; }
+html[data-theme="theme-graphite"] { --theme-chrome-bg: #090d12; }
+html[data-theme="theme-retro"] { --theme-chrome-bg: #111025; }
+html[data-theme="theme-cyberpunk"] { --theme-chrome-bg: #080716; }
+html[data-theme="theme-playstation"] { --theme-chrome-bg: #101827; }
+html[data-theme="theme-xbox"] { --theme-chrome-bg: #07120b; }
+html[data-theme="theme-steamdeck"] { --theme-chrome-bg: #171717; }
+html[data-theme="theme-arcane"] { --theme-chrome-bg: #100814; }
+html[data-theme="theme-stellar"] { --theme-chrome-bg: #020716; }
+html[data-theme="theme-multiverse"] { --theme-chrome-bg: #10040b; }
+html[data-theme="theme-relic"] { --theme-chrome-bg: #0a1008; }
+html[data-theme="theme-tamer"] { --theme-chrome-bg: #07131c; }
+html[data-theme="theme-mushroom"] { --theme-chrome-bg: #071b35; }
+html[data-theme="theme-blueblur"] { --theme-chrome-bg: #03102f; }
+html[data-theme="theme-blocks"] { --theme-chrome-bg: #14051d; }
+html[data-theme="theme-cubic"] { --theme-chrome-bg: #0b1f12; }
+html[data-theme="theme-hunter"] { --theme-chrome-bg: #08111b; }
+html[data-theme="theme-kart"] { --theme-chrome-bg: #08051f; }
+html[data-theme="theme-crystal"] { --theme-chrome-bg: #070c23; }
+html[data-theme="theme-ring"] { --theme-chrome-bg: #050715; }
+html[data-theme="theme-matrix"] { --theme-chrome-bg: #020a06; }
+html[data-theme="theme-wasteland"] { --theme-chrome-bg: #130b05; }
+html[data-theme="theme-treasure"] { --theme-chrome-bg: #071722; }
+html[data-theme="theme-vigilante"] { --theme-chrome-bg: #050711; }
+html[data-theme] { background: var(--theme-chrome-bg, #07091f) !important; color-scheme: dark; }
+body[data-theme] .app-shell::after { opacity: .28 !important; }
+body[data-theme]:not([data-theme="theme-indigo"]) .app-shell::after {
+  -webkit-mask-image: linear-gradient(to bottom, #0004, #000 180px);
+  mask-image: linear-gradient(to bottom, #0004, #000 180px);
+}
