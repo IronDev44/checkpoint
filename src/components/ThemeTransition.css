@@ -1,0 +1,64 @@
+.checkpoint-theme-transition {
+  position: fixed; inset: 0; z-index: 2500; overflow: hidden;
+  pointer-events: none; contain: strict; color: var(--motif-color);
+}
+.checkpoint-theme-transition > span {
+  position: absolute; left: var(--origin); top: var(--row);
+  width: var(--motif-size); height: var(--motif-size); opacity: 0;
+  animation: motifSweep 380ms linear var(--wait) both;
+  filter: drop-shadow(0 0 5px currentColor); will-change: transform, opacity;
+}
+.checkpoint-theme-transition svg { display: block; width: 100%; height: 100%; }
+@keyframes motifSweep {
+  0% { opacity: 0; transform: translate3d(0,0,0) scale(.7); }
+  10%, 85% { opacity: .8; }
+  100% { opacity: 0; transform: translate3d(var(--travel),0,0) scale(1); }
+}
+.motion-aurora > span { width: 90px; height: 34px; filter: blur(2px); }
+.motion-pulse > span { animation-name: motifPulse; }
+@keyframes motifPulse {
+  0% { opacity: 0; transform: translate3d(0,0,0) scale(.2); }
+  45% { opacity: .8; transform: translate3d(calc(var(--travel) * .45),0,0) scale(1.3); }
+  100% { opacity: 0; transform: translate3d(var(--travel),0,0) scale(.3); }
+}
+.motion-spell > span, .motion-float > span, .motion-jump > span { animation-name: motifArc; }
+@keyframes motifArc {
+  0% { opacity: 0; transform: translate3d(0,24px,0) rotate(-20deg); }
+  45% { opacity: .9; transform: translate3d(calc(var(--travel) * .45),-35px,0) rotate(0deg); }
+  100% { opacity: 0; transform: translate3d(var(--travel),24px,0) rotate(20deg); }
+}
+.motion-spell > span { width: 22px; height: 22px; }
+.motion-warp > span { width: 68px; height: 6px; }
+.motion-burst > span { width: 28px; height: 28px; animation-name: motifPulse; }
+.motion-roll > span { animation-name: motifRoll; }
+@keyframes motifRoll {
+  0% { opacity: 0; transform: translate3d(0,0,0) rotate(0deg); }
+  10%,85% { opacity: .85; }
+  100% { opacity: 0; transform: translate3d(var(--travel),0,0) rotate(270deg); }
+}
+.motion-dash > span:nth-child(even) { width: 80px; height: 3px; background: #60a5fa; border-radius: 50%; }
+.motion-dash > span:nth-child(even) svg { display: none; }
+.motion-drop > span, .motion-rain > span { left: var(--column); top: -60px; animation-name: motifDrop; }
+@keyframes motifDrop {
+  0% { opacity: 0; transform: translate3d(0,0,0); }
+  10%,85% { opacity: .75; }
+  100% { opacity: 0; transform: translate3d(0,calc(100vh + 80px),0); }
+}
+.motion-rain b { font: 700 16px/1.2 monospace; writing-mode: vertical-rl; letter-spacing: 5px; }
+.motion-assemble > span { animation-name: motifAssemble; }
+@keyframes motifAssemble {
+  0% { opacity: 0; transform: translate3d(0,0,0) rotate(45deg) scale(.2); }
+  50% { opacity: .8; transform: translate3d(calc(var(--travel) * .5),0,0) rotate(0deg) scale(1); }
+  100% { opacity: 0; transform: translate3d(var(--travel),0,0) rotate(0deg) scale(.4); }
+}
+.motion-scan > span { width: 40px; height: 18px; }
+.motion-race > span { width: 32px; height: 22px; }
+.motion-chomp > span:nth-child(even) { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.motion-chomp > span:nth-child(even) svg { display: none; }
+.motion-dust > span { animation-name: motifArc; filter: blur(1px); }
+.motion-glide > span { width: 32px; height: 24px; }
+.motion-circuit > span { width: 46px; height: 24px; }
+.motion-glitch > span { animation-timing-function: steps(8,end); }
+@media (prefers-reduced-motion: reduce) {
+  .checkpoint-theme-transition { display: none; }
+}

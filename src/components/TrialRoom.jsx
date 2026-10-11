@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import "./TrialRoom.css";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -38,6 +39,8 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [lastAnswerCorrect, setLastAnswerCorrect] = useState(null);
 
+  const answerTimer = useRef(null);
+  useEffect(() => () => window.clearTimeout(answerTimer.current), []);
   const questions = trial?.questions || [];
   const currentQuestion = questions[currentIndex];
   const currentChoices = useMemo(
@@ -50,7 +53,7 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
     ? Math.round(((currentIndex + (phase === "result" ? 1 : 0)) / questions.length) * 100)
     : 0;
   const remaining = Math.max(0, questions.length - currentIndex - 1);
-  const phaseClass = `phase-${phase}`;
+  const phaseClass = `phase-${phase} ${phase === "result" ? (passed ? "passed" : "failed") : ""}`;
   const prestigeParticles = useMemo(
     () =>
       Array.from({ length: PRESTIGE_PARTICLE_COUNT }, (_, index) => ({
@@ -66,17 +69,16 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
   if (!trial) return null;
 
   const validateAnswer = () => {
-    if (!currentQuestion || selectedAnswer === null) return;
+    if (!currentQuestion || selectedAnswer === null || lastAnswerCorrect !== null) return;
 
     const isCorrect = selectedAnswer === currentQuestion.correctIndex;
     const nextAnswers = [...answers, isCorrect];
 
     setAnswers(nextAnswers);
     setLastAnswerCorrect(isCorrect);
-    setSelectedAnswer(null);
-
-    window.setTimeout(() => {
+    answerTimer.current = window.setTimeout(() => {
       setLastAnswerCorrect(null);
+      setSelectedAnswer(null);
       if (currentIndex >= questions.length - 1) {
         setPhase("result");
         return;
@@ -94,7 +96,7 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
   };
 
   return (
-    <div className={`trial-room-shell ${phaseClass}`}>
+    <div className={`trial-room-shell trial-premium ${phaseClass}`}>
       <div className="trial-room-bg" aria-hidden="true">
         <span />
         <span />
@@ -138,18 +140,18 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
             <div className="trial-gate-stage">
               <div className="trial-gate-ring" />
               <div className="trial-guardian-orb">
-                <Shield size={48} />
+                <span className="trial-seal-label">CHECKPOINT</span><strong className="trial-seal-level">{trial.level}</strong><span className="trial-seal-caption">{trial.rewardRank}</span>
               </div>
               <div className="trial-gate-beam" />
             </div>
 
-            <div className="trial-kicker">Nouveau Checkpoint atteint</div>
-            <h1>Le Gardien du Checkpoint vous attend.</h1>
+            <div className="trial-kicker"><Sparkles size={14} /> Salle des épreuves</div>
+            <h1>{trial.title}</h1>
             <p>{trial.intro}</p>
 
             <div className="trial-intro-grid">
               <div>
-                <span>XP verrouillée</span>
+                <span>XP accumulée</span>
                 <strong>{rawXP} XP</strong>
               </div>
               <div>
@@ -157,7 +159,7 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
                 <strong>{trial.passScore}/{questions.length}</strong>
               </div>
               <div>
-                <span>Rang scellé</span>
+                <span>Prochain rang</span>
                 <strong>{trial.rewardRank}</strong>
               </div>
             </div>
@@ -185,7 +187,7 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
             </div>
 
             <button type="button" className="trial-primary-btn trial-enter-btn" onClick={() => setPhase("questions")}>
-              Entrer dans la Salle des Épreuves
+              Lancer l’épreuve
               <Swords size={18} />
             </button>
           </section>
@@ -198,6 +200,7 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
               <strong>{remaining} restantes</strong>
             </div>
 
+            <div className="trial-step-track" aria-label="Progression des réponses">{questions.map((question, index) => <span key={question.id} className={index < answers.length ? (answers[index] ? "done" : "missed") : index === currentIndex ? "current" : ""} aria-label={"Question " + (index + 1) + ": " + (index < answers.length ? (answers[index] ? "réussie" : "répondue") : index === currentIndex ? "en cours" : "à venir")}>{index < answers.length && answers[index] ? <CheckCircle2 size={16} /> : index + 1}</span>)}</div>
             <div className="trial-arena">
               <aside className="trial-guardian-panel">
                 <div className="trial-guardian-avatar">
@@ -244,13 +247,11 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
               </div>
             </div>
 
-            <button
-              type="button"
-              className="trial-primary-btn"
-              disabled={selectedAnswer === null || lastAnswerCorrect !== null}
+            <div className="trial-answer-feedback" role="status" aria-live="polite">{lastAnswerCorrect === true ? "Bien joué ! Un pas de plus vers ton rang." : lastAnswerCorrect === false ? "On garde le rythme, place à la suite !" : "Choisis ta réponse, puis valide pour continuer."}</div>
+            <button type="button" className="trial-primary-btn" disabled={selectedAnswer === null || lastAnswerCorrect !== null}
               onClick={validateAnswer}
             >
-              Verrouiller la réponse
+              {lastAnswerCorrect !== null ? "Réponse enregistrée" : "Valider ma réponse"}
               <Sparkles size={18} />
             </button>
           </section>
@@ -270,13 +271,13 @@ export default function TrialRoom({ checkpointLevel, rawXP, onClose, onComplete 
             </div>
 
             <div className="trial-kicker">
-              {passed ? "Épreuve réussie" : "Épreuve échouée"}
+              {passed ? "Épreuve réussie" : "Encore un essai ?"}
             </div>
-            <h1>{passed ? trial.rewardRank : "Rang toujours verrouillé"}</h1>
+            <h1>{passed ? trial.rewardRank : "Tu y es presque"}</h1>
             <p>
               {passed
                 ? "Le sceau s'ouvre. Le rang est révélé et la progression reprend."
-                : "Le Gardien referme la porte. Le rang reste verrouillé, mais l'épreuve pourra être retentée."}
+                : "Ton XP reste bien au chaud. Reviens quand tu veux pour décrocher ce rang."}
             </p>
 
             <div className="trial-score-card">

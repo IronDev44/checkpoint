@@ -20,6 +20,7 @@ import GameExperiencePanel from "./components/GameExperiencePanel";
 import { getGameExperience, getExperienceRatingFields } from "./services/gameExperience";
 import RatingSliderControl from "./components/RatingSlider";
 import SplashScreen from "./components/SplashScreen";
+import ThemeTransition from "./components/ThemeTransition";
 import TrialRoom from "./components/TrialRoom";
 import {
   GameService,
@@ -338,6 +339,7 @@ function normalizeAppOptions(options = {}) {
     schemaVersion: APP_OPTIONS_SCHEMA_VERSION,
     startTab,
     visualEffects,
+    headerMode: ["standard", "compact", "minimal"].includes(source.headerMode) ? source.headerMode : DEFAULT_APP_OPTIONS.headerMode,
     animatedBackground:
       typeof source.animatedBackground === "boolean"
         ? source.animatedBackground
@@ -1379,6 +1381,7 @@ function getGameTimelineYear(game = {}) {
 
 function getHardwareTimelineYear(item = {}) {
   return (
+    getTimelineYear(item.acquiredYear) ||
     getTimelineYear(item.acquiredAt) ||
     getTimelineYear(item.obtainedAt) ||
     getTimelineYear(item.updatedAt) ||
@@ -13516,6 +13519,7 @@ function HardwareDetailModal({
   onUpdateHardwareStatus,
   onUpdateHardwareSanctuary,
   onUpdateHardwareCondition,
+  onUpdateHardwareAcquiredYear,
   onUpdateHardwareDisplaySize,
   onUpdateHardwareComponent,
   onUpdateHardwareRating,
@@ -13689,9 +13693,16 @@ function HardwareDetailModal({
           )}
 
           <div className="modal-block hardware-detail-controls">
-            <div className="modal-block-title">État et statut</div>
+            <div className="modal-block-title">Mon matériel</div>
 
             <div className="hardware-card-dropdowns">
+              <label className="hardware-acquired-year-field">
+                <span>Année d’obtention</span>
+                <select value={item.acquiredYear || ""} onChange={(event) => onUpdateHardwareAcquiredYear?.(item.id, event.target.value)}>
+                  <option value="">Non précisée</option>
+                  {Array.from({ length: new Date().getFullYear() - 1949 }, (_, index) => new Date().getFullYear() - index).map((year) => <option key={year} value={year}>{year}</option>)}
+                </select>
+              </label>
               {item.type === "console" && String(item.status || "").toLowerCase().includes("poss") && (
                 <HardwareDropdown
                   id={`detail-condition-${item.id}`}
@@ -13841,6 +13852,7 @@ function HardwareTab({
   onUpdateHardwareStatus,
   onUpdateHardwareSanctuary,
   onUpdateHardwareCondition,
+  onUpdateHardwareAcquiredYear,
   onUpdateHardwareDisplaySize,
   onUpdateHardwareRank,
   onUpdateHardwareRating,
@@ -15052,6 +15064,7 @@ function HardwareTab({
                                         onUpdateHardwareStatus={onUpdateHardwareStatus}
                                         onUpdateHardwareSanctuary={onUpdateHardwareSanctuary}
                                         onUpdateHardwareCondition={onUpdateHardwareCondition}
+                          onUpdateHardwareAcquiredYear={onUpdateHardwareAcquiredYear}
                                         onUpdateHardwareDisplaySize={onUpdateHardwareDisplaySize}
                                         onUpdateHardwareComponent={onUpdateHardwareComponent}
                                         onUpdateHardwareRating={onUpdateHardwareRating}
@@ -15400,6 +15413,7 @@ function HardwareTab({
                           onUpdateHardwareStatus={onUpdateHardwareStatus}
                           onUpdateHardwareSanctuary={onUpdateHardwareSanctuary}
                           onUpdateHardwareCondition={onUpdateHardwareCondition}
+                          onUpdateHardwareAcquiredYear={onUpdateHardwareAcquiredYear}
                           onUpdateHardwareDisplaySize={onUpdateHardwareDisplaySize}
                           onUpdateHardwareComponent={onUpdateHardwareComponent}
                           onUpdateHardwareRating={onUpdateHardwareRating}
@@ -15487,6 +15501,7 @@ function HardwareTab({
 
                           <div className="hardware-card-bottom">
                             <div className="hardware-card-badges">
+                              {item.acquiredYear && <span className="hardware-card-badge">Obtenu en {item.acquiredYear}</span>}
                               {item.type === "console" && String(item.status || "").toLowerCase().includes("poss") && (
                                 <span className="hardware-card-badge">
                                   {CONDITION_OPTIONS.find((option) => option.id === (item.condition || "bon"))?.label || "Bon"}
@@ -15554,6 +15569,35 @@ function HardwareTab({
 }
 
 /* ==================== OPTIONS ==================== */
+
+function OptionGroup({
+    id,
+    title,
+    description,
+    summary,
+    children, isOpen, onToggle, }) {
+
+    return (
+      <section className={`options-group options-accordion ${isOpen ? "open" : ""}`}>
+        <button
+          type="button"
+          className="options-group-head"
+          onClick={onToggle}
+          aria-expanded={isOpen}
+        >
+          <div>
+            <span>{title}</span>
+            <p>{description}</p>
+          </div>
+          <div className="options-group-summary">
+            <span>{summary}</span>
+            <b aria-hidden="true">v</b>
+          </div>
+        </button>
+        {isOpen && <div className="options-group-body">{children}</div>}
+      </section>
+    );
+  }
 
 function OptionsTab({
   theme,
@@ -16151,41 +16195,6 @@ function OptionsTab({
   );
   const activeThemeLabel =
     themes.find((item) => item.id === theme)?.label || "Theme actif";
-  const OptionGroup = ({
-    id,
-    title,
-    description,
-    summary,
-    children,
-  }) => {
-    const isOpen = !!openOptionGroups[id];
-
-    return (
-      <section className={`options-group options-accordion ${isOpen ? "open" : ""}`}>
-        <button
-          type="button"
-          className="options-group-head"
-          onClick={() => {
-            setOpenOptionGroups((current) => ({
-              ...current,
-              [id]: !current[id],
-            }));
-          }}
-          aria-expanded={isOpen}
-        >
-          <div>
-            <span>{title}</span>
-            <p>{description}</p>
-          </div>
-          <div className="options-group-summary">
-            <span>{summary}</span>
-            <b aria-hidden="true">v</b>
-          </div>
-        </button>
-        {isOpen && <div className="options-group-body">{children}</div>}
-      </section>
-    );
-  };
   const helpModal = helpTopic
     ? createPortal(
         <div className="option-help-backdrop" onClick={() => setHelpTopic(null)}>
@@ -16225,8 +16234,7 @@ function OptionsTab({
           </div>
         </div>
 
-        <OptionGroup
-          id="interface"
+        <OptionGroup id="interface" isOpen={!!openOptionGroups.interface} onToggle={() => setOpenOptionGroups((current) => ({ ...current, interface: !current.interface }))}
           title="Interface"
           description="Ce qui change l'identité visuelle et les retours de l'app."
           summary={`${activeThemeLabel} · ${uiMode === "modern" ? "Transitions" : "Sans transition"}`}
@@ -16255,7 +16263,7 @@ function OptionsTab({
             <div className="option-setting-card">
               <div>
                 <SectionTitle title="Transition d'onglet" help="animations" />
-                <span>Active ou désactive uniquement l'effet pixel entre les onglets.</span>
+                <span>Active ou désactive la transition liée à ton thème entre les onglets.</span>
               </div>
               <div className="option-pill-grid two compact">
                 <button
@@ -16276,27 +16284,22 @@ function OptionsTab({
               </div>
             </div>
 
-            <div className="option-setting-card">
+            <div className="option-setting-card option-header-setting">
               <div>
-                <strong>En-tête</strong>
-                <span>Standard garde les infos XP en haut. Compact libère de la hauteur pour les listes longues.</span>
+                <strong>En-tête des onglets</strong>
+                <span>Choisis les informations affichées sous le logo. L’accueil et le profil gardent leur présentation dédiée.</span>
               </div>
-              <div className="option-pill-grid two compact">
-                <button
-                  type="button"
-                  className={`option-pill ${appOptions.headerMode !== "compact" ? "active" : ""}`}
-                  onClick={() => onOptionChange("headerMode", "standard")}
-                >
-                  Standard
-                </button>
-                <button
-                  type="button"
-                  className={`option-pill ${appOptions.headerMode === "compact" ? "active" : ""}`}
-                  onClick={() => onOptionChange("headerMode", "compact")}
-                >
-                  Compact
-                </button>
+              <div className="option-header-choices" role="group" aria-label="En-tête des onglets">
+                {[
+                  { id: "standard", label: "Complet", detail: "Niveau, XP et statistiques de ta collection." },
+                  { id: "compact", label: "Progression", detail: "Ton niveau et une barre d’XP discrète." },
+                  { id: "minimal", label: "Essentiel", detail: "Le logo, les notifications, puis le contenu." },
+                ].map((choice) => <button key={choice.id} type="button" className={"option-header-choice " + (appOptions.headerMode === choice.id ? "active" : "")} aria-pressed={appOptions.headerMode === choice.id} onClick={() => onOptionChange("headerMode", choice.id)}>
+                  <span className={"option-header-preview preview-" + choice.id} aria-hidden="true"><i /><i /><i /></span>
+                  <strong className="option-header-choice-label">{choice.label}<span className="option-choice-indicator" aria-hidden="true">{appOptions.headerMode === choice.id && <Check size={14} />}</span></strong><small>{choice.detail}</small>
+                </button>)}
               </div>
+              <span className="option-header-note">Les statistiques restent masquées dans Actu, Sorties, Promos, Live, Sanctuaire et Top 5.</span>
             </div>
 
             <div className="option-setting-card">
@@ -16359,8 +16362,7 @@ function OptionsTab({
           </div>
         </OptionGroup>
 
-        <OptionGroup
-          id="behavior"
+        <OptionGroup id="behavior" isOpen={!!openOptionGroups.behavior} onToggle={() => setOpenOptionGroups((current) => ({ ...current, behavior: !current.behavior }))}
           title="Comportement"
           description="Les choix qui évitent des gestes inutiles ou des erreurs."
           summary={appOptions.rememberLastTab ? "Dernier onglet" : "Onglet fixe"}
@@ -16480,8 +16482,7 @@ function OptionsTab({
           </div>
         </OptionGroup>
 
-        <OptionGroup
-          id="rating"
+        <OptionGroup id="rating" isOpen={!!openOptionGroups.rating} onToggle={() => setOpenOptionGroups((current) => ({ ...current, rating: !current.rating }))}
           title="Notation"
           description="Les règles d'affichage et le comportement des fiches quand tu notes."
           summary={appOptions.afterRatingAction === "list" ? "Retour liste" : "Rester sur fiche"}
@@ -16542,8 +16543,7 @@ function OptionsTab({
           </div>
         </OptionGroup>
 
-        <OptionGroup
-          id="services"
+        <OptionGroup id="services" isOpen={!!openOptionGroups.services} onToggle={() => setOpenOptionGroups((current) => ({ ...current, services: !current.services }))}
           title="Profil & services"
           description="Profil public, comptes liés et sources externes."
           summary={`${socialProfile.visibility === "public" ? "Public" : "Privé"} · Steam ${steamProfile.steamId ? "lié" : "off"}`}
@@ -17028,8 +17028,7 @@ function OptionsTab({
 
         </OptionGroup>
 
-        <OptionGroup
-          id="development"
+        <OptionGroup id="development" isOpen={!!openOptionGroups.development} onToggle={() => setOpenOptionGroups((current) => ({ ...current, development: !current.development }))}
           title="Développement"
           description="Accès internes pour tester les grands systèmes sans attendre le bon niveau."
           summary="Tests internes"
@@ -17061,8 +17060,7 @@ function OptionsTab({
           </div>
         </OptionGroup>
 
-        <OptionGroup
-          id="data"
+        <OptionGroup id="data" isOpen={!!openOptionGroups.data} onToggle={() => setOpenOptionGroups((current) => ({ ...current, data: !current.data }))}
           title="Données"
           description="Sauvegarde, import et contrôle de cohérence de ta bibliothèque."
           summary={gameIntegrityIssues.length ? `${gameIntegrityIssues.length} à vérifier` : "OK"}
@@ -18523,32 +18521,6 @@ export default function App() {
   const [soundStyle, setSoundStyle] = useState("balanced");
   const tabSwitchTimerRef = useRef(null);
   const tabTransitionTimerRef = useRef(null);
-  const pixelTransitionParticles = useMemo(
-    () => {
-      const particleCount =
-        appOptions.visualEffects === "boost"
-          ? 128
-          : appOptions.visualEffects === "calm"
-            ? 64
-            : 96;
-
-      return Array.from({ length: particleCount }).map((_, i) => {
-        const x = (i * 37) % 100;
-        const wave = Math.sin(i * 0.24) * 24;
-        const y = (i / (particleCount + 28)) * 100 + wave;
-
-        return {
-          id: i,
-          x: `${x}vw`,
-          y: `${y}vh`,
-          delay: `${(i % 18) * 0.01}s`,
-          size: `${4 + (i % 6)}px`,
-        };
-      });
-    },
-    [appOptions.visualEffects]
-  );
-
 const tabOrder = [
   "home",
   "news",
@@ -19579,6 +19551,19 @@ const updateHardwareCondition = async (id, condition) => {
     if (isAbortError(error)) return;
     console.error("Erreur état matériel :", error);
     setToast("Impossible de mettre à jour pour le moment.");
+  }
+};
+
+const updateHardwareAcquiredYear = async (id, value) => {
+  const acquiredYear = value === "" ? null : Number(value);
+  if (acquiredYear !== null && (!Number.isInteger(acquiredYear) || acquiredYear < 1950 || acquiredYear > new Date().getFullYear())) return;
+  try {
+    await updateDoc(doc(db, "hardware", id), { acquiredYear });
+    setToast(acquiredYear ? "Année d’obtention enregistrée." : "Année d’obtention retirée.");
+  } catch (error) {
+    if (isAbortError(error)) return;
+    console.error("Erreur année matériel :", error);
+    setToast("Impossible d’enregistrer l’année pour le moment.");
   }
 };
 
@@ -21284,14 +21269,9 @@ const setPlayedPlatforms = async (id, platforms) => {
   return null;
 }
 
-  const showFullHeader = activeTab === "library";
+  const showFullHeader = activeTab === "library" && appOptions.headerMode === "standard";
 
-  const showCompactHeader =
-  activeTab !== "home" &&
-  activeTab !== "library" &&
-  activeTab !== "hardware" &&
-  activeTab !== "profile" &&
-  activeTab !== "options";
+  const showCompactHeader = appOptions.headerMode !== "minimal" && !["home", "hardware", "profile", "options"].includes(activeTab) && !showFullHeader;
   return (
 
      <>
@@ -21361,11 +21341,11 @@ const setPlayedPlatforms = async (id, platforms) => {
       progress={progress}
     />
 
-    <StatsBarCompact
+    {appOptions.headerMode === "standard" && !["news", "upcoming", "deals", "live", "sanctuary", "top5"].includes(activeTab) && <StatsBarCompact
       total={games.length}
       finished={games.filter(isGameFinishedStatus).length}
       favorites={games.filter((g) => g.favorite).length}
-    />
+    />}
   </>
 )}
 
@@ -21748,6 +21728,7 @@ const setPlayedPlatforms = async (id, platforms) => {
     onUpdateHardwareStatus={updateHardwareStatus}
     onUpdateHardwareSanctuary={updateHardwareSanctuary}
     onUpdateHardwareCondition={updateHardwareCondition}
+    onUpdateHardwareAcquiredYear={updateHardwareAcquiredYear}
     onUpdateHardwareDisplaySize={updateHardwareDisplaySize}
     onUpdateHardwareRank={updateHardwareRank}
     onUpdateHardwareRating={updateHardwareRating}
@@ -21872,22 +21853,7 @@ const setPlayedPlatforms = async (id, platforms) => {
           onClose={() => setMiniPlayerLive(null)}
         /> 
 
-        {pixelTransition && (
-          <div className={`pixel-transition ${pixelTransition}`}>
-            {pixelTransitionParticles.map((particle) => (
-              <span
-                key={particle.id}
-                style={{
-                  "--x": particle.x,
-                  "--y": particle.y,
-                  "--delay": particle.delay,
-                  "--size": particle.size,
-                }}
-              />
-            ))}
-          </div>
-        )}
-
+        {pixelTransition && <ThemeTransition theme={theme} direction={pixelTransition} effects={appOptions.visualEffects} />}
 
       {!showSplash && (
 
