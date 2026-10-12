@@ -1,0 +1,37 @@
+html body[data-theme="theme-crimson"] {
+ --bg-main:radial-gradient(ellipse at 90% 75%,#e93e3212,transparent 45%),linear-gradient(180deg,#111419,#1d2229 55%,#0b0e12) !important;
+ --panel-bg:#20262ef2 !important; --panel-border:#89939c40 !important; --surface-bg:#2a313be8 !important; --surface-border:#94a0ac45 !important;
+ --input-bg:#12171e !important; --muted-bg:#c6d1da12 !important;
+ --accent:linear-gradient(115deg,#e53b32,#b32324 75%,#ce392d) !important; --accent-solid:#ff6252 !important; --accent-shadow:0 5px 20px #ff483025 !important;
+ --text-main:#f5f6f7 !important; --text-soft:#d0d7dc !important; --text-muted:#9ba8b3 !important; --genre-color:#ff9a66 !important;
+ --checkpoint-title-gradient:linear-gradient(180deg,#fff,#c9d1d8) !important; --checkpoint-title-glow:#c9d1d815 !important;
+ --theme-aurora:radial-gradient(ellipse at 80% 70%,#e53b3215,transparent 55%) !important;
+}
+html[data-theme="theme-crimson"] { --theme-chrome-bg:#111419 !important; }
+html body[data-theme="theme-crimson"] .app-shell::after { background:repeating-linear-gradient(125deg,transparent 0 70px,#a4adb508 70px 72px); }
+.redline-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:24px; box-sizing:border-box; overflow:hidden; color:#f1f4f6; background:repeating-conic-gradient(#ffffff03 0% 25%,transparent 0% 50%) 0 0/8px 8px,radial-gradient(ellipse at center,#252d37,#0b0e13 75%); }
+.redline-boot-content { width:min(430px,100%); text-align:center; }
+.redline-tachometer { display:block; width:240px; max-width:100%; height:200px; margin:0 auto 24px; }
+.redline-tachometer g { transition:transform 250ms ease-out; }
+.redline-kicker { color:#ff7a65; font:800 10px/1.5 system-ui; letter-spacing:.14em; }
+.redline-boot h1 { margin:16px 0 12px; font:900 italic clamp(34px,8vw,48px)/1.1 system-ui; letter-spacing:-.025em; }
+.redline-boot p { color:#acb8c4; font-size:14px; }
+.redline-progress { max-width:280px; height:8px; margin:28px auto 12px; background:#303944; transform:skewX(-18deg); overflow:hidden; }
+.redline-progress span { display:block; height:100%; background:repeating-linear-gradient(90deg,#ed493d 0 17px,#111419 17px 21px); transition:width 200ms; }
+.redline-boot small { display:flex; justify-content:space-between; max-width:280px; margin:auto; color:#a4b1bd; font:12px system-ui; }
+.redline-tab-transition { position:fixed; inset:0; z-index:2500; pointer-events:none; overflow:hidden; contain:strict; }
+.redline-asphalt { position:absolute; inset:0; background:repeating-conic-gradient(#ffffff04 0% 25%,transparent 0% 50%) 0 0/8px 8px,#111820e8; animation:redlineField 810ms ease both; }
+.redline-road-marks { position:absolute; left:-20%; right:-20%; top:70%; height:5px; background:repeating-linear-gradient(90deg,#e5e7eb 0 50px,transparent 50px 100px); animation:redlineRoadRun 800ms linear both; }
+.redline-tail-light { position:absolute; top:47%; left:-40%; width:60%; height:7px; border-radius:50%; background:linear-gradient(90deg,transparent,#ff3838,#fff4de); box-shadow:0 0 18px 5px #ff303060; animation:redlineLightRush 780ms ease-in both; }
+.redline-rpm-bars { position:absolute; left:50%; top:50%; width:min(360px,80vw); height:65px; display:flex; gap:5px; transform:translate(-50%,-50%) skewX(-18deg); }
+.redline-rpm-bars i { flex:1; background:var(--rpm-color); transform-origin:bottom; animation:redlineRpmRise 650ms ease var(--rpm-delay) both; }
+.redline-sparks { position:absolute; inset:0; }
+.redline-sparks i { position:absolute; left:0; top:var(--spark-y); width:12vw; height:2px; background:linear-gradient(90deg,transparent,#ffaf69); animation:redlineSparkRush 740ms ease-out var(--spark-delay) both; }
+.redline-tab-transition.direction-left .redline-tail-light,.redline-tab-transition.direction-left .redline-road-marks,.redline-tab-transition.direction-left .redline-sparks { scale:-1 1; }
+@keyframes redlineField { 0%,100%{opacity:0} 25%,65%{opacity:1} }
+@keyframes redlineRoadRun { 0%,100%{opacity:0} 25%,65%{opacity:.7} to{background-position:-500px 0} }
+@keyframes redlineLightRush { 0%{opacity:0;transform:translateX(0)} 25%,75%{opacity:1} 100%{opacity:0;transform:translateX(180vw)} }
+@keyframes redlineRpmRise { 0%{opacity:0;transform:scaleY(.1)} 40%,65%{opacity:.9;transform:scaleY(1)} 100%{opacity:0;transform:scaleY(.3)} }
+@keyframes redlineSparkRush { 0%{opacity:0;transform:translateX(-20vw)} 35%,70%{opacity:.65} 100%{opacity:0;transform:translateX(120vw)} }
+.redline-tab-transition.effects-calm .redline-sparks { display:none; }
+@media(prefers-reduced-motion:reduce){.redline-tab-transition{display:none}.redline-tachometer g{transition:none}}

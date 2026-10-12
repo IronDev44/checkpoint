@@ -1,0 +1,46 @@
+/* Forest, aged stone and gold: the Quête de la relique identity. */
+html body[data-theme="theme-relic"] {
+ --bg-main:radial-gradient(ellipse at 15% 40%,#3974591c,transparent 50%),radial-gradient(ellipse at 85% 70%,#a88b4820,transparent 50%),linear-gradient(180deg,#07120e,#12251d 55%,#050c08) !important;
+ --panel-bg:#14231cf2 !important; --panel-border:#8b9e7650 !important;
+ --surface-bg:#21332ae8 !important; --surface-border:#7f9c8055 !important;
+ --input-bg:#091710 !important; --muted-bg:#d6b87112 !important;
+ --accent:linear-gradient(125deg,#42755a,#315b44 65%,#677948) !important;
+ --accent-solid:#75ac82 !important; --accent-shadow:0 5px 22px #75ac8225 !important;
+ --theme-aurora:radial-gradient(ellipse at 20% 40%,#75ac8225,transparent 55%),radial-gradient(ellipse at 80% 60%,#d6b87115,transparent 55%) !important;
+ --text-main:#f2f4e9 !important; --text-soft:#c4d0bb !important; --text-muted:#93aa91 !important; --genre-color:#dfc77d !important;
+ --checkpoint-title-gradient:linear-gradient(180deg,#f8eed0,#d6b871) !important; --checkpoint-title-glow:#d6b87125 !important;
+}
+html[data-theme="theme-relic"] { --theme-chrome-bg:#07120e !important; }
+html body[data-theme="theme-relic"] .app-shell::after { background:radial-gradient(ellipse at 30% 65%,#75ac8225,transparent 55%),var(--theme-aurora) !important; }
+html body[data-theme="theme-relic"] :is(.search-panel,.home-card,.profile-showcase-card,.sanctuary-section,.hardware-collection-card) { border-color:#9eaa7155; box-shadow:inset 0 1px 0 #dfc77d12,0 8px 24px #02080540; }
+.relic-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; overflow:hidden; padding:24px; box-sizing:border-box; color:#f3efdb; background:radial-gradient(ellipse at 50% 30%,#234334,#051009 75%); }
+.relic-forest-light { position:absolute; inset:-30%; background:repeating-conic-gradient(from 20deg at 50% -5%,transparent 0deg 12deg,#a8d9a810 12deg 16deg,transparent 16deg 30deg); opacity:.65; }
+.relic-boot-content { position:relative; text-align:center; width:min(430px,100%); animation:relicIntroAwaken 750ms ease-out both; }
+.relic-emblem { display:block; width:185px; height:185px; margin:0 auto 25px; filter:drop-shadow(0 0 24px #d6b87130); }
+.relic-kicker { color:#d6b871; font:700 10px/1.4 system-ui; letter-spacing:.2em; }
+.relic-boot h1 { font:700 clamp(36px,8vw,50px)/1.1 Georgia,serif; margin:16px 0 12px; color:#f5e8be; }
+.relic-boot p { color:#b3c5ac; font-size:14px; line-height:1.5; }
+.relic-boot-progress { height:4px; max-width:280px; margin:30px auto 12px; background:#314033; border-radius:5px; overflow:hidden; }
+.relic-boot-progress span { display:block; height:100%; background:linear-gradient(90deg,#75ac82,#e0c779); transition:width 200ms; }
+.relic-boot small { display:flex; justify-content:space-between; max-width:280px; margin:auto; color:#a1b39a; font:12px system-ui; }
+.relic-motes { position:absolute; inset:0; pointer-events:none; }
+.relic-motes i { position:absolute; left:var(--mote-x); top:var(--mote-y); width:3px; height:3px; border-radius:50%; background:#d9ecb4; box-shadow:0 0 8px #bdd78d; }
+.relic-boot .relic-motes i { animation:relicFirefly 3s ease-in-out infinite alternate; animation-delay:var(--mote-delay); }
+@keyframes relicFirefly { from{opacity:.15;transform:translateY(18px)} to{opacity:.65;transform:translateY(-18px)} }
+@keyframes relicIntroAwaken { from{opacity:0;transform:translateY(18px) scale(.95)} to{opacity:1;transform:none} }
+.relic-tab-transition { position:fixed; inset:0; z-index:2500; pointer-events:none; overflow:hidden; contain:strict; }
+.relic-stone-gate { position:absolute; top:0; bottom:0; width:51%; border-inline:1px solid #d6b87150; background:repeating-linear-gradient(0deg,transparent 0 89px,#0a1610 89px 92px),repeating-linear-gradient(90deg,#203b2ddf 0 119px,#102519eb 119px 122px); }
+.gate-left { left:0; animation:relicGateLeft 780ms ease-in-out both; }
+.gate-right { right:0; animation:relicGateRight 780ms ease-in-out both; }
+.relic-temple-light { position:absolute; inset:0; background:radial-gradient(circle,#fff0aa35,#75ac8220 25%,transparent 70%); animation:relicLightReveal 800ms ease both; }
+.relic-transition-seal { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); animation:relicSealAwaken 780ms ease both; }
+.relic-transition-seal .relic-emblem { width:210px; height:210px; margin:0; }
+.relic-tab-transition .relic-motes i { animation:relicMoteRise 700ms ease-out var(--mote-delay) both; }
+@keyframes relicGateLeft { 0%{opacity:0;transform:translateX(-100%)} 30%,50%{opacity:1;transform:translateX(0)} 100%{opacity:0;transform:translateX(-100%)} }
+@keyframes relicGateRight { 0%{opacity:0;transform:translateX(100%)} 30%,50%{opacity:1;transform:translateX(0)} 100%{opacity:0;transform:translateX(100%)} }
+@keyframes relicSealAwaken { 0%{opacity:0;transform:translate(-50%,-50%) scale(.4)} 35%,55%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.4)} }
+@keyframes relicLightReveal { 0%,100%{opacity:0} 35%,60%{opacity:1} }
+@keyframes relicMoteRise { 0%{opacity:0;transform:translateY(50px)} 30%{opacity:.9} 100%{opacity:0;transform:translateY(-100px)} }
+.relic-tab-transition.effects-calm .relic-motes { display:none; }
+body[data-effects="calm"] .relic-boot .relic-motes i { animation:none; opacity:.4; }
+@media(prefers-reduced-motion:reduce){.relic-tab-transition{display:none}.relic-boot-content,.relic-boot .relic-motes i{animation:none}}

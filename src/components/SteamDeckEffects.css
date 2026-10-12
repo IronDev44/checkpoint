@@ -1,0 +1,30 @@
+.deck-boot { position:fixed; inset:0; z-index:99999; overflow:hidden; display:grid; place-items:center; background:radial-gradient(ellipse at 50% 45%,#1b3653,#050a13 70%); color:#f1f5f9; padding:24px; box-sizing:border-box; }
+.deck-boot-grid { position:absolute; inset:0; opacity:.18; background:linear-gradient(#60a5fa25 1px,transparent 1px),linear-gradient(90deg,#60a5fa25 1px,transparent 1px); background-size:48px 48px; mask-image:radial-gradient(ellipse,#000,transparent 75%); }
+.deck-boot-content { position:relative; width:min(560px,100%); text-align:center; animation:deckBootIn 600ms ease-out both; }
+.deck-boot-kicker { font:700 10px/1.4 system-ui; letter-spacing:.24em; color:#94a3b8; }
+.deck-device { display:block; width:100%; height:auto; }
+.deck-boot .deck-device { margin:32px auto; filter:drop-shadow(0 20px 36px #0009); }
+.deck-screen-ring { transform-origin:180px 80px; animation:deckRing 2400ms linear infinite; }
+.deck-boot h1 { margin:16px 0 10px; font:800 clamp(30px,8vw,48px)/1.1 system-ui; letter-spacing:-.04em; }
+.deck-boot p { color:#a8bbd1; font-size:14px; }
+.deck-boot-progress { height:4px; max-width:300px; background:#243145; border-radius:8px; margin:30px auto 12px; overflow:hidden; }
+.deck-boot-progress span { height:100%; display:block; background:#60a5fa; transition:width .2s; box-shadow:0 0 15px #60a5fa; }
+.deck-boot small { display:flex; justify-content:space-between; max-width:300px; margin:auto; color:#94a3b8; font:12px system-ui; }
+.deck-boot.complete .deck-screen-ring { stroke:#86efac; }
+@keyframes deckBootIn { from{opacity:0;transform:translateY(20px) scale(.95)} to{opacity:1;transform:none} }
+@keyframes deckRing { to{transform:rotate(360deg)} }
+.deck-tab-transition { position:fixed; inset:0; z-index:2500; pointer-events:none; overflow:hidden; contain:strict; animation:deckTransitionFade 820ms both; }
+.deck-transition-pane { position:absolute; top:0; bottom:0; width:51%; background:linear-gradient(160deg,#15283ef5,#060c16fa); border-inline:1px solid #60a5fa55; }
+.pane-left { left:0; animation:deckPaneLeft 780ms ease-in-out both; }
+.pane-right { right:0; animation:deckPaneRight 780ms ease-in-out both; }
+.deck-transition-device { position:absolute; top:50%; left:50%; width:min(360px,75vw); transform:translate(-50%,-50%); animation:deckDeviceReveal 750ms ease both; }
+.deck-transition-tiles { position:absolute; left:8%; right:8%; bottom:15%; display:flex; gap:10px; }
+.deck-transition-tiles i { flex:1; height:46px; border:1px solid #7dbbff45; border-radius:6px; background:linear-gradient(135deg,#60a5fa22,#94a3b810); animation:deckTileSlide 650ms ease calc(var(--tile-index)*10ms) both; }
+.direction-left .deck-transition-tiles { flex-direction:row-reverse; }
+@keyframes deckTransitionFade { 0%,100%{opacity:0} 15%,75%{opacity:1} }
+@keyframes deckPaneLeft { 0%{transform:translateX(-100%)} 30%,60%{transform:translateX(0)} 100%{transform:translateX(-100%)} }
+@keyframes deckPaneRight { 0%{transform:translateX(100%)} 30%,60%{transform:translateX(0)} 100%{transform:translateX(100%)} }
+@keyframes deckDeviceReveal { 0%{opacity:0;transform:translate(-50%,-50%) scale(.7)} 35%,60%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)} }
+@keyframes deckTileSlide { 0%{opacity:0;transform:translateY(50px)} 40%,65%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-30px)} }
+.effects-calm .deck-transition-tiles { display:none; }
+@media(prefers-reduced-motion:reduce){.deck-screen-ring,.deck-boot-content{animation:none}.deck-tab-transition{display:none}}

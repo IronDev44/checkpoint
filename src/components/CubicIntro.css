@@ -1,0 +1,22 @@
+.cubic-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; overflow:hidden; box-sizing:border-box; padding:24px; color:#edf3e5; background:radial-gradient(ellipse at 50% 30%,#283e32,#091711 75%); }
+.cubic-boot-content { position:relative; z-index:1; width:min(430px,100%); text-align:center; }
+.cubic-boot-mining { position:relative; width:140px; height:140px; margin:0 auto 38px; }
+.cubic-boot-block { position:absolute; inset:0; background:repeating-conic-gradient(#795234 0% 25%,#956a43 0% 50%) 0 0/28px 28px; border:5px solid #392a20; box-shadow:inset 7px 0 #ffffff14,inset -10px -10px #0003,0 12px 0 #06110b66; image-rendering:pixelated; animation:cubicMiningBlock 2600ms steps(1,end) infinite; }
+.cubic-boot-grass { position:absolute; top:0; left:0; right:0; height:26px; background:repeating-conic-gradient(#79a74c 0% 25%,#527d33 0% 50%) 0 0/20px 20px; border-bottom:8px solid #446b2d; clip-path:polygon(0 0,100% 0,100% 85%,85% 85%,85% 100%,65% 100%,65% 80%,45% 80%,45% 100%,20% 100%,20% 85%,0 85%); }
+.cubic-boot-crack { position:absolute; inset:0; background:#201a16; clip-path:polygon(47% 0,53% 0,53% 24%,65% 24%,65% 32%,55% 32%,55% 46%,78% 46%,78% 53%,57% 53%,57% 67%,67% 67%,67% 100%,60% 100%,60% 75%,46% 75%,46% 61%,24% 61%,24% 72%,17% 72%,17% 54%,44% 54%,44% 37%,35% 37%,35% 29%,47% 29%); animation:cubicMiningCrack 2600ms steps(3,end) infinite; }
+.cubic-boot-fragments { position:absolute; left:50%; top:50%; }
+.cubic-boot-fragments i { position:absolute; width:15px; height:15px; margin:-7px; background:var(--fragment-color); box-shadow:inset -4px -4px #0003; animation:cubicMiningFragments 2600ms ease-out infinite; }
+.cubic-boot-kicker { color:#9dce78; font:800 10px/1.6 monospace; letter-spacing:.12em; }
+.cubic-boot h1 { margin:16px 0 12px; color:#e0e4d8; font:900 clamp(34px,8vw,48px)/1.1 monospace; letter-spacing:-.04em; text-shadow:3px 3px #455443,5px 5px #070e09; }
+.cubic-boot p { color:#b2c3ad; font-size:14px; line-height:1.5; }
+.cubic-boot-progress { max-width:280px; height:12px; margin:28px auto 12px; background:#07110b; border:2px solid #607052; box-shadow:inset 0 2px #0005; overflow:hidden; }
+.cubic-boot-progress span { display:block; height:100%; background:repeating-linear-gradient(90deg,#81b850 0 18px,#547d34 18px 21px); transition:width 200ms; }
+.cubic-boot small { display:flex; justify-content:space-between; max-width:280px; margin:auto; color:#a4b69b; font:12px monospace; }
+.cubic-boot-terrain { position:absolute; bottom:0; left:0; right:0; display:flex; align-items:flex-end; opacity:.28; }
+.cubic-boot-terrain i { flex:1; height:var(--terrain-height); border-top:10px solid #6c974a; background:repeating-conic-gradient(#67492e 0% 25%,#815a36 0% 50%) 0 0/32px 32px; }
+@keyframes cubicMiningBlock { 0%,67%{opacity:1;transform:none} 68%,88%{opacity:0} 89%,100%{opacity:1} }
+@keyframes cubicMiningCrack { 0%,12%{opacity:0;transform:scale(.2)} 55%,67%{opacity:1;transform:scale(1)} 68%,100%{opacity:0} }
+@keyframes cubicMiningFragments { 0%,65%{opacity:0;transform:translate(0,0)} 68%{opacity:1;transform:translate(0,0)} 88%,100%{opacity:0;transform:translate(var(--fragment-x),var(--fragment-y)) rotate(var(--fragment-turn))} }
+body[data-effects="calm"] .cubic-boot-block,body[data-effects="calm"] .cubic-boot-crack { animation:none; }
+body[data-effects="calm"] .cubic-boot-crack,body[data-effects="calm"] .cubic-boot-fragments { display:none; }
+@media(prefers-reduced-motion:reduce){.cubic-boot-block{animation:none}.cubic-boot-crack,.cubic-boot-fragments{display:none}}

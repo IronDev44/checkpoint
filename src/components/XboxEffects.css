@@ -1,0 +1,22 @@
+.xbox-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; overflow:hidden; padding:24px; box-sizing:border-box; background:radial-gradient(ellipse at 50% 35%,#124524,#020a05 70%); color:#f0fdf4; }
+.xbox-boot-content { width:min(430px,100%); text-align:center; animation:xboxBootReveal 650ms ease-out both; }
+.xbox-sphere { position:relative; width:140px; height:140px; margin:0 auto; border-radius:50%; background:radial-gradient(circle at 35% 25%,#57b66d,#14742c 45%,#073113 80%); border:1px solid #86efac66; box-shadow:inset -15px -15px 30px #0005,inset 0 2px 4px #bbf7d055,0 0 65px #4ade8033; }
+.xbox-sphere svg { width:100%; height:100%; filter:drop-shadow(0 0 7px #86efac77); }
+.xbox-boot h1 { font:800 clamp(32px,8vw,48px)/1.1 system-ui; margin:32px 0 12px; letter-spacing:-.04em; }
+.xbox-boot p { color:#a5bfad; font-size:14px; }
+.xbox-boot-progress { max-width:280px; margin:34px auto 12px; height:5px; border-radius:8px; background:#183723; overflow:hidden; }
+.xbox-boot-progress span { display:block; height:100%; background:#66df83; transition:width 200ms; }
+.xbox-boot small { display:flex; justify-content:space-between; max-width:280px; margin:auto; color:#9bbbA4; font:12px system-ui; }
+@keyframes xboxBootReveal { from{opacity:0;transform:scale(.85) translateY(20px)} to{opacity:1;transform:none} }
+.xbox-tab-transition { position:fixed; inset:0; z-index:2500; overflow:hidden; pointer-events:none; contain:strict; }
+.xbox-transition-glow { position:absolute; inset:0; background:radial-gradient(circle,#238e3e55,#020a05bb); animation:xboxPassFade 820ms both; }
+.xbox-dashboard-tiles { position:absolute; inset:-8%; display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(3,1fr); gap:12px; perspective:800px; }
+.xbox-dashboard-tiles i { border-radius:8px; border:1px solid #86efac44; background:linear-gradient(140deg,#23713d,#082a14); animation:xboxTileTurn 700ms ease-in-out var(--tile-delay) both; }
+.direction-left .xbox-dashboard-tiles i { animation-name:xboxTileTurnLeft; }
+.xbox-transition-emblem { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); animation:xboxEmblemReveal 760ms ease both; }
+@keyframes xboxTileTurn { 0%{opacity:0;transform:translateX(-65vw) rotateY(85deg) scale(.6)} 35%,60%{opacity:.85;transform:translateX(0) rotateY(0deg) scale(1)} 100%{opacity:0;transform:translateX(65vw) rotateY(-85deg) scale(.6)} }
+@keyframes xboxTileTurnLeft { 0%{opacity:0;transform:translateX(65vw) rotateY(-85deg) scale(.6)} 35%,60%{opacity:.85;transform:translateX(0) rotateY(0deg) scale(1)} 100%{opacity:0;transform:translateX(-65vw) rotateY(85deg) scale(.6)} }
+@keyframes xboxEmblemReveal { 0%{opacity:0;transform:translate(-50%,-50%) scale(.4)} 35%,60%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)} }
+@keyframes xboxPassFade { 0%,100%{opacity:0} 25%,65%{opacity:1} }
+.effects-calm .xbox-dashboard-tiles { display:none; }
+@media(prefers-reduced-motion:reduce){.xbox-tab-transition{display:none}.xbox-boot-content{animation:none}}

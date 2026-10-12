@@ -1,0 +1,35 @@
+.ff-crystal-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:24px; box-sizing:border-box; overflow:hidden; background:radial-gradient(ellipse at 50% 40%,#133158,#050d24 75%); color:#eaf7ff; }
+.ff-crystal-nebula { position:absolute; inset:-20%; background:radial-gradient(ellipse at 25% 55%,#7469c525,transparent 45%),radial-gradient(ellipse at 70% 30%,#4ebbf025,transparent 40%); }
+.ff-crystal-boot-content { position:relative; width:min(430px,100%); text-align:center; }
+.ff-crystal-altar { position:relative; width:150px; height:225px; margin:0 auto 26px; }
+.ff-crystal { display:block; width:100%; height:100%; filter:drop-shadow(0 0 22px #71c9ff60); }
+.ff-crystal-boot .ff-crystal { animation:ffCrystalFloat 2800ms ease-in-out infinite alternate; }
+.ff-crystal-altar-ring { position:absolute; width:190px; height:45px; left:-20px; bottom:-6px; border:1px solid #81d2ff70; border-radius:50%; box-shadow:0 0 25px #63baff25,inset 0 0 18px #63baff25; }
+.ff-crystal-kicker { color:#99d8fa; font:700 10px/1.5 system-ui; letter-spacing:.17em; }
+.ff-crystal-boot h1 { color:#eef8ff; font:700 clamp(35px,8vw,49px)/1.1 Georgia,serif; letter-spacing:.03em; margin:16px 0 12px; text-shadow:0 0 25px #8ebaff40; }
+.ff-crystal-boot p { color:#b5c6df; font-size:14px; }
+.ff-crystal-progress { max-width:280px; height:4px; margin:28px auto 12px; background:#283853; overflow:hidden; border-radius:5px; }
+.ff-crystal-progress span { display:block; height:100%; background:linear-gradient(90deg,#6aa7e5,#d7f8ff); transition:width 200ms; }
+.ff-crystal-boot small { display:flex; justify-content:space-between; max-width:280px; margin:auto; color:#a8bdd7; font:12px system-ui; }
+.ff-crystal-dust { position:absolute; inset:0; }
+.ff-crystal-dust i { position:absolute; left:var(--dust-x); top:var(--dust-y); width:3px; height:3px; border-radius:50%; background:#ccf5ff; box-shadow:0 0 10px #8dcdff; }
+.ff-crystal-boot .ff-crystal-dust i { animation:ffCrystalFloat 3s ease-in-out infinite alternate; animation-delay:var(--dust-delay); opacity:.4; }
+.ff-crystal-transition { position:fixed; inset:0; z-index:2500; overflow:hidden; pointer-events:none; contain:strict; }
+.ff-crystal-invocation-glow { position:absolute; inset:0; background:radial-gradient(ellipse,#a3dbff60,#315ca95c 30%,#05122cd9 75%); animation:ffCrystalGlow 810ms ease both; }
+.ff-crystal-summon-circle { position:absolute; left:50%; top:50%; width:280px; height:280px; margin:-140px; animation:ffCrystalCircle 800ms ease-out both; }
+.ff-crystal-summon-circle i { position:absolute; inset:0; border:2px solid #a2e5ff; border-radius:50%; box-shadow:0 0 15px #85ceff50; }
+.ff-crystal-summon-circle i:nth-child(2){inset:15%;border-style:dashed;border-color:#b6a9ed;transform:rotate(25deg)}
+.ff-crystal-summon-circle i:nth-child(3){inset:29%;border-width:1px;border-color:#e9faff}
+.ff-crystal-summoned { position:absolute; top:50%; left:50%; width:130px; height:195px; animation:ffCrystalSummon 790ms ease both; }
+.ff-crystal-shards { position:absolute; top:50%; left:50%; }
+.ff-crystal-shards i { position:absolute; width:13px; height:38px; margin:-19px -6px; background:linear-gradient(90deg,#4386d6,#d5f8ff,#78b7ec); clip-path:polygon(50% 0,100% 30%,75% 80%,50% 100%,25% 80%,0 30%); animation:ffCrystalShard 740ms ease-out var(--shard-delay) both; }
+.ff-crystal-transition .ff-crystal-dust i { animation:ffCrystalDustRise 740ms ease-out var(--dust-delay) both; }
+@keyframes ffCrystalFloat { from{transform:translateY(7px)} to{transform:translateY(-7px)} }
+@keyframes ffCrystalGlow { 0%,100%{opacity:0} 40%,60%{opacity:1} }
+@keyframes ffCrystalCircle { 0%{opacity:0;transform:scale(.3) rotate(-45deg)} 40%,60%{opacity:1} 100%{opacity:0;transform:scale(2.4) rotate(45deg)} }
+@keyframes ffCrystalSummon { 0%{opacity:0;transform:translate(-50%,-30%) scale(.3)} 35%,55%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-65%) scale(1.3)} }
+@keyframes ffCrystalShard { 0%,35%{opacity:0;transform:rotate(var(--shard-angle)) translateY(25px) scale(.2)} 55%{opacity:1} 100%{opacity:0;transform:rotate(var(--shard-angle)) translateY(var(--shard-distance)) scale(.7)} }
+@keyframes ffCrystalDustRise { 0%,100%{opacity:0} 35%{opacity:.8} 100%{transform:translateY(-80px)} }
+.ff-crystal-transition.effects-calm .ff-crystal-shards { display:none; }
+body[data-effects="calm"] .ff-crystal-boot .ff-crystal,body[data-effects="calm"] .ff-crystal-boot .ff-crystal-dust i { animation:none; }
+@media(prefers-reduced-motion:reduce){.ff-crystal-transition{display:none}.ff-crystal-boot .ff-crystal,.ff-crystal-boot .ff-crystal-dust i{animation:none}}

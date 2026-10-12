@@ -1,0 +1,19 @@
+.tamer-tab-transition { position:fixed; inset:0; z-index:2500; pointer-events:none; overflow:hidden; contain:strict; }
+.tamer-capture-glow { position:absolute; inset:0; background:radial-gradient(circle at center,#fff5c460,#f6bd3525 25%,#111c38c9 70%); animation:tamerGlow 800ms ease both; }
+.tamer-capsule { position:absolute; left:50%; top:50%; width:150px; height:150px; margin:-75px; animation:tamerCapsule 780ms ease both; filter:drop-shadow(0 12px 22px #0006); }
+.tamer-capsule-top,.tamer-capsule-bottom { position:absolute; left:0; width:100%; height:50%; box-sizing:border-box; border:7px solid #192238; }
+.tamer-capsule-top { top:0; border-radius:150px 150px 0 0; background:radial-gradient(ellipse at 32% 30%,#ff8e89,#ef414b 55%,#a71832); animation:tamerOpenTop 780ms ease both; }
+.tamer-capsule-bottom { bottom:0; border-radius:0 0 150px 150px; background:linear-gradient(135deg,#fff,#e4eaf5 65%,#a2aec8); animation:tamerOpenBottom 780ms ease both; }
+.tamer-capsule-button { position:absolute; left:50%; top:50%; width:38px; height:38px; margin:-19px; box-sizing:border-box; border:7px solid #192238; border-radius:50%; background:#fff; box-shadow:inset 0 0 0 3px #becbe0; animation:tamerButton 780ms ease both; }
+.tamer-capture-ring { position:absolute; left:50%; top:50%; width:180px; height:180px; margin:-90px; border:3px solid #ffe591; box-sizing:border-box; border-radius:50%; box-shadow:0 0 22px #ffd85880,inset 0 0 22px #ffd85850; animation:tamerRing 780ms ease-out both; }
+.tamer-capture-sparks { position:absolute; left:50%; top:50%; }
+.tamer-capture-sparks i { position:absolute; width:6px; height:14px; margin:-7px -3px; background:#ffe99b; border-radius:2px; box-shadow:0 0 12px #ffcf49; animation:tamerSpark 730ms ease-out var(--capture-delay) both; }
+@keyframes tamerCapsule { 0%{opacity:0;transform:translateY(60px) rotate(-25deg) scale(.4)} 28%,52%{opacity:1;transform:translateY(0) rotate(0) scale(1)} 100%{opacity:0;transform:scale(1.25)} }
+@keyframes tamerOpenTop { 0%,42%{transform:none} 75%,100%{transform:translateY(-60px) rotate(-12deg)} }
+@keyframes tamerOpenBottom { 0%,42%{transform:none} 75%,100%{transform:translateY(60px) rotate(12deg)} }
+@keyframes tamerButton { 0%,42%{opacity:1} 65%,100%{opacity:0;transform:scale(2)} }
+@keyframes tamerRing { 0%,25%{opacity:0;transform:scale(.4)} 45%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(5)} }
+@keyframes tamerGlow { 0%,100%{opacity:0} 35%,55%{opacity:1} }
+@keyframes tamerSpark { 0%,35%{opacity:0;transform:rotate(var(--capture-angle)) translateY(35px) scale(.3)} 50%{opacity:1} 100%{opacity:0;transform:rotate(var(--capture-angle)) translateY(var(--capture-distance)) scale(.5)} }
+.tamer-tab-transition.effects-calm .tamer-capture-sparks { display:none; }
+@media(prefers-reduced-motion:reduce){.tamer-tab-transition{display:none}}

@@ -1,0 +1,45 @@
+/* Comic-inspired colours and crisp edges, scoped to Super-héros multivers. */
+html body[data-theme="theme-multiverse"] {
+ --bg-main:radial-gradient(ellipse at 10% 35%,#c92e4520,transparent 45%),radial-gradient(ellipse at 90% 65%,#2563eb20,transparent 45%),linear-gradient(180deg,#080f20,#101d38 55%,#050a16) !important;
+ --panel-bg:#111f37f2 !important; --panel-border:#6580ab55 !important;
+ --surface-bg:#192b49e8 !important; --surface-border:#7191bf55 !important;
+ --input-bg:#091326 !important; --muted-bg:#ffce5414 !important;
+ --accent:linear-gradient(125deg,#e83f56,#c92945 65%,#ef6b45) !important;
+ --accent-solid:#f05266 !important; --accent-shadow:0 5px 22px #e83f5635 !important;
+ --theme-aurora:radial-gradient(ellipse at 20% 45%,#e83f5620,transparent 55%),radial-gradient(ellipse at 80% 60%,#2563eb25,transparent 55%) !important;
+ --text-main:#f5f7ff !important; --text-soft:#c5d3e9 !important; --text-muted:#99acc9 !important; --genre-color:#ffce54 !important;
+ --checkpoint-title-gradient:linear-gradient(180deg,#fff3c2,#ffce54) !important; --checkpoint-title-glow:#ffce5430 !important;
+}
+html[data-theme="theme-multiverse"] { --theme-chrome-bg:#080f20 !important; }
+html body[data-theme="theme-multiverse"] .app-shell::after { background:radial-gradient(circle,#97b8ee20 1px,transparent 1.5px) 0 0 / 10px 10px,var(--theme-aurora) !important; filter:none; }
+html body[data-theme="theme-multiverse"] :is(.search-panel,.home-card,.profile-showcase-card,.sanctuary-section,.hardware-collection-card) { border-color:#6580ab55; box-shadow:0 5px 0 #04091666,inset 0 1px 0 #ffffff0d; }
+.hero-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; overflow:hidden; padding:24px; box-sizing:border-box; color:#f5f7ff; background:linear-gradient(135deg,#29142a,#0e1a34 50%,#163461); }
+.hero-halftone { position:absolute; inset:0; opacity:.3; background:radial-gradient(circle,#acc8ff30 1px,transparent 1.5px) 0 0 / 9px 9px; mask-image:linear-gradient(135deg,#000,transparent 70%); }
+.hero-boot-content { position:relative; text-align:center; width:min(460px,100%); animation:heroBootArrive 650ms ease-out both; }
+.hero-emblem { display:block; width:150px; height:150px; margin:0 auto 24px; filter:drop-shadow(0 10px 0 #03081755); }
+.hero-kicker { color:#ffce54; font:800 10px/1.5 system-ui; letter-spacing:.16em; }
+.hero-boot h1 { margin:16px 0; font:900 italic clamp(30px,8vw,48px)/1 system-ui; letter-spacing:-.035em; color:#fff1be; text-shadow:3px 4px 0 #060c1c; }
+.hero-boot p { color:#bfd0e9; font-size:14px; line-height:1.5; }
+.hero-boot-progress { height:6px; max-width:290px; margin:30px auto 12px; border:1px solid #6688b855; border-radius:5px; overflow:hidden; background:#081326; }
+.hero-boot-progress span { display:block; height:100%; background:linear-gradient(90deg,#f05266,#ffce54); transition:width 200ms; }
+.hero-boot small { display:flex; justify-content:space-between; max-width:290px; margin:auto; color:#adc1e0; font:12px system-ui; }
+@keyframes heroBootArrive { from{opacity:0;transform:translateY(30px) scale(.8)} to{opacity:1;transform:none} }
+.hero-tab-transition { position:fixed; inset:0; z-index:2500; pointer-events:none; overflow:hidden; contain:strict; }
+.hero-panel { position:absolute; inset:-20%; opacity:0; background:repeating-linear-gradient(125deg,#ffffff09 0 2px,transparent 2px 20px),#142952; animation:heroPanelClose 780ms ease-in-out both; }
+.hero-panel-red { background-color:#90243be8; clip-path:polygon(0 0,68% 0,30% 100%,0 100%); }
+.hero-panel-blue { background-color:#173d7ae8; clip-path:polygon(68% 0,100% 0,100% 100%,30% 100%); animation-name:heroPanelCloseBlue; }
+.hero-portal { position:absolute; left:50%; top:50%; width:200px; height:200px; transform:translate(-50%,-50%); animation:heroPortalOpen 780ms ease both; }
+.hero-portal > i { position:absolute; inset:-15px; border:3px solid #ffce54; border-radius:50%; box-shadow:0 0 22px #ffce5477; }
+.hero-portal > i:nth-child(2) { inset:-35px; border:2px dashed #f05266; }
+.hero-portal .hero-emblem { width:100%; height:100%; margin:0; }
+.hero-energy { position:absolute; left:50%; top:50%; }
+.hero-energy i { position:absolute; width:60px; height:3px; background:#ffce54; transform-origin:0 50%; animation:heroEnergyBurst 700ms ease-out var(--hero-delay) both; }
+@keyframes heroPanelClose { 0%{opacity:0;transform:translateX(-65%)} 35%,60%{opacity:1;transform:translateX(0)} 100%{opacity:0;transform:translateX(-65%)} }
+@keyframes heroPanelCloseBlue { 0%{opacity:0;transform:translateX(65%)} 35%,60%{opacity:1;transform:translateX(0)} 100%{opacity:0;transform:translateX(65%)} }
+.direction-left .hero-panel-red { animation-name:heroPanelCloseBlue; }
+.direction-left .hero-panel-blue { animation-name:heroPanelClose; }
+@keyframes heroPortalOpen { 0%{opacity:0;transform:translate(-50%,-50%) scale(.1) rotate(-30deg)} 40%,60%{opacity:1;transform:translate(-50%,-50%) scale(1) rotate(0deg)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.7) rotate(25deg)} }
+@keyframes heroEnergyBurst { 0%{opacity:0;transform:rotate(var(--hero-angle)) translateX(10px) scaleX(.2)} 35%{opacity:1} 100%{opacity:0;transform:rotate(var(--hero-angle)) translateX(80vmax) scaleX(2)} }
+.hero-tab-transition.effects-calm .hero-energy { display:none; }
+.hero-tab-transition.effects-calm .hero-portal > i { box-shadow:none; }
+@media(prefers-reduced-motion:reduce){.hero-tab-transition{display:none}.hero-boot-content{animation:none}}

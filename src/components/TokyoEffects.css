@@ -1,0 +1,38 @@
+html body[data-theme="theme-cyberpunk"] {
+ --bg-main:radial-gradient(ellipse at 10% 65%,#36d5e51a,transparent 45%),radial-gradient(ellipse at 90% 35%,#ed67b21a,transparent 45%),linear-gradient(180deg,#0c1027,#1a2140 55%,#090d20) !important;
+ --panel-bg:#1a2340f2 !important; --panel-border:#8198c44a !important; --surface-bg:#273150e8 !important; --surface-border:#91a4d14a !important; --input-bg:#111830 !important; --muted-bg:#7be8ed12 !important;
+ --accent:linear-gradient(120deg,#176877,#3d5685 60%,#874467) !important; --accent-solid:#72e0e8 !important; --accent-shadow:0 5px 20px #72e0e825 !important;
+ --text-main:#f0f4ff !important; --text-soft:#c8d3ec !important; --text-muted:#9aaacb !important; --genre-color:#f29bd1 !important;
+ --checkpoint-title-gradient:linear-gradient(110deg,#b2f8ff,#8ddbe9 50%,#f5a8db) !important; --checkpoint-title-glow:#7be8ed25 !important; --theme-aurora:radial-gradient(ellipse at 20% 60%,#36d5e51c,transparent 55%),radial-gradient(ellipse at 80% 40%,#ed67b218,transparent 55%) !important;
+}
+html[data-theme="theme-cyberpunk"] { --theme-chrome-bg:#0c1027 !important; }
+.tokyo-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:24px; box-sizing:border-box; overflow:hidden; background:linear-gradient(#090e29,#252342 60%,#0b1424); color:#effaff; }
+.tokyo-street { position:absolute; inset:0; overflow:hidden; }
+.tokyo-buildings { position:absolute; left:0; right:0; bottom:18%; display:flex; align-items:flex-end; gap:4px; }
+.tokyo-buildings i { flex:1; height:var(--building-height); background:repeating-linear-gradient(90deg,transparent 0 10px,#10152c 10px 16px),repeating-linear-gradient(0deg,#10152c 0 15px,#aab9da20 15px 20px); border-top:4px solid #10152c; }
+.tokyo-sign { position:absolute; padding:10px 8px; border:2px solid currentColor; background:#0c142bd9; writing-mode:vertical-rl; font:700 22px/1.4 system-ui; box-shadow:0 0 12px currentColor,inset 0 0 12px #ffffff10; text-shadow:0 0 10px currentColor; }
+.sign-cyan { left:6%; top:20%; color:#6de2e9; }.sign-pink { right:7%; top:31%; color:#f49acc; }.sign-small { right:20%; top:14%; color:#a6b9ff; font-size:14px; writing-mode:horizontal-tb; }
+.tokyo-street-reflection { position:absolute; bottom:0; left:0; right:0; height:18%; border-top:1px solid #9ac7e530; background:linear-gradient(90deg,transparent 3%,#6de2e92b 9%,transparent 20%,transparent 73%,#f49acc30 88%,transparent),repeating-linear-gradient(0deg,#080e2055 0 2px,transparent 2px 12px); }
+.tokyo-boot-content { position:relative; width:min(430px,100%); padding:30px 18px; box-sizing:border-box; text-align:center; background:radial-gradient(ellipse,#101a34f5,#101a34c9 55%,transparent 78%); }
+.tokyo-kicker { color:#ebafd2; font:700 10px/1.5 system-ui; letter-spacing:.1em; }
+.tokyo-boot h1 { margin:18px 0 12px; font:800 clamp(34px,8vw,48px)/1.1 system-ui; letter-spacing:-.025em; text-shadow:-2px 0 12px #6de2e930,2px 0 12px #f49acc30; }
+.tokyo-boot p { color:#c0cde5; font-size:14px; }
+.tokyo-progress { max-width:280px; height:5px; margin:28px auto 12px; background:#2b3654; overflow:hidden; border-radius:5px; }
+.tokyo-progress span { display:block; height:100%; background:linear-gradient(90deg,#6de2e9,#f49acc); transition:width 200ms; }
+.tokyo-boot small { display:flex; justify-content:space-between; max-width:280px; margin:auto; color:#b4c3e0; font:12px system-ui; }
+.tokyo-rain { position:absolute; inset:0; overflow:hidden; }
+.tokyo-rain i { position:absolute; left:var(--rain-x); top:-40px; width:1px; height:32px; background:linear-gradient(transparent,#b9e2f560); animation:tokyoRainFall var(--rain-duration) linear var(--rain-delay) infinite; }
+.tokyo-tab-transition { position:fixed; inset:0; z-index:2500; overflow:hidden; pointer-events:none; contain:strict; }
+.tokyo-transition-city { position:absolute; inset:0; background:#0c142be6; animation:tokyoCityFade 810ms ease both; }
+.tokyo-neon-panels { position:absolute; inset:0; }
+.tokyo-neon-panels i { position:absolute; top:-15%; bottom:-15%; width:32%; left:calc(var(--panel-index) * 28% - 12%); background:linear-gradient(110deg,#1c3d58dd,#203046f5,#5f3153dd); border-inline:2px solid #6de2e960; box-shadow:0 0 15px #6de2e925; transform:skewX(-12deg); animation:tokyoPanelSlide 730ms ease-in-out var(--panel-delay) both; }
+.tokyo-neon-panels i:nth-child(even){border-color:#f49acc80}
+.tokyo-tab-transition.direction-left .tokyo-neon-panels { transform:scaleX(-1); }
+.tokyo-transition-sign { position:absolute; left:50%; top:50%; padding:16px 25px; border:2px solid #f49acc; background:#101930e8; color:#f6b1dc; text-shadow:0 0 14px #ed67b2; box-shadow:0 0 20px #ed67b235; text-align:center; font:700 38px/1.3 system-ui; animation:tokyoSignReveal 790ms ease both; }
+.tokyo-transition-sign span { display:block; margin-top:8px; color:#9eecf1; font:700 11px/1.5 system-ui; letter-spacing:.15em; }
+@keyframes tokyoRainFall { to{transform:translate(-15vw,110vh)} }
+@keyframes tokyoCityFade { 0%,100%{opacity:0} 25%,65%{opacity:1} }
+@keyframes tokyoPanelSlide { 0%{opacity:0;transform:translateX(-110vw) skewX(-12deg)} 35%,55%{opacity:1;transform:skewX(-12deg)} 100%{opacity:0;transform:translateX(110vw) skewX(-12deg)} }
+@keyframes tokyoSignReveal { 0%{opacity:0;transform:translate(-50%,-50%) scale(.8)} 35%,60%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.1)} }
+body[data-effects="calm"] .tokyo-boot .tokyo-rain { display:none; }
+@media(prefers-reduced-motion:reduce){.tokyo-tab-transition,.tokyo-boot .tokyo-rain{display:none}}

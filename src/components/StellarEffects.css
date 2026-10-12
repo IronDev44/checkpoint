@@ -1,0 +1,27 @@
+.stellar-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; overflow:hidden; padding:24px; box-sizing:border-box; background:#02050d; color:#fff; }
+.stellar-star-field { position:absolute; inset:0; pointer-events:none; }
+.stellar-star-field i { position:absolute; left:var(--star-x); top:var(--star-y); width:var(--star-size); height:var(--star-size); background:#dbeafe; border-radius:50%; opacity:.65; box-shadow:0 0 5px #93c5fd77; }
+.stellar-boot .stellar-star-field i:nth-child(3n) { opacity:.3; }
+.stellar-horizon { position:absolute; top:70%; left:-15%; width:130%; height:70%; border-radius:50%; background:radial-gradient(ellipse at 50% 0%,#1c426a,#070c18 40%); border-top:1px solid #7dd3fc55; box-shadow:0 -10px 65px #38bdf820; }
+.stellar-boot-content { position:relative; width:min(560px,100%); text-align:center; animation:stellarTitleArrive 1100ms ease-out both; }
+.stellar-boot-kicker { color:#b3c0d4; font:700 9px/1.5 system-ui; letter-spacing:.2em; }
+.stellar-boot h1 { margin:26px 0 14px; font:900 clamp(30px,8vw,58px)/1.05 system-ui; letter-spacing:.06em; color:#f6d56c; text-shadow:0 0 24px #eab30825; }
+.stellar-boot p { font-size:14px; color:#a3b1c8; }
+.stellar-boot-progress { height:3px; max-width:300px; margin:34px auto 12px; background:#18233a; border-radius:6px; overflow:hidden; }
+.stellar-boot-progress span { display:block; height:100%; background:linear-gradient(90deg,#60a5fa,#e0f2fe); box-shadow:0 0 12px #7dd3fc; transition:width 200ms; }
+.stellar-boot small { display:flex; justify-content:space-between; max-width:300px; margin:auto; color:#a3b1c8; font:12px system-ui; }
+@keyframes stellarTitleArrive { from{opacity:0;transform:perspective(500px) translateZ(100px) translateY(15px)} to{opacity:1;transform:perspective(500px) translateZ(0) translateY(0)} }
+.stellar-tab-transition { position:fixed; inset:0; z-index:2500; overflow:hidden; pointer-events:none; contain:strict; background:#020611d9; animation:stellarJumpFade 820ms ease both; }
+.stellar-jump-core { position:absolute; inset:0; background:radial-gradient(ellipse at center,#e0f2fe66,transparent 12%,#38bdf81a 25%,transparent 60%); animation:stellarCoreExpand 780ms ease-out both; }
+.stellar-tab-transition .stellar-star-field i { left:50%; top:50%; width:2px; height:2px; border-radius:1px; opacity:0; transform-origin:0 50%; box-shadow:0 0 6px #7dd3fc88; animation:stellarHyperspace 700ms cubic-bezier(.55,0,.9,.55) var(--star-delay) both; }
+@keyframes stellarHyperspace {
+  0%{opacity:0;transform:rotate(var(--star-angle)) translateX(8vmin) scaleX(1)}
+  20%{opacity:1;transform:rotate(var(--star-angle)) translateX(12vmin) scaleX(5)}
+  65%{opacity:1;transform:rotate(var(--star-angle)) translateX(30vmax) scaleX(65)}
+  100%{opacity:0;transform:rotate(var(--star-angle)) translateX(90vmax) scaleX(120)}
+}
+@keyframes stellarCoreExpand { 0%{opacity:0;transform:scale(.3)} 40%{opacity:.9;transform:scale(1)} 100%{opacity:0;transform:scale(2)} }
+@keyframes stellarJumpFade { 0%,100%{opacity:0} 15%,75%{opacity:1} }
+.stellar-tab-transition.effects-calm .stellar-star-field i { box-shadow:none; }
+.stellar-tab-transition.effects-calm .stellar-jump-core { display:none; }
+@media(prefers-reduced-motion:reduce){.stellar-tab-transition{display:none}.stellar-boot-content{animation:none}}

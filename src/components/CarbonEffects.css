@@ -1,0 +1,38 @@
+html body[data-theme="theme-graphite"] {
+ --bg-main:radial-gradient(ellipse at 80% 25%,#8acced12,transparent 50%),linear-gradient(180deg,#111a22,#202c36 55%,#0c141b) !important;
+ --panel-bg:#22313cf2 !important; --panel-border:#9cbfd447 !important; --surface-bg:#2d3e4ae8 !important; --surface-border:#a6cadc45 !important;
+ --input-bg:#14212b !important; --muted-bg:#b5e3f512 !important;
+ --accent:linear-gradient(125deg,#426b82,#304f64 75%,#587c91) !important; --accent-solid:#b4deef !important; --accent-shadow:0 5px 20px #b4deef20 !important;
+ --text-main:#eff7fb !important; --text-soft:#c7dce6 !important; --text-muted:#9cb5c3 !important; --genre-color:#b4deef !important;
+ --checkpoint-title-gradient:linear-gradient(180deg,#f2fbff,#9fc9de) !important; --checkpoint-title-glow:#b4deef18 !important;
+ --theme-aurora:radial-gradient(ellipse at 70% 25%,#8acced18,transparent 55%) !important;
+}
+html[data-theme="theme-graphite"] { --theme-chrome-bg:#111a22 !important; }
+html body[data-theme="theme-graphite"] .app-shell::after { background:repeating-conic-gradient(#b4deef08 0% 25%,transparent 0% 50%) 0 0/12px 12px; }
+.carbon-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:24px; box-sizing:border-box; overflow:hidden; color:#eff8fd; background:repeating-conic-gradient(#ffffff03 0% 25%,transparent 0% 50%) 0 0/10px 10px,radial-gradient(ellipse at center,#293e4b,#0d1720 75%); }
+.carbon-boot-frost { position:absolute; inset:0; background:linear-gradient(135deg,#b8eaff12,transparent 45%),linear-gradient(45deg,transparent 60%,#b8eaff10); }
+.carbon-boot-content { position:relative; width:min(430px,100%); text-align:center; }
+.carbon-ice-core { display:block; width:180px; height:180px; margin:0 auto 28px; filter:drop-shadow(0 0 18px #b2e4ff25); }
+.carbon-boot .carbon-ice-core { animation:carbonCoreBreathe 2600ms ease-in-out infinite alternate; }
+.carbon-kicker { color:#accfdf; font:700 10px/1.5 system-ui; letter-spacing:.18em; }
+.carbon-boot h1 { margin:16px 0 12px; font:700 clamp(34px,8vw,48px)/1.1 system-ui; letter-spacing:-.025em; }
+.carbon-boot p { color:#b1c5d1; font-size:14px; }
+.carbon-progress { height:4px; max-width:280px; margin:28px auto 12px; background:#354d5b; overflow:hidden; }
+.carbon-progress span { display:block; height:100%; background:linear-gradient(90deg,#79abc8,#e0f7ff); transition:width 200ms; }
+.carbon-boot small { display:flex; justify-content:space-between; max-width:280px; margin:auto; color:#a7bfcd; font:12px system-ui; }
+.carbon-tab-transition { position:fixed; inset:0; z-index:2500; pointer-events:none; overflow:hidden; contain:strict; }
+.carbon-transition-frost { position:absolute; inset:0; background:radial-gradient(ellipse,#97cce64d,#12212fd4 70%); animation:carbonFrostFade 810ms ease both; }
+.carbon-ice-sheets { position:absolute; inset:0; }
+.carbon-ice-sheets i { position:absolute; top:-20%; bottom:-20%; left:calc(var(--sheet-index) * 16% - 10%); width:30%; border-inline:1px solid #d3f2ff75; background:linear-gradient(110deg,#c4eaff22,#526e8180,#c4eaff40); clip-path:polygon(15% 0,100% 0,85% 100%,0 100%); animation:carbonSheetSlide 730ms ease-in-out var(--sheet-delay) both; }
+.carbon-tab-transition.direction-left .carbon-ice-sheets { transform:scaleX(-1); }
+.carbon-transition-core { position:absolute; left:50%; top:50%; animation:carbonCoreReveal 790ms ease both; }
+.carbon-transition-core .carbon-ice-core { width:160px; height:160px; margin:0; }
+.carbon-ice-dust { position:absolute; inset:0; }
+.carbon-ice-dust i { position:absolute; left:var(--ice-x); top:var(--ice-y); width:5px; height:9px; background:#d9f4ff; clip-path:polygon(50% 0,100% 45%,50% 100%,0 45%); animation:carbonIceDrift 740ms ease-out var(--ice-delay) both; }
+@keyframes carbonCoreBreathe { from{opacity:.8} to{opacity:1} }
+@keyframes carbonFrostFade { 0%,100%{opacity:0} 30%,65%{opacity:1} }
+@keyframes carbonSheetSlide { 0%{opacity:0;transform:translateX(-100vw)} 35%,55%{opacity:1;transform:none} 100%{opacity:0;transform:translateX(100vw)} }
+@keyframes carbonCoreReveal { 0%{opacity:0;transform:translate(-50%,-50%) scale(.8)} 35%,60%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)} }
+@keyframes carbonIceDrift { 0%{opacity:0;transform:translate(-35px,-45px)} 40%{opacity:.7} 100%{opacity:0;transform:translate(35px,45px)} }
+body[data-effects="calm"] .carbon-boot .carbon-ice-core { animation:none; }
+@media(prefers-reduced-motion:reduce){.carbon-tab-transition{display:none}.carbon-boot .carbon-ice-core{animation:none}}

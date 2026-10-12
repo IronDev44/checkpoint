@@ -1,0 +1,35 @@
+.blueblur-boot { position:fixed; inset:0; z-index:99999; overflow:hidden; display:grid; place-items:center; padding:24px; box-sizing:border-box; background:radial-gradient(ellipse at 50% 40%,#125fbb,#061633 75%); color:#eef8ff; }
+.blueblur-boot-content { position:relative; z-index:1; text-align:center; width:min(440px,100%); animation:blueblurIntroEnter 650ms ease-out both; }
+.blueblur-speed-emblem { display:block; width:180px; height:180px; margin:0 auto 24px; filter:drop-shadow(0 0 20px #429dff50); }
+.blueblur-kicker { font:800 10px/1.5 system-ui; letter-spacing:.1em; color:#ffe384; }
+.blueblur-boot h1 { font:900 italic clamp(35px,8vw,52px)/1.1 system-ui; letter-spacing:-.035em; margin:16px 0 12px; text-shadow:3px 4px #003678; }
+.blueblur-boot p { color:#b9d9f6; font-size:14px; }
+.blueblur-boot-progress { height:7px; max-width:280px; margin:30px auto 12px; background:#041a38; border-radius:7px; overflow:hidden; transform:skewX(-15deg); }
+.blueblur-boot-progress span { display:block; height:100%; background:linear-gradient(90deg,#ffb823,#fff2a0); transition:width 200ms; }
+.blueblur-boot small { display:flex; justify-content:space-between; max-width:280px; margin:auto; color:#b9d9f6; font:12px system-ui; }
+.blueblur-speed-lines { position:absolute; inset:0; overflow:hidden; }
+.blueblur-speed-lines i { position:absolute; top:var(--speed-y); left:0; width:var(--speed-width); height:2px; background:linear-gradient(90deg,transparent,#8bd5ff,transparent); }
+.blueblur-boot .blueblur-speed-lines i { opacity:.15; animation:blueblurIntroLine 1800ms linear infinite; animation-delay:var(--speed-delay); }
+.blueblur-boot-track { position:absolute; bottom:0; left:0; right:0; height:12%; border-top:7px solid #58b86c; background:repeating-conic-gradient(#60452b 0% 25%,#91643c 0% 50%) 0 0/44px 44px; opacity:.5; }
+.blueblur-tab-transition { position:fixed; inset:0; z-index:2500; overflow:hidden; pointer-events:none; contain:strict; --run-start:-180px; --run-end:calc(100vw + 180px); --run-facing:1; }
+.blueblur-tab-transition.direction-left { --run-start:calc(100vw + 180px); --run-end:-180px; --run-facing:-1; }
+.blueblur-speed-wash { position:absolute; inset:0; background:linear-gradient(110deg,#063269c9,#1673bd80,#072247ba); animation:blueblurWash 810ms ease both; }
+.blueblur-tab-transition .blueblur-speed-lines i { animation:blueblurDashLine 700ms ease-out var(--speed-delay) both; }
+.blueblur-ring-lane { position:absolute; inset:0; }
+.blueblur-ring-lane i { position:absolute; top:var(--ring-y); left:50%; width:42px; height:54px; margin-left:-21px; box-sizing:border-box; border:6px solid #ffd34b; border-radius:50%; box-shadow:inset 2px 0 #fff4ac,2px 2px #9c5d12,0 0 16px #ffd34b55; animation:blueblurCollectRing 660ms ease-out var(--ring-delay) both; }
+.blueblur-runner { position:absolute; left:0; top:50%; width:90px; height:90px; margin-top:-45px; animation:blueblurFullDash 780ms cubic-bezier(.35,0,.65,1) both; }
+.blueblur-runner-ball { position:absolute; inset:0; border-radius:50%; background:repeating-conic-gradient(from 0deg,#76c7ff 0deg 12deg,#1978eb 12deg 65deg,#084998 65deg 90deg); border:4px solid #91dcff; box-shadow:0 0 25px #2d9bff,0 0 50px #3fafff80; animation:blueblurSpin 300ms linear infinite; }
+.blueblur-runner-tail { position:absolute; right:45px; top:15px; width:65vw; height:60px; transform:scaleX(var(--run-facing)); transform-origin:right center; background:linear-gradient(90deg,transparent,#2088ef40,#65d7ffcc); clip-path:polygon(0 30%,100% 0,100% 100%,0 70%,30% 52%); }
+.direction-left .blueblur-runner-tail { right:auto; left:45px; transform-origin:left center; }
+@keyframes blueblurFullDash { 0%{opacity:0;transform:translateX(var(--run-start))} 12%,85%{opacity:1} 100%{opacity:0;transform:translateX(var(--run-end))} }
+@keyframes blueblurSpin { to{transform:rotate(360deg)} }
+@keyframes blueblurCollectRing { 0%{opacity:0;transform:translateX(40vw) rotateY(0)} 25%,55%{opacity:1} 100%{opacity:0;transform:translateX(-40vw) translateY(-70px) rotateY(540deg) scale(.3)} }
+.direction-left .blueblur-ring-lane { transform:scaleX(-1); }
+.direction-left .blueblur-speed-lines { transform:scaleX(-1); }
+@keyframes blueblurDashLine { 0%{opacity:0;transform:translateX(100vw)} 25%,60%{opacity:.7} 100%{opacity:0;transform:translateX(-70vw)} }
+@keyframes blueblurWash { 0%,100%{opacity:0} 30%,60%{opacity:1} }
+@keyframes blueblurIntroLine { from{transform:translateX(100vw)} to{transform:translateX(-65vw)} }
+@keyframes blueblurIntroEnter { from{opacity:0;transform:translateX(-30px)} to{opacity:1;transform:none} }
+.blueblur-tab-transition.effects-calm .blueblur-speed-lines { display:none; }
+body[data-effects="calm"] .blueblur-boot .blueblur-speed-lines i { animation:none; }
+@media(prefers-reduced-motion:reduce){.blueblur-tab-transition{display:none}.blueblur-boot-content,.blueblur-boot .blueblur-speed-lines i{animation:none}}

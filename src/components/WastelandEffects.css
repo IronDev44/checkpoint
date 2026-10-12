@@ -1,0 +1,35 @@
+.wasteland-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:24px; box-sizing:border-box; overflow:hidden; background:radial-gradient(ellipse at 50% 25%,#4d4932,#141c16 75%); color:#e5d6a4; }
+.wasteland-boot-content { position:relative; width:min(430px,100%); text-align:center; }
+.wasteland-seal { display:block; width:165px; height:165px; margin:0 auto 22px; filter:drop-shadow(0 8px 18px #0005); }
+.wasteland-terminal { position:relative; padding:22px; border:1px solid #b3a36b55; border-radius:5px; background:repeating-linear-gradient(0deg,#0001 0 1px,transparent 1px 4px),#111c15ed; box-shadow:inset 0 0 35px #0005; }
+.wasteland-kicker { color:#c6ae68; font:700 10px/1.5 monospace; letter-spacing:.1em; }
+.wasteland-boot h1 { margin:16px 0 12px; font:900 clamp(33px,8vw,47px)/1.1 monospace; letter-spacing:-.035em; color:#d6e5b2; }
+.wasteland-boot p { color:#b0bba2; font:13px/1.6 monospace; }
+.wasteland-system-readout { display:flex; flex-direction:column; align-items:flex-start; gap:6px; margin-top:22px; color:#8ea77b; font:9px/1.5 monospace; }
+.wasteland-progress { height:10px; margin:20px 0 12px; background:#061009; border:1px solid #778b59; overflow:hidden; }
+.wasteland-progress span { display:block; height:100%; background:repeating-linear-gradient(90deg,#adc681 0 9px,#182719 9px 12px); transition:width 200ms; }
+.wasteland-boot small { display:flex; justify-content:space-between; gap:12px; color:#a4b58f; font:11px monospace; }
+.wasteland-horizon { position:absolute; bottom:0; left:-5%; right:-5%; height:15%; background:#0a120dc9; clip-path:polygon(0 35%,12% 45%,12% 10%,16% 10%,16% 55%,27% 35%,42% 60%,51% 30%,64% 45%,72% 12%,77% 12%,77% 47%,89% 38%,100% 60%,100% 100%,0 100%); }
+.wasteland-dust { position:absolute; inset:0; pointer-events:none; }
+.wasteland-dust i { position:absolute; left:var(--dust-x); top:var(--dust-y); width:var(--dust-size); height:var(--dust-size); background:#dbc78d; opacity:.25; }
+.wasteland-boot .wasteland-dust i { animation:wastelandAmbientDust 5s linear infinite; animation-delay:var(--dust-delay); }
+.wasteland-tab-transition { position:fixed; inset:0; z-index:2500; pointer-events:none; overflow:hidden; contain:strict; }
+.wasteland-transition-haze { position:absolute; inset:0; background:radial-gradient(ellipse,#bda26350,#151c16cc 70%); animation:wastelandHaze 810ms ease both; }
+.wasteland-bunker-door { position:absolute; top:0; bottom:0; width:50.5%; box-sizing:border-box; border:3px solid #636858; background:repeating-linear-gradient(0deg,transparent 0 109px,#02090466 109px 112px),repeating-linear-gradient(105deg,#8f784818 0 2px,transparent 2px 23px),linear-gradient(90deg,#28342df5,#465044f5,#202d25f5); box-shadow:inset 0 0 40px #0007; }
+.wasteland-bunker-door::after { content:""; position:absolute; top:60%; left:0; right:0; height:22px; background:repeating-linear-gradient(135deg,#c3a64c90 0 18px,#151a1590 18px 36px); border-block:3px solid #202921; }
+.wasteland-bunker-door.bunker-left { left:0; animation:wastelandDoorLeft 800ms ease-in-out both; }
+.wasteland-bunker-door.bunker-right { right:0; animation:wastelandDoorRight 800ms ease-in-out both; }
+.wasteland-door-seal { position:absolute; left:50%; top:50%; animation:wastelandSealTurn 790ms ease both; }
+.wasteland-door-seal .wasteland-seal { width:150px; height:150px; margin:0; }
+.wasteland-door-slit { position:absolute; top:0; bottom:0; left:50%; width:3px; background:#eed69c; box-shadow:0 0 28px 12px #e5c27950; animation:wastelandSlit 800ms ease both; }
+.wasteland-tab-transition .wasteland-dust i { animation:wastelandDustBurst 740ms ease-out var(--dust-delay) both; }
+@keyframes wastelandAmbientDust { from{transform:translate(-25px,35px);opacity:0} 40%,70%{opacity:.3} to{transform:translate(35px,-35px);opacity:0} }
+@keyframes wastelandHaze { 0%,100%{opacity:0} 30%,65%{opacity:1} }
+@keyframes wastelandDoorLeft { 0%{opacity:0;transform:translateX(-100%)} 30%,50%{opacity:1;transform:none} 100%{opacity:0;transform:translateX(-100%)} }
+@keyframes wastelandDoorRight { 0%{opacity:0;transform:translateX(100%)} 30%,50%{opacity:1;transform:none} 100%{opacity:0;transform:translateX(100%)} }
+@keyframes wastelandSealTurn { 0%{opacity:0;transform:translate(-50%,-50%) rotate(-45deg) scale(.7)} 32%,55%{opacity:1;transform:translate(-50%,-50%) rotate(0) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) rotate(55deg) scale(.85)} }
+@keyframes wastelandSlit { 0%,30%,100%{opacity:0} 50%,65%{opacity:1} }
+@keyframes wastelandDustBurst { 0%{opacity:0;transform:translate(-30px,40px)} 40%{opacity:.65} 100%{opacity:0;transform:translate(70px,-70px)} }
+.wasteland-tab-transition.effects-calm .wasteland-dust { display:none; }
+body[data-effects="calm"] .wasteland-boot .wasteland-dust i { animation:none; }
+@media(prefers-reduced-motion:reduce){.wasteland-tab-transition{display:none}.wasteland-boot .wasteland-dust i{animation:none}}

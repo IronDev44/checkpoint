@@ -1,0 +1,5 @@
+.playstation-symbol { width:100%; height:100%; display:block; }
+.playstation-intro-symbols { position:absolute; inset:15% 6% auto; display:flex; justify-content:space-around; pointer-events:none; z-index:2; }
+.playstation-intro-symbols > span { width:clamp(32px,8vw,72px); height:clamp(32px,8vw,72px); opacity:.65; animation:playstationSymbolIntro 2400ms ease-in-out both; }
+@keyframes playstationSymbolIntro { 0%{opacity:0;transform:translateY(-30px) rotate(-20deg) scale(.5)} 35%,75%{opacity:.75;transform:translateY(0) rotate(0deg) scale(1)} 100%{opacity:.45;transform:translateY(10px) scale(.9)} }
+@media(prefers-reduced-motion:reduce){.playstation-intro-symbols>span{animation:none}}

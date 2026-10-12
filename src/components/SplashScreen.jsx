@@ -1,4 +1,29 @@
 import { useEffect, useMemo } from "react";
+import PlayStationSymbol from "./PlayStationSymbol";
+import { SteamDeckIntro } from "./SteamDeckEffects";
+import { AuroraIntro } from "./AuroraEffects";
+import { XboxIntro } from "./XboxEffects";
+import { ArcaneIntro } from "./ArcaneEffects";
+import { StellarIntro } from "./StellarEffects";
+import { MultiverseIntro } from "./MultiverseEffects";
+import { RelicIntro } from "./RelicEffects";
+import { MushroomIntro } from "./MushroomEffects";
+import { BlueBlurIntro } from "./BlueBlurEffects";
+import { BlocksIntro } from "./BlocksEffects";
+import CubicIntro from "./CubicIntro";
+import { HunterIntro } from "./HunterEffects";
+import { KartIntro } from "./KartEffects";
+import { CrystalIntro } from "./CrystalEffects";
+import { PacIntro } from "./PacEffects";
+import CodeGreenIntro from "./CodeGreenIntro";
+import { WastelandIntro } from "./WastelandEffects";
+import { TreasureIntro } from "./TreasureEffects";
+import { VigilanteIntro } from "./VigilanteEffects";
+import { MintIntro } from "./MintEffects";
+import { RedlineIntro } from "./RedlineEffects";
+import { CarbonIntro } from "./CarbonEffects";
+import { ArcadeIntro } from "./ArcadeEffects";
+import { TokyoIntro } from "./TokyoEffects";
 
 export default function SplashScreen({ showSplash, progress = 0, onRequestClose }) {
   const safeProgress = Math.max(0, Math.min(100, Math.round(progress)));
@@ -49,25 +74,6 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose 
     []
   );
 
-  const matrixColumns = useMemo(() => {
-    const patterns = [
-      "010110100101101001011010010110100101101001011010010110100101",
-      "101001011010010110100101101001011010010110100101101001011010",
-      "001011010010110100101101001011010010110100101101001011010010",
-      "110100101101001011010010110100101101001011010010110100101101",
-    ];
-
-    return Array.from({ length: 76 }).map((_, index) => ({
-      id: `matrix-${index}`,
-      text: patterns[index % patterns.length].repeat(10),
-      left: -2 + index * 1.38,
-      delay: -(index % 28) * 0.3,
-      duration: 20 + (index % 7) * 1.35,
-      size: 12 + (index % 5) * 1.05,
-      opacity: 0.28 + (index % 4) * 0.035,
-    }));
-  }, []);
-
   useEffect(() => {
     if (!showSplash || typeof onRequestClose !== "function") return;
 
@@ -80,50 +86,35 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose 
 
   if (!showSplash) return null;
 
-  if (splashTheme === "theme-matrix") {
-    return (
-      <div className={`matrix-boot ${safeProgress >= 100 ? "complete" : ""}`}>
-        <div className="matrix-boot-frame">
-          <div className="matrix-rain" aria-hidden="true">
-            {matrixColumns.map((column) => (
-              <span
-                key={column.id}
-                style={{
-                  left: `${column.left}%`,
-                  animationDelay: `${column.delay}s`,
-                  animationDuration: `${column.duration}s`,
-                  fontSize: `${column.size}px`,
-                  opacity: column.opacity,
-                }}
-              >
-                {column.text}
-              </span>
-            ))}
-          </div>
-
-          <div className="matrix-focus" />
-
-          <div className="matrix-stage">
-            <div className="matrix-monogram">CP</div>
-            <h1 className="matrix-title">CHECKPOINT</h1>
-            <p className="matrix-subtitle">Votre univers gaming</p>
-
-            <div className="matrix-loader">
-              <div className="matrix-loading-label">Chargement en cours...</div>
-              <div className="matrix-loader-bar">
-                <div className="matrix-loader-fill" style={{ width: `${safeProgress}%` }} />
-              </div>
-              <strong>{safeProgress}%</strong>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (splashTheme === "theme-cyberpunk") return <TokyoIntro progress={safeProgress} />;
+  if (splashTheme === "theme-retro") return <ArcadeIntro progress={safeProgress} />;
+  if (splashTheme === "theme-graphite") return <CarbonIntro progress={safeProgress} />;
+  if (splashTheme === "theme-crimson") return <RedlineIntro progress={safeProgress} />;
+  if (splashTheme === "theme-emerald") return <MintIntro progress={safeProgress} />;
+  if (splashTheme === "theme-vigilante") return <VigilanteIntro progress={safeProgress} />;
+  if (splashTheme === "theme-treasure") return <TreasureIntro progress={safeProgress} />;
+  if (splashTheme === "theme-wasteland") return <WastelandIntro progress={safeProgress} />;
+  if (splashTheme === "theme-matrix") return <CodeGreenIntro progress={safeProgress} />;
+  if (splashTheme === "theme-ring") return <PacIntro progress={safeProgress} />;
+  if (splashTheme === "theme-crystal") return <CrystalIntro progress={safeProgress} />;
+  if (splashTheme === "theme-kart") return <KartIntro progress={safeProgress} />;
+  if (splashTheme === "theme-hunter") return <HunterIntro progress={safeProgress} />;
+  if (splashTheme === "theme-cubic") return <CubicIntro progress={safeProgress} />;
+  if (splashTheme === "theme-blocks") return <BlocksIntro progress={safeProgress} />;
+  if (splashTheme === "theme-blueblur") return <BlueBlurIntro progress={safeProgress} />;
+  if (splashTheme === "theme-mushroom") return <MushroomIntro progress={safeProgress} />;
+  if (splashTheme === "theme-relic") return <RelicIntro progress={safeProgress} />;
+  if (splashTheme === "theme-multiverse") return <MultiverseIntro progress={safeProgress} />;
+  if (splashTheme === "theme-stellar") return <StellarIntro progress={safeProgress} />;
+  if (splashTheme === "theme-arcane") return <ArcaneIntro progress={safeProgress} />;
+  if (splashTheme === "theme-xbox") return <XboxIntro progress={safeProgress} />;
+  if (splashTheme === "theme-indigo") return <AuroraIntro progress={safeProgress} />;
+  if (splashTheme === "theme-steamdeck") return <SteamDeckIntro progress={safeProgress} />;
 
   return (
     <div className={`checkpoint-splash ${safeProgress >= 100 ? "complete" : ""}`}>
       <div className="splash-bg" />
+      {splashTheme === "theme-playstation" && <div className="playstation-intro-symbols" aria-hidden="true">{[0,1,2,3].map((index) => <span key={index}><PlayStationSymbol index={index} /></span>)}</div>}
       <div className="splash-vignette" />
 
       <div className="splash-particles-premium">

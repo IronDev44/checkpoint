@@ -1,0 +1,36 @@
+.treasure-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:24px; box-sizing:border-box; overflow:hidden; background:radial-gradient(ellipse at center,#25434b,#081a24 75%); color:#f5e6c4; }
+.treasure-boot-map { position:absolute; inset:0; background:#c9aa70; opacity:.13; transform:rotate(-8deg) scale(1.2); }
+.treasure-map-art { display:block; width:100%; height:100%; }
+.treasure-boot-content { position:relative; width:min(430px,100%); text-align:center; }
+.treasure-compass { display:block; width:180px; height:180px; margin:0 auto 28px; filter:drop-shadow(0 8px 24px #0005); }
+.treasure-boot .treasure-compass { animation:treasureCompassSway 3s ease-in-out infinite alternate; }
+.treasure-kicker { font:700 10px/1.5 system-ui; letter-spacing:.1em; color:#dfbc79; }
+.treasure-boot h1 { font:700 clamp(35px,8vw,49px)/1.1 Georgia,serif; margin:16px 0 12px; color:#ffedc7; }
+.treasure-boot p { color:#bdc9c5; font-size:14px; }
+.treasure-progress { max-width:280px; height:5px; margin:28px auto 12px; background:#102a34; border:1px solid #be9a5650; overflow:hidden; }
+.treasure-progress span { display:block; height:100%; background:linear-gradient(90deg,#b98941,#f6d796); transition:width 200ms; }
+.treasure-boot small { display:flex; justify-content:space-between; max-width:280px; margin:auto; gap:10px; color:#b9c5c0; font:11px system-ui; }
+.treasure-tab-transition { position:fixed; inset:0; z-index:2500; overflow:hidden; pointer-events:none; contain:strict; }
+.treasure-transition-map { position:absolute; inset:-5%; background:radial-gradient(ellipse,#eed19b,#b99a64); box-shadow:inset 0 0 100px #53341870; animation:treasureMapUnfold 810ms ease both; }
+.treasure-transition-map .treasure-map-route { animation:treasureRouteTrace 800ms linear both; }
+.treasure-transition-chest { position:absolute; top:50%; left:50%; width:180px; height:140px; animation:treasureChestAppear 800ms ease both; }
+.treasure-chest { position:relative; width:100%; height:100%; filter:drop-shadow(0 10px 16px #37250b60); }
+.treasure-chest-base { position:absolute; left:0; right:0; bottom:0; height:80px; box-sizing:border-box; border:5px solid #513016; border-radius:0 0 8px 8px; background:repeating-linear-gradient(0deg,#88552a 0 19px,#623b1d 19px 22px); }
+.treasure-chest-base::before,.treasure-chest-base::after { content:""; position:absolute; top:0; bottom:0; width:12px; background:linear-gradient(90deg,#b58839,#e6c578,#9e722e); }
+.treasure-chest-base::before{left:22px}.treasure-chest-base::after{right:22px}
+.treasure-chest-base i { position:absolute; left:50%; top:8px; width:24px; height:30px; margin-left:-12px; background:#e0b45e; border:2px solid #715220; border-radius:3px; }
+.treasure-chest-base i::after { content:""; position:absolute; top:8px; left:9px; width:5px; height:12px; background:#533819; border-radius:4px; }
+.treasure-chest-lid { position:absolute; top:6px; left:0; right:0; height:65px; box-sizing:border-box; border:5px solid #513016; border-radius:45px 45px 0 0; background:linear-gradient(90deg,#88552a 0 17%,#d5ac5d 17% 25%,#88552a 25% 75%,#d5ac5d 75% 83%,#88552a 83%); transform-origin:50% 100%; animation:treasureLidOpen 800ms ease both; }
+.treasure-chest-light { position:absolute; left:-50%; right:-50%; bottom:45px; height:260px; background:radial-gradient(ellipse at bottom,#fff4bbbd,#ffe19640 40%,transparent 70%); clip-path:polygon(20% 0,80% 0,65% 100%,35% 100%); animation:treasureChestGlow 800ms ease both; }
+.treasure-gold-coins { position:absolute; top:50%; left:50%; }
+.treasure-gold-coins i { position:absolute; width:15px; height:20px; border-radius:50%; background:#f4cd58; border:2px solid #997026; box-shadow:inset 2px 0 #fff3a3; animation:treasureCoinBurst 740ms ease-out var(--coin-delay) both; }
+@keyframes treasureCompassSway { from{transform:rotate(-7deg)} to{transform:rotate(7deg)} }
+@keyframes treasureMapUnfold { 0%{opacity:0;transform:scaleX(.2) rotate(-7deg)} 30%,65%{opacity:1;transform:scaleX(1) rotate(0)} 100%{opacity:0;transform:scale(1.1)} }
+@keyframes treasureRouteTrace { to{stroke-dashoffset:-80} }
+@keyframes treasureChestAppear { 0%{opacity:0;transform:translate(-50%,-35%) scale(.5)} 30%,65%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)} }
+@keyframes treasureLidOpen { 0%,30%{transform:none} 60%,100%{transform:translateY(-22px) rotateX(-65deg)} }
+@keyframes treasureChestGlow { 0%,30%,100%{opacity:0} 55%,70%{opacity:1} }
+@keyframes treasureCoinBurst { 0%,35%{opacity:0;transform:none} 55%{opacity:1} 100%{opacity:0;transform:translate(var(--coin-x),var(--coin-y)) rotate(var(--coin-turn))} }
+.treasure-tab-transition.effects-calm .treasure-gold-coins { display:none; }
+body[data-effects="calm"] .treasure-boot .treasure-compass { animation:none; }
+@media(prefers-reduced-motion:reduce){.treasure-tab-transition{display:none}.treasure-boot .treasure-compass{animation:none}}

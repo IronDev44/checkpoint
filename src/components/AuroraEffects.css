@@ -1,0 +1,33 @@
+/* Aurora's identity is soft coloured light, with a clean luminous seal. */
+.aurora-boot { position:fixed; inset:0; z-index:99999; overflow:hidden; display:grid; place-items:center; padding:24px; box-sizing:border-box; background:#07091f; color:#f8fafc; }
+.aurora-boot-lights { position:absolute; inset:0; pointer-events:none; }
+.aurora-boot-lights i { position:absolute; width:75vmax; height:55vmax; border-radius:50%; filter:blur(32px); opacity:.45; animation:auroraBootDrift 7s ease-in-out infinite alternate; }
+.aurora-boot-lights i:nth-child(1) { top:0; left:-40%; background:radial-gradient(ellipse,#22d3ee45,transparent 65%); }
+.aurora-boot-lights i:nth-child(2) { top:10%; right:-35%; background:radial-gradient(ellipse,#8b5cf65c,transparent 65%); animation-delay:-2s; }
+.aurora-boot-lights i:nth-child(3) { bottom:-35%; left:5%; background:radial-gradient(ellipse,#ec48994a,transparent 65%); animation-delay:-4s; }
+.aurora-boot-content { position:relative; text-align:center; width:min(420px,100%); animation:auroraIntroReveal 650ms ease-out both; }
+.aurora-seal { position:relative; display:grid; place-items:center; width:130px; height:130px; margin:0 auto 36px; border-radius:32px; background:linear-gradient(145deg,#152644,#0b1029); border:1px solid #a5b4fc55; box-shadow:inset 0 1px 0 #ffffff30,0 0 50px #6366f12b; }
+.aurora-seal::before { content:""; position:absolute; inset:-3px; border-radius:35px; padding:2px; background:linear-gradient(135deg,#22d3ee,#818cf8,#ec4899); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); mask-composite:exclude; }
+.aurora-seal span { font:850 42px/1 system-ui; letter-spacing:-.08em; padding-right:4px; color:#e0f2fe; text-shadow:0 0 24px #a5b4fc66; }
+.aurora-boot h1 { margin:0 0 12px; font:800 clamp(32px,8vw,48px)/1.1 system-ui; letter-spacing:-.04em; }
+.aurora-boot p { color:#b6bddd; font-size:14px; line-height:1.5; }
+.aurora-boot-progress { height:5px; max-width:280px; margin:36px auto 12px; background:#222843; border-radius:8px; overflow:hidden; }
+.aurora-boot-progress span { display:block; height:100%; background:linear-gradient(90deg,#22d3ee,#818cf8,#ec4899); transition:width 200ms ease; }
+.aurora-boot small { display:flex; justify-content:space-between; max-width:280px; margin:auto; color:#a0aacb; font:12px system-ui; }
+@keyframes auroraBootDrift { from{transform:translate(-4%,0) rotate(-8deg)} to{transform:translate(6%,-5%) rotate(8deg)} }
+@keyframes auroraIntroReveal { from{opacity:0;transform:translateY(15px) scale(.97)} to{opacity:1;transform:none} }
+.aurora-tab-transition { position:fixed; inset:0; z-index:2500; overflow:hidden; pointer-events:none; contain:strict; }
+.aurora-transition-dim { position:absolute; inset:0; background:#080c2540; animation:auroraPassFade 800ms ease both; }
+.aurora-ribbon { position:absolute; top:-30%; left:-80%; width:70%; height:160%; border-radius:50%; filter:blur(14px); opacity:0; animation:auroraRibbonPass 680ms cubic-bezier(.35,0,.25,1) both; }
+.ribbon-cyan { background:linear-gradient(90deg,transparent,#22d3ee38,#67e8f977,transparent); }
+.ribbon-violet { background:linear-gradient(90deg,transparent,#6366f155,#a78bfa88,transparent); animation-delay:50ms; width:85%; }
+.ribbon-pink { background:linear-gradient(90deg,transparent,#ec489940,#f472b666,transparent); animation-delay:100ms; width:60%; }
+@keyframes auroraRibbonPass { 0%{opacity:0;transform:translateX(0) rotate(-20deg) scaleX(.5)} 25%,65%{opacity:1} 100%{opacity:0;transform:translateX(320%) rotate(-20deg) scaleX(1.2)} }
+.direction-left .aurora-ribbon { left:auto; right:-80%; animation-name:auroraRibbonPassLeft; }
+@keyframes auroraRibbonPassLeft { 0%{opacity:0;transform:translateX(0) rotate(20deg) scaleX(.5)} 25%,65%{opacity:1} 100%{opacity:0;transform:translateX(-320%) rotate(20deg) scaleX(1.2)} }
+@keyframes auroraPassFade { 0%,100%{opacity:0} 30%,60%{opacity:1} }
+.aurora-tab-transition.effects-calm .ribbon-pink,.aurora-tab-transition.effects-calm .ribbon-violet { display:none; }
+.aurora-tab-transition.effects-calm .aurora-ribbon { filter:none; }
+.aurora-tab-transition.effects-boost .aurora-ribbon { filter:blur(10px); }
+@media(prefers-reduced-motion:reduce){.aurora-tab-transition{display:none}.aurora-boot-lights i,.aurora-boot-content{animation:none}}
+body[data-effects="calm"] .aurora-boot-lights i { animation:none; }

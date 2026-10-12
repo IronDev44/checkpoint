@@ -1,5 +1,29 @@
 import { createPortal } from "react-dom";
 import "./ThemeTransition.css";
+import PlayStationSymbol from "./PlayStationSymbol";
+import { SteamDeckTransition } from "./SteamDeckEffects";
+import { AuroraTransition } from "./AuroraEffects";
+import { XboxTransition } from "./XboxEffects";
+import { ArcaneTransition } from "./ArcaneEffects";
+import { StellarTransition } from "./StellarEffects";
+import { MultiverseTransition } from "./MultiverseEffects";
+import { RelicTransition } from "./RelicEffects";
+import { TamerTransition } from "./TamerEffects";
+import { MushroomTransition } from "./MushroomEffects";
+import { BlueBlurTransition } from "./BlueBlurEffects";
+import { BlocksTransition } from "./BlocksEffects";
+import { HunterTransition } from "./HunterEffects";
+import { KartTransition } from "./KartEffects";
+import { CrystalTransition } from "./CrystalEffects";
+import { PacTransition } from "./PacEffects";
+import { WastelandTransition } from "./WastelandEffects";
+import { TreasureTransition } from "./TreasureEffects";
+import { VigilanteTransition } from "./VigilanteEffects";
+import { MintTransition } from "./MintEffects";
+import { RedlineTransition } from "./RedlineEffects";
+import { CarbonTransition } from "./CarbonEffects";
+import { ArcadeTransition } from "./ArcadeEffects";
+import { TokyoTransition } from "./TokyoEffects";
 
 // Each theme has its own motif; motion stays short enough to finish before cleanup.
 export const THEME_TRANSITION_DURATION = 840;
@@ -36,6 +60,7 @@ const identities = {
 const tetrisPieces = [[0,1,2,3], [0,1,4,5], [1,4,5,6], [0,4,5,6], [2,4,5,6], [1,2,4,5], [0,1,5,6]];
 const tetrisColors = ["#22d3ee", "#facc15", "#c084fc", "#60a5fa", "#fb923c", "#4ade80", "#f87171"];
 function renderMotif(theme, path, index) {
+  if (theme === "theme-playstation") return <PlayStationSymbol index={index} />;
   if (theme === "theme-cubic") return <b className="dirt-block"><i className="block-crack" /></b>;
   if (theme === "theme-blocks") return <b className="tetris-piece" style={{ "--piece-color": tetrisColors[index % 7] }}>{Array.from({length: 8}, (_, cell) => <i key={cell} className={tetrisPieces[index % 7].includes(cell) ? "filled" : ""} />)}</b>;
   if (theme === "theme-matrix") return <b className="matrix-code">{Array.from({length: 16}, (_, row) => <i key={row}>{"01アイウエオカキクケコ789"[(index * 7 + row * 11) % 18]}</i>)}</b>;
@@ -57,6 +82,29 @@ function MatrixScreenTransition({ effects }) {
 }
 
 export default function ThemeTransition({ theme, direction, effects }) {
+  if (theme === "theme-cyberpunk") return createPortal(<TokyoTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-retro") return createPortal(<ArcadeTransition effects={effects} />, document.body);
+  if (theme === "theme-graphite") return createPortal(<CarbonTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-crimson") return createPortal(<RedlineTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-emerald") return createPortal(<MintTransition effects={effects} />, document.body);
+  if (theme === "theme-vigilante") return createPortal(<VigilanteTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-treasure") return createPortal(<TreasureTransition effects={effects} />, document.body);
+  if (theme === "theme-wasteland") return createPortal(<WastelandTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-ring") return createPortal(<PacTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-crystal") return createPortal(<CrystalTransition effects={effects} />, document.body);
+  if (theme === "theme-kart") return createPortal(<KartTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-hunter") return createPortal(<HunterTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-blocks") return createPortal(<BlocksTransition effects={effects} />, document.body);
+  if (theme === "theme-blueblur") return createPortal(<BlueBlurTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-mushroom") return createPortal(<MushroomTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-tamer") return createPortal(<TamerTransition effects={effects} />, document.body);
+  if (theme === "theme-relic") return createPortal(<RelicTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-multiverse") return createPortal(<MultiverseTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-stellar") return createPortal(<StellarTransition effects={effects} />, document.body);
+  if (theme === "theme-arcane") return createPortal(<ArcaneTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-indigo") return createPortal(<AuroraTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-steamdeck") return createPortal(<SteamDeckTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-xbox") return createPortal(<XboxTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-matrix") return <MatrixScreenTransition effects={effects} />;
   const [motion, color, path] = identities[theme] || identities["theme-indigo"];
   const count = effects === "calm" ? 18 : effects === "boost" ? 112 : 72;
@@ -64,7 +112,7 @@ export default function ThemeTransition({ theme, direction, effects }) {
   return createPortal(
     <div className={`checkpoint-theme-transition motion-${motion} effects-${effects} direction-${direction}`} aria-hidden="true" style={{ "--travel": direction === "left" ? "calc(-100vw - 80px)" : "calc(100vw + 80px)", "--origin": direction === "left" ? "calc(100% + 32px)" : "-32px", "--motif-color": color }}>
       <i className="transition-veil" />
-      <div className="transition-feature" aria-hidden="true">{[0,1,2].map((index) => <div key={index} style={{ "--feature-index": index, "--feature-turn": `${index % 2 ? -25 : 25}deg` }}>{renderMotif(theme, path, index)}</div>)}</div>
+      <div className="transition-feature" aria-hidden="true">{(theme === "theme-playstation" ? [0,1,2,3] : [0,1,2]).map((index) => <div key={index} style={{ "--feature-index": index, "--feature-turn": `${index % 2 ? -25 : 25}deg` }}>{renderMotif(theme, path, index)}</div>)}</div>
       {Array.from({ length: count }, (_, i) => (
         <span key={i} style={{ "--row": `${4 + ((i * 37) % 92)}vh`, "--column": `${(i * 37) % 100}vw`, "--wait": `${(i % 8) * 16}ms`, "--motif-size": `${22 + (i % 4) * 6}px`, "--debris-x": `${(i % 2 ? 1 : -1) * (50 + i % 80)}px`, "--ray-angle": `${(i / count) * 360}deg`, "--drift": `${(i % 2 ? 1 : -1) * 22}vh`, "--tilt": `${(i % 2 ? 1 : -1) * 30}deg` }}>
           {renderMotif(theme, path, i)}
