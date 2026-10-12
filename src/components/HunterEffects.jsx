@@ -2,12 +2,16 @@ import "./HunterEffects.css";
 
 function Visor({ progress }) {
   return <svg className="hunter-visor" viewBox="0 0 300 220" fill="none" aria-hidden="true">
-    <path d="M50 177L31 101L67 42L121 21H179L233 42L269 101L250 177L210 199H90Z" fill="#19282d" stroke="#f39a34" strokeWidth="5" />
-    <path d="M67 42L91 68L74 101L89 163L50 177M233 42L209 68L226 101L211 163L250 177" stroke="#905426" strokeWidth="14" />
-    <path d="M76 87L114 72H186L224 87L207 123L170 114H130L93 123Z" fill="#74f9a0" stroke="#d7ffd7" strokeWidth="2" />
-    <path d="M132 114L125 165H175L168 114M125 165L112 194M175 165L188 194" stroke="#e59b4b" strokeWidth="4" />
-    <path d="M103 49H197M140 28V52M160 28V52M103 146H115M185 146H197" stroke="#a5c3c2" strokeWidth="3" />
-    <rect x="97" y="90" width={106 * progress / 100} height="5" fill="#effff1" opacity=".7" />
+    <path d="M61 153V98C61 46 94 19 150 19S239 46 239 98V153L213 189L178 202H122L87 189Z" fill="#ad302a" stroke="#481c21" strokeWidth="5" />
+    <path d="M65 92C71 46 103 27 150 27S229 46 235 92L205 71H95Z" fill="#de5140" />
+    <path d="M143 22H157L166 68H134Z" fill="#f77c58" />
+    <path d="M77 77L119 69H181L223 77L212 115L171 122L165 163H135L129 122L88 115Z" fill="#092e26" stroke="#481c21" strokeWidth="6" />
+    <path d="M85 83L121 76H179L215 83L205 108L164 115L159 155H141L136 115L95 108Z" fill="#6fef86" />
+    <path d="M96 85L126 81H179L196 85L187 91H105Z" fill="#c6ffb7" />
+    <path d="M75 123L101 128L116 170L132 183H168L184 170L199 128L225 123L220 155L199 185L174 194H126L101 185L80 155Z" fill="#7b2928" />
+    <path d="M64 101H79V150H65ZM221 101H236V150H221Z" fill="#c5c6b8" stroke="#6b6b60" strokeWidth="3" />
+    <path d="M114 169L127 180M186 169L173 180M130 187H170" stroke="#e5af82" strokeWidth="4" />
+    <rect x="137" y="137" width={26 * progress / 100} height="3" fill="#e5ffd9" opacity=".8" />
   </svg>;
 }
 function ScanFrame() {

@@ -19645,7 +19645,7 @@ useEffect(() => {
       "theme-steamdeck": "#171717",
       "theme-arcane": "#100814",
       "theme-stellar": "#020716",
-      "theme-multiverse": "#080f20",
+      "theme-multiverse": "#090f24",
       "theme-relic": "#07120e",
       "theme-tamer": "#07131c",
       "theme-mushroom": "#071b35",

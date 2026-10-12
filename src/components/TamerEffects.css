@@ -17,3 +17,24 @@
 @keyframes tamerSpark { 0%,35%{opacity:0;transform:rotate(var(--capture-angle)) translateY(35px) scale(.3)} 50%{opacity:1} 100%{opacity:0;transform:rotate(var(--capture-angle)) translateY(var(--capture-distance)) scale(.5)} }
 .tamer-tab-transition.effects-calm .tamer-capture-sparks { display:none; }
 @media(prefers-reduced-motion:reduce){.tamer-tab-transition{display:none}}
+.tamer-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:24px; box-sizing:border-box; overflow:hidden; color:#f7f7ff; background:radial-gradient(ellipse at 50% 35%,#29395e,#0c142a 75%); }
+.tamer-boot-content { position:relative; width:min(430px,100%); text-align:center; }
+.tamer-boot-capture { position:relative; width:220px; height:220px; margin:0 auto 28px; }
+.tamer-boot .tamer-capsule { animation:tamerBootWobble 2400ms ease-in-out infinite; }
+.tamer-boot .tamer-capsule-top,.tamer-boot .tamer-capsule-bottom { animation:none; }
+.tamer-boot .tamer-capsule-button { animation:tamerBootButton 2400ms ease-in-out infinite; }
+.tamer-boot-halo { position:absolute; inset:0; border:2px solid #ffe59150; border-radius:50%; box-shadow:0 0 24px #ffd85820,inset 0 0 24px #ffd85815; }
+.tamer-boot-stars { position:absolute; left:50%; top:50%; }
+.tamer-boot-stars i { position:absolute; width:8px; height:8px; background:#ffe69a; clip-path:polygon(50% 0,65% 35%,100% 50%,65% 65%,50% 100%,35% 65%,0 50%,35% 35%); animation:tamerBootStar 2400ms ease-in-out var(--star-delay) infinite; }
+.tamer-boot-kicker { color:#ffd988; font:800 10px/1.5 system-ui; letter-spacing:.1em; }
+.tamer-boot h1 { margin:16px 0 12px; font:900 clamp(34px,8vw,48px)/1.1 system-ui; letter-spacing:-.025em; color:#fff1bd; text-shadow:2px 3px #1c3469; }
+.tamer-boot p { color:#bfcee8; font-size:14px; }
+.tamer-boot-progress { max-width:280px; height:7px; margin:28px auto 12px; background:#263757; border-radius:7px; overflow:hidden; }
+.tamer-boot-progress span { display:block; height:100%; background:linear-gradient(90deg,#ed5564,#ffd988); transition:width 200ms; }
+.tamer-boot small { display:flex; justify-content:space-between; max-width:280px; margin:auto; color:#b2c2df; font:12px system-ui; }
+@keyframes tamerBootWobble { 0%,25%,55%,100%{transform:none} 35%{transform:rotate(-12deg)} 45%{transform:rotate(12deg)} }
+@keyframes tamerBootButton { 0%,50%,100%{background:#fff;box-shadow:inset 0 0 0 3px #becbe0} 65%,85%{background:#ffe591;box-shadow:0 0 15px #ffd85880,inset 0 0 0 3px #e6c16c} }
+@keyframes tamerBootStar { 0%,50%,100%{opacity:0;transform:rotate(var(--star-angle)) translateY(-85px) scale(.3)} 70%{opacity:.9;transform:rotate(var(--star-angle)) translateY(-125px) scale(1)} 90%{opacity:0;transform:rotate(var(--star-angle)) translateY(-145px) scale(.5)} }
+body[data-effects="calm"] .tamer-boot .tamer-capsule,body[data-effects="calm"] .tamer-boot .tamer-capsule-button { animation:none; }
+body[data-effects="calm"] .tamer-boot-stars { display:none; }
+@media(prefers-reduced-motion:reduce){.tamer-boot .tamer-capsule,.tamer-boot .tamer-capsule-button{animation:none}.tamer-boot-stars{display:none}}

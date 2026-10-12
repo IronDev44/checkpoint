@@ -1,5 +1,15 @@
 import "./MushroomEffects.css";
 
+function MushroomMascot({ className }) {
+  return <svg className={className} viewBox="0 0 100 90" fill="none" aria-hidden="true">
+    <path d="M22 51H78V70Q78 83 65 83H35Q22 83 22 70Z" fill="#ffe9c0" stroke="#542a20" strokeWidth="4" />
+    <path d="M4 49C4 23 24 5 50 5S96 23 96 49Q96 59 83 59H17Q4 59 4 49Z" fill="#ef4444" stroke="#542a20" strokeWidth="4" />
+    <ellipse cx="50" cy="27" rx="17" ry="18" fill="#fff7e6" />
+    <path d="M9 30Q25 26 24 44Q23 53 7 51Q4 42 9 30ZM91 30Q75 26 76 44Q77 53 93 51Q96 42 91 30Z" fill="#fff7e6" />
+    <path d="M40 65V73M60 65V73" stroke="#542a20" strokeWidth="4" strokeLinecap="round" />
+  </svg>;
+}
+
 export function MushroomIntro({ progress }) {
   return <div className="mushroom-boot">
     <div className="mushroom-boot-cloud cloud-one" aria-hidden="true" /><div className="mushroom-boot-cloud cloud-two" aria-hidden="true" />
@@ -8,13 +18,7 @@ export function MushroomIntro({ progress }) {
       <div className="mushroom-boot-blocks" aria-hidden="true">{[0,1,2].map(i => <div className="mushroom-block-slot" key={i} style={{ "--block-delay": i * 180 + "ms" }}>
         <div className="mushroom-gold-coin"><span /></div><div className="mushroom-question-block"><b>?</b><i /><i /><i /><i /></div>
       </div>)}</div>
-      <svg className="mushroom-boot-mascot" viewBox="0 0 100 90" aria-hidden="true">
-        <path d="M29 47H71V70Q71 86 50 86Q29 86 29 70Z" fill="#ffe9c0" stroke="#542a20" strokeWidth="5" />
-        <path d="M5 48C5 20 22 5 50 5S95 20 95 48Q95 61 50 61Q5 61 5 48Z" fill="#ef4444" stroke="#542a20" strokeWidth="5" />
-        <ellipse cx="50" cy="23" rx="13" ry="15" fill="#fff7e6" />
-        <path d="M9 33Q28 26 27 50Q15 55 8 48M91 33Q72 26 73 50Q85 55 92 48" fill="#fff7e6" />
-        <path d="M41 68V76M59 68V76" stroke="#542a20" strokeWidth="5" strokeLinecap="round" />
-      </svg>
+      <MushroomMascot className="mushroom-boot-mascot" />
       <span className="mushroom-boot-kicker">UNE NOUVELLE PARTIE T’ATTEND</span>
       <h1>Checkpoint</h1><p>À toi de jouer !</p>
       <div className="mushroom-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: progress + "%" }} /></div>
@@ -32,11 +36,6 @@ export function MushroomTransition({ direction, effects }) {
       <div className="mushroom-question-block"><b>?</b><i /><i /><i /><i /></div>
       <div className="mushroom-block-spark spark-left" /><div className="mushroom-block-spark spark-right" />
     </div>)}</div>
-    <div className="mushroom-powerup"><svg viewBox="0 0 100 90" fill="none">
-      <path d="M29 47H71V70Q71 86 50 86Q29 86 29 70Z" fill="#ffe9c0" stroke="#542a20" strokeWidth="5" />
-      <path d="M5 48C5 20 22 5 50 5S95 20 95 48Q95 61 50 61Q5 61 5 48Z" fill="#ef4444" stroke="#542a20" strokeWidth="5" />
-      <ellipse cx="50" cy="23" rx="13" ry="15" fill="#fff7e6" /><path d="M9 33Q28 26 27 50Q15 55 8 48M91 33Q72 26 73 50Q85 55 92 48" fill="#fff7e6" />
-      <path d="M41 68V76M59 68V76" stroke="#542a20" strokeWidth="5" strokeLinecap="round" />
-    </svg></div>
+    <div className="mushroom-powerup"><MushroomMascot /></div>
   </div>;
 }
