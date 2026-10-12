@@ -1541,8 +1541,7 @@ function getGamingTimeline(games = [], hardware = [], socialProfile = {}) {
       if (a.sortYear !== b.sortYear) return a.sortYear - b.sortYear;
       const typeOrder = { hardware: 0, identity: 1, goty: 2, game: 3, checkpoint: 4 };
       return (typeOrder[a.type] ?? 9) - (typeOrder[b.type] ?? 9);
-    })
-    .slice(-18);
+    });
 }
 
 function getProfileInsights(games = [], hardware = [], badges = []) {
@@ -8657,6 +8656,7 @@ function ActivityFeed({
 function GamingTimeline({ timeline = [], compact = false }) {
   const [filter, setFilter] = useState("all");
   const [newestFirst, setNewestFirst] = useState(false);
+  const [showAllYears, setShowAllYears] = useState(false);
   if (!timeline.length) {
     return (
       <EmptyState
@@ -8672,7 +8672,9 @@ function GamingTimeline({ timeline = [], compact = false }) {
     .sort((a, b) => a - b);
   const firstYear = knownYears[0];
   const lastYear = knownYears[knownYears.length - 1];
-  const visibleTimeline = compact ? timeline.slice(-6) : selectTimelineEvents(timeline, filter, newestFirst);
+  const filteredTimeline = selectTimelineEvents(timeline, filter, newestFirst);
+  const recentYears = [...new Set(filteredTimeline.map((event) => event.year).filter(Boolean))].sort((a, b) => b - a).slice(0, 6);
+  const visibleTimeline = compact ? timeline.slice(-6) : showAllYears ? filteredTimeline : filteredTimeline.filter((event) => !event.year || recentYears.includes(event.year));
 
   return (
     <div className={`gaming-timeline ${compact ? "compact" : ""}`}>
@@ -8702,6 +8704,7 @@ function GamingTimeline({ timeline = [], compact = false }) {
           ))}
         </div>
         <button type="button" className="profile-toggle-btn" aria-pressed={newestFirst} onClick={() => setNewestFirst((value) => !value)}>{newestFirst ? "Du plus récent au plus ancien" : "Du plus ancien au plus récent"}</button>
+        <button type="button" className="profile-toggle-btn" aria-pressed={showAllYears} onClick={() => setShowAllYears((value) => !value)}>{showAllYears ? "Voir les 6 dernières années" : "Voir toutes les années"}</button>
         <span className="option-value">{visibleTimeline.length} {visibleTimeline.length > 1 ? "moments" : "moment"}</span>
       </div>}
       {!visibleTimeline.length && <p className="option-value">Pas encore de moment dans cette catégorie. Ton parcours continue de se dessiner.</p>}
@@ -21199,7 +21202,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
       tabTransitionTimerRef.current = window.setTimeout(() => {
         setPixelTransition(null);
-      }, THEME_TRANSITION_DURATION);
+      }, theme === "theme-matrix" ? 1320 : THEME_TRANSITION_DURATION);
     }, 16);
   };
 
@@ -21321,13 +21324,6 @@ const setPlayedPlatforms = async (id, platforms) => {
       progress={progress}
     />
 
-    <StatsBar
-      total={games.length}
-      wishlist={games.filter((g) => g.status === "wishlist").length}
-      inProgress={games.filter((g) => g.status === "en cours").length}
-      finished={games.filter(isGameFinishedStatus).length}
-      favorites={games.filter((g) => g.favorite).length}
-    />
 
   </>
 )}

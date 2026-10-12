@@ -199,3 +199,66 @@
 .motion-drop .transition-spark-field > i { background:#22d3ee; border-radius:1px; width:10px; height:10px; box-shadow:inset 1px 1px 0 #ffffff60; }
 .motion-drop .transition-spark-field > i:nth-child(3n) { background:#facc15; }
 .motion-drop .transition-spark-field > i:nth-child(5n) { background:#c084fc; }
+
+/* Matrix is a computer screen filled with digital rain, not floating icons. */
+.matrix-screen-transition {
+  position:fixed; inset:0; z-index:2500; pointer-events:none;
+  overflow:hidden; contain:strict; background:#000b03;
+  animation:matrixScreenFade 1300ms linear both;
+}
+.matrix-screen-code { position:absolute; inset:0; display:flex; justify-content:space-around; overflow:hidden; }
+.matrix-screen-column {
+  position:relative; flex:0 0 14px; margin:0; top:-65vh;
+  color:#00c847; font:500 15px/19px "Courier New",monospace;
+  text-align:center; white-space:pre; opacity:var(--code-brightness);
+  text-shadow:0 0 5px #00b63788;
+  transform:translateY(var(--code-offset));
+  animation:matrixScreenRain var(--code-speed) linear both;
+  -webkit-mask-image:repeating-linear-gradient(to bottom,transparent 0px,#0004 30px,#000 140px,#000 230px,transparent 250px,transparent 330px);
+  mask-image:repeating-linear-gradient(to bottom,transparent 0px,#0004 30px,#000 140px,#000 230px,transparent 250px,transparent 330px);
+}
+.matrix-screen-column:nth-child(4n) { color:#b5ffca; text-shadow:0 0 8px #35ff6c; }
+.matrix-screen-column:nth-child(3n) { font-size:13px; line-height:17px; }
+.matrix-screen-grain {
+  position:absolute; inset:0; opacity:.18;
+  background:repeating-linear-gradient(to bottom,transparent 0 2px,#000 2px 3px);
+  box-shadow:inset 0 0 90px 30px #000;
+}
+@keyframes matrixScreenRain { from{transform:translateY(var(--code-offset))} to{transform:translateY(calc(var(--code-offset) + 65vh))} }
+@keyframes matrixScreenFade { 0%{opacity:0} 12%,72%{opacity:.96} 100%{opacity:0} }
+@media(max-width:700px){.matrix-screen-column:nth-child(n+33){display:none}.matrix-screen-column{flex-basis:11px;font-size:13px;line-height:17px}}
+.matrix-screen-transition.effects-calm .matrix-screen-column:nth-child(even) { display:none; }
+.matrix-screen-transition.effects-calm .matrix-screen-column { text-shadow:none; }
+.matrix-screen-transition.effects-boost .matrix-screen-column { color:#16ed5c; text-shadow:0 0 7px #13e54e; }
+@media(prefers-reduced-motion:reduce){.matrix-screen-transition{display:none}}
+
+/* Three large signature objects make the theme readable among the particles. */
+.transition-feature { position:absolute; inset:0; display:flex; align-items:center; justify-content:space-evenly; gap:12px; padding:16px; box-sizing:border-box; }
+.transition-feature > div { position:relative; width:clamp(64px,17vw,155px); height:clamp(64px,17vw,155px); flex-shrink:0; opacity:0; color:var(--motif-color); filter:drop-shadow(0 0 16px currentColor); animation:featureReveal 700ms ease-out calc(var(--feature-index)*35ms) both; }
+@keyframes featureReveal { 0%{opacity:0;transform:translateY(70px) scale(.1) rotate(-30deg)} 35%,60%{opacity:.95;transform:translateY(0) scale(1) rotate(0deg)} 100%{opacity:0;transform:translateY(-70px) scale(1.4) rotate(20deg)} }
+.motion-dash .transition-feature > div,.motion-redline .transition-feature > div,.motion-race .transition-feature > div { animation-name:featureSprint; }
+@keyframes featureSprint { 0%{opacity:0;transform:translateX(-100vw) rotate(-35deg)} 40%,55%{opacity:1;transform:translateX(0) rotate(0deg)} 100%{opacity:0;transform:translateX(100vw) rotate(35deg)} }
+.direction-left .transition-feature { flex-direction:row-reverse; }
+.direction-left:is(.motion-dash,.motion-redline,.motion-race) .transition-feature > div { animation-name:featureSprintLeft; }
+@keyframes featureSprintLeft { 0%{opacity:0;transform:translateX(100vw) rotate(35deg)} 40%,55%{opacity:1;transform:translateX(0) rotate(0deg)} 100%{opacity:0;transform:translateX(-100vw) rotate(-35deg)} }
+.motion-warp .transition-feature { display:none; }
+.motion-warp .transition-veil { background:radial-gradient(ellipse at center,transparent 5%,#bae6fd20 12%,#38bdf830 18%,transparent 30%,#38bdf81a 45%,#000b 90%); }
+.motion-warp > span { width:170px; height:6px; }
+.motion-spell .transition-feature > div,.motion-compass .transition-feature > div { animation-name:featureSigil; }
+@keyframes featureSigil { 0%{opacity:0;transform:rotate(-120deg) scale(.1)} 45%{opacity:1;transform:rotate(0deg) scale(1.1)} 100%{opacity:0;transform:rotate(100deg) scale(1.6)} }
+.motion-spell .transition-feature > div::before,.motion-compass .transition-feature > div::before { content:"";position:absolute;inset:-20%;border:2px dashed currentColor;border-radius:50%;opacity:.5; }
+.motion-crystal .transition-feature > div,.motion-relic .transition-feature > div { animation-name:featureCrystal; }
+@keyframes featureCrystal { 0%{opacity:0;transform:rotateY(90deg) translateY(90px) scale(.2)} 40%,60%{opacity:1;transform:rotateY(0deg) translateY(0) scale(1.15)} 100%{opacity:0;transform:rotateY(-90deg) translateY(-120px) scale(1.7)} }
+.motion-assemble .transition-feature > div { filter:none;animation-name:featureBlockBreak; }
+.transition-feature .dirt-block { border-radius:0; background-size:auto,22px 22px; }
+@keyframes featureBlockBreak { 0%{opacity:0;transform:scale(.5)} 20%,40%{opacity:1;transform:scale(1)} 50%{opacity:1;transform:translate(4px,-4px) rotate(3deg) scale(1.08)} 100%{opacity:0;transform:translateY(170px) rotate(var(--feature-turn)) scale(.1)} }
+.motion-drop .transition-feature > div { width:clamp(90px,25vw,220px);height:clamp(45px,12.5vw,110px);filter:none;animation-name:featureTetris;animation-timing-function:steps(8,end); }
+@keyframes featureTetris { 0%{opacity:0;transform:translateY(-80vh)} 20%{opacity:1} 55%,70%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(80vh)} }
+.motion-pixels .transition-feature > div,.motion-glitch .transition-feature > div,.motion-mechanical .transition-feature > div { animation-timing-function:steps(5,end); }
+.motion-scan .transition-feature > div,.motion-shutter .transition-feature > div { animation-name:featureScan; }
+@keyframes featureScan { 0%{opacity:0;transform:scaleX(.05) scaleY(2)} 40%,60%{opacity:1;transform:scaleX(1) scaleY(1)} 100%{opacity:0;transform:scaleX(2) scaleY(.05)} }
+.motion-wings .transition-feature > div { animation-name:featureFlight; }
+@keyframes featureFlight { 0%{opacity:0;transform:translateY(70vh) scale(.2)} 40%{opacity:1;transform:translateY(0) scaleY(.6)} 65%{opacity:1;transform:translateY(-15vh) scaleY(1.2)} 100%{opacity:0;transform:translateY(-70vh) scale(.2)} }
+.motion-dust .transition-feature { opacity:.55; }
+.effects-calm .transition-feature { display:none; }
+@media(prefers-reduced-motion:reduce){.transition-feature{display:none}}

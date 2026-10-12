@@ -42,13 +42,29 @@ function renderMotif(theme, path, index) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>;
 }
 
+function MatrixScreenTransition({ effects }) {
+  const symbols = "012345789アイウエオカキクケコサシスセソタチツテトナニヌネノ<>:=+";
+  return createPortal(
+    <div className={"matrix-screen-transition effects-" + effects} aria-hidden="true">
+      <div className="matrix-screen-code">
+        {Array.from({length: 64}, (_, column) => <pre key={column} className="matrix-screen-column" style={{ "--code-speed": (800 + column % 7 * 65) + "ms", "--code-offset": (-column % 9 * 22) + "px", "--code-brightness": .45 + column % 5 * .12 }}>
+          {Array.from({length: 90}, (_, row) => (row + column * 3) % 21 < 4 ? " " : symbols[(column * 17 + row * 13 + row * row) % symbols.length]).join("\n")}
+        </pre>)}
+      </div>
+      <div className="matrix-screen-grain" />
+    </div>, document.body
+  );
+}
+
 export default function ThemeTransition({ theme, direction, effects }) {
+  if (theme === "theme-matrix") return <MatrixScreenTransition effects={effects} />;
   const [motion, color, path] = identities[theme] || identities["theme-indigo"];
   const count = effects === "calm" ? 18 : effects === "boost" ? 112 : 72;
   const sparkCount = effects === "calm" ? 0 : effects === "boost" ? 144 : 80;
   return createPortal(
     <div className={`checkpoint-theme-transition motion-${motion} effects-${effects} direction-${direction}`} aria-hidden="true" style={{ "--travel": direction === "left" ? "calc(-100vw - 80px)" : "calc(100vw + 80px)", "--origin": direction === "left" ? "calc(100% + 32px)" : "-32px", "--motif-color": color }}>
       <i className="transition-veil" />
+      <div className="transition-feature" aria-hidden="true">{[0,1,2].map((index) => <div key={index} style={{ "--feature-index": index, "--feature-turn": `${index % 2 ? -25 : 25}deg` }}>{renderMotif(theme, path, index)}</div>)}</div>
       {Array.from({ length: count }, (_, i) => (
         <span key={i} style={{ "--row": `${4 + ((i * 37) % 92)}vh`, "--column": `${(i * 37) % 100}vw`, "--wait": `${(i % 8) * 16}ms`, "--motif-size": `${22 + (i % 4) * 6}px`, "--debris-x": `${(i % 2 ? 1 : -1) * (50 + i % 80)}px`, "--ray-angle": `${(i / count) * 360}deg`, "--drift": `${(i % 2 ? 1 : -1) * 22}vh`, "--tilt": `${(i % 2 ? 1 : -1) * 30}deg` }}>
           {renderMotif(theme, path, i)}

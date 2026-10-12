@@ -605,3 +605,104 @@ body[data-theme]:not([data-theme="theme-indigo"]) .app-shell::after {
   -webkit-mask-image: linear-gradient(to bottom, #0004, #000 180px);
   mask-image: linear-gradient(to bottom, #0004, #000 180px);
 }
+
+/* Keep session, collection and extras panels separated inside game details. */
+.game-detail-organized-group > .game-detail-group-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.game-detail-organized-group > .game-detail-group-content > .game-detail-section {
+  margin-block: 0;
+  min-width: 0;
+}
+
+/* Library controls: readable labels and buttons contained by their track. */
+body[data-theme] .library-switch > .library-switch-btn,
+body[data-theme] .library-section .library-view-toggle > button {
+  box-sizing: border-box;
+  min-width: 0 !important;
+  overflow-wrap: normal !important;
+  word-break: normal !important;
+  hyphens: none;
+  text-align: center;
+}
+body[data-theme] .library-section .library-view-toggle {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  max-width: 480px;
+  box-sizing: border-box;
+  gap: 8px !important;
+  padding: 8px !important;
+  border-radius: 20px;
+}
+body[data-theme] .library-section .library-view-toggle > button {
+  width: 100% !important;
+  margin: 0 !important;
+  min-height: 48px !important;
+  padding: 10px 8px !important;
+  white-space: normal !important;
+}
+body[data-theme] .library-section .library-sort {
+  display: flex; flex-wrap: wrap;
+  width: 100% !important;
+  justify-content: center !important;
+  gap: 8px !important;
+}
+body[data-theme] .library-section .library-sort > button {
+  min-height: 44px; padding: 10px 14px !important;
+  border: 1px solid var(--control-border); border-bottom-width: 3px;
+  border-radius: 14px; background: var(--control-bg); color: var(--text-main);
+  font: inherit; font-size: .875rem !important; font-weight: 750;
+  box-shadow: inset 0 1px 0 #ffffff26, 0 3px 7px #00000045;
+  cursor: pointer; white-space: nowrap;
+}
+body[data-theme] .library-section .library-sort > button.active {
+  background: var(--accent); border-color: var(--accent-solid); color: #fff;
+}
+@media(max-width:640px) {
+  body[data-theme] .library-switch {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 10px !important;
+  }
+  body[data-theme] .library-switch > .library-switch-btn {
+    min-height: 48px !important;
+    padding: 10px 12px !important;
+    white-space: nowrap !important;
+  }
+}
+
+/* The hardware detail frame supplies its own background; no oversized black backing. */
+body[data-theme] .hardware-inline-detail::before {
+  content: none;
+  display: none;
+  box-shadow: none;
+}
+body[data-theme] .hardware-inline-detail-panel {
+  overflow: hidden !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .08) !important;
+}
+body[data-theme] .hardware-inline-detail-panel::before {
+  content: none;
+  display: none;
+}
+
+/* Display sanctuary objects whole, rather than cropping them like cover art. */
+.sanctuary-relic-grid .sanctuary-relic-image {
+  height: clamp(150px, 24vw, 190px);
+  box-sizing: border-box;
+  padding: 16px;
+  background: radial-gradient(ellipse at center, rgba(255,255,255,.07), rgba(255,255,255,.025));
+}
+.sanctuary-relic-grid .sanctuary-relic-image > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
