@@ -1,3 +1,28 @@
 name = "checkpoint"
 compatibility_date = "2026-07-09"
 pages_build_output_dir = "build"
+
+[env.production]
+compatibility_date = "2026-07-09"
+
+[env.production.vars]
+ACCOUNT_OWNER_UID = "pAcrkmTs1tN8Kfv9C2IdNICKLOi2"
+NEWS_FEED_ENABLED = "true"
+
+[[env.production.kv_namespaces]]
+binding = "FEEDBACK_STORE"
+id = "8409ac1ecfcf407e957529611813060e"
+
+[[env.production.d1_databases]]
+binding = "ACCOUNT_DB"
+database_name = "checkpoint-accounts"
+database_id = "39d1ae1f-8781-4fb4-92e3-16db19671a71"
+
+[env.preview.vars]
+ACCOUNT_OWNER_UID = "pAcrkmTs1tN8Kfv9C2IdNICKLOi2"
+NEWS_FEED_ENABLED = "true"
+
+[[env.preview.d1_databases]]
+binding = "ACCOUNT_DB"
+database_name = "checkpoint-accounts"
+database_id = "39d1ae1f-8781-4fb4-92e3-16db19671a71"

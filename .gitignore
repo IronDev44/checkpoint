@@ -25,3 +25,6 @@ yarn-error.log*
 
 # local accidental downloads
 *.torrent
+.feedback-admin-secret.local.txt
+.account-backups/
+.tmp-feedback-cloudflare/

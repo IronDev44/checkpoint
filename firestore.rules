@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Historic data remain recoverable by the owner. New application data live in D1.
+    match /{document=**} {
+      allow read: if request.auth != null && request.auth.uid == 'pAcrkmTs1tN8Kfv9C2IdNICKLOi2';
+      allow write: if false;
+    }
+  }
+}

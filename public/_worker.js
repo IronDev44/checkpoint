@@ -1,3 +1,5 @@
+import { handleAccountApi } from "./account-api.js";
+
 const DEFAULT_DEAL_REGION = {
   country: "FR",
   locale: "fr-FR",
@@ -1857,9 +1859,60 @@ async function getDeals(requestUrl) {
   };
 }
 
+async function handleTesterFeedback(request, env) {
+  const reply = (body, status = 200) => privateJsonResponse(body, { status });
+  if (!env.FEEDBACK_STORE || String(env.FEEDBACK_ADMIN_SECRET || "").length < 20) return reply({ error: "La boîte de retours n’est pas encore configurée." }, 503);
+  const url = new URL(request.url);
+  const admin = url.pathname === "/api/feedback/admin";
+  if (admin) {
+    const supplied = request.headers.get("authorization") || "";
+    const expected = "Bearer " + env.FEEDBACK_ADMIN_SECRET;
+    const a = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(supplied)));
+    const b = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(expected)));
+    let diff = 0; for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+    if (diff) return reply({ error: "Code d’accès incorrect." }, 401);
+    if (request.method === "GET") {
+      const page = await env.FEEDBACK_STORE.list({ prefix: "report:", limit: 50, cursor: url.searchParams.get("cursor") || undefined });
+      const items = (await Promise.all(page.keys.map(key => env.FEEDBACK_STORE.get(key.name, "json")))).filter(Boolean);
+      return reply({ items, cursor: page.list_complete ? null : page.cursor });
+    }
+  } else if (request.method !== "POST") return reply({ error: "Méthode non autorisée." }, 405);
+  if (request.method !== "POST" && request.method !== "PATCH") return reply({ error: "Méthode non autorisée." }, 405);
+  const raw = await request.text();
+  if (new TextEncoder().encode(raw).length > 16000) return reply({ error: "Message trop long." }, 413);
+  let data; try { data = JSON.parse(raw); } catch { return reply({ error: "Message invalide." }, 400); }
+  if (!data || typeof data !== "object") return reply({ error: "Message invalide." }, 400);
+  if (admin) {
+    if (request.method !== "PATCH" || !/^report:\d{13}:[a-f0-9-]{36}$/.test(data.id || "") || !["new","progress","resolved"].includes(data.status)) return reply({ error: "Modification invalide." }, 400);
+    const report = await env.FEEDBACK_STORE.get(data.id, "json");
+    if (!report) return reply({ error: "Retour introuvable." }, 404);
+    await env.FEEDBACK_STORE.put(data.id, JSON.stringify({ ...report, status: data.status }));
+    return reply({ ok: true });
+  }
+  if (!["bug","idea","visual"].includes(data.category) || typeof data.message !== "string" || data.message.trim().length < 10 || data.message.length > 3000) return reply({ error: "Ajoute une description valide." }, 400);
+  const text = (value, max) => typeof value === "string" ? value.trim().slice(0, max) : "";
+  const ip = request.headers.get("cf-connecting-ip");
+  if (ip) {
+    const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ip)))).map(x=>x.toString(16).padStart(2,"0")).join("");
+    const key = "rate:" + hash;
+    if (await env.FEEDBACK_STORE.get(key)) return reply({ error: "Attends une minute avant un nouveau retour." }, 429);
+    await env.FEEDBACK_STORE.put(key, "1", { expirationTtl: 60 });
+  }
+  const id = "report:" + String(9999999999999 - Date.now()).padStart(13,"0") + ":" + crypto.randomUUID();
+  await env.FEEDBACK_STORE.put(id, JSON.stringify({ id, status: "new", category: data.category, message: data.message.trim(), expected: text(data.expected,1500), screen: text(data.screen,60), name: text(data.name,60), context: { theme:text(data.context?.theme,60), viewport:text(data.context?.viewport,40), platform:text(data.context?.platform,300) }, createdAt: new Date().toISOString() }));
+  return reply({ ok: true }, 201);
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+
+    if (url.pathname === "/api/account-data") return handleAccountApi(request, env);
+
+    if (url.pathname === "/api/feedback" || url.pathname === "/api/feedback/admin") {
+      try { return await handleTesterFeedback(request, env); }
+      catch { return privateJsonResponse({ error: "Les retours sont temporairement indisponibles." }, { status: 503 }); }
+    }
 
     if (url.pathname === "/api/deals") {
       if (request.method === "OPTIONS") {

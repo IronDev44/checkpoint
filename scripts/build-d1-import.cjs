@@ -1,0 +1,10 @@
+const fs=require('fs');const path=require('path');const {rowsFromBackup,importSql}=require('./d1-import-data.cjs');
+const backupFile=process.argv[2];
+if(!backupFile)throw new Error('Indique le fichier de sauvegarde complet à importer.');
+const dir=path.join(process.cwd(),'.account-backups');
+const owner=JSON.parse(fs.readFileSync(path.join(dir,'owner.json')));
+const rows=rowsFromBackup(JSON.parse(fs.readFileSync(backupFile)),owner.uid);
+fs.writeFileSync(path.join(dir,'import.sql'),importSql(rows));
+fs.writeFileSync(path.join(dir,'expected-d1.json'),JSON.stringify(rows));
+console.log('Import SQL préparé. Il échoue si un document existe déjà ; aucun remplacement silencieux.');
+console.log(JSON.stringify(rows.reduce((counts,row)=>{counts[row.collection]=(counts[row.collection]||0)+1;return counts;},{})));

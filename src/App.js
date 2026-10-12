@@ -2,7 +2,9 @@ import { Fragment, useState, useEffect, useMemo, useRef, useCallback } from "rea
 import { createPortal } from "react-dom";
 import "./App.css";
 import "./polish.css";
-import { db } from "./firebase";
+import { db, auth } from "./firebase";
+import { collection, doc, accountsEnabled, accountStorage as localStorage } from "./services/accountData";
+import { AccountOptions } from "./components/AccountGate";
 import { applySelectedGamePatch } from "./services/gameSelection";
 import { HARDWARE_CATALOG } from "./data/hardware";
 import { PC_COMPONENT_FIELDS, getPcComponentOptions } from "./data/pcComponents";
@@ -22,6 +24,9 @@ import RatingSliderControl from "./components/RatingSlider";
 import SplashScreen from "./components/SplashScreen";
 import ThemeTransition, { THEME_TRANSITION_DURATION } from "./components/ThemeTransition";
 import TrialRoom from "./components/TrialRoom";
+import TesterFeedback from "./components/TesterFeedback";
+import FeedbackInbox from "./components/FeedbackInbox";
+import { sendTesterFeedback } from "./services/testerFeedback";
 import {
   GameService,
   RawgRequestError,
@@ -30,17 +35,15 @@ import {
   fetchJsonWithTimeout,
 } from "./services/gameService";
 import {
-  collection,
   addDoc,
   onSnapshot,
   deleteDoc,
-  doc,
   getDoc,
   updateDoc,
   setDoc,
   arrayUnion,
   serverTimestamp,
-} from "firebase/firestore";
+} from "./services/d1Data";
 
 import {
   Home,
@@ -2321,6 +2324,7 @@ const BADGE_BRAND_LOGOS = {
 const CREATOR_HANDLES = ["checkpoint", "irondev44", "bodyjordan", "bodyj"];
 
 function isCreatorProfile(profile = {}) {
+  if (accountsEnabled) return (profile.ownerUid || auth.currentUser?.uid) === process.env.REACT_APP_OWNER_UID;
   const handle = normalizeHandle(profile.handle || "");
   const displayName = normalizeHandle(profile.displayName || "");
 
@@ -8058,14 +8062,14 @@ function formatEventDate(date) {
 
 const DEFAULT_SOCIAL_PROFILE = {
   displayName: "Player One",
-  handle: "checkpoint",
+  handle: accountsEnabled ? "" : "checkpoint",
   bio: "Je construis mon univers gaming, une partie après l'autre.",
   platform: "Multi-plateforme",
   visibility: "prive",
   featuredBadgeId: "",
   selectedBadgeIds: [],
-  isCreator: true,
-  creatorBadgeEnabled: true,
+  isCreator: !accountsEnabled,
+  creatorBadgeEnabled: !accountsEnabled,
   identityGameIds: [],
   setupPhotos: [],
   collectionPhotos: [],
@@ -16227,6 +16231,8 @@ function OptionsTab({
 
   return (
     <div className="progression-stack options-tab">
+      <AccountOptions />
+      <TesterFeedback onSubmit={sendTesterFeedback} />
       <div className="search-panel options-panel">
         <div className="options-header">
           <div>
@@ -17031,7 +17037,7 @@ function OptionsTab({
 
         </OptionGroup>
 
-        <OptionGroup id="development" isOpen={!!openOptionGroups.development} onToggle={() => setOpenOptionGroups((current) => ({ ...current, development: !current.development }))}
+        {(!accountsEnabled || auth.currentUser?.uid === process.env.REACT_APP_OWNER_UID) && <OptionGroup id="development" isOpen={!!openOptionGroups.development} onToggle={() => setOpenOptionGroups((current) => ({ ...current, development: !current.development }))}
           title="Développement"
           description="Accès internes pour tester les grands systèmes sans attendre le bon niveau."
           summary="Tests internes"
@@ -17061,7 +17067,7 @@ function OptionsTab({
               </div>
             </div>
           </div>
-        </OptionGroup>
+        </OptionGroup>}
 
         <OptionGroup id="data" isOpen={!!openOptionGroups.data} onToggle={() => setOpenOptionGroups((current) => ({ ...current, data: !current.data }))}
           title="Données"
@@ -18486,7 +18492,7 @@ export default function App() {
   const [socialProfile, setSocialProfile] = useState(() => {
     try {
       const storedProfile = JSON.parse(
-        localStorage.getItem(SOCIAL_PROFILE_STORAGE_KEY) || "{}"
+        localStorage.getItem(SOCIAL_PROFILE_STORAGE_KEY) || JSON.stringify({ displayName: auth.currentUser?.displayName || "Player One", visibility: "private" })
       );
 
       return storeSocialProfile(storedProfile);
@@ -19097,7 +19103,7 @@ const syncPublicProfileIfNeeded = async (profile) => {
 
   await setDoc(
     doc(db, "publicProfiles", handle),
-    { ...buildPublicSocialProfile(profile), visibility: "public" },
+    { ...buildPublicSocialProfile(profile), visibility: "public", ...(auth.currentUser ? { ownerUid: auth.currentUser.uid } : {}) },
     { merge: true }
   );
 };
@@ -19328,7 +19334,7 @@ const setSocialProfileVisibility = async (visibility) => {
     if (visibility === "public") {
       await setDoc(
         doc(db, "publicProfiles", handle),
-        { ...buildPublicSocialProfile(normalizedProfile), visibility: "public" },
+        { ...buildPublicSocialProfile(normalizedProfile), visibility: "public", ...(auth.currentUser ? { ownerUid: auth.currentUser.uid } : {}) },
         { merge: true }
       );
 
@@ -19365,7 +19371,7 @@ const copySocialProfileLink = async () => {
   try {
     await setDoc(
       doc(db, "publicProfiles", handle),
-      { ...buildPublicSocialProfile(), visibility: "public" },
+      { ...buildPublicSocialProfile(), visibility: "public", ...(auth.currentUser ? { ownerUid: auth.currentUser.uid } : {}) },
       { merge: true }
     );
 
@@ -19492,7 +19498,7 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
-  if (showSplash || newsItems.length > 0 || newsEmptyImportAttemptedRef.current) return;
+  if (showSplash || newsItems.length > 0 || newsEmptyImportAttemptedRef.current || (accountsEnabled && auth.currentUser?.uid !== process.env.REACT_APP_OWNER_UID)) return;
 
   newsEmptyImportAttemptedRef.current = true;
   importNewsFromRSS({ silent: true, force: true }).catch((error) => {
@@ -21828,7 +21834,7 @@ const setPlayedPlatforms = async (id, platforms) => {
                 onImportXboxGames={importXboxGamesToLibrary}
               />
 
-              <AdminPanel events={gamingEvents} onImportNews={importNewsFromRSS} />
+              {(!accountsEnabled || auth.currentUser?.uid === process.env.REACT_APP_OWNER_UID) && <><FeedbackInbox /><AdminPanel events={gamingEvents} onImportNews={importNewsFromRSS} /></>}
             </>
           )}
 
