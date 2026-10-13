@@ -25,7 +25,8 @@ import GameExperiencePanel from "./components/GameExperiencePanel";
 import { getGameExperience, getExperienceRatingFields } from "./services/gameExperience";
 import RatingSliderControl from "./components/RatingSlider";
 import SplashScreen from "./components/SplashScreen";
-import ThemeTransition, { THEME_TRANSITION_DURATION, TransitionMotionNotice } from "./components/ThemeTransition";
+import ThemeTransition, { THEME_TRANSITION_DURATION } from "./components/ThemeTransition";
+import TransitionSettings from "./components/TransitionSettings";
 import TrialRoom from "./components/TrialRoom";
 import TesterFeedback from "./components/TesterFeedback";
 import FeedbackInbox from "./components/FeedbackInbox";
@@ -346,7 +347,7 @@ function normalizeAppOptions(options = {}) {
     schemaVersion: APP_OPTIONS_SCHEMA_VERSION,
     startTab,
     visualEffects,
-    transitionMotion: source.transitionMotion === "system" ? "system" : "full",
+    transitionMotion: ["light", "system"].includes(source.transitionMotion) ? "light" : "full",
     headerMode: ["standard", "compact", "minimal"].includes(source.headerMode) ? source.headerMode : DEFAULT_APP_OPTIONS.headerMode,
     animatedBackground:
       typeof source.animatedBackground === "boolean"
@@ -16278,35 +16279,13 @@ function OptionsTab({
             <div className="option-setting-card">
               <div>
                 <SectionTitle title="Transition d'onglet" help="animations" />
-                <span>Active ou désactive la transition liée à ton thème entre les onglets.</span>
-                {uiMode === "modern" && <TransitionMotionNotice fullMotion={appOptions.transitionMotion === "full"} />}
+                <span>Choisis les effets qui conviennent à ton appareil.</span>
               </div>
-              <div className="option-pill-grid two compact">
-                <button
-                  type="button"
-                  className={`option-pill ${uiMode === "modern" ? "active" : ""}`}
-                  onClick={() => setUiMode("modern")}
-                >
-                  Activée
-                </button>
-
-                <button
-                  type="button"
-                  className={`option-pill ${uiMode === "reduced" ? "active" : ""}`}
-                  onClick={() => setUiMode("reduced")}
-                >
-                  Désactivée
-                </button>
-              </div>
+              <TransitionSettings mode={uiMode === "reduced" ? "off" : appOptions.transitionMotion} onChange={mode => {
+                setUiMode(mode === "off" ? "reduced" : "modern");
+                if (mode !== "off") onOptionChange("transitionMotion", mode);
+              }} />
             </div>
-
-            {uiMode === "modern" && <div className="option-setting-card">
-              <strong>Animations des transitions</strong>
-              <div className="option-pill-grid two compact">
-                <button type="button" className={`option-pill ${appOptions.transitionMotion === "full" ? "active" : ""}`} aria-pressed={appOptions.transitionMotion === "full"} onClick={() => onOptionChange("transitionMotion", "full")}>Animations complètes</button>
-                <button type="button" className={`option-pill ${appOptions.transitionMotion === "system" ? "active" : ""}`} aria-pressed={appOptions.transitionMotion === "system"} onClick={() => onOptionChange("transitionMotion", "system")}>Suivre l’appareil</button>
-              </div>
-            </div>}
 
             <div className="option-setting-card option-header-setting">
               <div>
@@ -21841,7 +21820,7 @@ const setPlayedPlatforms = async (id, platforms) => {
           onClose={() => setMiniPlayerLive(null)}
         /> 
 
-        {pixelTransition && <ThemeTransition key={pixelTransition.id} theme={theme} direction={pixelTransition.direction} effects={appOptions.visualEffects} fullMotion={appOptions.transitionMotion === "full"} />}
+        {pixelTransition && <ThemeTransition key={pixelTransition.id} theme={theme} direction={pixelTransition.direction} effects={appOptions.transitionMotion === "light" ? "calm" : appOptions.visualEffects} fullMotion light={appOptions.transitionMotion === "light"} />}
 
       {!showSplash && (
 

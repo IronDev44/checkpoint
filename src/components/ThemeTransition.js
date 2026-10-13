@@ -69,17 +69,17 @@ function renderMotif(theme, path, index) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>;
 }
 
-function transitionPortal(content, target, fullMotion) {
-  return renderPortal(<div className={fullMotion ? "checkpoint-full-tab-motion" : "checkpoint-tab-motion"} style={{ display: "contents" }}>{content}</div>, target);
+function transitionPortal(content, target, fullMotion, light = false) {
+  return renderPortal(<div className={`${fullMotion ? "checkpoint-full-tab-motion" : "checkpoint-tab-motion"}${light ? " checkpoint-tab-light" : ""}`} style={{ display: "contents" }}>{content}</div>, target);
 }
 
-function MatrixScreenTransition({ effects, fullMotion }) {
-  const createPortal = (content, target) => transitionPortal(content, target, fullMotion);
+function MatrixScreenTransition({ effects, fullMotion, light }) {
+  const createPortal = (content, target) => transitionPortal(content, target, fullMotion, light);
   const symbols = "012345789アイウエオカキクケコサシスセソタチツテトナニヌネノ<>:=+";
   return createPortal(
     <div className={"matrix-screen-transition effects-" + effects} aria-hidden="true">
       <div className="matrix-screen-code">
-        {Array.from({length: 64}, (_, column) => <pre key={column} className="matrix-screen-column" style={{ "--code-speed": (800 + column % 7 * 65) + "ms", "--code-offset": (-column % 9 * 22) + "px", "--code-brightness": .45 + column % 5 * .12 }}>
+        {Array.from({length: light ? 24 : 64}, (_, column) => <pre key={column} className="matrix-screen-column" style={{ "--code-speed": (800 + column % 7 * 65) + "ms", "--code-offset": (-column % 9 * 22) + "px", "--code-brightness": .45 + column % 5 * .12 }}>
           {Array.from({length: 90}, (_, row) => (row + column * 3) % 21 < 4 ? " " : symbols[(column * 17 + row * 13 + row * row) % symbols.length]).join("\n")}
         </pre>)}
       </div>
@@ -114,9 +114,9 @@ export function TransitionMotionNotice({ fullMotion = false }) {
   </p>;
 }
 
-export default function ThemeTransition({ theme, direction, effects, fullMotion = false }) {
+export default function ThemeTransition({ theme, direction, effects, fullMotion = false, light = false }) {
   const reduceMotion = useReducedMotion();
-  const createPortal = (content, target) => transitionPortal(content, target, fullMotion);
+  const createPortal = (content, target) => transitionPortal(content, target, fullMotion, light);
   // Keep a visible, stationary cue when Android suppresses motion. The
   // system preference still prevents sweeps, flashes and moving particles.
   if (reduceMotion && !fullMotion) return createPortal(
@@ -147,7 +147,7 @@ export default function ThemeTransition({ theme, direction, effects, fullMotion 
   if (theme === "theme-indigo") return createPortal(<AuroraTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-steamdeck") return createPortal(<SteamDeckTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-xbox") return createPortal(<XboxTransition direction={direction} effects={effects} />, document.body);
-  if (theme === "theme-matrix") return <MatrixScreenTransition effects={effects} fullMotion={fullMotion} />;
+  if (theme === "theme-matrix") return <MatrixScreenTransition effects={effects} fullMotion={fullMotion} light={light} />;
   const [motion, color, path] = identities[theme] || identities["theme-indigo"];
   const count = effects === "calm" ? 18 : effects === "boost" ? 112 : 72;
   const sparkCount = effects === "calm" ? 0 : effects === "boost" ? 144 : 80;

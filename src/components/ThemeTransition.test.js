@@ -1,6 +1,15 @@
 import { act, render } from "@testing-library/react";
 import ThemeTransition from "./ThemeTransition";
 
+test("light Matrix reduces rendered columns while complete Matrix retains all columns", () => {
+  const view = render(<ThemeTransition theme="theme-matrix" direction="right" effects="balanced" fullMotion />);
+  expect(document.querySelectorAll(".matrix-screen-column")).toHaveLength(64);
+  expect(document.querySelector(".checkpoint-tab-light")).toBeNull();
+  view.rerender(<ThemeTransition theme="theme-matrix" direction="right" effects="calm" fullMotion light />);
+  expect(document.querySelectorAll(".matrix-screen-column")).toHaveLength(24);
+  expect(document.querySelector(".checkpoint-tab-light")).not.toBeNull();
+});
+
 test("Android reduced motion keeps a stationary cue and responds to system changes", () => {
   const previous = window.matchMedia;
   let listener;

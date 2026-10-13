@@ -706,3 +706,18 @@ body[data-theme] .hardware-inline-detail-panel::before {
   object-fit: contain;
   object-position: center;
 }
+/* Mobile Chrome can retain transition textures in a scrolling backdrop layer.
+   Keep navigation on an opaque, isolated surface without backdrop sampling. */
+@media (max-width: 768px), (pointer: coarse) {
+  body .bottom-tabs {
+    background: linear-gradient(180deg, #ffffff0d, #ffffff03), var(--theme-chrome-bg, #10182b) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    isolation: isolate;
+    contain: paint;
+  }
+
+  body .bottom-tabs .tab-btn {
+    filter: none !important;
+  }
+}
