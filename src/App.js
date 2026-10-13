@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import "./App.css";
 import "./polish.css";
 import { db, auth } from "./firebase";
+import { ownerUid } from "./services/accountConfig";
 import { collection, doc, accountsEnabled, accountStorage as localStorage } from "./services/accountData";
 import { AccountOptions } from "./components/AccountGate";
 import { applySelectedGamePatch } from "./services/gameSelection";
@@ -2324,7 +2325,7 @@ const BADGE_BRAND_LOGOS = {
 const CREATOR_HANDLES = ["checkpoint", "irondev44", "bodyjordan", "bodyj"];
 
 function isCreatorProfile(profile = {}) {
-  if (accountsEnabled) return (profile.ownerUid || auth.currentUser?.uid) === process.env.REACT_APP_OWNER_UID;
+  if (accountsEnabled) return (profile.ownerUid || auth.currentUser?.uid) === ownerUid;
   const handle = normalizeHandle(profile.handle || "");
   const displayName = normalizeHandle(profile.displayName || "");
 
@@ -17037,7 +17038,7 @@ function OptionsTab({
 
         </OptionGroup>
 
-        {(!accountsEnabled || auth.currentUser?.uid === process.env.REACT_APP_OWNER_UID) && <OptionGroup id="development" isOpen={!!openOptionGroups.development} onToggle={() => setOpenOptionGroups((current) => ({ ...current, development: !current.development }))}
+        {(!accountsEnabled || auth.currentUser?.uid === ownerUid) && <OptionGroup id="development" isOpen={!!openOptionGroups.development} onToggle={() => setOpenOptionGroups((current) => ({ ...current, development: !current.development }))}
           title="Développement"
           description="Accès internes pour tester les grands systèmes sans attendre le bon niveau."
           summary="Tests internes"
@@ -19498,7 +19499,7 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
-  if (showSplash || newsItems.length > 0 || newsEmptyImportAttemptedRef.current || (accountsEnabled && auth.currentUser?.uid !== process.env.REACT_APP_OWNER_UID)) return;
+  if (showSplash || newsItems.length > 0 || newsEmptyImportAttemptedRef.current || (accountsEnabled && auth.currentUser?.uid !== ownerUid)) return;
 
   newsEmptyImportAttemptedRef.current = true;
   importNewsFromRSS({ silent: true, force: true }).catch((error) => {
@@ -21834,7 +21835,7 @@ const setPlayedPlatforms = async (id, platforms) => {
                 onImportXboxGames={importXboxGamesToLibrary}
               />
 
-              {(!accountsEnabled || auth.currentUser?.uid === process.env.REACT_APP_OWNER_UID) && <><FeedbackInbox /><AdminPanel events={gamingEvents} onImportNews={importNewsFromRSS} /></>}
+              {(!accountsEnabled || auth.currentUser?.uid === ownerUid) && <><FeedbackInbox /><AdminPanel events={gamingEvents} onImportNews={importNewsFromRSS} /></>}
             </>
           )}
 

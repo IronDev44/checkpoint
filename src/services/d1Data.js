@@ -1,6 +1,7 @@
 import * as firestore from "firebase/firestore";
 import { auth } from "../firebase";
-export const d1Enabled=process.env.REACT_APP_DATA_BACKEND === "d1";
+import { d1Enabled } from "./accountConfig";
+export { d1Enabled } from "./accountConfig";
 const listeners=new Map();
 function reference(collection,id){return {collection,id,type:"d1",path:id?`${collection}/${id}`:collection};}
 export const collection=(db,...parts)=>d1Enabled?reference(parts[0]):firestore.collection(db,...parts);

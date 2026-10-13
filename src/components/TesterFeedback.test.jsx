@@ -1,5 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import TesterFeedback from "./TesterFeedback";
+jest.mock("../services/accountData", () => ({ accountStorage: {
+  getItem: key => global.localStorage.getItem(key),
+  setItem: (key, value) => global.localStorage.setItem(key, value),
+  removeItem: key => global.localStorage.removeItem(key),
+} }));
 
 beforeEach(()=>localStorage.clear());
 test("keeps the report draft when sending fails",async()=>{

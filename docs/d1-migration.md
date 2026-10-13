@@ -24,6 +24,6 @@ Compilation réussie. Tests SQLite réels : isolation des comptes, droits admini
 
 Les changements se rechargent après une mutation locale ou un retour au premier plan, sans abonnement permanent. Les actualités publiques se rafraîchissent depuis le flux déjà utilisé par l’application, au plus toutes les six heures si disponible. Aucun nouveau plan payant activé.
 
-Configuration de build active dans .env.production.local : REACT_APP_DATA_BACKEND=d1, REACT_APP_ACCOUNTS_ENABLED=true, REACT_APP_OWNER_UID et REACT_APP_GOOGLE_AUTH_ENABLED=false. Ce fichier est ignoré ; conserver ces variables pour les prochaines publications.
+Configuration par défaut suivie dans src/services/accountConfig.js : comptes actifs, D1 et UID propriétaire. Elle fonctionne aussi lors d’une compilation Cloudflare sans .env.production.local. Les variables REACT_APP_ACCOUNTS_ENABLED=false et REACT_APP_DATA_BACKEND=firestore restent disponibles pour un retour explicite à l’ancien fonctionnement ; ne pas les utiliser lors d’une publication courante. Google reste désactivé par défaut.
 
 Pour terminer la récupération historique : exporter Firestore après rétablissement du quota, importer uniquement les collections/documents absents avec un contrôle de contenu. Ne pas relancer un import initial sur des documents D1 modifiés depuis la bascule.

@@ -1,7 +1,8 @@
 import { collection as firebaseCollection, doc as firebaseDoc, d1Enabled } from "./d1Data";
 import { auth } from "../firebase";
 
-export const accountsEnabled = process.env.REACT_APP_ACCOUNTS_ENABLED === "true";
+import { accountsEnabled } from "./accountConfig";
+export { accountsEnabled } from "./accountConfig";
 const privateCollections = new Set(["games", "hardware", "playerProgress", "playerPrivateSettings", "gameCollections"]);
 function scopedPath(parts) {
   if (d1Enabled || !accountsEnabled || !privateCollections.has(parts[0])) return parts;
