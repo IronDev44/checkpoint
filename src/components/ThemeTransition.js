@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import "./ThemeTransition.css";
 import PlayStationSymbol from "./PlayStationSymbol";
@@ -82,7 +83,38 @@ function MatrixScreenTransition({ effects }) {
   );
 }
 
+function useReducedMotion() {
+  const [reduceMotion, setReduceMotion] = useState(() =>
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+  );
+  useEffect(() => {
+    const preference = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    if (!preference) return undefined;
+    const update = () => setReduceMotion(preference.matches);
+    update();
+    preference.addEventListener("change", update);
+    return () => preference.removeEventListener("change", update);
+  }, []);
+  return reduceMotion;
+}
+
+export function TransitionMotionNotice() {
+  const reduceMotion = useReducedMotion();
+  return <p className="transition-motion-notice">
+    {reduceMotion
+      ? "Ton appareil limite les animations : un repère discret remplace les effets du thème."
+      : "Les animations du thème sont autorisées par ton appareil."}
+  </p>;
+}
+
 export default function ThemeTransition({ theme, direction, effects }) {
+  const reduceMotion = useReducedMotion();
+  // Keep a visible, stationary cue when Android suppresses motion. The
+  // system preference still prevents sweeps, flashes and moving particles.
+  if (reduceMotion) return createPortal(
+    <div className="checkpoint-transition-still" aria-hidden="true" />,
+    document.body
+  );
   if (theme === "theme-slayer") return createPortal(<SlayerTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-cyberpunk") return createPortal(<TokyoTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-retro") return createPortal(<ArcadeTransition effects={effects} />, document.body);

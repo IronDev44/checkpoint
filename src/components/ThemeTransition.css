@@ -262,3 +262,18 @@
 .motion-dust .transition-feature { opacity:.55; }
 .effects-calm .transition-feature { display:none; }
 @media(prefers-reduced-motion:reduce){.transition-feature{display:none}}
+.checkpoint-transition-still {
+  position: fixed;
+  inset: 0;
+  z-index: 2500;
+  pointer-events: none;
+  border: 3px solid var(--accent-solid, #93c5fd);
+  box-shadow: inset 0 0 24px var(--accent-solid, #93c5fd);
+  opacity: .45;
+}
+.transition-motion-notice {
+  margin: 8px 0 0;
+  color: var(--text-muted, #b6bddd);
+  font-size: .85rem;
+  line-height: 1.5;
+}

@@ -25,7 +25,7 @@ import GameExperiencePanel from "./components/GameExperiencePanel";
 import { getGameExperience, getExperienceRatingFields } from "./services/gameExperience";
 import RatingSliderControl from "./components/RatingSlider";
 import SplashScreen from "./components/SplashScreen";
-import ThemeTransition, { THEME_TRANSITION_DURATION } from "./components/ThemeTransition";
+import ThemeTransition, { THEME_TRANSITION_DURATION, TransitionMotionNotice } from "./components/ThemeTransition";
 import TrialRoom from "./components/TrialRoom";
 import TesterFeedback from "./components/TesterFeedback";
 import FeedbackInbox from "./components/FeedbackInbox";
@@ -16277,6 +16277,7 @@ function OptionsTab({
               <div>
                 <SectionTitle title="Transition d'onglet" help="animations" />
                 <span>Active ou désactive la transition liée à ton thème entre les onglets.</span>
+                {uiMode === "modern" && <TransitionMotionNotice />}
               </div>
               <div className="option-pill-grid two compact">
                 <button
@@ -21153,7 +21154,12 @@ const setPlayedPlatforms = async (id, platforms) => {
   };
 
   const changeTab = (nextTab) => {
-    if (nextTab === activeTab) return;
+    window.clearTimeout(tabSwitchTimerRef.current);
+    window.clearTimeout(tabTransitionTimerRef.current);
+    if (nextTab === activeTab) {
+      setPixelTransition(null);
+      return;
+    }
 
     setNotificationPanelOpen(false);
     setSelectedGame(null);
@@ -21164,9 +21170,6 @@ const setPlayedPlatforms = async (id, platforms) => {
     const nextIndex = tabOrder.indexOf(nextTab);
     const nextDirection = nextIndex > currentIndex ? "right" : "left";
 
-    window.clearTimeout(tabSwitchTimerRef.current);
-    window.clearTimeout(tabTransitionTimerRef.current);
-
     // Transition visuelle très courte, par-dessus
     if (uiMode === "reduced") {
       setPixelTransition(null);
@@ -21174,19 +21177,15 @@ const setPlayedPlatforms = async (id, platforms) => {
       return;
     }
 
-    setPixelTransition(null);
-
-    window.setTimeout(() => {
-      setPixelTransition(nextDirection);
-
-      tabSwitchTimerRef.current = window.setTimeout(() => {
-        setActiveTab(nextTab);
-      }, 90);
-
-      tabTransitionTimerRef.current = window.setTimeout(() => {
-        setPixelTransition(null);
-      }, theme === "theme-matrix" ? 1320 : THEME_TRANSITION_DURATION);
-    }, 16);
+    // A fresh key restarts the effect even when consecutive taps go in the
+    // same direction. No deferred start can resurrect a cancelled transition.
+    setPixelTransition({ direction: nextDirection, id: performance.now() });
+    tabSwitchTimerRef.current = window.setTimeout(() => {
+      setActiveTab(nextTab);
+    }, 90);
+    tabTransitionTimerRef.current = window.setTimeout(() => {
+      setPixelTransition(null);
+    }, theme === "theme-matrix" ? 1320 : THEME_TRANSITION_DURATION);
   };
 
   const openNotification = (notification) => {
@@ -21832,7 +21831,7 @@ const setPlayedPlatforms = async (id, platforms) => {
           onClose={() => setMiniPlayerLive(null)}
         /> 
 
-        {pixelTransition && <ThemeTransition theme={theme} direction={pixelTransition} effects={appOptions.visualEffects} />}
+        {pixelTransition && <ThemeTransition key={pixelTransition.id} theme={theme} direction={pixelTransition.direction} effects={appOptions.visualEffects} />}
 
       {!showSplash && (
 

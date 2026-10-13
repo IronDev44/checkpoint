@@ -1,5 +1,25 @@
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import ThemeTransition from "./ThemeTransition";
+
+test("Android reduced motion keeps a stationary cue and responds to system changes", () => {
+  const previous = window.matchMedia;
+  let listener;
+  const preference = {
+    matches: true,
+    addEventListener: jest.fn((event, callback) => { listener = callback; }),
+    removeEventListener: jest.fn(),
+  };
+  window.matchMedia = jest.fn(() => preference);
+  const view = render(<ThemeTransition theme="theme-indigo" direction="right" effects="balanced" />);
+  expect(document.querySelector(".checkpoint-transition-still")).not.toBeNull();
+  expect(document.querySelector(".aurora-tab-transition")).toBeNull();
+  act(() => { preference.matches = false; listener(); });
+  expect(document.querySelector(".checkpoint-transition-still")).toBeNull();
+  expect(document.querySelector(".aurora-tab-transition")).not.toBeNull();
+  view.unmount();
+  expect(preference.removeEventListener).toHaveBeenCalledWith("change", listener);
+  window.matchMedia = previous;
+});
 
 test.each([
   ["theme-slayer", ".slayer-tab-transition"],
