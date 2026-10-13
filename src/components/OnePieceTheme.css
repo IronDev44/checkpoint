@@ -1,0 +1,12 @@
+html[data-theme="theme-treasure"]{--theme-chrome-bg:#0b2038}
+body[data-theme="theme-treasure"]{
+  --bg-main:radial-gradient(ellipse at 12% 4%,#ef69472b,transparent 35%),radial-gradient(ellipse at 85% 14%,#ffcf6d24,transparent 32%),linear-gradient(180deg,#0b2038,#113c59 55%,#071b30)!important;
+  --panel-bg:rgba(13,39,62,.92)!important;--panel-border:#f3bd6545!important;--surface-bg:rgba(24,60,83,.82)!important;--surface-border:#f0bf6840!important;--input-bg:#081b30!important;--muted-bg:#ffc86b12!important;
+  --accent:linear-gradient(125deg,#a43139,#b95132 52%,#90641f)!important;--accent-solid:#e8664d!important;--accent-shadow:0 5px 24px #ea624032!important;
+  --text-main:#fff3dc!important;--text-soft:#d2e5ee!important;--text-muted:#9dbdce!important;--genre-color:#ffcf79!important;
+  --theme-aurora:radial-gradient(circle at 16% 24%,#e7664824,transparent 32%),radial-gradient(circle at 82% 18%,#ffc76421,transparent 30%),radial-gradient(ellipse at 50% 90%,#188caa30,transparent 45%)!important;
+  --checkpoint-title-gradient:linear-gradient(180deg,#fff4d7,#ffd180 60%,#eb7051)!important;--checkpoint-title-glow:#efae4b45!important;
+  --checkpoint-splash-primary:#ef674e!important;--checkpoint-splash-secondary:#ffcf79!important;--checkpoint-splash-glow:#f5b85a50!important;
+}
+body[data-theme="theme-treasure"] .app-shell::after{background:var(--theme-aurora)!important}
+.option-pill.theme-theme-treasure.active{background:linear-gradient(125deg,#a43139,#b95132 52%,#90641f)!important;border-color:#ffcb7b!important}

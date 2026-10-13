@@ -18,6 +18,7 @@ import { CrystalTransition } from "./CrystalEffects";
 import { PacTransition } from "./PacEffects";
 import { WastelandTransition } from "./WastelandEffects";
 import { TreasureTransition } from "./TreasureEffects";
+import { SlayerTransition } from "./SlayerEffects";
 import { VigilanteTransition } from "./VigilanteEffects";
 import { MintTransition } from "./MintEffects";
 import { RedlineTransition } from "./RedlineEffects";
@@ -82,13 +83,14 @@ function MatrixScreenTransition({ effects }) {
 }
 
 export default function ThemeTransition({ theme, direction, effects }) {
+  if (theme === "theme-slayer") return createPortal(<SlayerTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-cyberpunk") return createPortal(<TokyoTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-retro") return createPortal(<ArcadeTransition effects={effects} />, document.body);
   if (theme === "theme-graphite") return createPortal(<CarbonTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-crimson") return createPortal(<RedlineTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-emerald") return createPortal(<MintTransition effects={effects} />, document.body);
   if (theme === "theme-vigilante") return createPortal(<VigilanteTransition direction={direction} effects={effects} />, document.body);
-  if (theme === "theme-treasure") return createPortal(<TreasureTransition effects={effects} />, document.body);
+  if (theme === "theme-treasure") return createPortal(<TreasureTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-wasteland") return createPortal(<WastelandTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-ring") return createPortal(<PacTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-crystal") return createPortal(<CrystalTransition effects={effects} />, document.body);

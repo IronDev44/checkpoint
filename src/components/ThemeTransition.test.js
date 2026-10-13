@@ -2,6 +2,7 @@ import { render } from "@testing-library/react";
 import ThemeTransition from "./ThemeTransition";
 
 test.each([
+  ["theme-slayer", ".slayer-tab-transition"],
   ["theme-cyberpunk", ".tokyo-tab-transition"],
   ["theme-retro", ".arcade-tab-transition"],
   ["theme-graphite", ".carbon-tab-transition"],

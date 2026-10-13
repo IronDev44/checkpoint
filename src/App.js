@@ -2,6 +2,7 @@ import { Fragment, useState, useEffect, useMemo, useRef, useCallback } from "rea
 import { createPortal } from "react-dom";
 import "./App.css";
 import "./polish.css";
+import "./components/OnePieceTheme.css";
 import { db, auth } from "./firebase";
 import { ownerUid } from "./services/accountConfig";
 import { collection, doc, accountsEnabled, accountStorage as localStorage } from "./services/accountData";
@@ -10555,16 +10556,16 @@ function HomeTab({
     : 0;
   const nextRank = RANKS.find((rank) => rank.min > level);
   const progressionMilestones = [
-    { level: 10, label: "Theme", reward: "Ecole des sorciers" },
-    { level: 15, label: "Theme", reward: "Guerre des etoiles" },
-    { level: 20, label: "Theme", reward: "Super-heros multivers" },
-    { level: 25, label: "Theme", reward: "Code vert" },
-    { level: 30, label: "Theme", reward: "Chevalier noir" },
+    { level: 10, label: "Theme", reward: "Harry Potter" },
+    { level: 15, label: "Theme", reward: "Star Wars" },
+    { level: 20, label: "Theme", reward: "Marvel (MCU)" },
+    { level: 25, label: "Theme", reward: "Matrix" },
+    { level: 30, label: "Theme", reward: "Batman" },
     { level: 40, label: "Profil", reward: "Badge mis en avant" },
-    { level: 60, label: "Theme", reward: "Carte au tresor" },
-    { level: 70, label: "Theme", reward: "Survie post-apo" },
-    { level: 80, label: "Theme", reward: "Quete de la relique" },
-    { level: 90, label: "Theme", reward: "Maitre des creatures" },
+    { level: 60, label: "Theme", reward: "One Piece" },
+    { level: 70, label: "Theme", reward: "Fallout" },
+    { level: 80, label: "Theme", reward: "The Legend of Zelda" },
+    { level: 90, label: "Theme", reward: "Pokémon" },
     { level: 100, label: "Statut", reward: "Supreme" },
   ];
   const unlockedMilestones = progressionMilestones.filter((milestone) => level >= milestone.level);
@@ -15660,26 +15661,27 @@ function OptionsTab({
   });
   const themes = [
   { id: "theme-indigo", label: "Aurora Neon" },
-  { id: "theme-playstation", label: "PS5 Premium" },
+  { id: "theme-playstation", label: "PlayStation 5" },
   { id: "theme-xbox", label: "Xbox Dashboard" },
   { id: "theme-steamdeck", label: "Steam Deck" },
-  { id: "theme-arcane", label: "Ecole des sorciers" },
-  { id: "theme-stellar", label: "Guerre des etoiles" },
-  { id: "theme-multiverse", label: "Super-heros multivers" },
-  { id: "theme-relic", label: "Quete de la relique" },
-  { id: "theme-tamer", label: "Maitre des creatures" },
-  { id: "theme-mushroom", label: "Mario - Royaume" },
-  { id: "theme-blueblur", label: "Sonic - Vitesse" },
-  { id: "theme-blocks", label: "Tetris - Blocs" },
-  { id: "theme-cubic", label: "Minecraft - Cubes" },
-  { id: "theme-hunter", label: "Metroid - Chasseur" },
-  { id: "theme-kart", label: "Mario Kart - Route arc-en-ciel" },
-  { id: "theme-crystal", label: "Final Fantasy - Cristal" },
-  { id: "theme-ring", label: "Pac-Man - Labyrinthe" },
-  { id: "theme-matrix", label: "Code vert" },
-  { id: "theme-wasteland", label: "Survie post-apo" },
-  { id: "theme-treasure", label: "Pirates et tresors" },
-  { id: "theme-vigilante", label: "Chevalier noir" },
+  { id: "theme-arcane", label: "Harry Potter" },
+  { id: "theme-stellar", label: "Star Wars" },
+  { id: "theme-multiverse", label: "Marvel (MCU)" },
+  { id: "theme-relic", label: "The Legend of Zelda" },
+  { id: "theme-tamer", label: "Pokémon" },
+  { id: "theme-mushroom", label: "Super Mario" },
+  { id: "theme-blueblur", label: "Sonic" },
+  { id: "theme-blocks", label: "Tetris" },
+  { id: "theme-cubic", label: "Minecraft" },
+  { id: "theme-hunter", label: "Metroid" },
+  { id: "theme-kart", label: "Mario Kart · Route Arc-en-ciel" },
+  { id: "theme-crystal", label: "Final Fantasy" },
+  { id: "theme-ring", label: "Pac-Man" },
+  { id: "theme-matrix", label: "Matrix" },
+  { id: "theme-wasteland", label: "Fallout" },
+  { id: "theme-treasure", label: "One Piece" },
+  { id: "theme-slayer", label: "Demon Slayer" },
+  { id: "theme-vigilante", label: "Batman" },
   { id: "theme-emerald", label: "Circuit Mint" },
   { id: "theme-crimson", label: "Redline" },
   { id: "theme-graphite", label: "Carbon Ice" },
@@ -19665,7 +19667,8 @@ useEffect(() => {
       "theme-ring": "#050715",
       "theme-matrix": "#020a06",
       "theme-wasteland": "#130b05",
-      "theme-treasure": "#071722",
+      "theme-treasure": "#0b2038",
+      "theme-slayer": "#081b1d",
       "theme-vigilante": "#050711",
           };
 

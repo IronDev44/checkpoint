@@ -26,6 +26,7 @@ import { CarbonIntro } from "./CarbonEffects";
 import { ArcadeIntro } from "./ArcadeEffects";
 import { TokyoIntro } from "./TokyoEffects";
 import { TamerIntro } from "./TamerEffects";
+import { SlayerIntro } from "./SlayerEffects";
 
 export default function SplashScreen({ showSplash, progress = 0, onRequestClose }) {
   const safeProgress = Math.max(0, Math.min(100, Math.round(progress)));
@@ -89,6 +90,7 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose 
   if (!showSplash) return null;
 
   if (splashTheme === "theme-tamer") return <TamerIntro progress={safeProgress} />;
+  if (splashTheme === "theme-slayer") return <SlayerIntro progress={safeProgress} />;
   if (splashTheme === "theme-cyberpunk") return <TokyoIntro progress={safeProgress} />;
   if (splashTheme === "theme-retro") return <ArcadeIntro progress={safeProgress} />;
   if (splashTheme === "theme-graphite") return <CarbonIntro progress={safeProgress} />;
