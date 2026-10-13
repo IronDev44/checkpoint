@@ -6,6 +6,8 @@ Google n’est pas encore configuré et son bouton est masqué. Les options de p
 
 L’écran de connexion sépare la récupération du mot de passe et la création de compte. « Rester connecté » est coché par défaut et utilise la persistance locale Firebase. Décoché, il utilise la persistance de session du navigateur. Ce choix est appliqué avant la connexion ou l’inscription et sa préférence est mémorisée sur l’appareil, sans stocker le mot de passe dans l’application.
 
+« Mot de passe oublié » reste accessible quand l’adresse est vide : il ouvre un formulaire dédié qui demande uniquement l’e-mail. L’envoi du lien est une action distincte, avec confirmation et retour à la connexion ; aucun ancien mot de passe n’est demandé.
+
 Le compte propriétaire bodyjordan@gmail.com retrouve les 570 jeux, 70 matériels, son profil et ses options fournis dans la sauvegarde. Les données non exportées attendent leur récupération dans Firestore, sans suppression des originaux.
 
 Voir d1-migration.md pour les validations, les limites et la configuration des prochaines publications.

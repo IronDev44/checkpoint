@@ -26,6 +26,7 @@ export default function AccountGate({ children }) {
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [tour, setTour] = useState(false);
   const [creatingProfile, setCreatingProfile] = useState(false);
   useEffect(() => {
@@ -47,7 +48,7 @@ export default function AccountGate({ children }) {
   }, []);
   useEffect(() => { const replay = () => setTour(true); window.addEventListener("checkpoint-replay-tour", replay); return () => window.removeEventListener("checkpoint-replay-tour", replay); }, []);
   async function run(action) {
-    setBusy(true); setError("");
+    setBusy(true); setError(""); setNotice("");
     try { await action(); } catch (e) { setError(messages[e.code] || "La connexion n’a pas abouti. Réessaie dans un instant."); } finally { setBusy(false); }
   }
   function finishTour() { try { accountStorage.setItem("welcome-complete", "true"); } catch {} setTour(false); }
@@ -59,6 +60,11 @@ export default function AccountGate({ children }) {
     await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
   }
   async function submitAccount() {
+    if (mode === "reset") {
+      await sendPasswordResetEmail(auth, email.trim());
+      setNotice("Si cette adresse a un compte, un lien de récupération va arriver par e-mail. Pense aussi à vérifier les courriers indésirables.");
+      return;
+    }
     await preparePersistence();
     if (mode !== "create") return signInWithEmailAndPassword(auth, email, password);
     if (!pseudo.trim()) { setError("Choisis un pseudo pour ton profil."); return; }
@@ -71,17 +77,18 @@ export default function AccountGate({ children }) {
   if (!accountsEnabled) return <>{children}{tour && <WelcomeTour onClose={finishTour} />}</>;
   if (user === undefined || creatingProfile) return <div className="account-welcome-overlay"><p>Ouverture de ton espace…</p></div>;
   if (!user) return <div className="account-welcome-overlay"><section className="account-welcome">
-    <p className="welcome-counter">CHECKPOINT</p><h1>{mode === "create" ? "Ton aventure commence ici" : "Content de te retrouver"}</h1><p>Un espace à toi pour tes jeux, ton matériel et tes souvenirs.</p>
+    <p className="welcome-counter">CHECKPOINT</p><h1>{mode === "reset" ? "Retrouver ton compte" : mode === "create" ? "Ton aventure commence ici" : "Content de te retrouver"}</h1><p>{mode === "reset" ? "Indique l’adresse e-mail de ton compte pour recevoir un lien et choisir un nouveau mot de passe." : "Un espace à toi pour tes jeux, ton matériel et tes souvenirs."}</p>
     <form onSubmit={e => { e.preventDefault(); run(submitAccount); }}>
       {mode === "create" && <label>Ton pseudo<input required maxLength={40} value={pseudo} onChange={e => setPseudo(e.target.value)} autoComplete="nickname" /></label>}
       <label>Adresse e-mail<input type="email" required value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" /></label>
-      <label>Mot de passe<input type="password" minLength={6} required value={password} onChange={e => setPassword(e.target.value)} autoComplete={mode === "create" ? "new-password" : "current-password"} /></label>
-      <label className="welcome-remember"><input type="checkbox" checked={remember} disabled={busy} onChange={e => changeRemember(e.target.checked)} /><span>Rester connecté<small>Retrouve ton espace à la prochaine ouverture.</small></span></label>
-      <button className="checkpoint-primary-action" disabled={busy}>{busy ? "Un instant…" : mode === "create" ? "Créer mon compte" : "Se connecter"}</button>
+      {mode !== "reset" && <><label>Mot de passe<input type="password" minLength={6} required value={password} onChange={e => setPassword(e.target.value)} autoComplete={mode === "create" ? "new-password" : "current-password"} /></label>
+      <label className="welcome-remember"><input type="checkbox" checked={remember} disabled={busy} onChange={e => changeRemember(e.target.checked)} /><span>Rester connecté<small>Retrouve ton espace à la prochaine ouverture.</small></span></label></>}
+      <button className="checkpoint-primary-action" disabled={busy}>{busy ? "Un instant…" : mode === "reset" ? "Envoyer le lien" : mode === "create" ? "Créer mon compte" : "Se connecter"}</button>
     </form>
     {process.env.REACT_APP_GOOGLE_AUTH_ENABLED === "true" && <div className="welcome-actions"><button disabled={busy} onClick={() => run(async () => { await preparePersistence(); await signInWithPopup(auth, new GoogleAuthProvider()); })}>Continuer avec Google</button></div>}
-    {mode === "login" && <div className="welcome-recovery"><button className="welcome-reset" disabled={busy || !email} onClick={() => run(async () => { await sendPasswordResetEmail(auth, email); setError("Si cette adresse a un compte, tu recevras un e-mail pour changer le mot de passe."); })}>Mot de passe oublié</button></div>}
-    <div className="welcome-account-switch"><p>{mode === "create" ? "Déjà dans l’aventure ?" : "Nouveau sur Checkpoint ?"}</p><button disabled={busy} onClick={() => { setMode(mode === "create" ? "login" : "create"); setError(""); }}>{mode === "create" ? "J’ai déjà un compte" : "Créer un compte"}</button></div>
+    {mode === "login" && <div className="welcome-recovery"><button className="welcome-reset" disabled={busy} onClick={() => { setMode("reset"); setError(""); setNotice(""); }}>Mot de passe oublié</button></div>}
+    {notice && <p className="welcome-notice" role="status">{notice}</p>}
+    <div className="welcome-account-switch">{mode !== "reset" && <p>{mode === "create" ? "Déjà dans l’aventure ?" : "Nouveau sur Checkpoint ?"}</p>}<button disabled={busy} onClick={() => { setMode(mode === "create" || mode === "reset" ? "login" : "create"); setError(""); setNotice(""); }}>{mode === "reset" ? "Retour à la connexion" : mode === "create" ? "J’ai déjà un compte" : "Créer un compte"}</button></div>
     {error && <p className="welcome-error" role="status">{error}</p>}
   </section></div>;
   return <>{cloneElement(children, { key: user.uid })}{tour && <WelcomeTour onClose={finishTour} />}</>;
