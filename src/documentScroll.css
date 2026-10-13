@@ -1,0 +1,28 @@
+/* One document scroller. Hidden X + visible Y computes to auto Y and creates
+   nested scroll containers; containing their overscroll traps Android swipes. */
+html {
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  height: auto !important;
+  max-height: none !important;
+  overscroll-behavior-y: auto !important;
+}
+body,
+body.modal-open,
+#root,
+.app-shell {
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+  overscroll-behavior-y: auto !important;
+}
+/* Do not propagate a modal's own scrolling into the page behind it. */
+.account-welcome-overlay {
+  align-items: safe center;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}

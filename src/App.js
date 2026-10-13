@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import "./App.css";
 import "./polish.css";
 import "./components/OnePieceTheme.css";
+import "./documentScroll.css";
 import { db, auth } from "./firebase";
 import { ownerUid } from "./services/accountConfig";
 import { collection, doc, accountsEnabled, accountStorage as localStorage } from "./services/accountData";
@@ -19970,34 +19971,6 @@ useEffect(() => {
       document.body.classList.remove("modal-open");
     };
   }, []);
-
-useEffect(() => {
-  const handleWheel = (e) => {
-    const target = e.target;
-
-    if (
-      target.closest("input, textarea, select") ||
-      target.closest(".modal-backdrop") ||
-      target.closest(".search-detail-backdrop") ||
-      target.closest(".hardware-modal-backdrop") ||
-      target.closest(".hardware-zoom-backdrop")
-    ) {
-      return;
-    }
-
-    window.scrollBy({
-      top: e.deltaY,
-      left: 0,
-      behavior: "auto",
-    });
-  };
-
-  window.addEventListener("wheel", handleWheel, { passive: true });
-
-  return () => {
-    window.removeEventListener("wheel", handleWheel);
-  };
-}, []);
 
   const filteredLibraryGames = useMemo(() => {
     const q = librarySearch.trim().toLowerCase();
