@@ -8,6 +8,10 @@ L’écran de connexion sépare la récupération du mot de passe et la créatio
 
 « Mot de passe oublié » reste accessible quand l’adresse est vide : il ouvre un formulaire dédié qui demande uniquement l’e-mail. L’envoi du lien est une action distincte, avec confirmation et retour à la connexion ; aucun ancien mot de passe n’est demandé.
 
+La langue Firebase Auth est fixée à fr pour les e-mails de récupération et les actions de compte hébergées.
+
+Le nom d’expéditeur du modèle de récupération a été réglé sur Checkpoint et relu via l’API. Le nom dans le texte (%APP_NAME%) dépend du « Nom public » du projet, distinct du nom interne déjà Checkpoint. La modification de l’objet/du corps via l’API renvoie EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED. La console Firebase du navigateur intégré affiche une erreur de chargement des conditions ; le réglage du nom public reste à effectuer via une console accessible. Ne pas déclarer cette partie terminée.
+
 Le compte propriétaire bodyjordan@gmail.com retrouve les 570 jeux, 70 matériels, son profil et ses options fournis dans la sauvegarde. Les données non exportées attendent leur récupération dans Firestore, sans suppression des originaux.
 
 Voir d1-migration.md pour les validations, les limites et la configuration des prochaines publications.

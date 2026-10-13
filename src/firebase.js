@@ -16,3 +16,5 @@ const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);
+// Firebase uses this language for password-reset emails and hosted account actions.
+auth.languageCode = "fr";
