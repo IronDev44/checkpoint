@@ -42,7 +42,7 @@ html body[data-theme="theme-multiverse"] :is(.search-panel,.home-card,.profile-s
 @keyframes heroEnergyBurst { 0%{opacity:0;transform:rotate(var(--hero-angle)) translateX(10px) scaleX(.2)} 35%{opacity:1} 100%{opacity:0;transform:rotate(var(--hero-angle)) translateX(80vmax) scaleX(2)} }
 .hero-tab-transition.effects-calm .hero-energy { display:none; }
 .hero-tab-transition.effects-calm .hero-portal > i { box-shadow:none; }
-@media(prefers-reduced-motion:reduce){.hero-tab-transition{display:none}.hero-boot-content{animation:none}}
+@media(prefers-reduced-motion:reduce){.hero-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.hero-boot-content:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}
 /* Cinematic multiverse: mystic portals and cosmic light. */
 html body[data-theme="theme-multiverse"] {
  --bg-main:radial-gradient(ellipse at 15% 65%,#ad64281c,transparent 50%),radial-gradient(ellipse at 85% 35%,#7356ba20,transparent 50%),linear-gradient(180deg,#090f24,#19243e 55%,#070b1c) !important;
@@ -77,4 +77,4 @@ html body[data-theme="theme-multiverse"] :is(.search-panel,.home-card,.profile-s
 @keyframes heroRealityFragment { 0%{opacity:0;transform:rotate(var(--fragment-angle)) scale(.2)} 45%{opacity:.7} 100%{opacity:0;transform:translateY(-80px) rotate(var(--fragment-angle)) scale(1.4)} }
 body[data-effects="calm"] .hero-boot .hero-portal-sparks { display:none; }
 body[data-effects="calm"] .hero-portal-rim { animation:none; }
-@media(prefers-reduced-motion:reduce){.hero-portal-rim{animation:none}.hero-boot .hero-portal-sparks{display:none}}
+@media(prefers-reduced-motion:reduce){.hero-portal-rim:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}.hero-boot .hero-portal-sparks:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}}

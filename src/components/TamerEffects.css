@@ -16,7 +16,7 @@
 @keyframes tamerGlow { 0%,100%{opacity:0} 35%,55%{opacity:1} }
 @keyframes tamerSpark { 0%,35%{opacity:0;transform:rotate(var(--capture-angle)) translateY(35px) scale(.3)} 50%{opacity:1} 100%{opacity:0;transform:rotate(var(--capture-angle)) translateY(var(--capture-distance)) scale(.5)} }
 .tamer-tab-transition.effects-calm .tamer-capture-sparks { display:none; }
-@media(prefers-reduced-motion:reduce){.tamer-tab-transition{display:none}}
+@media(prefers-reduced-motion:reduce){.tamer-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}}
 .tamer-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:24px; box-sizing:border-box; overflow:hidden; color:#f7f7ff; background:radial-gradient(ellipse at 50% 35%,#29395e,#0c142a 75%); }
 .tamer-boot-content { position:relative; width:min(430px,100%); text-align:center; }
 .tamer-boot-capture { position:relative; width:220px; height:220px; margin:0 auto 28px; }
@@ -37,4 +37,4 @@
 @keyframes tamerBootStar { 0%,50%,100%{opacity:0;transform:rotate(var(--star-angle)) translateY(-85px) scale(.3)} 70%{opacity:.9;transform:rotate(var(--star-angle)) translateY(-125px) scale(1)} 90%{opacity:0;transform:rotate(var(--star-angle)) translateY(-145px) scale(.5)} }
 body[data-effects="calm"] .tamer-boot .tamer-capsule,body[data-effects="calm"] .tamer-boot .tamer-capsule-button { animation:none; }
 body[data-effects="calm"] .tamer-boot-stars { display:none; }
-@media(prefers-reduced-motion:reduce){.tamer-boot .tamer-capsule,.tamer-boot .tamer-capsule-button{animation:none}.tamer-boot-stars{display:none}}
+@media(prefers-reduced-motion:reduce){.tamer-boot .tamer-capsule:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),.tamer-boot .tamer-capsule-button:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}.tamer-boot-stars:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}}

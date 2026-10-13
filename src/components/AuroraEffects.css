@@ -29,5 +29,5 @@
 .aurora-tab-transition.effects-calm .ribbon-pink,.aurora-tab-transition.effects-calm .ribbon-violet { display:none; }
 .aurora-tab-transition.effects-calm .aurora-ribbon { filter:none; }
 .aurora-tab-transition.effects-boost .aurora-ribbon { filter:blur(10px); }
-@media(prefers-reduced-motion:reduce){.aurora-tab-transition{display:none}.aurora-boot-lights i,.aurora-boot-content{animation:none}}
+@media(prefers-reduced-motion:reduce){.aurora-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.aurora-boot-lights i:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),.aurora-boot-content:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}
 body[data-effects="calm"] .aurora-boot-lights i { animation:none; }

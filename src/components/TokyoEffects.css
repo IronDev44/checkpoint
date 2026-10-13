@@ -35,4 +35,4 @@ html[data-theme="theme-cyberpunk"] { --theme-chrome-bg:#0c1027 !important; }
 @keyframes tokyoPanelSlide { 0%{opacity:0;transform:translateX(-110vw) skewX(-12deg)} 35%,55%{opacity:1;transform:skewX(-12deg)} 100%{opacity:0;transform:translateX(110vw) skewX(-12deg)} }
 @keyframes tokyoSignReveal { 0%{opacity:0;transform:translate(-50%,-50%) scale(.8)} 35%,60%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.1)} }
 body[data-effects="calm"] .tokyo-boot .tokyo-rain { display:none; }
-@media(prefers-reduced-motion:reduce){.tokyo-tab-transition,.tokyo-boot .tokyo-rain{display:none}}
+@media(prefers-reduced-motion:reduce){.tokyo-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),.tokyo-boot .tokyo-rain:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}}

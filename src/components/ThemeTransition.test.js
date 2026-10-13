@@ -21,6 +21,16 @@ test("Android reduced motion keeps a stationary cue and responds to system chang
   window.matchMedia = previous;
 });
 
+test.each(["theme-indigo", "theme-matrix", "theme-cubic", "theme-slayer"])("explicit full animations override Android reduction for %s", (theme) => {
+  const previous = window.matchMedia;
+  window.matchMedia = jest.fn(() => ({ matches: true, addEventListener: jest.fn(), removeEventListener: jest.fn() }));
+  const view = render(<ThemeTransition theme={theme} direction="right" effects="balanced" fullMotion />);
+  expect(document.querySelector(".checkpoint-transition-still")).toBeNull();
+  expect(document.querySelector(".checkpoint-full-tab-motion")).not.toBeNull();
+  view.unmount();
+  window.matchMedia = previous;
+});
+
 test.each([
   ["theme-slayer", ".slayer-tab-transition"],
   ["theme-cyberpunk", ".tokyo-tab-transition"],

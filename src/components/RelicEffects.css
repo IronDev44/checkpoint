@@ -43,4 +43,4 @@ html body[data-theme="theme-relic"] :is(.search-panel,.home-card,.profile-showca
 @keyframes relicMoteRise { 0%{opacity:0;transform:translateY(50px)} 30%{opacity:.9} 100%{opacity:0;transform:translateY(-100px)} }
 .relic-tab-transition.effects-calm .relic-motes { display:none; }
 body[data-effects="calm"] .relic-boot .relic-motes i { animation:none; opacity:.4; }
-@media(prefers-reduced-motion:reduce){.relic-tab-transition{display:none}.relic-boot-content,.relic-boot .relic-motes i{animation:none}}
+@media(prefers-reduced-motion:reduce){.relic-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.relic-boot-content:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),.relic-boot .relic-motes i:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}

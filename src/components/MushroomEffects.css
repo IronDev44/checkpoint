@@ -19,7 +19,7 @@
 @keyframes mushroomPowerupJump { 0%,25%{opacity:0;transform:translate(-65px,70px) scale(.5)} 48%{opacity:1;transform:translate(0,-10px) scale(1)} 70%{opacity:1;transform:translate(35px,0)} 100%{opacity:0;transform:translate(100px,40px)} }
 .direction-left .mushroom-block-row { flex-direction:row-reverse; }
 .effects-calm .mushroom-block-spark,.effects-calm .mushroom-powerup { display:none; }
-@media(prefers-reduced-motion:reduce){.mushroom-tab-transition{display:none}}
+@media(prefers-reduced-motion:reduce){.mushroom-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}}
 .mushroom-boot { position:fixed; inset:0; z-index:99999; display:grid; place-items:center; padding:24px; box-sizing:border-box; overflow:hidden; color:#fff8da; background:linear-gradient(#09234a,#15568a); }
 .mushroom-boot-content { position:relative; z-index:1; width:min(430px,100%); text-align:center; animation:mushroomIntroEnter 600ms ease-out both; }
 .mushroom-boot-blocks { display:flex; justify-content:center; gap:22px; margin:0 auto 48px; }
@@ -43,4 +43,4 @@
 @keyframes mushroomIntroCoin { 0%,18%{opacity:0;transform:translateY(0)} 30%{opacity:1} 48%{opacity:1;transform:translateY(-65px) rotateY(360deg)} 60%,100%{opacity:0;transform:translateY(-45px) rotateY(540deg)} }
 body[data-effects="calm"] .mushroom-boot-blocks .mushroom-question-block { animation:none; }
 body[data-effects="calm"] .mushroom-boot-blocks .mushroom-gold-coin { display:none; }
-@media(prefers-reduced-motion:reduce){.mushroom-boot-content,.mushroom-boot-blocks .mushroom-question-block{animation:none}.mushroom-boot-blocks .mushroom-gold-coin{display:none}}
+@media(prefers-reduced-motion:reduce){.mushroom-boot-content:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),.mushroom-boot-blocks .mushroom-question-block:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}.mushroom-boot-blocks .mushroom-gold-coin:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}}

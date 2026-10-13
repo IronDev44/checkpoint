@@ -19,4 +19,4 @@
 @keyframes xboxEmblemReveal { 0%{opacity:0;transform:translate(-50%,-50%) scale(.4)} 35%,60%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)} }
 @keyframes xboxPassFade { 0%,100%{opacity:0} 25%,65%{opacity:1} }
 .effects-calm .xbox-dashboard-tiles { display:none; }
-@media(prefers-reduced-motion:reduce){.xbox-tab-transition{display:none}.xbox-boot-content{animation:none}}
+@media(prefers-reduced-motion:reduce){.xbox-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.xbox-boot-content:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}

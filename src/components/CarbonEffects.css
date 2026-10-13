@@ -35,4 +35,4 @@ html body[data-theme="theme-graphite"] .app-shell::after { background:repeating-
 @keyframes carbonCoreReveal { 0%{opacity:0;transform:translate(-50%,-50%) scale(.8)} 35%,60%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)} }
 @keyframes carbonIceDrift { 0%{opacity:0;transform:translate(-35px,-45px)} 40%{opacity:.7} 100%{opacity:0;transform:translate(35px,45px)} }
 body[data-effects="calm"] .carbon-boot .carbon-ice-core { animation:none; }
-@media(prefers-reduced-motion:reduce){.carbon-tab-transition{display:none}.carbon-boot .carbon-ice-core{animation:none}}
+@media(prefers-reduced-motion:reduce){.carbon-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.carbon-boot .carbon-ice-core:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}

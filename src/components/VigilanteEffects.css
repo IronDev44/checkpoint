@@ -31,4 +31,4 @@
 @keyframes vigilanteBatFlight { 0%{opacity:0;transform:translate(-40vw,30vh) rotate(var(--bat-tilt)) scale(.4)} 35%,65%{opacity:1} 100%{opacity:0;transform:translate(45vw,-35vh) rotate(var(--bat-tilt)) scale(1.2)} }
 .vigilante-tab-transition.effects-calm .vigilante-bat-swarm { display:none; }
 body[data-effects="calm"] .vigilante-searchlight { animation:none; }
-@media(prefers-reduced-motion:reduce){.vigilante-tab-transition{display:none}.vigilante-searchlight{animation:none}}
+@media(prefers-reduced-motion:reduce){.vigilante-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.vigilante-searchlight:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}

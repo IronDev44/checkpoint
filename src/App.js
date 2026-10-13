@@ -273,6 +273,7 @@ const DEFAULT_PUBLIC_SECTIONS = {
 const DEFAULT_APP_OPTIONS = {
   startTab: "home",
   visualEffects: "balanced",
+  transitionMotion: "full",
   animatedBackground: true,
   appIcon: "theme",
   ratingDisplay: "number",
@@ -345,6 +346,7 @@ function normalizeAppOptions(options = {}) {
     schemaVersion: APP_OPTIONS_SCHEMA_VERSION,
     startTab,
     visualEffects,
+    transitionMotion: source.transitionMotion === "system" ? "system" : "full",
     headerMode: ["standard", "compact", "minimal"].includes(source.headerMode) ? source.headerMode : DEFAULT_APP_OPTIONS.headerMode,
     animatedBackground:
       typeof source.animatedBackground === "boolean"
@@ -16277,7 +16279,7 @@ function OptionsTab({
               <div>
                 <SectionTitle title="Transition d'onglet" help="animations" />
                 <span>Active ou désactive la transition liée à ton thème entre les onglets.</span>
-                {uiMode === "modern" && <TransitionMotionNotice />}
+                {uiMode === "modern" && <TransitionMotionNotice fullMotion={appOptions.transitionMotion === "full"} />}
               </div>
               <div className="option-pill-grid two compact">
                 <button
@@ -16297,6 +16299,14 @@ function OptionsTab({
                 </button>
               </div>
             </div>
+
+            {uiMode === "modern" && <div className="option-setting-card">
+              <strong>Animations des transitions</strong>
+              <div className="option-pill-grid two compact">
+                <button type="button" className={`option-pill ${appOptions.transitionMotion === "full" ? "active" : ""}`} aria-pressed={appOptions.transitionMotion === "full"} onClick={() => onOptionChange("transitionMotion", "full")}>Animations complètes</button>
+                <button type="button" className={`option-pill ${appOptions.transitionMotion === "system" ? "active" : ""}`} aria-pressed={appOptions.transitionMotion === "system"} onClick={() => onOptionChange("transitionMotion", "system")}>Suivre l’appareil</button>
+              </div>
+            </div>}
 
             <div className="option-setting-card option-header-setting">
               <div>
@@ -21831,7 +21841,7 @@ const setPlayedPlatforms = async (id, platforms) => {
           onClose={() => setMiniPlayerLive(null)}
         /> 
 
-        {pixelTransition && <ThemeTransition key={pixelTransition.id} theme={theme} direction={pixelTransition.direction} effects={appOptions.visualEffects} />}
+        {pixelTransition && <ThemeTransition key={pixelTransition.id} theme={theme} direction={pixelTransition.direction} effects={appOptions.visualEffects} fullMotion={appOptions.transitionMotion === "full"} />}
 
       {!showSplash && (
 

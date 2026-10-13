@@ -27,4 +27,4 @@
 @keyframes kartBoostRay { 0%{opacity:0;transform:rotate(var(--ray-angle)) translateY(20px) scaleY(.2)} 45%{opacity:.8} 100%{opacity:0;transform:rotate(var(--ray-angle)) translateY(65vmax) scaleY(2)} }
 @media(max-height:550px){.kart-boot-content{top:12px;padding:10px}.kart-boot h1{font-size:28px}.kart-boot p{display:none}.kart-driver-cockpit{height:110px}}
 body[data-effects="calm"] .kart-boot .kart-driver-tiles,body[data-effects="calm"] .kart-driver-steering { animation:none; }
-@media(prefers-reduced-motion:reduce){.kart-tab-transition{display:none}.kart-driver-tiles,.kart-driver-steering{animation:none}}
+@media(prefers-reduced-motion:reduce){.kart-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.kart-driver-tiles:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),.kart-driver-steering:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}

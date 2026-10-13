@@ -27,4 +27,4 @@ html[data-theme="theme-retro"] { --theme-chrome-bg:#201326 !important; }
 @keyframes arcadeSkyFade { 0%,100%{opacity:0} 25%,65%{opacity:1} }
 @keyframes arcadeStripWipe { 0%{opacity:0;transform:scaleY(0)} 30%,50%{opacity:.8;transform:scaleY(1)} 100%{opacity:0;transform:scaleY(0)} }
 @keyframes arcadeCabinetReveal { 0%{opacity:0;transform:translate(-50%,-40%) scale(.6)} 35%,60%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)} }
-@media(prefers-reduced-motion:reduce){.arcade-tab-transition{display:none}}
+@media(prefers-reduced-motion:reduce){.arcade-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}}

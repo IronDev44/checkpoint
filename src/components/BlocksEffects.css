@@ -24,4 +24,4 @@
 @keyframes blocksLineClear { 0%,45%{opacity:0;transform:translateY(-35px)} 58%,70%{opacity:1;transform:none;filter:brightness(1)} 75%{opacity:1;filter:brightness(2)} 100%{opacity:0;transform:scaleY(.1)} }
 @keyframes blocksClearFlash { 0%,70%{opacity:0;transform:scaleX(.2)} 78%{opacity:.85;transform:scaleX(1)} 100%{opacity:0;transform:scaleY(.1)} }
 body[data-effects="calm"] .blocks-boot-piece { animation:none; }
-@media(prefers-reduced-motion:reduce){.blocks-tab-transition{display:none}.blocks-boot-piece{animation:none}}
+@media(prefers-reduced-motion:reduce){.blocks-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.blocks-boot-piece:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}

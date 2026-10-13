@@ -32,4 +32,4 @@
 @keyframes ffCrystalDustRise { 0%,100%{opacity:0} 35%{opacity:.8} 100%{transform:translateY(-80px)} }
 .ff-crystal-transition.effects-calm .ff-crystal-shards { display:none; }
 body[data-effects="calm"] .ff-crystal-boot .ff-crystal,body[data-effects="calm"] .ff-crystal-boot .ff-crystal-dust i { animation:none; }
-@media(prefers-reduced-motion:reduce){.ff-crystal-transition{display:none}.ff-crystal-boot .ff-crystal,.ff-crystal-boot .ff-crystal-dust i{animation:none}}
+@media(prefers-reduced-motion:reduce){.ff-crystal-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.ff-crystal-boot .ff-crystal:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),.ff-crystal-boot .ff-crystal-dust i:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}

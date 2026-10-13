@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
+import { createPortal as renderPortal } from "react-dom";
 import "./ThemeTransition.css";
 import PlayStationSymbol from "./PlayStationSymbol";
 import { SteamDeckTransition } from "./SteamDeckEffects";
@@ -69,7 +69,12 @@ function renderMotif(theme, path, index) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>;
 }
 
-function MatrixScreenTransition({ effects }) {
+function transitionPortal(content, target, fullMotion) {
+  return renderPortal(<div className={fullMotion ? "checkpoint-full-tab-motion" : "checkpoint-tab-motion"} style={{ display: "contents" }}>{content}</div>, target);
+}
+
+function MatrixScreenTransition({ effects, fullMotion }) {
+  const createPortal = (content, target) => transitionPortal(content, target, fullMotion);
   const symbols = "012345789アイウエオカキクケコサシスセソタチツテトナニヌネノ<>:=+";
   return createPortal(
     <div className={"matrix-screen-transition effects-" + effects} aria-hidden="true">
@@ -98,20 +103,23 @@ function useReducedMotion() {
   return reduceMotion;
 }
 
-export function TransitionMotionNotice() {
+export function TransitionMotionNotice({ fullMotion = false }) {
   const reduceMotion = useReducedMotion();
   return <p className="transition-motion-notice">
-    {reduceMotion
+    {fullMotion
+      ? "Les transitions complètes sont activées, même si ton appareil limite les animations."
+      : reduceMotion
       ? "Ton appareil limite les animations : un repère discret remplace les effets du thème."
       : "Les animations du thème sont autorisées par ton appareil."}
   </p>;
 }
 
-export default function ThemeTransition({ theme, direction, effects }) {
+export default function ThemeTransition({ theme, direction, effects, fullMotion = false }) {
   const reduceMotion = useReducedMotion();
+  const createPortal = (content, target) => transitionPortal(content, target, fullMotion);
   // Keep a visible, stationary cue when Android suppresses motion. The
   // system preference still prevents sweeps, flashes and moving particles.
-  if (reduceMotion) return createPortal(
+  if (reduceMotion && !fullMotion) return createPortal(
     <div className="checkpoint-transition-still" aria-hidden="true" />,
     document.body
   );
@@ -139,7 +147,7 @@ export default function ThemeTransition({ theme, direction, effects }) {
   if (theme === "theme-indigo") return createPortal(<AuroraTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-steamdeck") return createPortal(<SteamDeckTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-xbox") return createPortal(<XboxTransition direction={direction} effects={effects} />, document.body);
-  if (theme === "theme-matrix") return <MatrixScreenTransition effects={effects} />;
+  if (theme === "theme-matrix") return <MatrixScreenTransition effects={effects} fullMotion={fullMotion} />;
   const [motion, color, path] = identities[theme] || identities["theme-indigo"];
   const count = effects === "calm" ? 18 : effects === "boost" ? 112 : 72;
   const sparkCount = effects === "calm" ? 0 : effects === "boost" ? 144 : 80;

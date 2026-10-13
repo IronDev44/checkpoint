@@ -32,4 +32,4 @@
 @keyframes blueblurIntroEnter { from{opacity:0;transform:translateX(-30px)} to{opacity:1;transform:none} }
 .blueblur-tab-transition.effects-calm .blueblur-speed-lines { display:none; }
 body[data-effects="calm"] .blueblur-boot .blueblur-speed-lines i { animation:none; }
-@media(prefers-reduced-motion:reduce){.blueblur-tab-transition{display:none}.blueblur-boot-content,.blueblur-boot .blueblur-speed-lines i{animation:none}}
+@media(prefers-reduced-motion:reduce){.blueblur-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.blueblur-boot-content:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),.blueblur-boot .blueblur-speed-lines i:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}

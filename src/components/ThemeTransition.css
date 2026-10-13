@@ -60,7 +60,7 @@
 .motion-circuit > span { width: 46px; height: 24px; }
 .motion-glitch > span { animation-timing-function: steps(8,end); }
 @media (prefers-reduced-motion: reduce) {
-  .checkpoint-theme-transition { display: none; }
+  .checkpoint-theme-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)) { display: none; }
 }
 
 /* Stronger theme choreography, with a full exit before the 840 ms cleanup. */
@@ -121,7 +121,7 @@
 @keyframes cyberGlitch { 0%{opacity:0;transform:translate(0,0)} 25%{opacity:1;transform:translate(calc(var(--travel)*.25),-40px) skewX(25deg)} 55%{opacity:1;transform:translate(calc(var(--travel)*.55),40px) skewX(-25deg)} 100%{opacity:0;transform:translate(var(--travel),0)} }
 .effects-calm > span { filter:none; }
 .effects-calm .transition-veil { display:none; }
-@media(prefers-reduced-motion:reduce) { .checkpoint-theme-transition { display:none; } }
+@media(prefers-reduced-motion:reduce) { .checkpoint-theme-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)) { display:none; } }
 
 /* Fine particles add depth around the larger theme motifs. */
 .transition-spark-field { position: absolute; inset: 0; pointer-events: none; }
@@ -167,7 +167,7 @@
 .motion-spell .transition-spark-field > i,
 .motion-crystal .transition-spark-field > i { border-radius: 0; animation-name: spellRise; }
 .effects-boost .transition-spark-field > i { box-shadow: 0 0 10px currentColor; }
-@media(prefers-reduced-motion:reduce) { .transition-spark-field { display: none; } }
+@media(prefers-reduced-motion:reduce) { .transition-spark-field:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)) { display: none; } }
 
 /* Restore the game-specific materials instead of outline icons. */
 .motion-assemble > span {
@@ -230,7 +230,7 @@
 .matrix-screen-transition.effects-calm .matrix-screen-column:nth-child(even) { display:none; }
 .matrix-screen-transition.effects-calm .matrix-screen-column { text-shadow:none; }
 .matrix-screen-transition.effects-boost .matrix-screen-column { color:#16ed5c; text-shadow:0 0 7px #13e54e; }
-@media(prefers-reduced-motion:reduce){.matrix-screen-transition{display:none}}
+@media(prefers-reduced-motion:reduce){.matrix-screen-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}}
 
 /* Three large signature objects make the theme readable among the particles. */
 .transition-feature { position:absolute; inset:0; display:flex; align-items:center; justify-content:space-evenly; gap:12px; padding:16px; box-sizing:border-box; }
@@ -261,7 +261,7 @@
 @keyframes featureFlight { 0%{opacity:0;transform:translateY(70vh) scale(.2)} 40%{opacity:1;transform:translateY(0) scaleY(.6)} 65%{opacity:1;transform:translateY(-15vh) scaleY(1.2)} 100%{opacity:0;transform:translateY(-70vh) scale(.2)} }
 .motion-dust .transition-feature { opacity:.55; }
 .effects-calm .transition-feature { display:none; }
-@media(prefers-reduced-motion:reduce){.transition-feature{display:none}}
+@media(prefers-reduced-motion:reduce){.transition-feature:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}}
 .checkpoint-transition-still {
   position: fixed;
   inset: 0;

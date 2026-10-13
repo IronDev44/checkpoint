@@ -31,4 +31,4 @@ html body[data-theme="theme-emerald"] .app-shell::after { background:linear-grad
 @keyframes mintSignalConnect { 0%,100%{opacity:0;transform:scale(.3)} 45%,65%{opacity:.8;transform:scale(1)} }
 .mint-tab-transition.effects-calm .mint-signal-grid { display:none; }
 body[data-effects="calm"] .mint-circuit-pulse { animation:none; }
-@media(prefers-reduced-motion:reduce){.mint-tab-transition{display:none}.mint-circuit-pulse{animation:none}}
+@media(prefers-reduced-motion:reduce){.mint-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.mint-circuit-pulse:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}

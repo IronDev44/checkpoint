@@ -24,4 +24,4 @@
 @keyframes stellarJumpFade { 0%,100%{opacity:0} 15%,75%{opacity:1} }
 .stellar-tab-transition.effects-calm .stellar-star-field i { box-shadow:none; }
 .stellar-tab-transition.effects-calm .stellar-jump-core { display:none; }
-@media(prefers-reduced-motion:reduce){.stellar-tab-transition{display:none}.stellar-boot-content{animation:none}}
+@media(prefers-reduced-motion:reduce){.stellar-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.stellar-boot-content:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}

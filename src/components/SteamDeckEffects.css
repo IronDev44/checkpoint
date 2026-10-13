@@ -27,4 +27,4 @@
 @keyframes deckDeviceReveal { 0%{opacity:0;transform:translate(-50%,-50%) scale(.7)} 35%,60%{opacity:1;transform:translate(-50%,-50%) scale(1)} 100%{opacity:0;transform:translate(-50%,-50%) scale(1.15)} }
 @keyframes deckTileSlide { 0%{opacity:0;transform:translateY(50px)} 40%,65%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-30px)} }
 .effects-calm .deck-transition-tiles { display:none; }
-@media(prefers-reduced-motion:reduce){.deck-screen-ring,.deck-boot-content{animation:none}.deck-tab-transition{display:none}}
+@media(prefers-reduced-motion:reduce){.deck-screen-ring:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),.deck-boot-content:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}.deck-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}}

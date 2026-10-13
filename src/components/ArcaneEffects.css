@@ -31,4 +31,4 @@
 @keyframes arcaneSparkBurst { 0%{opacity:0;transform:rotate(var(--spark-turn)) translateX(0) scale(.3)} 35%{opacity:1} 100%{opacity:0;transform:rotate(var(--spark-turn)) translateX(100px) scale(.1)} }
 .effects-calm .arcane-turning-page { display:none; }
 body[data-effects="calm"] .arcane-boot .arcane-sparks i,body[data-effects="calm"] .arcane-seal::before { animation:none; }
-@media(prefers-reduced-motion:reduce){.arcane-tab-transition{display:none}.arcane-boot-content,.arcane-seal::before,.arcane-boot .arcane-sparks i{animation:none}}
+@media(prefers-reduced-motion:reduce){.arcane-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.arcane-boot-content:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),.arcane-seal:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *))::before,.arcane-boot .arcane-sparks i:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}

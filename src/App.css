@@ -6608,9 +6608,9 @@ body[data-ui="modern"] .chip.active {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  *:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),
+  *:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *))::before,
+  *:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *))::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
@@ -27985,7 +27985,7 @@ body[data-theme="theme-steamdeck"] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .title::after {
+  .title:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *))::after {
     animation: none !important;
     opacity: 0 !important;
   }

@@ -39,4 +39,4 @@
 @keyframes hunterMarker { 0%,100%{opacity:0} 35%,65%{opacity:.75} }
 .hunter-tab-transition.effects-calm .hunter-scan-markers { display:none; }
 body[data-effects="calm"] .hunter-boot-scan { display:none; }
-@media(prefers-reduced-motion:reduce){.hunter-tab-transition,.hunter-boot-scan{display:none}}
+@media(prefers-reduced-motion:reduce){.hunter-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),.hunter-boot-scan:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}}

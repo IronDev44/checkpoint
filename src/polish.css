@@ -173,8 +173,8 @@ textarea { resize: vertical; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :is(.app-shell, .game-modal, .hardware-modal-panel) *,
-  :is(.toast, .badge-unlock-toast) {
+  :is(.app-shell, .game-modal, .hardware-modal-panel) *:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),
+  :is(.toast, .badge-unlock-toast):not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)) {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -432,7 +432,7 @@ body[data-theme] :is(.home-next-level, .profile-tab .current-rank-card) {
 @media (prefers-reduced-motion: reduce) {
   body[data-theme] :is(.checkpoint-primary-action, .home-resume-action,
   .hardware-catalog-toggle, .game-rating-save-btn, .game-detail-section > .save-review-btn,
-  .live-open-btn, .series-suggestions-btn, .trial-primary-btn)::after {
+  .live-open-btn, .series-suggestions-btn, .trial-primary-btn):not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *))::after {
     animation: none !important;
     content: none;
   }

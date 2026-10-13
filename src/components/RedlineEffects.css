@@ -34,4 +34,4 @@ html body[data-theme="theme-crimson"] .app-shell::after { background:repeating-l
 @keyframes redlineRpmRise { 0%{opacity:0;transform:scaleY(.1)} 40%,65%{opacity:.9;transform:scaleY(1)} 100%{opacity:0;transform:scaleY(.3)} }
 @keyframes redlineSparkRush { 0%{opacity:0;transform:translateX(-20vw)} 35%,70%{opacity:.65} 100%{opacity:0;transform:translateX(120vw)} }
 .redline-tab-transition.effects-calm .redline-sparks { display:none; }
-@media(prefers-reduced-motion:reduce){.redline-tab-transition{display:none}.redline-tachometer g{transition:none}}
+@media(prefers-reduced-motion:reduce){.redline-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.redline-tachometer g:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){transition:none}}

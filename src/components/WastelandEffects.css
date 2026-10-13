@@ -32,4 +32,4 @@
 @keyframes wastelandDustBurst { 0%{opacity:0;transform:translate(-30px,40px)} 40%{opacity:.65} 100%{opacity:0;transform:translate(70px,-70px)} }
 .wasteland-tab-transition.effects-calm .wasteland-dust { display:none; }
 body[data-effects="calm"] .wasteland-boot .wasteland-dust i { animation:none; }
-@media(prefers-reduced-motion:reduce){.wasteland-tab-transition{display:none}.wasteland-boot .wasteland-dust i{animation:none}}
+@media(prefers-reduced-motion:reduce){.wasteland-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.wasteland-boot .wasteland-dust i:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}}

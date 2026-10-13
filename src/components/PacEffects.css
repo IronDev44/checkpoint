@@ -36,4 +36,4 @@
 @keyframes pacBackdrop { 0%,100%{opacity:0} 20%,65%{opacity:1} }
 body[data-effects="calm"] .pac-boot-runner,body[data-effects="calm"] .pac-boot .pac-effect-player i { animation:none; }
 body[data-effects="calm"] .pac-boot-runner { left:15%; }
-@media(prefers-reduced-motion:reduce){.pac-tab-transition{display:none}.pac-boot-runner,.pac-boot .pac-effect-player i{animation:none}.pac-boot-runner{left:15%}}
+@media(prefers-reduced-motion:reduce){.pac-tab-transition:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){display:none}.pac-boot-runner:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)),.pac-boot .pac-effect-player i:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){animation:none}.pac-boot-runner:not(:where(.checkpoint-full-tab-motion, .checkpoint-full-tab-motion *)){left:15%}}
