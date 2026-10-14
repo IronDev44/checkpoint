@@ -50,3 +50,30 @@
   .social-hub-nav button { font-size:.875rem; }
   .social-hub-profile-link { font-size:.7rem; max-width:70px; }
 }
+.social-clean .social-public-profile-v2.search-panel {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none !important;
+  gap: 0;
+}
+.social-clean .social-public-profile-v2 > .social-public-mini-section,
+.social-clean .social-public-profile-v2 > .public-vitrine-section {
+  margin: 0 !important;
+  padding: 20px 0 !important;
+  border: 0;
+  border-top: 1px solid var(--panel-border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.social-clean .social-identity-game .social-identity-rank {
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.social-clean .social-identity-rank::before { content: none; }
