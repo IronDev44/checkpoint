@@ -183,9 +183,12 @@ textarea { resize: vertical; }
 }
 /* One shared vocabulary for controls across every tab. */
 body {
-  --control-bg: linear-gradient(180deg, #27334b, #172136);
-  --control-border: color-mix(in srgb, var(--accent-solid) 25%, #8292aa);
+  --control-bg: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.015)), var(--surface-bg, #172136);
+  --control-border: var(--surface-border, #8292aa);
   --control-selected: var(--accent);
+}
+@supports (color: color-mix(in srgb, white, black)) {
+  body { --control-border: color-mix(in srgb, var(--accent-solid) 35%, var(--surface-border, #8292aa)); }
 }
 body[data-theme] :is(.chip, .choice-pill, .status-btn, .option-pill, .profile-toggle-btn,
 .filter-toggle-btn, .library-switch-btn, .quick-status-btn, .back-btn,
@@ -720,4 +723,47 @@ body[data-theme] .hardware-inline-detail-panel::before {
   body .bottom-tabs .tab-btn {
     filter: none !important;
   }
+}
+/* Keep the theme backdrop inside the app's paint stack on Chrome Android.
+   Negative pseudo-element layers must not disappear behind #root or body. */
+body[data-theme] .app-shell {
+  isolation: isolate !important;
+  background: var(--bg-main) !important;
+}
+
+/* Two-line ranking choices need their own full-height grid tracks. */
+body[data-theme] .top5-group-picker.top5-advanced-picker,
+body[data-theme] .top5-group-picker.top5-hardware-criteria-picker {
+  grid-auto-rows: minmax(84px, auto);
+  align-items: stretch;
+  gap: 10px !important;
+  padding: 3px 3px 8px !important;
+}
+body[data-theme] .top5-group-picker.top5-advanced-picker > button,
+body[data-theme] .top5-group-picker.top5-hardware-criteria-picker > button {
+  display: grid !important;
+  grid-template-rows: auto auto;
+  align-content: center;
+  justify-items: start;
+  gap: 6px !important;
+  min-height: 84px !important;
+  height: auto !important;
+  padding: 12px 14px !important;
+  white-space: normal;
+}
+body[data-theme] .top5-advanced-picker > button > span,
+body[data-theme] .top5-hardware-criteria-picker > button > span {
+  min-width: 0;
+  line-height: 1.3;
+}
+body[data-theme] .top5-advanced-picker > button > small,
+body[data-theme] .top5-hardware-criteria-picker > button > small {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  font-size: .75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: normal;
 }
