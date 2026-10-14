@@ -1,0 +1,52 @@
+.social-clean { gap: 16px !important; }
+.social-clean > * { order: 0 !important; }
+.social-clean.social-visiting > :not(.social-public-profile):not(.social-hub-notice) { display:none !important; }
+.social-hub-header { display:flex; justify-content:space-between; gap:16px; align-items:center; padding:8px 0; }
+.social-hub-header h2 { margin:0; font-size:1.7rem; }
+.social-hub-header p { margin:6px 0 0; color:var(--text-soft); }
+.social-hub-account,.social-hub-friend-identity,.social-hub-post-author { display:flex; align-items:center; gap:12px; border:0; background:transparent; color:var(--text-main); text-align:left; cursor:pointer; min-width:0; padding:0; }
+.social-hub-account strong,.social-hub-friend-identity strong,.social-hub-post-author strong { display:block; overflow-wrap:anywhere; }
+.social-hub-account small,.social-hub-friend-identity small,.social-hub-post-author small { display:block; color:var(--text-soft); margin-top:4px; overflow-wrap:anywhere; }
+.social-hub-avatar { display:grid; place-items:center; width:44px; height:44px; flex:0 0 44px; border-radius:50%; background:var(--accent); color:white; font-weight:800; }
+.social-hub-nav { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; padding:5px; border:1px solid var(--panel-border); background:var(--panel-bg); border-radius:18px; }
+.social-hub-nav button,.social-hub-profile-tabs button,.social-hub-feed-tabs button { min-height:44px; border:0; border-radius:12px; background:transparent; color:var(--text-soft); font:inherit; font-weight:700; padding:10px; cursor:pointer; }
+.social-hub-nav button.active,.social-hub-profile-tabs button.active,.social-hub-feed-tabs button.active { background:var(--accent); color:white; }
+.social-hub-nav small { margin-left:6px; font-size:.75rem; }
+.social-hub-profile-tabs,.social-hub-feed-tabs { display:flex; gap:8px; flex-wrap:wrap; }
+.social-hub-profile-tabs button,.social-hub-feed-tabs button { background:var(--surface-bg); border:1px solid var(--surface-border); }
+.social-hub-directory { display:grid; gap:12px; }
+.social-hub-directory input { width:100%; min-height:46px; padding:12px; border:1px solid var(--surface-border); border-radius:12px; color:var(--text-main); background:var(--input-bg); font:inherit; }
+.social-hub-friend { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:14px; padding:16px; border:1px solid var(--surface-border); border-radius:18px; background:var(--surface-bg); }
+.social-hub-friend-actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.social-hub-friend-actions button,.social-hub-feed-heading button,.social-hub-friends-feed > button { min-height:40px; padding:10px 14px; border:1px solid var(--surface-border); border-radius:12px; color:var(--text-main); background:var(--surface-bg); font:inherit; cursor:pointer; }
+.social-hub-friend-actions .social-hub-primary { background:var(--accent); color:white; }
+.social-hub-friend-actions .social-hub-remove { background:transparent; color:var(--text-muted); }
+.social-hub-empty { padding:24px 16px; color:var(--text-soft); line-height:1.6; border:1px dashed var(--surface-border); border-radius:16px; }
+.social-hub-notice { color:var(--text-soft); line-height:1.5; }
+.social-hub-feed-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.social-hub-feed-heading h3 { margin:0; font-size:1.1rem; }
+.social-hub-friends-feed { display:grid; gap:14px; }
+.social-hub-post { padding:18px; border:1px solid var(--panel-border); background:var(--panel-bg); border-radius:20px; }
+.social-hub-post-author { width:100%; }
+.social-hub-profile-link { margin-left:auto; color:var(--text-soft); font-size:.8rem; }
+.social-hub-post-body { display:flex; align-items:flex-start; gap:14px; margin-top:16px; }
+.social-hub-post-body img { width:70px; height:94px; border-radius:10px; object-fit:cover; flex-shrink:0; }
+.social-hub-post-body h4 { margin:6px 0; font-size:1.05rem; }
+.social-hub-post-body p { margin:6px 0 0; line-height:1.5; overflow-wrap:anywhere; }
+.social-hub-post-body small { color:var(--text-muted); }
+.social-clean button:focus-visible { outline:2px solid var(--accent-solid); outline-offset:3px; }
+.social-clean button:disabled { cursor:wait; opacity:.65; }
+.social-clean .social-composer-panel { padding:16px !important; }
+.social-hub-compose-trigger { display:flex; align-items:center; justify-content:space-between; gap:14px; width:100%; min-height:40px; padding:0; border:0; background:transparent; color:var(--text-main); font:inherit; font-weight:700; text-align:left; cursor:pointer; }
+.social-hub-compose-trigger span { font-size:1.4rem; color:var(--accent-solid); }
+.social-clean .social-composer-panel textarea { min-height:92px; margin-top:14px; }
+.social-clean .social-friends-panel { display:grid; gap:16px; }
+.social-clean .social-feed-filters { margin:12px 0 16px; }
+@media(max-width:600px) {
+  .social-hub-header { align-items:flex-start; }
+  .social-hub-account > span:last-child { display:none; }
+  .social-hub-friend { grid-template-columns:1fr; }
+  .social-hub-friend-actions { padding-left:56px; }
+  .social-hub-nav button { font-size:.875rem; }
+  .social-hub-profile-link { font-size:.7rem; max-width:70px; }
+}

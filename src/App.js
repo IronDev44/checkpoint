@@ -27,6 +27,8 @@ import RatingSliderControl from "./components/RatingSlider";
 import SplashScreen from "./components/SplashScreen";
 import ThemeTransition, { THEME_TRANSITION_DURATION } from "./components/ThemeTransition";
 import TransitionSettings from "./components/TransitionSettings";
+import { SocialNavigation, SocialFriendsDirectory, FriendsActivityFeed } from "./components/SocialHub";
+import { readPublicSocialProfile } from "./services/socialProfiles";
 import TrialRoom from "./components/TrialRoom";
 import TesterFeedback from "./components/TesterFeedback";
 import FeedbackInbox from "./components/FeedbackInbox";
@@ -8747,6 +8749,7 @@ function PublicProfilePreview({
   actionLabel,
   onAction,
   onClose,
+  closeLabel = "Fermer",
 }) {
   const [selectedHardware, setSelectedHardware] = useState(null);
 
@@ -8798,7 +8801,7 @@ function PublicProfilePreview({
           </div>
           {onClose && (
             <button type="button" onClick={onClose}>
-              Fermer
+              {closeLabel}
             </button>
           )}
         </div>
@@ -9242,7 +9245,9 @@ function ProfileShowcase({ showcase, identityTitle = null }) {
   );
 }
 
-function SocialTab({
+const loadCheckpointSocialProfile = handle => readPublicSocialProfile(handle, value => getDoc(doc(db, "publicProfiles", value)));
+
+export function SocialTab({
   games,
   hardware,
   badges,
@@ -9258,13 +9263,17 @@ function SocialTab({
   onRemoveProfilePhoto,
   onAddFriend,
   onRemoveFriend,
+  onOpenFriend,
+  loadFriendProfile = loadCheckpointSocialProfile,
 }) {
   const [friendHandle, setFriendHandle] = useState("");
   const [socialMessage, setSocialMessage] = useState("");
   const [showPublicPreview, setShowPublicPreview] = useState(false);
   const [socialView, setSocialView] = useState("feed");
+  const [socialFeedSource, setSocialFeedSource] = useState("friends");
   const [socialFeedFilter, setSocialFeedFilter] = useState("all");
   const [postDraft, setPostDraft] = useState("");
+  const [composerOpen, setComposerOpen] = useState(false);
   const activities = getSocialActivityFeed(games, hardware, badges);
   const stats = getAdvancedStats(games);
   const favorites = games.filter((game) => game.favorite).slice(0, 3);
@@ -9553,7 +9562,7 @@ function SocialTab({
   };
 
   const handleShowcasePreviewToggle = () => {
-    onProfileChange("showShowcasePreview", !showShowcasePreview);
+    setShowPublicPreview(value => !value);
   };
 
   const handleAddComment = (activityId, text) => {
@@ -9591,6 +9600,8 @@ function SocialTab({
     setPostDraft("");
     setSocialView("feed");
     setSocialFeedFilter("posts");
+    setSocialFeedSource("mine");
+    setComposerOpen(false);
   };
 
   const handleDeletePost = (postId) => {
@@ -9631,116 +9642,23 @@ function SocialTab({
   };
 
   return (
-    <div className="progression-stack social-tab">
-      <div className="search-panel social-profile-card">
-        <div className="social-profile-side">
-          <div className="social-avatar social-avatar-brand" aria-hidden="true">
-            <span>CP</span>
-          </div>
-          <div className="social-profile-side-progress">
-            <span>Profil</span>
-            <strong>{profileCompletion}%</strong>
-          </div>
-          <div className="social-profile-side-facts">
-            <span>Niv. {level}</span>
-            <span>{socialProfile.platform || "Multi-plateforme"}</span>
-          </div>
-        </div>
-
-        <div className="social-profile-main">
-          <div className="profile-kicker">Profil social</div>
-          <div className="social-profile-name-row">
-            <h2 className="profile-title">{socialProfile.displayName}</h2>
-            <FeaturedBadgePill badge={featuredBadge} />
-          </div>
-          <div className="social-handle">Lien public @{socialProfile.handle}</div>
-          <p>{socialProfile.bio}</p>
-
-          <div className="social-profile-tags">
-            <span>
-              {socialProfile.visibility === "public" ? "Public" : "Privé"}
-            </span>
-            <span>{finishedGames.length} terminés</span>
-            <span>{favoriteGames.length} favoris</span>
-          </div>
-
-          <div className="social-profile-actions">
-            <button
-              type="button"
-              onClick={() => {
-                setShowPublicPreview(false);
-                setSocialView("profile");
-              }}
-            >
-              Modifier
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSocialView("showcase");
-                setShowPublicPreview(false);
-              }}
-            >
-              Vitrine
-            </button>
-            <button type="button" onClick={() => setSocialView("friends")}>
-              Amis
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="social-view-tabs">
-        {[
-          { key: "feed", label: "Fil" },
-          { key: "profile", label: "Profil" },
-          { key: "showcase", label: "Vitrine" },
-          { key: "friends", label: "Amis" },
-        ].map((item) => (
-          <button
-            key={item.key}
-            type="button"
-            className={socialView === item.key ? "active" : ""}
-            onClick={() => {
-              setSocialView(item.key);
-              setShowPublicPreview(false);
-            }}
-          >
-            {item.label}
-          </button>
-        ))}
-      </div>
-
-      <div className={`search-panel social-section-intro ${socialView === "feed" ? "" : "social-section-hidden"}`}>
-        <span>Fil d'actu</span>
-        <strong>Ce que les autres peuvent suivre</strong>
-        <p>
-          Tes publications, tes ajouts, tes notes et les moments importants de ta collection.
-        </p>
-      </div>
-
-      <div className={`search-panel social-section-intro ${socialView === "showcase" ? "" : "social-section-hidden"}`}>
-        <span>Vitrine</span>
-        <strong>Ce que tu choisis de montrer</strong>
-        <p>
-          Choisis les jeux fondateurs, les badges, les photos et les éléments visibles sur ton profil public.
-        </p>
-      </div>
-
-      <div className={`search-panel social-section-intro ${socialView === "friends" ? "" : "social-section-hidden"}`}>
-        <span>Amis</span>
-        <strong>Ton cercle Checkpoint</strong>
-        <p>
-          Ajoute des profils publics et garde sous la main les joueurs que tu veux suivre.
-        </p>
-      </div>
-
+    <div className={`progression-stack social-tab social-clean ${sharedProfile ? "social-visiting" : ""}`}>
+      <SocialNavigation view={socialView} profile={socialProfile} friendCount={socialFriends.length} onChange={view => {
+        setSocialView(view);
+        setShowPublicPreview(false);
+      }} />
+      {socialMessage && <p role="status" className="social-hub-notice">{socialMessage}</p>}
+      {socialView === "feed" && <div className="social-hub-feed-tabs" role="group" aria-label="Choisir le fil">
+        <button type="button" className={socialFeedSource === "friends" ? "active" : ""} aria-pressed={socialFeedSource === "friends"} onClick={() => setSocialFeedSource("friends")}>Mes amis</button>
+        <button type="button" className={socialFeedSource === "mine" ? "active" : ""} aria-pressed={socialFeedSource === "mine"} onClick={() => setSocialFeedSource("mine")}>Mon activité</button>
+      </div>}
       {sharedProfile && (
         <PublicProfilePreview
           profile={sharedProfile}
-          title="Profil partagé"
+          title="Profil du joueur"
+          closeLabel="Retour au Social"
           onClose={onCloseSharedProfile}
-          actionLabel="Ajouter ce profil en ami"
+          actionLabel={socialFriends.some(friend => friend.handle === sharedProfile.handle) ? undefined : "Ajouter en ami"}
           onAction={async () => {
             const result = await onAddFriend(sharedProfile.handle);
             setSocialMessage(result.message);
@@ -9753,20 +9671,20 @@ function SocialTab({
           <div>
             <h2 className="panel-title">Aperçu public</h2>
             <div className="option-value">
-              Affiche ou masque l'aperçu pendant que tu personnalises ta vitrine.
+              Ouvre ta vitrine comme tes amis la verront.
             </div>
           </div>
           <button
             type="button"
-            className={`social-preview-toggle ${showShowcasePreview ? "active" : ""}`}
+            className={`social-preview-toggle ${showPublicPreview ? "active" : ""}`}
             onClick={handleShowcasePreviewToggle}
           >
-            {showShowcasePreview ? "Aperçu affiché" : "Aperçu masqué"}
+            {showPublicPreview ? "Fermer l’aperçu" : "Voir mon profil"}
           </button>
         </div>
       )}
 
-      {(showPublicPreview || (socialView === "showcase" && showShowcasePreview)) && (
+      {showPublicPreview && (
         <PublicProfilePreview
           profile={ownPublicPreview}
           title="Aperçu de ton profil public"
@@ -9875,18 +9793,14 @@ function SocialTab({
 
       {socialView === "feed" && (
         <div className="search-panel social-composer-panel">
-          <div className="home-section-head">
-            <div>
-              <h2 className="panel-title">Publier une update</h2>
-              <div className="option-value">
-                Partage une session, une envie, une acquisition ou un avis rapide.
-              </div>
-            </div>
-          </div>
+          <button type="button" className="social-hub-compose-trigger" aria-expanded={composerOpen} onClick={() => setComposerOpen(value => !value)}>
+            {composerOpen ? "Fermer la rédaction" : "Partager un moment"}<span aria-hidden="true">{composerOpen ? "−" : "+"}</span>
+          </button>
+          {composerOpen && <>
           <textarea
             value={postDraft}
             onChange={(event) => setPostDraft(event.target.value)}
-            placeholder="Ex: Ce soir je continue mon backlog PS5..."
+            placeholder="À quoi tu joues en ce moment ?"
             maxLength={240}
             rows={3}
           />
@@ -9900,6 +9814,7 @@ function SocialTab({
               Publier
             </button>
           </div>
+          </>}
         </div>
       )}
 
@@ -9946,7 +9861,7 @@ function SocialTab({
           </button>
         </div>
 
-        {socialMessage && <div className="social-message">{socialMessage}</div>}
+
       </div>
 
       <div className={`search-panel social-editor ${socialView === "profile" ? "" : "social-section-hidden"}`}>
@@ -10140,44 +10055,21 @@ function SocialTab({
             value={friendHandle}
             onChange={(e) => setFriendHandle(normalizeHandle(e.target.value))}
             placeholder="identifiant ami"
+            aria-label="Identifiant de l’ami à ajouter"
           />
           <button type="button" onClick={handleAddFriend}>
             Ajouter
           </button>
         </div>
 
-        {socialFriends.length ? (
-          <div className="social-friends-list">
-            {socialFriends.map((friend) => (
-              <div key={friend.handle} className="social-friend-card">
-                <div className="social-friend-avatar">
-                  {getInitials(friend.displayName)}
-                </div>
-                <div>
-                  <strong>{friend.displayName}</strong>
-                  <span>@{friend.handle}</span>
-                  <p>{friend.bio || "Profil Checkpoint"}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onRemoveFriend(friend.handle)}
-                >
-                  Retirer
-                </button>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="Aucun ami pour le moment"
-            subtitle="Publie ton profil, partage ton identifiant, puis ajoute ceux de tes amis."
-          />
-        )}
+        <SocialFriendsDirectory friends={socialFriends} onOpen={onOpenFriend} onRemove={onRemoveFriend} />
+
       </div>
 
-      <div className={`search-panel ${socialView === "feed" ? "" : "social-section-hidden"}`}>
+      {socialView === "feed" && socialFeedSource === "friends" && !sharedProfile && <FriendsActivityFeed friends={socialFriends} loadProfile={loadFriendProfile} onOpen={onOpenFriend} />}
+      <div className={`search-panel ${socialView === "feed" && socialFeedSource === "mine" ? "" : "social-section-hidden"}`}>
         <div className="home-section-head">
-          <h2 className="panel-title">Fil social</h2>
+          <h2 className="panel-title">Mon activité</h2>
           <span className="social-section-count">{socialFeedItems.length}</span>
         </div>
         <div className="social-feed-filters">
@@ -19396,13 +19288,7 @@ const addSocialFriend = async (handleValue) => {
   }
 
   try {
-    const profileSnap = await getDoc(doc(db, "publicProfiles", handle));
-
-    if (!profileSnap.exists()) {
-      return { ok: false, message: "Aucun profil public trouvé avec cet identifiant." };
-    }
-
-    const profile = profileSnap.data();
+    const profile = await loadCheckpointSocialProfile(handle);
     const friend = {
       displayName: profile.displayName || handle,
       handle,
@@ -19420,7 +19306,7 @@ const addSocialFriend = async (handleValue) => {
     return { ok: true, message: `${friend.displayName} a été ajouté.` };
   } catch (error) {
     console.error("Erreur ajout ami :", error);
-    return { ok: false, message: "Impossible d'ajouter cet ami pour le moment." };
+    return { ok: false, message: error.message || "Impossible d'ajouter cet ami pour le moment." };
   }
 };
 
@@ -19428,6 +19314,12 @@ const removeSocialFriend = (handle) => {
   setSocialFriends((prev) => {
     return storeSocialFriends(prev.filter((friend) => friend.handle !== handle));
   });
+};
+
+const openSocialFriendProfile = async handle => {
+  const profile = await loadCheckpointSocialProfile(handle);
+  setSharedProfile(profile);
+  window.scrollTo({ top: 0, behavior: "auto" });
 };
 
 const closeSharedProfile = () => {
@@ -21740,6 +21632,7 @@ const setPlayedPlatforms = async (id, platforms) => {
               onRemoveProfilePhoto={removeSocialProfilePhoto}
               onAddFriend={addSocialFriend}
               onRemoveFriend={removeSocialFriend}
+              onOpenFriend={openSocialFriendProfile}
             />
           )}
 
