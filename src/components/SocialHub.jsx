@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { getFriendsFeed } from "../services/socialProfiles";
+import { SocialAvatar } from "./ProfilePhoto";
 import "./SocialHub.css";
-
-const initials = name => String(name || "CP").split(/\s+/).map(word => word[0]).slice(0, 2).join("").toUpperCase();
 
 export function SocialNavigation({ view, onChange, profile, friendCount }) {
   const profileView = view === "profile" || view === "showcase";
@@ -10,7 +9,7 @@ export function SocialNavigation({ view, onChange, profile, friendCount }) {
     <header className="social-hub-header">
       <div><h2>Social</h2><p>Les jeux nous rassemblent.</p></div>
       <button className="social-hub-account" type="button" onClick={() => onChange("profile")} aria-label="Ouvrir mon profil">
-        <span className="social-hub-avatar" aria-hidden="true">{initials(profile.displayName)}</span>
+        <SocialAvatar name={profile.displayName} src={profile.photoURL} />
         <span><strong>{profile.displayName || "Mon profil"}</strong><small>{profile.handle ? `@${profile.handle}` : "Personnaliser mon profil"}</small></span>
       </button>
     </header>
@@ -28,11 +27,24 @@ export function SocialNavigation({ view, onChange, profile, friendCount }) {
   </>;
 }
 
-export function SocialFriendsDirectory({ friends, onOpen, onRemove }) {
+export function SocialFriendsDirectory({ friends, onOpen, onRemove, loadProfile }) {
   const [query, setQuery] = useState("");
   const [opening, setOpening] = useState("");
   const [error, setError] = useState("");
+  const [currentProfiles, setCurrentProfiles] = useState({});
+  const [limit, setLimit] = useState(20);
   const filtered = friends.filter(friend => `${friend.displayName} ${friend.handle}`.toLowerCase().includes(query.toLowerCase()));
+  const shown = filtered.slice(0, limit);
+  const handles = shown.map(friend => friend.handle).join(",");
+  useEffect(() => {
+    if (!loadProfile) return undefined;
+    let cancelled = false;
+    const list = handles.split(",").filter(Boolean);
+    Promise.allSettled(list.map(handle => loadProfile(handle))).then(results => {
+      if (!cancelled) setCurrentProfiles(Object.fromEntries(results.map((result, index) => [list[index], result.status === "fulfilled" ? result.value : null])));
+    });
+    return () => { cancelled = true; };
+  }, [handles, loadProfile]);
   const open = async handle => {
     setOpening(handle); setError("");
     try { await onOpen(handle); } catch (e) { setError(e.message || "Impossible de charger ce profil. Réessaie."); }
@@ -41,9 +53,9 @@ export function SocialFriendsDirectory({ friends, onOpen, onRemove }) {
   return <div className="social-hub-directory">
     {friends.length > 0 && <input type="search" aria-label="Rechercher un ami" value={query} onChange={e => setQuery(e.target.value)} placeholder="Rechercher parmi mes amis" />}
     {error && <p role="alert" className="social-hub-notice">{error}</p>}
-    {filtered.map(friend => <article key={friend.handle} className="social-hub-friend">
+    {shown.map(friend => <article key={friend.handle} className="social-hub-friend">
       <button type="button" className="social-hub-friend-identity" disabled={Boolean(opening)} onClick={() => open(friend.handle)} aria-label={`Voir le profil de ${friend.displayName || friend.handle}`}>
-        <span className="social-hub-avatar" aria-hidden="true">{initials(friend.displayName)}</span>
+        <SocialAvatar name={friend.displayName} src={loadProfile ? currentProfiles[friend.handle]?.photoURL : friend.photoURL} />
         <span><strong>{friend.displayName || friend.handle}</strong><small>@{friend.handle}</small>{friend.platform && <small>{friend.platform}</small>}</span>
       </button>
       <div className="social-hub-friend-actions">
@@ -53,6 +65,7 @@ export function SocialFriendsDirectory({ friends, onOpen, onRemove }) {
     </article>)}
     {!friends.length && <p className="social-hub-empty">Ton cercle commence ici. Ajoute un ami avec son identifiant Checkpoint.</p>}
     {friends.length > 0 && !filtered.length && <p className="social-hub-empty">Aucun ami ne correspond à cette recherche.</p>}
+    {filtered.length > limit && <button type="button" className="option-pill" onClick={() => setLimit(n => n + 20)}>Voir les autres amis</button>}
   </div>;
 }
 
@@ -90,7 +103,7 @@ export function FriendsActivityFeed({ friends, loadProfile, onOpen }) {
     {!loading && !activities.length && <p className="social-hub-empty">{friends.length ? "Pas encore d’activité publique à afficher. Tu peux retrouver tes amis et leurs vitrines dans Amis." : "Ajoute des amis pour retrouver ici leurs jeux, leurs notes et leurs publications."}</p>}
     {!loading && activities.map(item => <article className="social-hub-post" key={item.feedId}>
       <button type="button" className="social-hub-post-author" disabled={Boolean(opening)} onClick={() => open(item.profile.handle)}>
-        <span className="social-hub-avatar" aria-hidden="true">{initials(item.profile.displayName)}</span>
+        <SocialAvatar name={item.profile.displayName} src={item.profile.photoURL} />
         <span><strong>{item.profile.displayName || item.profile.handle}</strong><small>@{item.profile.handle}</small></span>
         <span className="social-hub-profile-link">{opening === item.profile.handle ? "Chargement…" : "Voir le profil"}</span>
       </button>

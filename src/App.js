@@ -29,6 +29,8 @@ import ThemeTransition, { THEME_TRANSITION_DURATION } from "./components/ThemeTr
 import TransitionSettings from "./components/TransitionSettings";
 import { SocialNavigation, SocialFriendsDirectory, FriendsActivityFeed } from "./components/SocialHub";
 import { readPublicSocialProfile } from "./services/socialProfiles";
+import { getPlayerNotes, getFounderSignature, getPublicPlayerNotes } from "./services/playerNotes";
+import ProfilePhotoEditor, { SocialAvatar } from "./components/ProfilePhoto";
 import TrialRoom from "./components/TrialRoom";
 import TesterFeedback from "./components/TesterFeedback";
 import FeedbackInbox from "./components/FeedbackInbox";
@@ -1070,301 +1072,12 @@ function GenreStatsChart({ games }) {
 }
 
 function getPlayerProfile(games) {
-  if (!games.length) {
-    return {
-      title: "Signature en construction",
-      subtitle: "Ta bibliotheque commence a dessiner ton univers gaming."
-    };
-  }
-
-  const finishedGames = games.filter(isGameFinishedStatus);
-  const favoriteGames = games.filter((g) => g.favorite);
-  const stats = getAdvancedStats(games);
-
-  const topGenre = stats.topGenres[0]?.[0] || "";
-  const avgDifficulty = stats.avgDifficulty || 0;
-  const avgRating = stats.avgRating || 0;
-  const totalPlaytime = stats.totalPlaytime || 0;
-  const finishedCount = finishedGames.length;
-  const favoriteCount = favoriteGames.length;
-
-  if (finishedCount >= 20 && avgDifficulty >= 3.2) {
-    return {
-      title: "Mode Legende active",
-      subtitle: "Tu valides des jeux exigeants et tu fais monter ton checkpoint."
-    };
-  }
-
-  if (topGenre === "RPG") {
-    return {
-      title: "Cartographe d'univers",
-      subtitle: "Ton profil se construit autour des mondes riches, des quetes et de la progression."
-    };
-  }
-
-  if (topGenre === "Aventure") {
-    return {
-      title: "Voyageur de mondes",
-      subtitle: "Tu avances par decouverte, ambiance et grands moments d'exploration."
-    };
-  }
-
-  if (topGenre === "Shooter") {
-    return {
-      title: "Précision tactique",
-      subtitle: "Ton profil aime la visée propre, la pression et les décisions rapides."
-    };
-  }
-
-  if (topGenre === "Course") {
-    return {
-      title: "Pilote de trajectoires",
-      subtitle: "Ton univers aime la vitesse, la maîtrise et le feeling manette en main."
-    };
-  }
-
-  if (topGenre === "Horreur") {
-    return {
-      title: "Chasseur de tension",
-      subtitle: "Ton profil se nourrit d'ambiance, de survie et de moments qui restent."
-    };
-  }
-
-  if (topGenre === "Stratégie") {
-    return {
-      title: "Architecte tactique",
-      subtitle: "Tu aimes planifier, optimiser et gagner avant même que l'action explose."
-    };
-  }
-
-  if (topGenre === "Action" || topGenre === "Combat") {
-    return {
-      title: "Instinct arcade",
-      subtitle: "Ton checkpoint préfère le rythme, l'impact et les sensations immédiates."
-    };
-  }
-
-  if (topGenre === "Simulation") {
-    return {
-      title: "Architecte de systemes",
-      subtitle: "Tu prends plaisir a gerer, optimiser et construire quelque chose qui tient."
-    };
-  }
-
-  if (favoriteCount >= 8 && avgRating >= 8) {
-    return {
-      title: "Curateur de pepites",
-      subtitle: "Tes favoris racontent une selection personnelle, pas juste une collection."
-    };
-  }
-
-  if (avgRating >= 8.6) {
-    return {
-      title: "Oeil de selection",
-      subtitle: "Tu notes haut quand un jeu merite vraiment sa place dans ton univers."
-    };
-  }
-
-  if (totalPlaytime >= 120) {
-    return {
-      title: "Gardien du backlog",
-      subtitle: "Tu donnes du temps a ta bibliotheque et tu fais vivre tes jeux sur la duree."
-    };
-  }
-
-  if (finishedCount >= 10) {
-    return {
-      title: "Bibliotheque consolidee",
-      subtitle: "Ton checkpoint a deja une vraie base de jeux termines et assumes."
-    };
-  }
-
-  if (avgDifficulty <= 1.5) {
-    return {
-      title: "Session confort",
-      subtitle: "Tu privilegies les experiences fluides, accessibles et agreables a lancer."
-    };
-  }
-
-  return {
-    title: "Profil multi-plateforme",
-    subtitle: "Ton univers reste ouvert, varie et difficile a ranger dans une seule case."
-  };
+  const { title, subtitle } = getPlayerNotes(games);
+  return { title, subtitle };
 }
 
-function getPlayerAnalysis(games = [], hardware = [], badges = []) {
-  const stats = getAdvancedStats(games);
-  const finishedGames = games.filter(isGameFinishedStatus);
-  const ratedGames = games.filter((game) => getGameRating(game) > 0);
-  const favoriteGames = games.filter((game) => game.favorite);
-  const currentHardware = getCurrentOwnedHardware(hardware);
-  const unlockedBadges = badges.filter((badge) => badge.unlocked);
-  const totalGames = games.length;
-  const completionRate = totalGames
-    ? Math.round((finishedGames.length / totalGames) * 100)
-    : 0;
-  const averageRating = stats.avgRating || 0;
-  const platformCount = stats.topPlatforms.length;
-  const genreMap = Object.fromEntries(stats.topGenres.map(([label, count]) => [label, count]));
-  const hasGenre = (...labels) =>
-    labels.some((label) => (genreMap[label] || 0) > 0);
-  const genreScore = (...labels) =>
-    labels.reduce((sum, label) => sum + (genreMap[label] || 0), 0);
-
-  const archetypes = [
-    {
-      key: "narrativeExplorer",
-      title: "Explorateur narratif",
-      icon: "◇",
-      score:
-        genreScore("RPG", "Aventure") * 13 +
-        Math.min(platformCount * 8, 18) +
-        Math.min(finishedGames.length * 0.55, 18),
-      subtitle:
-        "Tu construis ton univers avec des mondes, des ambiances et des histoires qui restent.",
-      vibe: "Decouverte, lore, grands voyages.",
-    },
-    {
-      key: "strategist",
-      title: "Strategiste",
-      icon: "⌬",
-      score:
-        genreScore("Strategie", "Simulation") * 16 +
-        Math.min(stats.avgDifficulty * 9, 24),
-      subtitle:
-        "Tu aimes comprendre les systemes, optimiser tes choix et prendre l'avantage proprement.",
-      vibe: "Planification, maitrise, decisions.",
-    },
-    {
-      key: "competitor",
-      title: "Competiteur instinctif",
-      icon: "▲",
-      score:
-        genreScore("Shooter", "Course", "Combat", "Sport") * 15 +
-        Math.min(averageRating * 2.2, 20),
-      subtitle:
-        "Ton profil ressort quand il y a du rythme, du controle et un vrai feeling en main.",
-      vibe: "Reflexes, precision, performance.",
-    },
-    {
-      key: "collector",
-      title: "Collectionneur d'univers",
-      icon: "◆",
-      score:
-        Math.min(totalGames * 0.7, 42) +
-        Math.min(currentHardware.length * 3, 22) +
-        Math.min(unlockedBadges.length * 0.55, 18),
-      subtitle:
-        "Ton plaisir vient aussi de construire une collection qui raconte ton parcours.",
-      vibe: "Bibliotheque, materiel, badges.",
-    },
-    {
-      key: "completionist",
-      title: "Chasseur de 100%",
-      icon: "◎",
-      score:
-        completionRate * 0.62 +
-        Math.min(finishedGames.length * 0.7, 24) +
-        (completionRate >= 70 ? 14 : 0),
-      subtitle:
-        "Tu transformes ta bibliotheque en trajectoire claire, avec des jeux vraiment valides.",
-      vibe: "Finir, consolider, verrouiller.",
-    },
-    {
-      key: "curator",
-      title: "Curateur de pepites",
-      icon: "✦",
-      score:
-        Math.min(averageRating * 7, 56) +
-        Math.min(favoriteGames.length * 3, 22) +
-        Math.min(ratedGames.length * 0.8, 18),
-      subtitle:
-        "Tu selectionnes, tu notes, et tu fais ressortir les jeux qui meritent une vraie place.",
-      vibe: "Gout personnel, favoris, exigence.",
-    },
-  ];
-
-  const ranked = archetypes
-    .map((item) => ({ ...item, score: Math.max(0, Math.round(item.score)) }))
-    .sort((a, b) => b.score - a.score);
-  const primary = ranked[0] || archetypes[0];
-  const secondary = ranked.slice(1, 3);
-  const topGenreName = stats.topGenres[0]?.[0] || "profil varie";
-  const topPlatformName = stats.topPlatforms[0]?.[0] || "multi-plateforme";
-  const confidence = Math.min(
-    100,
-    Math.round(
-      Math.min(totalGames * 1.4, 34) +
-        Math.min(ratedGames.length * 2.1, 28) +
-        Math.min(finishedGames.length * 1.1, 24) +
-        Math.min(currentHardware.length * 1.2, 14)
-    )
-  );
-  const signals = [
-    {
-      label: "Genre dominant",
-      value: topGenreName,
-      detail: stats.topGenres[0]
-        ? `${stats.topGenres[0][1]} signaux detectes`
-        : "Ajoute plus de genres pour affiner.",
-    },
-    {
-      label: "Plateforme forte",
-      value: topPlatformName,
-      detail: stats.topPlatforms[0]
-        ? `${stats.topPlatforms[0][1]} jeux associes`
-        : "Les plateformes ressortiront avec la bibliotheque.",
-    },
-    {
-      label: "Rythme",
-      value: `${completionRate}% termines`,
-      detail: `${finishedGames.length} jeux terminés sur ${totalGames || 0}`,
-    },
-    {
-      label: "Exigence",
-      value: averageRating ? formatRating10(averageRating, "-") : "A calibrer",
-      detail: ratedGames.length
-        ? `${ratedGames.length} notes dans l'app`
-        : "Les notes vont renforcer l'analyse.",
-    },
-  ];
-  const nextSteps = [];
-
-  if (ratedGames.length < 10) {
-    nextSteps.push("Noter au moins 10 jeux pour rendre ton style beaucoup plus precis.");
-  }
-
-  if (finishedGames.length < 15) {
-    nextSteps.push("Terminer quelques jeux de plus pour distinguer passion et curiosite.");
-  }
-
-  if (!hasGenre("RPG", "Aventure", "Shooter", "Strategie", "Course", "Simulation")) {
-    nextSteps.push("Associer des genres plus specifiques pour eviter un profil trop generaliste.");
-  }
-
-  if (currentHardware.length && currentHardware.filter((item) => getHardwareAverageRating(item) > 0).length < 3) {
-    nextSteps.push("Noter ton materiel principal pour lier ton style a ton setup.");
-  }
-
-  return {
-    key: primary.key,
-    title: primary.title,
-    icon: primary.icon,
-    subtitle: primary.subtitle,
-    vibe: primary.vibe,
-    confidence,
-    maturity:
-      confidence >= 80
-        ? "Analyse solide"
-        : confidence >= 55
-          ? "Analyse fiable"
-          : confidence >= 30
-            ? "Analyse en progression"
-            : "Analyse naissante",
-    secondary,
-    signals,
-    nextSteps: nextSteps.slice(0, 3),
-  };
+function getPlayerAnalysis(games = [], hardware = []) {
+  return getPlayerNotes(games, hardware);
 }
 
 function getTimelineYear(value) {
@@ -1555,124 +1268,7 @@ function getGamingTimeline(games = [], hardware = [], socialProfile = {}) {
     });
 }
 
-function getProfileInsights(games = [], hardware = [], badges = []) {
-  const stats = getAdvancedStats(games);
-  const completedGames = games.filter(isGameFinishedStatus);
-  const ratedGames = games.filter((game) => getGameRating(game) > 0);
-  const currentHardware = hardware.filter((item) => {
-    const status = normalizeIdentityText(item.status || "");
-    return status.includes("poss") || status.includes("reparer");
-  });
-  const ratedHardware = currentHardware
-    .map((item) => ({
-      ...item,
-      average: getHardwareAverageRating(item),
-    }))
-    .filter((item) => item.average > 0)
-    .sort((a, b) => b.average - a.average);
 
-  const topGenre = stats.topGenres[0];
-  const topPlatform = stats.topPlatforms[0];
-  const topHardware = ratedHardware[0];
-  const unlockedBadges = badges.filter((badge) => badge.unlocked);
-  const favoriteGames = games.filter((game) => game.favorite);
-  const badgeCompletion = badges.length
-    ? Math.round((unlockedBadges.length / badges.length) * 100)
-    : 0;
-  const averageRating = stats.avgRating || 0;
-  const completionRate = games.length
-    ? Math.round((completedGames.length / games.length) * 100)
-    : 0;
-  const topGenreName = topGenre?.[0] || "univers varié";
-  const topPlatformName = topPlatform?.[0] || "multi-plateforme";
-  const hardwareTone = topHardware
-    ? `et un setup porté par ${topHardware.name}`
-    : "avec un setup encore en construction";
-
-  const headline =
-    games.length > 0
-      ? `${topGenreName} sur ${topPlatformName}`
-      : "Signature à révéler";
-  const summary =
-    games.length > 0
-      ? `Ton profil penche vers ${topGenreName}, avec ${completedGames.length} jeux terminés, ${favoriteGames.length} favoris ${hardwareTone}.`
-      : "Ajoute tes jeux, ton matériel et quelques notes pour que Checkpoint commence à lire ton identité de joueur.";
-  const maturity =
-    completedGames.length >= 50
-      ? "Profil solide"
-      : completedGames.length >= 20
-        ? "Profil établi"
-        : completedGames.length >= 5
-          ? "Profil en progression"
-          : "Profil naissant";
-
-  const cards = [
-    {
-      label: "Signature",
-      value: topGenre ? topGenre[0] : "À définir",
-      detail: topGenre
-        ? `${topGenre[1]} jeux dans ce registre`
-        : "Ajoute ou classe tes jeux pour révéler ton style.",
-      tone: "primary",
-    },
-    {
-      label: "Terrain favori",
-      value: topPlatform ? topPlatform[0] : "Multi-plateforme",
-      detail: topPlatform
-        ? `${topPlatform[1]} jeux liés à cette plateforme`
-        : "Tes plateformes ressortiront avec plus de jeux classés.",
-      tone: "platform",
-    },
-    {
-      label: "Exigence",
-      value: averageRating ? formatRating10(averageRating, "-") : "À noter",
-      detail: ratedGames.length
-        ? `${ratedGames.length} jeux notés`
-        : "Tes notes construiront une vraie lecture de ton profil.",
-      tone: averageRating >= 8.5 ? "high" : "neutral",
-    },
-    {
-      label: "Matériel repère",
-      value: topHardware ? topHardware.name : "À choisir",
-      detail: topHardware
-        ? `${formatRating10(topHardware.average, "-")} sur tes critères`
-        : `${currentHardware.length} matériels actuellement en possession`,
-      tone: "hardware",
-    },
-  ];
-
-  const focus = [];
-
-  if (completedGames.length >= 25) {
-    focus.push("Tu as une base solide de jeux terminés, ton profil commence à raconter une vraie trajectoire.");
-  } else if (completedGames.length > 0) {
-    focus.push(`Encore ${Math.max(1, 25 - completedGames.length)} jeux terminés pour consolider ta trajectoire.`);
-  } else {
-    focus.push("Terminer quelques jeux donnera plus de poids à ton profil joueur.");
-  }
-
-  if (badgeCompletion >= 70) {
-    focus.push("Ta chasse aux badges est déjà bien avancée.");
-  } else if (badges.length) {
-    focus.push(`${badgeCompletion}% des badges débloqués, il reste de quoi faire évoluer ton identité.`);
-  }
-
-  if (ratedHardware.length >= 5) {
-    focus.push("Tes notes matériel commencent à donner une vraie hiérarchie à ton setup.");
-  } else if (currentHardware.length) {
-    focus.push("Noter plus de matériel rendra tes classements beaucoup plus fiables.");
-  }
-
-  return {
-    headline,
-    summary,
-    maturity,
-    completionRate,
-    badgeCompletion,
-    cards,
-    focus: focus.slice(0, 3),
-  };
-}
 
 function normalizeIdentityText(value = "") {
   return String(value)
@@ -1682,198 +1278,7 @@ function normalizeIdentityText(value = "") {
 }
 
 function getIdentityPlayerTitle(identityGames = []) {
-  const games = identityGames.filter(Boolean).slice(0, 3);
-
-  if (!games.length) {
-    return {
-      title: "Identite a construire",
-      subtitle: "Choisis 3 jeux pour reveler ta signature de joueur.",
-    };
-  }
-
-  const text = games
-    .flatMap((game) => [
-      game.name,
-      ...(game.genreNames || []),
-      ...(game.platforms || []),
-      ...(game.platformNames || []),
-    ])
-    .map(normalizeIdentityText)
-    .join(" ");
-
-  const countMatches = (words) =>
-    words.reduce((count, word) => count + (text.includes(word) ? 1 : 0), 0);
-
-  const identityRules = [
-    {
-      title: "Pilote dans l'ame",
-      subtitle: "Ton ADN de joueur sent la trajectoire parfaite et la vitesse.",
-      words: ["racing", "race", "driving", "cars", "car", "vehicle", "automobile", "forza", "gran turismo", "need for speed", "mario kart", "dirt", "f1", "wrc", "assetto"],
-    },
-    {
-      title: "Samourai du pad",
-      subtitle: "Ton identite s'est forgee dans l'exigence, les boss et la perseverance.",
-      words: ["souls", "soulslike", "dark souls", "elden ring", "bloodborne", "sekiro", "nioh", "lies of p", "lord of the fallen", "wo long"],
-    },
-    {
-      title: "Infiltreur",
-      subtitle: "Tu aimes observer, contourner et gagner sans faire de bruit.",
-      words: ["stealth", "infiltration", "metal gear", "splinter cell", "hitman", "dishonored", "thief", "deus ex", "assassin"],
-    },
-    {
-      title: "Legende JRPG",
-      subtitle: "Ton imaginaire s'est construit avec les equipes, les invocations et les grandes odyssees.",
-      words: ["jrpg", "final fantasy", "dragon quest", "persona", "xenoblade", "tales of", "chrono trigger", "ni no kuni", "octopath", "fire emblem"],
-    },
-    {
-      title: "Gardien de la fantasy",
-      subtitle: "Tu reviens toujours vers les royaumes, les mythes et les destins epiques.",
-      words: ["fantasy", "dragon", "witcher", "skyrim", "elder scrolls", "baldur", "dragon age", "diablo", "warcraft", "middle-earth"],
-    },
-    {
-      title: "Voyageur de science-fiction",
-      subtitle: "Ton profil regarde vers l'espace, la technologie et les futurs possibles.",
-      words: ["sci-fi", "science fiction", "space", "cyberpunk", "starfield", "mass effect", "halo", "metroid", "deus ex", "outer worlds", "no man's sky"],
-    },
-    {
-      title: "Heros de comics",
-      subtitle: "Ton identite de joueur a le gout des pouvoirs, des masques et des grandes responsabilites.",
-      words: ["spider-man", "spiderman", "batman", "arkham", "marvel", "guardians", "avengers", "injustice", "dc ", "lego marvel"],
-    },
-    {
-      title: "Roi du crime ouvert",
-      subtitle: "Tu t'es construit dans les villes ouvertes, les braquages et les histoires de rue.",
-      words: ["gta", "grand theft", "mafia", "saints row", "yakuza", "like a dragon", "sleeping dogs", "watch dogs", "payday", "crime"],
-    },
-    {
-      title: "Survivant",
-      subtitle: "Tu aimes quand chaque ressource compte et que le monde ne te fait aucun cadeau.",
-      words: ["survival", "craft", "the forest", "subnautica", "dayz", "rust", "ark", "valheim", "green hell", "don't starve"],
-    },
-    {
-      title: "Createur de mondes",
-      subtitle: "Tu preferes construire, decorer, organiser et laisser une trace visible.",
-      words: ["builder", "building", "creation", "minecraft", "animal crossing", "dragon quest builders", "planet coaster", "cities", "sims", "two point"],
-    },
-    {
-      title: "Maitre des enigmes",
-      subtitle: "Ton plaisir vient des idees qui s'emboitent et des solutions elegantes.",
-      words: ["puzzle", "portal", "witness", "talos", "tetris", "professor layton", "monument valley", "baba is you", "return of the obra dinn"],
-    },
-    {
-      title: "Rythme dans le sang",
-      subtitle: "Tu joues autant avec l'oreille qu'avec les reflexes.",
-      words: ["rhythm", "music", "guitar hero", "rock band", "beat saber", "just dance", "taiko", "osu", "hatsune", "thumper"],
-    },
-    {
-      title: "Ame d'independant",
-      subtitle: "Tu es marque par les experiences singulieres, les idees fortes et les petits studios.",
-      words: ["indie", "hades", "hollow knight", "celeste", "limbo", "inside", "dead cells", "undertale", "cuphead", "ori"],
-    },
-    {
-      title: "Retro dans le coeur",
-      subtitle: "Ton identite garde le gout des classiques, des sprites et des consoles qui ont ouvert la voie.",
-      words: ["retro", "arcade", "classic", "mega man", "castlevania", "pac-man", "street fighter ii", "sonic", "mario bros", "contra"],
-    },
-    {
-      title: "Joueur de canape",
-      subtitle: "Ton histoire se raconte aussi a plusieurs, manette en main et rire en fond.",
-      words: ["coop", "co-op", "party", "multiplayer", "overcooked", "it takes two", "mario party", "smash", "gang beasts", "moving out"],
-    },
-    {
-      title: "Competiteur en ligne",
-      subtitle: "Tu cherches le duel, le classement et la partie ou tout se joue maintenant.",
-      words: ["competitive", "esport", "ranked", "league of legends", "valorant", "counter-strike", "fortnite", "apex legends", "rocket league", "overwatch"],
-    },
-    {
-      title: "Chasseur de monstres",
-      subtitle: "Tu aimes apprendre les patterns, preparer ton equipement et repartir en chasse.",
-      words: ["monster hunter", "dauntless", "god eater", "wild hearts", "dragons dogma", "horizon", "witcher"],
-    },
-    {
-      title: "Commandant de guerre",
-      subtitle: "Ton profil aime les fronts, les escouades et les decisions sous pression.",
-      words: ["war", "military", "battlefield", "call of duty", "medal of honor", "arma", "hell let loose", "company of heroes", "brothers in arms"],
-    },
-    {
-      title: "Collectionneur de creatures",
-      subtitle: "Ton aventure passe par les equipes a composer, les captures et l'attachement.",
-      words: ["pokemon", "digimon", "palworld", "monster sanctuary", "temtem", "yo-kai", "nexomon"],
-    },
-    {
-      title: "Explorateur de mondes",
-      subtitle: "Tu t'es construit avec l'aventure, les grands espaces et la decouverte.",
-      words: ["adventure", "open world", "exploration", "zelda", "tomb raider", "uncharted", "horizon", "death stranding"],
-    },
-    {
-      title: "Heros narratif",
-      subtitle: "Ce sont les histoires, les personnages et les emotions qui t'ont marque.",
-      words: ["story", "narrative", "rpg", "role-playing", "the last of us", "life is strange", "detroit", "mass effect", "final fantasy", "persona"],
-    },
-    {
-      title: "Combattant instinctif",
-      subtitle: "Ton profil s'est forge dans le duel, le timing et la maitrise.",
-      words: ["fighting", "combat", "mortal kombat", "street fighter", "tekken", "dragon ball", "super smash", "soulcalibur"],
-    },
-    {
-      title: "Tacticien",
-      subtitle: "Tu aimes comprendre les systemes, optimiser et gagner avec la tete.",
-      words: ["strategy", "tactical", "tactics", "management", "civilization", "xcom", "fire emblem", "total war", "football manager"],
-    },
-    {
-      title: "Tireur de precision",
-      subtitle: "Ton identite passe par le reflexe, la visee et la pression.",
-      words: ["shooter", "fps", "shooting", "call of duty", "battlefield", "halo", "doom", "counter-strike", "valorant", "destiny"],
-    },
-    {
-      title: "Architecte du chaos",
-      subtitle: "Tu aimes les bacs a sable, les systemes libres et les histoires que tu crees toi-meme.",
-      words: ["sandbox", "simulation", "simulator", "minecraft", "terraria", "sims", "cities", "planet coaster", "stardew"],
-    },
-    {
-      title: "Chasseur d'ombres",
-      subtitle: "Ton parcours a ete marque par l'horreur, la tension et les ambiances lourdes.",
-      words: ["horror", "survival", "resident evil", "silent hill", "dead space", "alan wake", "outlast", "evil within"],
-    },
-    {
-      title: "Gardien du sport",
-      subtitle: "Ton profil s'est construit dans la competition, les saisons et les grands matchs.",
-      words: ["sports", "sport", "football", "soccer", "nba", "fifa", "fc ", "efootball", "nhl", "ufc", "wwe", "tennis"],
-    },
-    {
-      title: "Plateformeur ne",
-      subtitle: "Tu as grandi avec le saut parfait, le rythme et les niveaux a maitriser.",
-      words: ["platformer", "platform", "mario", "sonic", "rayman", "crash", "spyro", "celeste", "ori"],
-    },
-    {
-      title: "Gardien familial",
-      subtitle: "Ton identite de joueur garde un cote accessible, colore et partageable.",
-      words: ["family", "kids", "nintendo", "kirby", "yoshi", "lego", "mario", "splatoon", "animal crossing"],
-    },
-  ];
-
-  const rankedRules = identityRules
-    .map((rule) => ({ ...rule, score: countMatches(rule.words) }))
-    .sort((a, b) => b.score - a.score);
-
-  if (rankedRules[0]?.score >= 2) {
-    return {
-      title: rankedRules[0].title,
-      subtitle: rankedRules[0].subtitle,
-    };
-  }
-
-  if (games.length === 3) {
-    return {
-      title: "Joueur aux trois piliers",
-      subtitle: "Tes jeux fondateurs dessinent un profil varie et tres personnel.",
-    };
-  }
-
-  return {
-    title: "Signature en cours",
-    subtitle: "Ajoute encore des jeux fondateurs pour affiner ton identite.",
-  };
+  return getFounderSignature(identityGames);
 }
 
 function formatGameRating10(rating) {
@@ -8069,6 +7474,7 @@ function formatEventDate(date) {
 }
 
 const DEFAULT_SOCIAL_PROFILE = {
+  photoURL: "",
   displayName: "Player One",
   handle: accountsEnabled ? "" : "checkpoint",
   bio: "Je construis mon univers gaming, une partie après l'autre.",
@@ -8126,6 +7532,7 @@ function normalizeSocialProfile(profile = {}) {
     ...DEFAULT_SOCIAL_PROFILE,
     ...source,
     schemaVersion: SOCIAL_PROFILE_SCHEMA_VERSION,
+    photoURL: typeof source.photoURL === "string" ? source.photoURL : "",
     displayName,
     handle,
     bio:
@@ -8768,7 +8175,10 @@ function PublicProfilePreview({
     gotyHighlights: [],
     hardwareHighlights: [],
   };
-  const playerAnalysis = profile.playerAnalysis || null;
+  const playerAnalysis = getPublicPlayerNotes(profile);
+  const identityTitle = publicSections.identityGames && profile.identityGames?.length
+    ? getFounderSignature(profile.identityGames, profile.displayName || "Ce joueur")
+    : null;
   const publicBadges = [
     profile.featuredBadge,
     ...(profile.selectedBadges || []),
@@ -8779,7 +8189,7 @@ function PublicProfilePreview({
     )
     .slice(0, 5);
   const platformStrengths = (profile.platformStrengths || []).slice(0, 4);
-  const identityGames = (profile.identityGames || []).slice(0, 3);
+  const identityGames = publicSections.identityGames ? (profile.identityGames || []).slice(0, 3) : [];
   const sanctuaryGames = (profile.sanctuaryGames || []).slice(0, 4);
   const sanctuaryHardware = (profile.sanctuaryHardware || []).slice(0, 3);
   const gamingTimeline = (profile.gamingTimeline || []).slice(0, 8);
@@ -8808,7 +8218,7 @@ function PublicProfilePreview({
 
         <div className="public-vitrine-main">
           <div className="public-vitrine-avatar">
-            {heroGame?.image ? (
+            {profile.photoURL ? <SocialAvatar name={profile.displayName} src={profile.photoURL} className="public-profile-photo" /> : heroGame?.image ? (
               <img src={heroGame.image} alt={heroGame.name} />
             ) : (
               <span>{getInitials(profile.displayName)}</span>
@@ -8820,11 +8230,11 @@ function PublicProfilePreview({
               <FeaturedBadgePill badge={profile.featuredBadge} />
             </div>
             <p>{profile.bio || "Profil Checkpoint"}</p>
-            {profile.identityTitle && (
+            {identityTitle && (
               <div className="public-vitrine-signature">
-                <span>Signature joueur</span>
-                <strong>{profile.identityTitle.title}</strong>
-                <small>{profile.identityTitle.subtitle}</small>
+                <span>Les jeux qui comptent</span>
+                <strong>{identityTitle.title}</strong>
+                <small>{identityTitle.subtitle}</small>
               </div>
             )}
           </div>
@@ -8873,7 +8283,7 @@ function PublicProfilePreview({
       {playerAnalysis && (
         <div className="public-vitrine-section public-player-analysis">
           <div className="public-vitrine-section-head">
-            <span>Analyse joueur</span>
+            <span>Ses habitudes de jeu</span>
             <strong>{playerAnalysis.maturity}</strong>
           </div>
           <div className="public-analysis-card">
@@ -8881,7 +8291,7 @@ function PublicProfilePreview({
             <div>
               <strong>{playerAnalysis.title}</strong>
               <p>{playerAnalysis.subtitle}</p>
-              <span>{playerAnalysis.vibe}</span>
+              {playerAnalysis.vibe && <span>{playerAnalysis.vibe}</span>}
             </div>
           </div>
         </div>
@@ -8944,20 +8354,19 @@ function PublicProfilePreview({
       )}
 
       {publicSections.essential &&
-        (profile.identityTitle ||
-          profileShowcase.topScores?.length > 0 ||
+        (profileShowcase.topScores?.length > 0 ||
           profileShowcase.specializedTops?.length > 0 ||
           profileShowcase.gotyHighlights?.length > 0 ||
           profileShowcase.hardwareHighlights?.length > 0) && (
         <div className="social-public-mini-section">
           <strong>Vitrine Checkpoint</strong>
-          <ProfileShowcase showcase={profileShowcase} identityTitle={profile.identityTitle} />
+          <ProfileShowcase showcase={profileShowcase} />
         </div>
       )}
 
       {publicSections.identityGames && profile.identityGames?.length > 0 && (
         <div className="social-public-mini-section">
-          <strong>Mes 3 jeux fondateurs</strong>
+          <strong>Ses jeux fondateurs</strong>
           <div className="social-identity-games">
             {profile.identityGames.map((game, index) => (
               <div key={game.id || game.name} className="social-identity-game">
@@ -9152,7 +8561,7 @@ function ProfileShowcase({ showcase, identityTitle = null }) {
     <div className="profile-showcase">
       {identityTitle && (
         <div className="profile-showcase-signature">
-          <span>Signature joueur</span>
+          <span>Les jeux qui comptent</span>
           <strong>{identityTitle.title}</strong>
           <p>{identityTitle.subtitle}</p>
         </div>
@@ -9420,6 +8829,7 @@ export function SocialTab({
   const shareUrl = getProfileShareUrl(socialProfile.handle);
   const showShowcasePreview = socialProfile.showShowcasePreview !== false;
   const ownPublicPreview = {
+    photoURL: socialProfile.photoURL || "",
     displayName: socialProfile.displayName || DEFAULT_SOCIAL_PROFILE.displayName,
     handle: normalizeHandle(socialProfile.handle),
     bio: socialProfile.bio || "",
@@ -9456,6 +8866,7 @@ export function SocialTab({
       image: game.image || "",
       rating: getGameRating(game),
       platforms: game.platforms || [],
+      genreNames: game.genreNames || [],
     })),
     essentialTops: essentialTopSections.map((section) => {
       const game = section.games[0];
@@ -9866,6 +9277,7 @@ export function SocialTab({
 
       <div className={`search-panel social-editor ${socialView === "profile" ? "" : "social-section-hidden"}`}>
         <h2 className="panel-title">Identité publique</h2>
+        <ProfilePhotoEditor name={socialProfile.displayName} value={socialProfile.photoURL || ""} onChange={photo => onProfileChange("photoURL", photo)} />
         <div className="social-editor-grid">
           <label>
             Nom affiché
@@ -9918,7 +9330,7 @@ export function SocialTab({
         <div>
           <h2 className="panel-title">Jeux fondateurs</h2>
           <div className="option-value">
-            Choisis les 3 jeux qui ont construit ton identité de joueur.
+            Choisis jusqu’à trois jeux qui comptent pour toi. Un souvenir, un favori ou simplement un jeu que tu adores.
           </div>
         </div>
 
@@ -9967,7 +9379,7 @@ export function SocialTab({
             <div>
               <strong>Depuis ton Sanctuaire</strong>
               <span>
-                Tu peux reprendre ces jeux marquants comme base de ton identité joueur.
+                Tu peux aussi choisir parmi tes jeux du Sanctuaire.
               </span>
             </div>
             <div>
@@ -10062,7 +9474,7 @@ export function SocialTab({
           </button>
         </div>
 
-        <SocialFriendsDirectory friends={socialFriends} onOpen={onOpenFriend} onRemove={onRemoveFriend} />
+        {socialView === "friends" && !sharedProfile && <SocialFriendsDirectory friends={socialFriends} onOpen={onOpenFriend} onRemove={onRemoveFriend} loadProfile={loadFriendProfile} />}
 
       </div>
 
@@ -11584,7 +10996,7 @@ function ConsoleXPSection({ games, compact = false }) {
   );
 }
 
-function ProfileTab({
+export function ProfileTab({
   badges,
   level,
   totalXP,
@@ -11606,11 +11018,15 @@ function ProfileTab({
 
   const nextRank = RANKS.find((rank) => rank.min > level);
   const stats = getAdvancedStats(games);
-  const profile = getPlayerProfile(games);
-  const playerAnalysis = getPlayerAnalysis(games, hardware, badges);
+  const playerAnalysis = getPlayerAnalysis(games, hardware);
   const badgeStats = calculateBadgeStats(games, level, hardware);
   const featuredBadge = getFeaturedBadgeFromSelection(badges, featuredBadgeId);
-  const profileInsights = getProfileInsights(games, hardware, badges);
+  const founderIds = (socialProfile.identityGameIds || []).slice(0, 3).map(String);
+  const founderGames = founderIds.map(id => games.find(game => String(game.id) === id)).filter(Boolean);
+  const founderSignature = getIdentityPlayerTitle(founderGames);
+  const completionRate = playerAnalysis.facts.collectionCount
+    ? Math.round(playerAnalysis.facts.finishedCount / playerAnalysis.facts.collectionCount * 100)
+    : 0;
   const profileShowcase = getProfileShowcase(games, hardware);
   const gamingTimeline = getGamingTimeline(games, hardware, socialProfile);
   const hasProfileShowcase =
@@ -11644,7 +11060,8 @@ function ProfileTab({
     .filter((game) => game.checkpointRating > 0)
     .sort((a, b) => b.checkpointRating - a.checkpointRating);
   const favoriteGames = games.filter((game) => game.favorite);
-  const identityGame = ratedGames[0] || favoriteGames[0] || games[0];
+  const identityGame = favoriteGames[0] || ratedGames[0];
+  const currentGame = games.find(game => game.status === "en cours");
   const currentHardware = hardware.filter((item) => {
     const status = normalizeIdentityText(item.status || "");
     return status.includes("poss") || status.includes("reparer");
@@ -11656,42 +11073,28 @@ function ProfileTab({
     }))
     .filter((item) => item.average > 0)
     .sort((a, b) => b.average - a.average);
-  const profilePowerScore = Math.min(
-    100,
-    Math.round(
-      profileInsights.completionRate * 0.35 +
-        profileInsights.badgeCompletion * 0.25 +
-        Math.min(ratedGames.length * 0.22, 18) +
-        Math.min(ratedHardware.length * 2, 12) +
-        Math.min(favoriteGames.length * 1.5, 10)
-    )
-  );
   const profileLivingCards = [
     {
-      label: "Jeu qui te ressemble",
-      value: identityGame?.name || "A definir",
+      label: favoriteGames.length || !identityGame ? "Un de tes coups de cœur" : "Ta meilleure note",
+      value: identityGame?.name || "Pas encore de favori",
       detail: identityGame
-        ? `${identityGame.released || "Annee inconnue"} - ${formatRating10(
-            getGameRating(identityGame),
-            "non note"
-          )}`
-        : "Note quelques jeux pour faire ressortir une vraie signature.",
+        ? formatRating10(getGameRating(identityGame), "Pas encore noté")
+        : "Le cœur sur une fiche permet de garder un jeu en favori.",
     },
     {
-      label: "Terrain de jeu",
-      value: stats.topPlatforms[0]?.[0] || "Multi-plateforme",
-      detail: stats.topPlatforms[0]
-        ? `${stats.topPlatforms[0][1]} jeux qui reviennent souvent`
-        : "Tes plateformes se préciseront avec ta collection.",
+      label: "Ta partie en cours",
+      value: currentGame?.name || "Aucune pour le moment",
+      detail: currentGame ? "À retrouver quand tu en as envie." : "Pas besoin de jouer tous les jours.",
     },
     {
-      label: "Setup du moment",
-      value: ratedHardware[0]?.name || currentHardware[0]?.name || "A calibrer",
+      label: "Dans ton setup",
+      value: ratedHardware[0]?.name || currentHardware[0]?.name || "Pas encore renseigné",
       detail: ratedHardware[0]
-        ? `${formatRating10(ratedHardware[0].average, "-")} de ressenti materiel`
-        : `${currentHardware.length} materiels dans ta collection actuelle`,
+        ? `${formatRating10(ratedHardware[0].average, "-")} d’après tes notes`
+        : `${currentHardware.length} équipement${currentHardware.length > 1 ? "s" : ""} actuellement en ta possession`,
     },
   ];
+
   const profileMission = nextBadges[0]
     ? {
         label: "Mission active",
@@ -11721,17 +11124,18 @@ function ProfileTab({
     <div className="progression-stack profile-tab">
       <div className="search-panel profile-hero">
         <div className="profile-hero-main">
+          {socialProfile.photoURL && <SocialAvatar name={socialProfile.displayName} src={socialProfile.photoURL} className="profile-personal-avatar" />}
           <div className="profile-kicker">Profil joueur</div>
           <div className="social-profile-name-row">
-            <h2 className="profile-title">{profile.title}</h2>
+            <h2 className="profile-title">{socialProfile.displayName || "Ton profil"}</h2>
             <FeaturedBadgePill badge={featuredBadge} />
           </div>
-          <div className="profile-subtitle">{profile.subtitle}</div>
+          <div className="profile-subtitle">{`${playerAnalysis.facts.collectionCount} ${playerAnalysis.facts.collectionCount === 1 ? "jeu" : "jeux"} dans ta bibliothèque`}</div>
 
           <div className="profile-hero-tags">
             <span>Niveau {level}</span>
             <span>{currentRank.title}</span>
-            <span>{profileInsights.maturity}</span>
+            <span>{playerAnalysis.maturity}</span>
           </div>
         </div>
 
@@ -11760,25 +11164,12 @@ function ProfileTab({
 
       <div className="search-panel profile-living-panel">
         <div className="profile-living-main">
-          <span>Ta signature joueur</span>
-          <strong>{profileInsights.headline}</strong>
-          <p>{profileInsights.summary}</p>
+          <span>Ta signature de joueur</span>
+          <strong>{founderSignature.title}</strong>
+          <p>{founderSignature.subtitle}</p>
+          {!founderGames.length && <small>Tu peux les choisir dans Social → Mon profil → Ma vitrine.</small>}
 
-          <div className="profile-living-meter">
-            <div>
-              <span>Profil renseigné</span>
-              <strong>{profilePowerScore}%</strong>
-            </div>
-            <div className="profile-living-bar">
-              <div style={{ width: `${profilePowerScore}%` }} />
-            </div>
-          </div>
 
-          <div className="player-analysis-meta profile-living-analysis-meta">
-            <small>{playerAnalysis.title}</small>
-            <small>{playerAnalysis.confidence}% de repères</small>
-            <small>{playerAnalysis.vibe}</small>
-          </div>
         </div>
 
         <div className="profile-living-side">
@@ -11799,6 +11190,23 @@ function ProfileTab({
           </div>
         </div>
       </div>
+
+      <section className="search-panel player-notes-panel" aria-label="Tes habitudes de jeu">
+        <div className="profile-section-header">
+          <h2 className="panel-title">Tes habitudes de jeu</h2>
+        </div>
+        <div className="player-notes-summary">
+          <strong>{playerAnalysis.title}</strong>
+          <p>{playerAnalysis.subtitle}</p>
+        </div>
+        <div className="player-analysis-meta">
+          <small>{playerAnalysis.maturity}</small>
+          {playerAnalysis.vibe && <small>{playerAnalysis.vibe}</small>}
+        </div>
+        {playerAnalysis.nextSteps.length > 0 && (
+          <p className="player-notes-suggestion">{playerAnalysis.nextSteps[0]}</p>
+        )}
+      </section>
 
       <div className="search-panel profile-trials-panel">
         <div className="profile-section-header">
@@ -11967,7 +11375,7 @@ function ProfileTab({
         </div>
 
         <div className="stat-card">
-          <div className="stat-value">{profileInsights.completionRate}%</div>
+          <div className="stat-value">{completionRate}%</div>
           <div className="stat-label">Complétion</div>
         </div>
       </div>
@@ -12000,67 +11408,6 @@ function ProfileTab({
         </div>
 
         <GamingTimeline timeline={gamingTimeline} />
-      </div>
-
-      <div className="search-panel profile-insights-panel">
-        <div className="profile-section-header">
-          <div>
-            <h2 className="panel-title">Analyse de joueur</h2>
-            <div className="option-value">
-              Ton style ressort de tes notes, plateformes, genres, jeux termines et materiel.
-            </div>
-          </div>
-        </div>
-
-        <div className="player-analysis-hero">
-          <div className="player-analysis-emblem">{playerAnalysis.icon}</div>
-          <div>
-            <span>Style principal</span>
-            <strong>{playerAnalysis.title}</strong>
-            <p>{playerAnalysis.subtitle}</p>
-            <div className="player-analysis-meta">
-              <small>{playerAnalysis.maturity}</small>
-              <small>{playerAnalysis.confidence}% de confiance</small>
-              <small>{playerAnalysis.vibe}</small>
-            </div>
-          </div>
-        </div>
-
-        {playerAnalysis.secondary.length > 0 && (
-          <div className="player-analysis-secondary">
-            {playerAnalysis.secondary.map((style) => (
-              <div key={style.key}>
-                <span>{style.icon}</span>
-                <strong>{style.title}</strong>
-                <small>{style.vibe}</small>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="profile-insights-grid">
-          {playerAnalysis.signals.map((card) => (
-            <div
-              key={card.label}
-              className="profile-insight-card tone-primary"
-            >
-              <span>{card.label}</span>
-              <strong>{card.value}</strong>
-              <small>{card.detail}</small>
-            </div>
-          ))}
-        </div>
-
-        {playerAnalysis.nextSteps.length > 0 && (
-          <div className="profile-insights-focus">
-            <span>Pour affiner ton analyse</span>
-            {playerAnalysis.nextSteps.map((item) => (
-              <div key={item} className="profile-insights-focus-item">
-                {item}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       <div className="search-panel profile-growth-panel">
@@ -19105,6 +18452,7 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
 
   return {
     displayName: profileOverride.displayName || DEFAULT_SOCIAL_PROFILE.displayName,
+    photoURL: profileOverride.photoURL || "",
     handle,
     bio: profileOverride.bio || "",
     platform: profileOverride.platform || "",
@@ -19150,6 +18498,7 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
       image: game.image || "",
       rating: getGameRating(game),
       platforms: game.platforms || [],
+      genreNames: game.genreNames || [],
     })),
     essentialTops: essentialTopSections.map((section) => {
       const game = section.games[0];
@@ -19290,6 +18639,7 @@ const addSocialFriend = async (handleValue) => {
   try {
     const profile = await loadCheckpointSocialProfile(handle);
     const friend = {
+      photoURL: profile.photoURL || "",
       displayName: profile.displayName || handle,
       handle,
       bio: profile.bio || "",

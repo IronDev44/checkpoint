@@ -802,3 +802,13 @@ body[data-theme] .option-choice-indicator > svg {
   margin: 0;
   flex-shrink: 0;
 }
+/* Player notes stay short and readable beside the user's own founder choices. */
+.profile-tab .profile-living-main { justify-content: flex-start; }
+.profile-tab .profile-living-panel { grid-template-columns: minmax(0, 1fr); }
+.profile-tab .profile-living-cards { grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); }
+.profile-tab .player-notes-panel { display: grid; gap: 12px; }
+.player-notes-panel .profile-section-header { margin: 0; }
+.player-notes-summary strong { color: var(--text-main); font-size: 1.15rem; line-height: 1.35; }
+.player-notes-summary p, .player-notes-suggestion { margin: 8px 0 0; color: var(--text-soft); line-height: 1.6; overflow-wrap: anywhere; }
+.player-notes-panel .player-analysis-meta { margin: 0; }
+.player-notes-panel .player-notes-suggestion { margin: 0; font-size: .85rem; color: var(--text-muted); }

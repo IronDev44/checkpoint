@@ -2,6 +2,17 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { SocialFriendsDirectory, SocialNavigation, FriendsActivityFeed } from "./SocialHub";
 
 const friends = [{ handle: "alex", displayName: "Alex", platform: "Switch" }, { handle: "sam", displayName: "Sam" }];
+test("friend photos are refreshed from the public profile", async () => {
+  const loadProfile = jest.fn().mockResolvedValue({ photoURL: "fresh.jpg" });
+  const view = render(<SocialFriendsDirectory friends={[{ ...friends[0], photoURL: "old.jpg" }]} loadProfile={loadProfile} onOpen={jest.fn()} onRemove={jest.fn()} />);
+  await waitFor(() => expect(view.container.querySelector("img")).toHaveAttribute("src", "fresh.jpg"));
+});
+test("a private friend does not expose the cached photo", async () => {
+  const loadProfile = jest.fn().mockRejectedValue(new Error("Profil privé"));
+  const view = render(<SocialFriendsDirectory friends={[{ ...friends[0], photoURL: "old.jpg" }]} loadProfile={loadProfile} onOpen={jest.fn()} onRemove={jest.fn()} />);
+  await waitFor(() => expect(loadProfile).toHaveBeenCalled());
+  expect(view.container.querySelector("img")).toBeNull();
+});
 test("friend identities and the profile button open the chosen friend", async () => {
   const onOpen = jest.fn().mockResolvedValue(undefined);
   render(<SocialFriendsDirectory friends={friends} onOpen={onOpen} onRemove={jest.fn()} />);
