@@ -10790,58 +10790,6 @@ body[data-ui="modern"] .chip.active {
   gap: 9px;
 }
 
-.public-badge-chip {
-  min-width: 0;
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  align-items: center;
-  gap: 9px;
-  border: 1px solid rgba(255,255,255,0.13);
-  border-radius: 18px;
-  background: rgba(255,255,255,0.07);
-  padding: 10px;
-}
-
-.public-badge-chip > span {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  background: rgba(var(--accent-rgb, 97, 132, 255), 0.18);
-  font-size: 18px;
-}
-
-.public-badge-chip strong,
-.public-badge-chip small {
-  display: block;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.public-badge-chip strong {
-  color: white;
-  font-size: 12px;
-  line-height: 1.1;
-}
-
-.public-badge-chip small {
-  margin-top: 4px;
-  color: var(--text-muted);
-  font-size: 10px;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
-.public-badge-chip.rarity-mythic,
-.public-badge-chip.rarity-creator {
-  border-color: rgba(255, 214, 102, 0.34);
-  background:
-    linear-gradient(135deg, rgba(255,214,102,0.14), rgba(var(--accent-rgb, 97, 132, 255), 0.1));
-}
-
 .public-platform-strip {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

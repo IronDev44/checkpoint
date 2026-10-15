@@ -31,6 +31,9 @@ import { SocialNavigation, SocialFriendsDirectory, FriendsActivityFeed } from ".
 import { readPublicSocialProfile } from "./services/socialProfiles";
 import { getPlayerNotes, getFounderSignature, getPublicPlayerNotes } from "./services/playerNotes";
 import ProfilePhotoEditor, { SocialAvatar } from "./components/ProfilePhoto";
+import FounderGames from "./components/FounderGames";
+import { toPublicFounderGame } from "./services/gameCovers";
+import { restorePublicBadge, toPublicBadge } from "./services/publicBadges";
 import TrialRoom from "./components/TrialRoom";
 import TesterFeedback from "./components/TesterFeedback";
 import FeedbackInbox from "./components/FeedbackInbox";
@@ -8179,15 +8182,17 @@ function PublicProfilePreview({
   const identityTitle = publicSections.identityGames && profile.identityGames?.length
     ? getFounderSignature(profile.identityGames, profile.displayName || "Ce joueur")
     : null;
+  const publicFeaturedBadge = restorePublicBadge(profile.featuredBadge, BADGES);
   const publicBadges = [
-    profile.featuredBadge,
+    publicFeaturedBadge,
     ...(profile.selectedBadges || []),
   ]
     .filter(Boolean)
     .filter((badge, index, list) =>
       list.findIndex((item) => String(item.id) === String(badge.id)) === index
     )
-    .slice(0, 5);
+    .slice(0, 5)
+    .map(badge => restorePublicBadge(badge, BADGES));
   const platformStrengths = (profile.platformStrengths || []).slice(0, 4);
   const identityGames = publicSections.identityGames ? (profile.identityGames || []).slice(0, 3) : [];
   const sanctuaryGames = (profile.sanctuaryGames || []).slice(0, 4);
@@ -8227,7 +8232,7 @@ function PublicProfilePreview({
           <div className="public-vitrine-identity">
             <div className="public-profile-name-row">
               <h3>{profile.displayName}</h3>
-              <FeaturedBadgePill badge={profile.featuredBadge} />
+              <FeaturedBadgePill badge={publicFeaturedBadge} />
             </div>
             <p>{profile.bio || "Profil Checkpoint"}</p>
             {identityTitle && (
@@ -8261,23 +8266,31 @@ function PublicProfilePreview({
       </div>
 
       {publicBadges.length > 0 && (
-        <div className="public-vitrine-section">
+        <section className="public-vitrine-section" aria-label="Badges à la une">
           <div className="public-vitrine-section-head">
-            <span>Badges choisis</span>
-            <strong>Marqueurs du profil</strong>
+            <span>Ses récompenses</span>
+            <strong>Badges à la une</strong>
           </div>
-          <div className="public-badge-strip">
-            {publicBadges.map((badge) => (
-              <div key={badge.id} className={`public-badge-chip rarity-${badge.rarity || "common"}`}>
-                <span>{badge.icon}</span>
-                <div>
-                  <strong>{badge.name}</strong>
-                  <small>{badge.rarity || "badge"}</small>
-                </div>
-              </div>
-            ))}
+          <div className="public-profile-badges profile-tab">
+            <div className="public-badge-strip">
+              {publicBadges.map(badge => (
+                <article key={badge.id} className={`badge-card unlocked ${badge.rarity}${
+                  badge.platformFamily ? ` platform-${badge.platformFamily}` : ""
+                }${badge.platformKey ? " platform-specific" : " brand-family"}${
+                  isBadgeNumericSeal(badge) ? " badge-numeric-seal" : ""
+                }${badge.special ? ` badge-special-${badge.special}` : ""}`}>
+                  <span className="badge-sheen" aria-hidden="true" />
+                  <span className="badge-sparkles" aria-hidden="true" />
+                  <div className="badge-topline">
+                    <div className="badge-emblem"><span className="badge-icon"><BadgeVisualIcon badge={badge} /></span></div>
+                    <span className="badge-rarity-chip">{getBadgeRarityLabel(badge)}</span>
+                  </div>
+                  <div className="badge-name">{badge.name}</div>
+                </article>
+              ))}
+            </div>
           </div>
-        </div>
+        </section>
       )}
 
       {playerAnalysis && (
@@ -8314,7 +8327,7 @@ function PublicProfilePreview({
         <div>
           <div className="public-profile-name-row">
             <h3>{profile.displayName}</h3>
-            <FeaturedBadgePill badge={profile.featuredBadge} />
+            <FeaturedBadgePill badge={publicFeaturedBadge} />
           </div>
           <p>{profile.bio || "Profil Checkpoint"}</p>
           <div className="social-profile-tags">
@@ -8367,24 +8380,7 @@ function PublicProfilePreview({
       {publicSections.identityGames && profile.identityGames?.length > 0 && (
         <div className="social-public-mini-section">
           <strong>Ses jeux fondateurs</strong>
-          <div className="social-identity-games">
-            {profile.identityGames.map((game, index) => (
-              <div key={game.id || game.name} className="social-identity-game">
-                <span className="social-identity-rank">{index + 1}</span>
-                {game.image ? <img src={game.image} alt={game.name} /> : null}
-                <div>
-                  <strong>{game.name}</strong>
-                  <span>
-                    {game.platforms?.length
-                      ? game.platforms.slice(0, 2).join(", ")
-                      : game.rating
-                        ? formatGameRating10(game.rating)
-                        : "Jeu marquant"}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <FounderGames games={identityGames} />
         </div>
       )}
 
@@ -8841,13 +8837,7 @@ export function SocialTab({
     },
     featuredBadge,
     selectedBadges: selectedBadgeList
-      .map((badge) => ({
-        id: badge.id,
-        icon: badge.icon,
-        name: badge.name,
-        rarity: badge.rarity,
-        special: badge.special || "",
-      })),
+      .map(toPublicBadge),
     level,
     totalGames: games.length,
     finishedGames: finishedCount,
@@ -8861,12 +8851,8 @@ export function SocialTab({
     gamingTimeline,
     showcase: profileShowcase,
     identityGames: identityGames.map((game) => ({
-      id: game.id,
-      name: game.name,
-      image: game.image || "",
+      ...toPublicFounderGame(game),
       rating: getGameRating(game),
-      platforms: game.platforms || [],
-      genreNames: game.genreNames || [],
     })),
     essentialTops: essentialTopSections.map((section) => {
       const game = section.games[0];
@@ -18461,25 +18447,9 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
       ...DEFAULT_PUBLIC_SECTIONS,
       ...(profileOverride.publicSections || {}),
     },
-    featuredBadge: featuredBadge
-      ? {
-          id: featuredBadge.id,
-          icon: featuredBadge.icon,
-          name: featuredBadge.name,
-          rarity: featuredBadge.rarity,
-          platformFamily: featuredBadge.platformFamily || "",
-          platformKey: featuredBadge.platformKey || "",
-          special: featuredBadge.special || "",
-        }
-      : null,
+    featuredBadge: toPublicBadge(featuredBadge),
     selectedBadges: selectedBadges
-      .map((badge) => ({
-        id: badge.id,
-        icon: badge.icon,
-        name: badge.name,
-        rarity: badge.rarity,
-        special: badge.special || "",
-      })),
+      .map(toPublicBadge),
     level,
     totalGames: games.length,
     finishedGames: games.filter(isGameFinishedStatus).length,
@@ -18493,12 +18463,8 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
     gamingTimeline,
     showcase: profileShowcase,
     identityGames: identityGames.map((game) => ({
-      id: game.id,
-      name: game.name,
-      image: game.image || "",
+      ...toPublicFounderGame(game),
       rating: getGameRating(game),
-      platforms: game.platforms || [],
-      genreNames: game.genreNames || [],
     })),
     essentialTops: essentialTopSections.map((section) => {
       const game = section.games[0];
