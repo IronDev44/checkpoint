@@ -1,9 +1,11 @@
-import { cloneElement, useEffect, useState } from "react";
+import { cloneElement, useCallback, useEffect, useState } from "react";
 import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile, signOut, sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 import { auth } from "../firebase";
 import { accountsEnabled, accountStorage } from "../services/accountData";
 import { ownerUid } from "../services/accountConfig";
 import WelcomeTour from "./WelcomeTour";
+import StartupIntro from "./StartupIntro";
+import { readStartupAppearance } from "../services/startupAppearance";
 import "./AccountWelcome.css";
 
 const messages = {
@@ -29,6 +31,19 @@ export default function AccountGate({ children }) {
   const [notice, setNotice] = useState("");
   const [tour, setTour] = useState(false);
   const [creatingProfile, setCreatingProfile] = useState(false);
+  const [startupVisible, setStartupVisible] = useState(true);
+  const [startupAppearance] = useState(readStartupAppearance);
+  const [appProgress, setAppProgress] = useState(0);
+  const reportAppProgress = useCallback(progress => setAppProgress(previous => Math.max(previous, progress)), []);
+  const finishStartup = useCallback(() => setStartupVisible(false), []);
+  const startupReady = !creatingProfile && (accountsEnabled ? user === null || Boolean(user && appProgress >= 1) : appProgress >= 1);
+  const app = () => cloneElement(children, { key: user?.uid || "local", startupVisible, onStartupProgress: reportAppProgress });
+  const withStartup = content => <><div style={{display:"contents"}} inert={startupVisible || creatingProfile ? true : undefined} aria-hidden={startupVisible || creatingProfile ? "true" : undefined}>{content}</div><StartupIntro visible={startupVisible || creatingProfile} appearance={startupAppearance} authReady={!accountsEnabled || user !== undefined} appProgress={appProgress} ready={startupReady} onComplete={finishStartup}/></>;
+  useEffect(() => {
+    if (user !== undefined) return;
+    document.documentElement.dataset.theme = startupAppearance.theme;
+    document.body.dataset.theme = startupAppearance.theme;
+  }, [user, startupAppearance]);
   useEffect(() => {
     if (!accountsEnabled) return;
     return onAuthStateChanged(auth, current => {
@@ -74,9 +89,9 @@ export default function AccountGate({ children }) {
       await updateProfile(result.user, { displayName: pseudo.trim() });
     } finally { setCreatingProfile(false); }
   }
-  if (!accountsEnabled) return <>{children}{tour && <WelcomeTour onClose={finishTour} />}</>;
-  if (user === undefined || creatingProfile) return <div className="account-welcome-overlay"><p>Ouverture de ton espace…</p></div>;
-  if (!user) return <div className="account-welcome-overlay"><section className="account-welcome">
+  if (!accountsEnabled) return withStartup(<>{app()}{tour && !startupVisible && <WelcomeTour onClose={finishTour} />}</>);
+  if (user === undefined || creatingProfile) return withStartup(null);
+  if (!user) return withStartup(<div className="account-welcome-overlay"><section className="account-welcome">
     <p className="welcome-counter">CHECKPOINT</p><h1>{mode === "reset" ? "Retrouver ton compte" : mode === "create" ? "Ton aventure commence ici" : "Content de te retrouver"}</h1><p>{mode === "reset" ? "Indique l’adresse e-mail de ton compte pour recevoir un lien et choisir un nouveau mot de passe." : "Un espace à toi pour tes jeux, ton matériel et tes souvenirs."}</p>
     <form onSubmit={e => { e.preventDefault(); run(submitAccount); }}>
       {mode === "create" && <label>Ton pseudo<input required maxLength={40} value={pseudo} onChange={e => setPseudo(e.target.value)} autoComplete="nickname" /></label>}
@@ -90,8 +105,8 @@ export default function AccountGate({ children }) {
     {notice && <p className="welcome-notice" role="status">{notice}</p>}
     <div className="welcome-account-switch">{mode !== "reset" && <p>{mode === "create" ? "Déjà dans l’aventure ?" : "Nouveau sur Checkpoint ?"}</p>}<button disabled={busy} onClick={() => { setMode(mode === "create" || mode === "reset" ? "login" : "create"); setError(""); setNotice(""); }}>{mode === "reset" ? "Retour à la connexion" : mode === "create" ? "J’ai déjà un compte" : "Créer un compte"}</button></div>
     {error && <p className="welcome-error" role="status">{error}</p>}
-  </section></div>;
-  return <>{cloneElement(children, { key: user.uid })}{tour && <WelcomeTour onClose={finishTour} />}</>;
+  </section></div>);
+  return withStartup(<>{app()}{tour && !startupVisible && <WelcomeTour onClose={finishTour} />}</>);
 }
 export function AccountOptions() {
   return <section className="search-panel options-panel account-options"><h2 className="panel-title">Prendre ses repères</h2><p>Retrouve la présentation de Checkpoint quand tu veux.</p><button className="option-pill option-wide-action" onClick={() => window.dispatchEvent(new Event("checkpoint-replay-tour"))}>Revoir la découverte</button>{accountsEnabled && <><p>Connecté : {auth.currentUser?.email}</p><button className="option-pill option-wide-action" onClick={() => signOut(auth)}>Se déconnecter</button></>}</section>;

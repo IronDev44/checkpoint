@@ -28,15 +28,16 @@ import { TokyoIntro } from "./TokyoEffects";
 import { TamerIntro } from "./TamerEffects";
 import { SlayerIntro } from "./SlayerEffects";
 
-export default function SplashScreen({ showSplash, progress = 0, onRequestClose, effects = "balanced", light = false }) {
+export default function SplashScreen({ showSplash, progress = 0, onRequestClose, effects = "balanced", light = false, theme: explicitTheme, managed = false }) {
   const safeProgress = Math.max(0, Math.min(100, Math.round(progress)));
-  const splashTheme = useMemo(() => {
+  const storedTheme = useMemo(() => {
     try {
       return localStorage.getItem("checkpoint-theme") || "theme-indigo";
     } catch (error) {
       return "theme-indigo";
     }
   }, []);
+  const splashTheme = explicitTheme || storedTheme;
 
   const particles = useMemo(
     () =>
@@ -78,14 +79,14 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
   );
 
   useEffect(() => {
-    if (!showSplash || typeof onRequestClose !== "function") return;
+    if (managed || !showSplash || typeof onRequestClose !== "function") return;
 
     const safetyTimer = setTimeout(() => {
       onRequestClose();
     }, 4200);
 
     return () => clearTimeout(safetyTimer);
-  }, [onRequestClose, showSplash]);
+  }, [managed, onRequestClose, showSplash]);
 
   if (!showSplash) return null;
 

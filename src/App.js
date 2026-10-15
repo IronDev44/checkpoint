@@ -25,9 +25,11 @@ import UpcomingReleasesTab from "./components/UpcomingReleasesTab";
 import GameExperiencePanel from "./components/GameExperiencePanel";
 import { getGameExperience, getExperienceRatingFields } from "./services/gameExperience";
 import RatingSliderControl from "./components/RatingSlider";
-import SplashScreen from "./components/SplashScreen";
+import { saveStartupAppearance } from "./services/startupAppearance";
 import ThemeTransition, { THEME_TRANSITION_DURATION } from "./components/ThemeTransition";
 import TransitionSettings from "./components/TransitionSettings";
+import SoundSettings from "./components/SoundSettings";
+import { DEFAULT_SOUND_SETTINGS, normalizeSoundSettings, readLegacySoundSettings, playSound, applySoundSettings, stopAllSounds } from "./services/soundEffects";
 import { SocialNavigation, SocialFriendsDirectory, FriendsActivityFeed } from "./components/SocialHub";
 import { readPublicSocialProfile } from "./services/socialProfiles";
 import { getPlayerNotes, getFounderSignature, getPublicPlayerNotes } from "./services/playerNotes";
@@ -111,24 +113,6 @@ async function rawgApiRequest(path, params = {}, options = {}) {
 const WEEKLY_QUIZ_STORAGE_KEY = "checkpoint-weekly-quiz";
 const CHECKPOINT_GOALS_STORAGE_KEY = "checkpoint-goals";
 const CHECKPOINT_TRIAL_STORAGE_KEY = "checkpoint-trial-progress";
-const SPLASH_SEEN_STORAGE_KEY = "checkpoint-splash-seen";
-
-const hasSeenSplash = () => {
-  try {
-    return sessionStorage.getItem(SPLASH_SEEN_STORAGE_KEY) === "true";
-  } catch (error) {
-    return false;
-  }
-};
-
-const markSplashSeen = () => {
-  try {
-    sessionStorage.setItem(SPLASH_SEEN_STORAGE_KEY, "true");
-  } catch (error) {
-    // The splash must never block the app if browser storage is unavailable.
-  }
-};
-
 const DEFAULT_WEEKLY_QUIZ_PROGRESS = {
   answers: {},
   totalXP: 0,
@@ -281,6 +265,7 @@ const DEFAULT_PUBLIC_SECTIONS = {
 };
 
 const DEFAULT_APP_OPTIONS = {
+  sound: DEFAULT_SOUND_SETTINGS,
   startTab: "home",
   visualEffects: "balanced",
   transitionMotion: "full",
@@ -354,6 +339,7 @@ function normalizeAppOptions(options = {}) {
     ...DEFAULT_APP_OPTIONS,
     ...source,
     schemaVersion: APP_OPTIONS_SCHEMA_VERSION,
+    sound: normalizeSoundSettings(source.sound, readLegacySoundSettings(localStorage)),
     startTab,
     visualEffects,
     transitionMotion: ["light", "system"].includes(source.transitionMotion) ? "light" : "full",
@@ -1290,102 +1276,6 @@ function formatGameRating10(rating) {
   return formatRating10(rating, "");
 }
 
-const soundEnabledGlobal = () => {
-  return localStorage.getItem("checkpoint-sound-enabled") !== "false";
-};
-
-let checkpointAudioContext = null;
-
-const getCheckpointAudioContext = () => {
-  const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-  if (!AudioContextClass) return null;
-
-  if (!checkpointAudioContext || checkpointAudioContext.state === "closed") {
-    checkpointAudioContext = new AudioContextClass();
-  }
-
-  if (checkpointAudioContext.state === "suspended") {
-    checkpointAudioContext.resume().catch(() => {});
-  }
-
-  return checkpointAudioContext;
-};
-
-const playSound = (type, options = {}) => {
-  const force = typeof options === "object" && options?.force === true;
-  if (!force && !soundEnabledGlobal()) return;
-
-  try {
-    const ctx = getCheckpointAudioContext();
-    if (!ctx) return;
-
-    const now = ctx.currentTime;
-
-    const master = ctx.createGain();
-    master.gain.value = 0.06;
-    master.connect(ctx.destination);
-
-    const note = (freq, start, dur, vol = 0.13, waveform = "sine") => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = waveform;
-      osc.frequency.setValueAtTime(freq, now + start);
-
-      gain.gain.setValueAtTime(0.0001, now + start);
-      gain.gain.exponentialRampToValueAtTime(vol, now + start + 0.012);
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + start + dur
-      );
-
-      osc.connect(gain);
-      gain.connect(master);
-
-      osc.start(now + start);
-      osc.stop(now + start + dur);
-    };
-
-    // 🎮 SWITCH PAR ACTION
-    switch (type) {
-      case "click":
-        note(880, 0, 0.045, 0.08, "triangle");
-        break;
-
-      case "success":
-        note(740, 0, 0.06, 0.09, "triangle");
-        note(980, 0.06, 0.07, 0.1, "sine");
-        note(1280, 0.13, 0.1, 0.11, "sine");
-        break;
-
-      case "delete":
-        note(520, 0, 0.08, 0.1, "triangle");
-        note(360, 0.06, 0.1, 0.08, "sine");
-        break;
-
-      case "badge":
-        note(860, 0, 0.055, 0.1, "triangle");
-        note(1180, 0.055, 0.07, 0.11, "sine");
-        note(1580, 0.13, 0.12, 0.12, "sine");
-        break;
-
-      case "levelup":
-        note(660, 0, 0.07, 0.1, "triangle");
-        note(880, 0.07, 0.08, 0.1, "triangle");
-        note(1180, 0.15, 0.09, 0.11, "sine");
-        note(1560, 0.25, 0.14, 0.12, "sine");
-        break;
-
-      default:
-        note(880, 0, 0.06, 0.09, "triangle");
-    }
-
-    setTimeout(() => master.disconnect(), 800);
-  } catch (e) {
-    console.error("Erreur son :", e);
-  }
-};
-
 const createPixelEffect = (x, y) => {
   const pixel = document.createElement("div");
   pixel.className = "pixel-click";
@@ -1509,64 +1399,6 @@ function getGameDetailedRatingSummary(game = {}) {
       ? Math.round((ratedBaseFields.length / baseFields.length) * 100)
       : 0,
   };
-}
-
-/* ==================== SONS ==================== */
-
-function playBootSoundNow() {
-  try {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return false;
-
-    const ctx = new AudioContextClass();
-    const master = ctx.createGain();
-    master.gain.value = 0.08;
-    master.connect(ctx.destination);
-
-    const now = ctx.currentTime + 0.02;
-
-    const notes = [
-      { freq: 196, start: 0.0, dur: 0.45, type: "sine" },
-      { freq: 293.66, start: 0.12, dur: 0.55, type: "triangle" },
-      { freq: 392, start: 0.34, dur: 0.8, type: "triangle" },
-      { freq: 587.33, start: 0.68, dur: 1.0, type: "sine" },
-    ];
-
-    notes.forEach((note) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      const filter = ctx.createBiquadFilter();
-
-      osc.type = note.type;
-      osc.frequency.setValueAtTime(note.freq, now + note.start);
-
-      filter.type = "lowpass";
-      filter.frequency.setValueAtTime(2200, now + note.start);
-
-      gain.gain.setValueAtTime(0.0001, now + note.start);
-      gain.gain.exponentialRampToValueAtTime(0.22, now + note.start + 0.08);
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + note.start + note.dur
-      );
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(master);
-
-      osc.start(now + note.start);
-      osc.stop(now + note.start + note.dur);
-    });
-
-    setTimeout(() => {
-      ctx.close().catch(() => {});
-    }, 2500);
-
-    return true;
-  } catch (e) {
-    console.error("Erreur son démarrage :", e);
-    return false;
-  }
 }
 
   /* -------------------- BADGES V2 -------------------- */
@@ -14842,8 +14674,6 @@ function OptionsTab({
   setTheme,
   uiMode,
   setUiMode,
-  soundEnabled,
-  setSoundEnabled,
   appOptions,
   onOptionChange,
   socialProfile,
@@ -15553,40 +15383,7 @@ function OptionsTab({
               </div>
             </div>
 
-            <div className="option-setting-card">
-              <div>
-                <strong>Son</strong>
-                <span>Active les retours sonores de l'interface ou teste le son actuel.</span>
-              </div>
-              <div className="option-pill-grid three compact">
-                <button
-                  type="button"
-                  className={`option-pill ${soundEnabled ? "active" : ""}`}
-                  onClick={() => {
-                    setSoundEnabled(true);
-                    localStorage.setItem("checkpoint-sound-enabled", "true");
-                    playSound("success", { force: true });
-                  }}
-                >
-                  Activé
-                </button>
-
-                <button
-                  type="button"
-                  className={`option-pill ${!soundEnabled ? "active" : ""}`}
-                  onClick={() => setSoundEnabled(false)}
-                >
-                  Désactivé
-                </button>
-                <button
-                  type="button"
-                  className="option-pill"
-                  onClick={() => playSound("success", { force: true })}
-                >
-                  Test
-                </button>
-              </div>
-            </div>
+            <SoundSettings value={appOptions.sound} onChange={(value) => onOptionChange("sound", value)} />
           </div>
         </OptionGroup>
 
@@ -17627,7 +17424,7 @@ function CheckpointReachedOverlay({ checkpointLevel, onEnter, onClose }) {
 
 /* ==================== APP PRINCIPALE ==================== */
 
-export default function App() {
+export default function App({ startupVisible = false, onStartupProgress } = {}) {
   const [selectedSearchGame, setSelectedSearchGame] = useState(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -17664,31 +17461,10 @@ export default function App() {
       ? "reduced"
       : localStorage.getItem("checkpoint-ui-mode") || "modern"
   );
-  const [showSplash, setShowSplash] = useState(() => {
-    return !hasSeenSplash();
-  });
-  const [splashProgress, setSplashProgress] = useState(() =>
-    hasSeenSplash() ? 100 : 2
-  );
+  const showSplash = startupVisible;
   const [bootReady, setBootReady] = useState({
-    events: false,
-    news: false,
-    hardware: false,
-    games: false,
+    events: false, news: false, hardware: false, games: false,
   });
-  const [splashTargetProgress, setSplashTargetProgress] = useState(() =>
-    hasSeenSplash() ? 100 : 18
-  );
-  const splashStartedAtRef = useRef(Date.now());
-  const splashClosingRef = useRef(false);
-  const closeSplash = useCallback(() => {
-    if (splashClosingRef.current) return;
-    splashClosingRef.current = true;
-    setSplashTargetProgress(100);
-    setSplashProgress(100);
-    setShowSplash(false);
-    markSplashSeen();
-  }, []);
 
   const [yearFilter, setYearFilter] = useState("");
   const [platformFilter, setPlatformFilter] = useState("");
@@ -17746,7 +17522,7 @@ export default function App() {
   const [nextPage, setNextPage] = useState(null);
   const [gamingEvents, setGamingEvents] = useState(FALLBACK_GAMING_EVENTS);
   const [pixelTransition, setPixelTransition] = useState(null);
-  const [soundStyle, setSoundStyle] = useState("balanced");
+  const soundStyle = appOptions.sound.style;
   const tabSwitchTimerRef = useRef(null);
   const tabTransitionTimerRef = useRef(null);
 const tabOrder = [
@@ -17765,10 +17541,6 @@ const tabOrder = [
   "profile",
   "options",
 ];
-
-const [soundEnabled, setSoundEnabled] = useState(
-  localStorage.getItem("checkpoint-sound-enabled") !== "false"
-);
 
 useEffect(() => {
   let cancelled = false;
@@ -18790,17 +18562,10 @@ const updateHardwareDisplaySize = async (id, displaySize) => {
 };
 
 useEffect(() => {
-  localStorage.setItem("checkpoint-sound-enabled", String(soundEnabled));
-}, [soundEnabled]);
+  applySoundSettings(appOptions.sound);
+}, [appOptions.sound]);
 
-useEffect(() => {
-  if (soundStyle === "retro") {
-    setSoundStyle("nes");
-    return;
-  }
-
-  localStorage.setItem("checkpoint-sound", soundStyle);
-}, [soundStyle]);
+useEffect(() => () => stopAllSounds(), []);
 
 const [libraryCardMode, setLibraryCardMode] = useState(() => {
   const savedMode = localStorage.getItem("checkpoint-library-card-mode");
@@ -18920,89 +18685,20 @@ useEffect(() => {
   }, []);
 
   useEffect(() => {
-    if (!showSplash) return;
-
-    splashClosingRef.current = false;
-    splashStartedAtRef.current = Date.now();
-
-    const fallbackTimer = setTimeout(() => {
-      setBootReady({
-        events: true,
-        news: true,
-        hardware: true,
-        games: true,
-      });
-    }, 3600);
-
-    return () => clearTimeout(fallbackTimer);
-  }, [showSplash]);
+    const values = Object.values(bootReady);
+    onStartupProgress?.(values.filter(Boolean).length / values.length);
+  }, [bootReady, onStartupProgress]);
 
   useEffect(() => {
     if (!showSplash) return;
-
-    const progressTimers = [
-      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 22)), 180),
-      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 38)), 760),
-      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 54)), 1340),
-      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 72)), 1960),
-      setTimeout(() => setSplashTargetProgress((current) => Math.max(current, 90)), 2620),
-      setTimeout(() => setSplashTargetProgress(100), 3180),
-    ];
-
-    const closeTimer = setTimeout(() => {
-      closeSplash();
-    }, 3800);
-
-    return () => {
-      progressTimers.forEach(clearTimeout);
-      clearTimeout(closeTimer);
-    };
-  }, [closeSplash, showSplash]);
+    // A slow optional feed must not keep the whole app behind its introduction.
+    const timer = window.setTimeout(() => onStartupProgress?.(1), 8000);
+    return () => window.clearTimeout(timer);
+  }, [showSplash, onStartupProgress]);
 
   useEffect(() => {
-    if (!showSplash) return;
-
-    const readyCount = Object.values(bootReady).filter(Boolean).length;
-    const targetProgress = Math.min(72, 12 + readyCount * 12);
-
-    setSplashTargetProgress((current) =>
-      current < targetProgress ? targetProgress : current
-    );
-  }, [bootReady, showSplash]);
-
-  useEffect(() => {
-    if (!showSplash) return;
-
-    const progressTimer = setInterval(() => {
-      setSplashProgress((current) => {
-        if (current >= splashTargetProgress) return current;
-
-        const gap = splashTargetProgress - current;
-        const step = Math.max(1, Math.min(3, Math.ceil(gap * 0.08)));
-        return Math.min(splashTargetProgress, current + step);
-      });
-    }, 90);
-
-    return () => clearInterval(progressTimer);
-  }, [showSplash, splashTargetProgress]);
-
-  useEffect(() => {
-    if (!showSplash) return;
-
-    const allReady = Object.values(bootReady).every(Boolean);
-    const elapsed = Date.now() - splashStartedAtRef.current;
-    const minimumDuration = 2600;
-
-    if (!allReady) return;
-
-    const timer = setTimeout(() => {
-      closeSplash();
-    }, Math.max(0, minimumDuration - elapsed));
-
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [bootReady, closeSplash, showSplash]);
+    saveStartupAppearance({ theme, effects: appOptions.visualEffects, light: appOptions.transitionMotion === "light" || uiMode === "reduced" });
+  }, [theme, appOptions.visualEffects, appOptions.transitionMotion, uiMode]);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "games"), (snapshot) => {
@@ -20462,7 +20158,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
           <Toast message={toast} />
           <BadgeUnlockToast badge={newUnlockedBadge} />
-{ <SplashScreen showSplash={showSplash} progress={splashProgress} onRequestClose={closeSplash} effects={appOptions.visualEffects} light={appOptions.transitionMotion === "light" || uiMode === "reduced"} /> }
+
           {pendingCheckpointLevel &&
             dismissedCheckpointLevel !== pendingCheckpointLevel &&
             !activeTrialLevel &&
@@ -20987,8 +20683,6 @@ const setPlayedPlatforms = async (id, platforms) => {
                 setTheme={setTheme}
                 uiMode={uiMode}
                 setUiMode={setUiMode}
-                soundEnabled={soundEnabled}
-                setSoundEnabled={setSoundEnabled}
                 appOptions={appOptions}
                 onOptionChange={updateAppOption}
                 socialProfile={socialProfile}

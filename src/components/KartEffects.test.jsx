@@ -18,14 +18,15 @@ beforeEach(() => {
 });
 afterEach(() => { jest.restoreAllMocks(); window.ResizeObserver = originalObserver; });
 
-test("the loading indicator reaches GO without restarting the canvas loop", () => {
+test("the loading indicator completes without a cockpit or restarting the canvas loop", () => {
   const view = render(<KartIntro progress={10}/>);
   expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "10");
-  expect(view.container.querySelector(".kart-start-signal strong")).toHaveTextContent("3");
+  expect(view.container.querySelector(".kart-cockpit")).toBeNull();
+  expect(view.container.querySelector(".kart-start-signal")).toBeNull();
   const starts = request.mock.calls.length;
   view.rerender(<KartIntro progress={110}/>);
   expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100");
-  expect(view.container.querySelector(".kart-start-signal strong")).toHaveTextContent("GO!");
+  expect(screen.getByText("Tout est prêt")).toBeVisible();
   expect(request).toHaveBeenCalledTimes(starts);
 });
 

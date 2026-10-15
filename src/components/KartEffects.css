@@ -19,16 +19,7 @@ body .kart-boot .kart-skip { display:flex; align-items:center; justify-content:c
 .kart-boot .kart-boot-title h1 { margin:8px 0 9px; padding:0 4px; font:950 italic clamp(32px,9.4vw,76px)/1.05 system-ui; letter-spacing:-.055em; color:#fff9e8; -webkit-text-stroke:.5px #fff9e8; text-shadow:0 2px 0 #bcb1cb,0 5px 0 #4e315b,0 10px 24px #08051688; }
 .kart-boot-title > p { margin:0; color:#ffdfa3; font-size:clamp(14px,3.5vw,20px); font-weight:650; letter-spacing:.06em; }
 .kart-boot-title::after { content:""; display:block; width:95px; height:3px; margin:16px auto 0; border-radius:3px; background:linear-gradient(90deg,#f56c96,#ffad69,#f6df76,#72dbac,#68d9ec,#8792f4,#cc86ea); }
-.kart-start-signal { position:absolute; left:50%; top:41%; transform:translate(-50%,-50%); display:grid; justify-items:center; gap:10px; pointer-events:none; }
-.kart-start-lights { display:flex; gap:8px; padding:9px 13px; border:1px solid #dccaf359; border-bottom:3px solid #070915; border-radius:40px; background:#141226ef; box-shadow:0 5px 16px #08071670; }
-.kart-start-lights > i { width:14px; height:14px; border-radius:50%; background:#3e3149; border:1px solid #ffffff20; }
-.kart-start-lights > i.lit { background:#ffaf77; box-shadow:inset 0 2px 3px #fff6bc,0 0 12px #ff8d5955; }
-.kart-start-signal > strong { display:block; font-size:clamp(44px,11vw,76px); font-weight:950; font-style:italic; line-height:1; color:#fff2bf; -webkit-text-stroke:1px #a46731; text-shadow:0 4px #613c40,0 9px 24px #0b061c; }
-.is-ready .kart-start-lights > i.lit { background:#a4f1b7; box-shadow:inset 0 2px 3px #eeffc7,0 0 14px #70e9ae66; }
-.is-ready .kart-start-signal > strong { color:#c8ffd3; -webkit-text-stroke-color:#457961; transform:rotate(-5deg) scale(1.12); }
-.kart-cockpit { position:absolute; bottom:0; left:50%; width:min(180%,1160px); height:auto; max-height:34vh; transform:translateX(-50%); overflow:visible; pointer-events:none; }
-.kart-cockpit-wheel { transform-origin:380px 205px; animation:kart-wheel-turn 5s ease-in-out infinite; }
-.kart-loading { position:absolute; bottom:clamp(145px,23vh,235px); left:50%; transform:translateX(-50%); width:min(280px,calc(100% - 64px)); padding:12px 16px; box-sizing:border-box; border:1px solid #c2d3ed2e; border-radius:12px; background:#0c1021ed; }
+.kart-loading { position:absolute; bottom:max(28px,env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%); width:min(280px,calc(100% - 64px)); padding:12px 16px; box-sizing:border-box; border:1px solid #c2d3ed2e; border-radius:12px; background:#0c1021ed; }
 .kart-loading > div:first-child { display:flex; justify-content:space-between; align-items:center; gap:16px; font-size:11px; color:#d8d9e9; }
 .kart-loading strong { color:#fff0c2; font-variant-numeric:tabular-nums; }
 .kart-boot-progress { height:4px; margin-top:9px; border-radius:4px; background:#42415a; overflow:hidden; }
@@ -43,14 +34,12 @@ body .kart-boot .kart-skip { display:flex; align-items:center; justify-content:c
 .kart-tab-transition.direction-left .kart-exit-ribbon { animation-name:kart-exit-rainbow-left; }
 .kart-tab-transition.is-light .kart-boost-stage { animation-name:none; }
 .kart-tab-transition.is-light .kart-exit-ribbon { display:none; }
-.kart-boot.is-light .kart-cockpit-wheel { animation:none; }
-@keyframes kart-wheel-turn { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(4deg)} }
 @keyframes kart-boost-envelope { 0%{opacity:0} 8%,62%{opacity:1} 100%{opacity:0} }
 @keyframes kart-boost-bank-right { from{transform:scale(1.03) rotate(-4deg)} to{transform:scale(1.2) rotate(5deg)} }
 @keyframes kart-boost-bank-left { from{transform:scale(1.03) rotate(4deg)} to{transform:scale(1.2) rotate(-5deg)} }
 @keyframes kart-boost-word { 0%,8%{opacity:0;scale:.8} 25%,55%{opacity:1;scale:1} 90%,100%{opacity:0;scale:1.2} }
 @keyframes kart-exit-rainbow { 0%,35%{transform:translateX(-140%)} 100%{transform:translateX(140%)} }
 @keyframes kart-exit-rainbow-left { 0%,35%{transform:translateX(140%)} 100%{transform:translateX(-140%)} }
-@media(min-width:900px) { .kart-start-signal{top:47%}.kart-cockpit{max-height:34vh}.kart-boot-title{top:13vh} }
-@media(max-height:500px) { .kart-boot-header{inset:8px 16px auto}.kart-boot-title{top:65px}.kart-boot .kart-boot-title h1{font-size:34px;margin:4px 0}.kart-boot-title > span{display:none}.kart-boot-title::after{margin-top:8px}.kart-start-signal{top:57%;left:22%}.kart-start-signal > strong{font-size:38px}.kart-cockpit{width:65%;max-height:40vh}.kart-loading{width:200px;padding:8px 12px;bottom:max(10px,env(safe-area-inset-bottom));left:auto;right:max(18px,env(safe-area-inset-right));transform:none} }
-@media(prefers-reduced-motion:reduce) { .kart-boot .kart-cockpit-wheel{animation:none}.kart-boot-progress > span{transition:none} }
+@media(min-width:900px) { .kart-boot-title{top:13vh} }
+@media(max-height:500px) { .kart-boot-header{inset:8px 16px auto}.kart-boot-title{top:65px}.kart-boot .kart-boot-title h1{font-size:34px;margin:4px 0}.kart-boot-title::after{margin-top:8px}.kart-loading{width:200px;padding:8px 12px;bottom:max(10px,env(safe-area-inset-bottom));left:auto;right:max(18px,env(safe-area-inset-right));transform:none} }
+@media(prefers-reduced-motion:reduce) { .kart-boot-progress > span{transition:none} }

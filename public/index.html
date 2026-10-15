@@ -12,7 +12,8 @@
     <script>
       (function () {
         try {
-          var theme = localStorage.getItem("checkpoint-theme") || "theme-playstation";
+          var saved = JSON.parse(localStorage.getItem("checkpoint-startup-appearance") || "null");
+          var theme = saved && /^theme-[a-z]+$/.test(saved.theme) ? saved.theme : localStorage.getItem("checkpoint-theme") || "theme-indigo";
           var isMatrix = theme === "theme-matrix";
           document.documentElement.setAttribute("data-theme", theme);
           if (isMatrix) {
@@ -70,7 +71,7 @@
     <script>
       (function () {
         try {
-          var theme = localStorage.getItem("checkpoint-theme") || "theme-playstation";
+          var theme = document.documentElement.getAttribute("data-theme") || "theme-indigo";
           document.body.setAttribute("data-theme", theme);
           if (theme === "theme-matrix") document.body.style.backgroundColor = "#000302";
         } catch (e) {}

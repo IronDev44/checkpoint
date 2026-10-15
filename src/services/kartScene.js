@@ -3,7 +3,7 @@ export const KART_RAINBOW = ["#f56c96", "#ffad69", "#f6df76", "#72dbac", "#68d9e
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 const smoothstep = value => { const t = clamp(value, 0, 1); return t * t * (3 - 2 * t); };
 const tint = (hex, factor) => `rgb(${[1, 3, 5].map(offset => Math.round(parseInt(hex.slice(offset, offset + 2), 16) * factor)).join(",")})`;
-const roadColors = [0.67, 0.84].map(factor => KART_RAINBOW.map(color => tint(color, factor)));
+const roadColors = [0.86, 1].map(factor => KART_RAINBOW.map(color => tint(color, factor)));
 
 export function getKartSceneBudget(width, height, { light = false, effects = "balanced", dpr = 1 } = {}) {
   const reduced = light || effects === "calm";
@@ -22,8 +22,8 @@ export function projectKartRoad(z, width, height, distance = 0, direction = 1) {
   const depth = 1 / Math.max(.55, z);
   const bend = Math.pow(clamp(1 - depth, 0, 1), 2);
   return {
-    x: width * (.5 + direction * .43 * Math.sin(z * .075 + distance * .012) * bend),
-    y: height * (.40 + .76 * depth - .14 * smoothstep((z - 8) / 48)),
+    x: width * (.5 + direction * .46 * Math.sin(z * .075 + distance * .016) * bend),
+    y: height * (.42 + .72 * depth - .18 * smoothstep((z - 8) / 48) + .018 * Math.sin(distance * .025)),
     half: width * .82 * depth,
     scale: depth,
   };
@@ -45,12 +45,27 @@ function star(ctx, x, y, radius, color, turn = 0) {
   ctx.closePath(); ctx.fill();
 }
 
+function cloud(ctx, x, y, size, alpha = 1) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  const gradient = ctx.createLinearGradient(0, y - size * .6, 0, y + size * .4);
+  gradient.addColorStop(0, "#b6cff3"); gradient.addColorStop(.3, "#6b8ab6"); gradient.addColorStop(1, "#314765");
+  ctx.fillStyle = gradient;
+  ctx.beginPath();
+  for (let i = 0; i < 7; i++) {
+    const r = size * (.23 + (i % 3) * .06);
+    const cx = x + (i - 3) * size * .22, cy = y - Math.sin(i * 1.25) * size * .14;
+    ctx.moveTo(cx + r, cy); ctx.ellipse(cx, cy, r, r * .65, 0, 0, Math.PI * 2);
+  }
+  ctx.fill();
+  ctx.restore();
+}
+
 export function paintKartSky(ctx, width, height, budget) {
   const sky = ctx.createLinearGradient(0, 0, width * .6, height);
-  sky.addColorStop(0, "#100b2c"); sky.addColorStop(.47, "#22143e"); sky.addColorStop(1, "#080d23");
+  sky.addColorStop(0, "#0b1730"); sky.addColorStop(.47, "#263b63"); sky.addColorStop(1, "#0d1731");
   ctx.fillStyle = sky; ctx.fillRect(0, 0, width, height);
   const nebula = ctx.createRadialGradient(width * .68, height * .38, 0, width * .68, height * .38, height * .55);
-  nebula.addColorStop(0, "#74528f55"); nebula.addColorStop(.45, "#4f285b35"); nebula.addColorStop(1, "#29173a00");
+  nebula.addColorStop(0, "#9dbad73d"); nebula.addColorStop(.45, "#8f7db526"); nebula.addColorStop(1, "#29173a00");
   ctx.fillStyle = nebula; ctx.fillRect(0, 0, width, height);
   for (let index = 0; index < budget.stars; index++) {
     const x = ((index * .61803398875 + .09) % 1) * width;
@@ -60,40 +75,26 @@ export function paintKartSky(ctx, width, height, budget) {
     ctx.beginPath(); ctx.arc(x, y, size, 0, Math.PI * 2); ctx.fill();
     if (index % 13 === 0) { ctx.fillRect(x - size * 3, y - .35, size * 6, .7); ctx.fillRect(x - .35, y - size * 3, .7, size * 6); }
   }
-  const px = width * .82, py = height * .24, radius = Math.min(width * .105, height * .09);
-  ctx.save(); ctx.translate(px, py); ctx.rotate(-.35);
-  ctx.strokeStyle = "#c3a1ef48"; ctx.lineWidth = radius * .18;
-  ctx.beginPath(); ctx.ellipse(0, 0, radius * 1.8, radius * .35, 0, 0, Math.PI * 2); ctx.stroke();
-  const planet = ctx.createRadialGradient(-radius * .4, -radius * .5, 0, 0, 0, radius);
-  planet.addColorStop(0, "#d7b5e0"); planet.addColorStop(.45, "#8c71ae"); planet.addColorStop(1, "#2f244d");
-  ctx.fillStyle = planet; ctx.beginPath(); ctx.arc(0, 0, radius, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = "#edcaf38c"; ctx.lineWidth = radius * .10;
-  ctx.beginPath(); ctx.ellipse(0, 0, radius * 1.8, radius * .35, 0, 0, Math.PI); ctx.stroke(); ctx.restore();
+  for (let i = 0; i < (budget.reduced ? 5 : 9); i++) {
+    cloud(ctx, width * ((i * .618 + .08) % 1), height * (.23 + (i % 4) * .11), Math.min(width * (.20 + i % 3 * .05), height * .18), .42 + i % 3 * .1);
+  }
   star(ctx, width * .13, height * .31, Math.min(width * .026, 17), "#ffe6a1", -.2);
   star(ctx, width * .9, height * .66, Math.min(width * .016, 11), "#99e6e5", .2);
 }
 
-function coin(ctx, x, y, radius, angle) {
-  const squash = .4 + Math.abs(Math.cos(angle)) * .45;
-  ctx.fillStyle = "#a16a25"; ctx.beginPath(); ctx.ellipse(x + radius * .14, y, radius * squash, radius, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = "#ffdc6c"; ctx.beginPath(); ctx.ellipse(x, y, radius * squash, radius, 0, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = "#fff3bc"; ctx.lineWidth = Math.max(.7, radius * .12);
-  ctx.beginPath(); ctx.ellipse(x, y, radius * squash * .7, radius * .76, 0, 0, Math.PI * 2); ctx.stroke();
-  ctx.fillStyle = "#bd8328"; ctx.fillRect(x - radius * .08, y - radius * .47, radius * .16, radius * .94);
-}
-
-function itemBox(ctx, x, y, size, time) {
-  ctx.save(); ctx.translate(x, y); ctx.rotate(Math.sin(time * 1.3) * .14);
+function crystal(ctx, x, y, size, lean) {
+  ctx.save(); ctx.translate(x, y); ctx.rotate(lean);
   const s = size;
-  quad(ctx, "#b7eaff", -s, -s, s * .55, -s * 1.35, s * 1.25, -s * .8, -s * .3, -s * .45);
-  quad(ctx, "#ae83e6", s * .55, -s * 1.35, s * 1.25, -s * .8, s * 1.25, s * .7, s * .55, s);
-  quad(ctx, "#6bbed8", -s, -s, s * .55, -s * .65, s * .55, s, -s, s * .65);
-  ctx.strokeStyle = "#ecfaff"; ctx.lineWidth = Math.max(.6, s * .06); ctx.strokeRect(-s, -s * .85, s * 1.55, s * 1.6);
-  ctx.fillStyle = "#fff9e5"; ctx.font = `900 ${s * 1.5}px system-ui`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  ctx.fillText("?", -s * .22, s * .02); ctx.restore();
+  quad(ctx, "#7466dc", 0, -s * 2.5, -s * .55, -s * 1.6, -s * .4, 0, 0, s * .2);
+  quad(ctx, "#79daf3", 0, -s * 2.5, s * .45, -s * 1.7, s * .5, -s * .2, 0, s * .2);
+  quad(ctx, "#ccf6ff", 0, -s * 2.5, s * .12, -s * 1.5, 0, s * .2, -s * .12, -s * 1.4);
+  ctx.restore();
 }
 
 export function paintKartRoad(ctx, width, height, distance, time, { budget, direction = 1, boost = false }) {
+  ctx.save(); ctx.translate(width * .5, height * .42);
+  ctx.rotate(budget.reduced ? 0 : Math.sin(time * .6) * .025 * direction);
+  ctx.translate(-width * .5, -height * .42);
   const step = 64 / budget.rows;
   const offset = distance % step;
   const worldRow = Math.floor(distance / step);
@@ -110,7 +111,11 @@ export function paintKartRoad(ctx, width, height, distance, time, { budget, dire
     }
     for (let lane = 0; lane < 7; lane++) {
       const left = lane * 2 / 7 - 1, right = (lane + 1) * 2 / 7 - 1;
-      quad(ctx, boostTile ? (lane % 2 ? "#c1eced" : "#fff0a0") : colors[lane], near.x + left * near.half, near.y, far.x + left * far.half, far.y, far.x + right * far.half, far.y, near.x + right * near.half, near.y);
+      quad(ctx, boostTile ? (lane % 2 ? "#c1eced" : "#fff0a0") : colors[(lane + Math.floor(row / 3)) % 7], near.x + left * near.half, near.y, far.x + left * far.half, far.y, far.x + right * far.half, far.y, near.x + right * near.half, near.y);
+      ctx.strokeStyle = "#282c4e73"; ctx.lineWidth = Math.max(.6, near.scale * 1.5); ctx.stroke();
+      if (!budget.reduced && (row + lane) % 3 === 0) {
+        ctx.fillStyle = "#effcff24"; ctx.beginPath(); ctx.moveTo(near.x + left * near.half, near.y); ctx.lineTo(far.x + left * far.half, far.y); ctx.lineTo(far.x + right * far.half, far.y); ctx.closePath(); ctx.fill();
+      }
       if (boostTile && near.y - far.y > 3) {
         const half = (near.half + far.half) / 2;
         const cx = (near.x + far.x) / 2 + (left + right) / 2 * half;
@@ -130,11 +135,17 @@ export function paintKartRoad(ctx, width, height, distance, time, { budget, dire
         ctx.beginPath(); ctx.moveTo(n, near.y); ctx.lineTo(n, near.y - near.scale * 17); ctx.stroke();
       }
     }
-    if (budget.items && index > 2 && index < 24 && row % 11 === 5) {
-      const size = Math.min(22, near.half * .065);
-      coin(ctx, near.x + near.half * .35, near.y - size * 1.5, size, time * 2.4 + index);
+    if (budget.items && index > 2 && index < 22 && row % 10 === 6) {
+      const side = row % 20 < 10 ? -1 : 1;
+      const size = Math.min(48, near.half * .27);
+      crystal(ctx, near.x + side * (near.half + size), near.y + size * .3, size, -side * .25);
+      crystal(ctx, near.x + side * (near.half + size * 1.7), near.y + size * .4, size * .6, side * .2);
     }
-    if (budget.items && index > 4 && index < 18 && row % 21 === 9) itemBox(ctx, near.x - near.half * .4, near.y - near.half * .11, near.half * .075, time);
+  }
+  ctx.restore();
+  if (!budget.reduced) {
+    cloud(ctx, -width * .12 + Math.sin(time * .17) * width * .05, height * .86, width * .32, .36);
+    cloud(ctx, width * 1.13 + Math.cos(time * .15) * width * .04, height * .69, width * .29, .31);
   }
   if (boost && !budget.reduced) {
     ctx.lineCap = "round";

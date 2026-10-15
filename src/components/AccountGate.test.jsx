@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { setPersistence, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import AccountGate from "./AccountGate";
+jest.mock("./StartupIntro", () => ({ __esModule: true, default: ({ onComplete }) => { require("react").useEffect(onComplete, [onComplete]); return null; } }));
 jest.mock("../firebase", () => ({auth:{currentUser:null}}));
 jest.mock("../services/accountData", () => ({accountsEnabled:true,accountStorage:{getItem:jest.fn(),setItem:jest.fn()}}));
 jest.mock("firebase/auth", () => ({
