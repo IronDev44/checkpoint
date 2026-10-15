@@ -31,6 +31,7 @@ import { SocialNavigation, SocialFriendsDirectory, FriendsActivityFeed } from ".
 import { readPublicSocialProfile } from "./services/socialProfiles";
 import { getPlayerNotes, getFounderSignature, getPublicPlayerNotes } from "./services/playerNotes";
 import ProfilePhotoEditor, { SocialAvatar } from "./components/ProfilePhoto";
+import FavoritePlatforms, { FavoritePlatformTags } from "./components/FavoritePlatforms";
 import FounderGames from "./components/FounderGames";
 import { toPublicFounderGame } from "./services/gameCovers";
 import { restorePublicBadge, toPublicBadge } from "./services/publicBadges";
@@ -8223,7 +8224,7 @@ function PublicProfilePreview({
 
         <div className="public-vitrine-main">
           <div className="public-vitrine-avatar">
-            {profile.photoURL ? <SocialAvatar name={profile.displayName} src={profile.photoURL} className="public-profile-photo" /> : heroGame?.image ? (
+            {profile.photoURL ? <SocialAvatar name={profile.displayName} src={profile.photoURL} className="public-profile-photo" zoomable /> : heroGame?.image ? (
               <img src={heroGame.image} alt={heroGame.name} />
             ) : (
               <span>{getInitials(profile.displayName)}</span>
@@ -8235,6 +8236,7 @@ function PublicProfilePreview({
               <FeaturedBadgePill badge={publicFeaturedBadge} />
             </div>
             <p>{profile.bio || "Profil Checkpoint"}</p>
+            <FavoritePlatformTags value={profile.platform} />
             {identityTitle && (
               <div className="public-vitrine-signature">
                 <span>Les jeux qui comptent</span>
@@ -9290,14 +9292,10 @@ export function SocialTab({
             <span className="field-hint">Il sert au lien de partage, comme une adresse courte : @{socialProfile.handle || "checkpoint"}.</span>
           </label>
 
-          <label>
-            Plateforme favorite
-            <input
-              value={socialProfile.platform}
-              onChange={(e) => onProfileChange("platform", e.target.value)}
-              placeholder="PlayStation, Xbox, Switch..."
-            />
-          </label>
+          <FavoritePlatforms
+            value={socialProfile.platform}
+            onChange={value => onProfileChange("platform", value)}
+          />
 
         </div>
 
@@ -11110,7 +11108,7 @@ export function ProfileTab({
     <div className="progression-stack profile-tab">
       <div className="search-panel profile-hero">
         <div className="profile-hero-main">
-          {socialProfile.photoURL && <SocialAvatar name={socialProfile.displayName} src={socialProfile.photoURL} className="profile-personal-avatar" />}
+          {socialProfile.photoURL && <SocialAvatar name={socialProfile.displayName} src={socialProfile.photoURL} className="profile-personal-avatar" zoomable />}
           <div className="profile-kicker">Profil joueur</div>
           <div className="social-profile-name-row">
             <h2 className="profile-title">{socialProfile.displayName || "Ton profil"}</h2>
@@ -11123,6 +11121,7 @@ export function ProfileTab({
             <span>{currentRank.title}</span>
             <span>{playerAnalysis.maturity}</span>
           </div>
+          <FavoritePlatformTags value={socialProfile.platform} />
         </div>
 
         <div className="profile-hero-side">

@@ -1,0 +1,29 @@
+.social-editor-grid > .favorite-platform-editor { grid-column:1 / -1; min-width:0; }
+.favorite-platform-editor { display:grid; gap:10px; }
+.favorite-platform-editor > p { margin:0; color:var(--text-muted); font-size:.85rem; line-height:1.5; }
+.social-editor .favorite-platform-editor > label { font-size:.95rem; color:var(--text-main); }
+.social-editor .favorite-platform-editor > select {
+  min-width:0; min-height:48px; padding:12px; font-size:16px; cursor:pointer;
+  background-color:var(--theme-chrome-bg,#111827); color:var(--text-main);
+}
+.favorite-platform-editor select:focus-visible { outline:2px solid var(--accent-solid); outline-offset:3px; }
+.favorite-platform-editor option,.favorite-platform-editor optgroup { background:var(--theme-chrome-bg,#111827); color:var(--text-main); }
+.favorite-platform-empty { font-size:.8rem; line-height:1.5; color:var(--text-muted); }
+.favorite-platform-choices,.favorite-platform-tags {
+  display:flex; flex-wrap:wrap; gap:8px; list-style:none; padding:0; margin:0;
+}
+.favorite-platform-choices > li,.favorite-platform-tags > li {
+  display:flex; align-items:center; gap:8px; max-width:100%; box-sizing:border-box;
+  padding:5px 5px 5px 12px; border:1px solid var(--surface-border); border-radius:14px;
+  background:var(--surface-bg); color:var(--text-main); font-size:.85rem; line-height:1.4;
+}
+.favorite-platform-choices > li > span { min-width:0; overflow-wrap:anywhere; }
+body .favorite-platform-choices > li > button {
+  display:grid; place-items:center; flex:0 0 44px; width:44px; height:44px; min-width:44px; min-height:44px;
+  margin:0; padding:0; border:1px solid var(--surface-border); border-radius:10px;
+  background:rgba(255,255,255,.08); color:var(--text-main); box-shadow:none; cursor:pointer; transform:none;
+}
+.favorite-platform-choices button::before,.favorite-platform-choices button::after { content:none !important; }
+.favorite-platform-choices button:focus-visible { outline:2px solid var(--accent-solid); outline-offset:2px; }
+.favorite-platform-tags { margin-top:12px; }
+.favorite-platform-tags > li { padding:6px 10px; font-size:.8rem; overflow-wrap:anywhere; }
