@@ -1,28 +1,134 @@
+import { useEffect, useId, useRef } from "react";
+import { getKartSceneBudget, paintKartSky, paintKartRoad } from "../services/kartScene";
 import "./KartEffects.css";
 
-const colors = ["#ff527f", "#ffad47", "#ffe95c", "#60ed9b", "#45cfff", "#8d86ff", "#e776ed"];
-function DriverView({ cockpit = false }) {
-  return <div className="kart-driver-scene" aria-hidden="true">
-    <div className="kart-driver-stars">{Array.from({length:45},(_,i)=><i key={i} style={{left:(i*61.803%100)+"%",top:(i*37.719%48)+"%"}} />)}</div>
-    <div className="kart-driver-planet" />
-    <svg className="kart-driver-road" viewBox="0 0 600 800" preserveAspectRatio="none" fill="none">
-      <path d="M275 280Q420 185 362 154Q307 128 359 93" stroke="#9c92e9" strokeWidth="12" />
-      {colors.map((color,i)=><path key={color} d={`M${275+i*7} 280L${-500+i*230} 800H${-500+(i+1)*230}L${275+(i+1)*7} 280Z`} fill={color} />)}
-      <path d="M275 280L-500 800M324 280L1110 800" stroke="#e3d9ff" strokeWidth="7" />
-      <g className="kart-driver-tiles">{Array.from({length:18},(_,i)=>{const y=282+Math.pow((i+1)/18,2)*540;const t=(y-280)/520;return <path key={i} d={`M${275-775*t} ${y}H${324+786*t}`} stroke="#fff" strokeOpacity=".45" strokeWidth={1+t*4} />;})}</g>
-      <path d="M299 280V800" stroke="#fff" strokeOpacity=".3" strokeWidth="2" />
-    </svg>
-    {cockpit && <svg className="kart-driver-cockpit" viewBox="0 0 600 220" preserveAspectRatio="xMidYMax meet">
-      <path d="M0 220V142L60 116L137 122L195 150H405L463 122L540 116L600 142V220Z" fill="#d33f4d" stroke="#ff8a70" strokeWidth="5" />
-      <path d="M155 220L190 134Q300 100 410 134L445 220Z" fill="#182335" stroke="#60748a" strokeWidth="4" />
-      <g className="kart-driver-steering"><ellipse cx="300" cy="153" rx="101" ry="54" fill="none" stroke="#07101d" strokeWidth="22" /><ellipse cx="300" cy="153" rx="101" ry="54" fill="none" stroke="#778ba3" strokeWidth="3" /><path d="M205 154L282 166M395 154L318 166M300 171V210" stroke="#273c55" strokeWidth="17" /><ellipse cx="300" cy="163" rx="26" ry="17" fill="#354d67" stroke="#98afc7" strokeWidth="3" /><path d="M290 160H310" stroke="#ffe56d" strokeWidth="4" /></g>
-      <path d="M45 171L121 184M479 184L555 171" stroke="#ffb898" strokeWidth="8" strokeLinecap="round" />
-    </svg>}
+function RainbowDrive({ light = false, effects = "balanced", boost = false, transition = false, direction = "right" }) {
+  const canvasRef = useRef(null);
+  const boostRef = useRef(boost);
+  boostRef.current = boost;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    let ctx;
+    try { ctx = canvas.getContext("2d", { alpha: false }); } catch { return; }
+    if (!ctx) return;
+    const backdrop = document.createElement("canvas");
+    const sky = backdrop.getContext("2d", { alpha: false });
+    if (!sky) return;
+    let width = 0, height = 0, budget, frame = 0, lastTime = 0, elapsed = 0, distance = 2.6, stopped = false;
+    const draw = () => {
+      ctx.drawImage(backdrop, 0, 0, width, height);
+      paintKartRoad(ctx, width, height, distance, elapsed, { budget, direction: direction === "left" ? -1 : 1, boost: transition || boostRef.current });
+      canvas.dataset.ready = "true";
+    };
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      width = Math.max(1, rect.width); height = Math.max(1, rect.height);
+      budget = getKartSceneBudget(width, height, { light, effects, dpr: window.devicePixelRatio });
+      canvas.width = backdrop.width = Math.max(1, Math.round(width * budget.pixelRatio));
+      canvas.height = backdrop.height = Math.max(1, Math.round(height * budget.pixelRatio));
+      ctx.setTransform(budget.pixelRatio, 0, 0, budget.pixelRatio, 0, 0);
+      sky.setTransform(budget.pixelRatio, 0, 0, budget.pixelRatio, 0, 0);
+      paintKartSky(sky, width, height, budget);
+      draw();
+    };
+    const tick = now => {
+      if (stopped) return;
+      if (!lastTime) lastTime = now;
+      const delta = now - lastTime;
+      if (delta >= 1000 / budget.fps - .5) {
+        const seconds = Math.min(delta / 1000, .05);
+        lastTime = now; elapsed += seconds;
+        distance += seconds * (transition ? 30 + Math.min(elapsed, .8) * 65 : boostRef.current ? 20 : 6);
+        draw();
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    const start = () => {
+      if (document.hidden || stopped || frame) return;
+      lastTime = 0; frame = requestAnimationFrame(tick);
+    };
+    const visibility = () => {
+      cancelAnimationFrame(frame); frame = 0; lastTime = 0;
+      if (!document.hidden) start();
+    };
+    resize(); start();
+    const observer = typeof ResizeObserver === "function" ? new ResizeObserver(resize) : null;
+    observer?.observe(canvas);
+    if (!observer) window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", visibility);
+    return () => {
+      stopped = true; cancelAnimationFrame(frame); observer?.disconnect();
+      window.removeEventListener("resize", resize); document.removeEventListener("visibilitychange", visibility);
+    };
+  }, [light, effects, transition, direction]);
+  return <div className="kart-rainbow-drive" aria-hidden="true">
+    <div className="kart-road-fallback" />
+    <canvas ref={canvasRef} className="kart-scene-canvas" />
+    <div className="kart-scene-vignette" />
   </div>;
 }
-export function KartIntro({ progress }) {
-  return <div className="kart-boot"><DriverView cockpit /><main className="kart-boot-content"><span className="kart-boot-badge">ROUTE ARC-EN-CIEL</span><h1>Checkpoint</h1><p>Prends le volant.</p><div className="kart-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div><small>Prêt au départ <strong>{progress}%</strong></small></main></div>;
+
+function DriverCockpit({ light }) {
+  const id = useId().replace(/:/g, "");
+  return <svg className={`kart-cockpit ${light ? "is-light" : ""}`} viewBox="0 95 760 175" aria-hidden="true">
+    <defs>
+      <linearGradient id={`${id}-red`} x2="0" y2="1"><stop stopColor="#ff5d6b"/><stop offset=".45" stopColor="#c32c46"/><stop offset="1" stopColor="#64182f"/></linearGradient>
+      <linearGradient id={`${id}-metal`} x2="0" y2="1"><stop stopColor="#8594b5"/><stop offset=".35" stopColor="#26314b"/><stop offset="1" stopColor="#0a1021"/></linearGradient>
+      <linearGradient id={`${id}-glove`} x2=".3" y2="1"><stop stopColor="#fff7ed"/><stop offset="1" stopColor="#adb9d0"/></linearGradient>
+    </defs>
+    <path d="M-30 280L5 140Q56 94 116 114L242 182H518L644 114Q704 94 755 140L790 280Z" fill={`url(#${id}-red)`} stroke="#fc8c99" strokeWidth="2"/>
+    <path d="M18 148Q61 121 110 133L213 197M742 148Q699 121 650 133L547 197" fill="none" stroke="#ffbec1" strokeWidth="5"/>
+    <path d="M125 280L218 170Q380 126 542 170L635 280Z" fill={`url(#${id}-metal)`} stroke="#596987" strokeWidth="3"/>
+    <path d="M254 188Q380 151 506 188L484 224H276Z" fill="#080e20" stroke="#8394b3" strokeWidth="2"/>
+    <path d="M306 196H454" stroke="#62e8ed" strokeWidth="3" strokeDasharray="8 4"/>
+    <g className="kart-cockpit-wheel">
+      <ellipse cx="380" cy="200" rx="124" ry="67" fill="none" stroke="#080c18" strokeWidth="25"/>
+      <ellipse cx="380" cy="200" rx="124" ry="67" fill="none" stroke="#7b87a3" strokeWidth="3"/>
+      <path d="M270 202L355 217M490 202L405 217M380 220V267" stroke="#151d31" strokeWidth="21"/>
+      <path d="M275 202L354 216M485 202L406 216" stroke="#60708d" strokeWidth="3"/>
+      <ellipse cx="380" cy="216" rx="36" ry="25" fill="#25324c" stroke="#7789a9" strokeWidth="2"/>
+      <path d="M380 200L385 211L398 212L389 221L391 233L380 227L369 233L371 221L362 212L375 211Z" fill="#ffe298"/>
+      <g fill={`url(#${id}-glove)`} stroke="#77849e" strokeWidth="1.5">
+        <path d="M229 207Q224 188 237 173L250 162Q259 158 264 165L276 183Q289 179 294 187Q298 198 284 211L266 226Z"/>
+        <path d="M531 207Q536 188 523 173L510 162Q501 158 496 165L484 183Q471 179 466 187Q462 198 476 211L494 226Z"/>
+      </g>
+      <path d="M223 205L266 223L255 249L207 227ZM537 205L494 223L505 249L553 227Z" fill="#c62b45" stroke="#f07080" strokeWidth="2"/>
+      <path d="M241 180L255 195M250 173L265 189M519 180L505 195M510 173L495 189" stroke="#8392ab" strokeWidth="2" strokeLinecap="round"/>
+    </g>
+  </svg>;
 }
-export function KartTransition({ direction, effects }) {
-  return <div className={`kart-tab-transition direction-${direction} effects-${effects}`} aria-hidden="true"><div className="kart-boost-drive"><DriverView /></div><div className="kart-boost-rays">{Array.from({length:effects==="calm"?0:effects==="boost"?42:24},(_,i)=><i key={i} style={{"--ray-angle":i*360/(effects==="boost"?42:24)+"deg","--ray-color":colors[i%7],"--ray-delay":i%5*10+"ms"}} />)}</div></div>;
+
+export function KartIntro({ progress = 0, light = false, effects = "balanced", onRequestClose }) {
+  useEffect(() => {
+    document.documentElement.classList.add("checkpoint-kart-intro-active");
+    return () => document.documentElement.classList.remove("checkpoint-kart-intro-active");
+  }, []);
+  const value = Math.max(0, Math.min(100, Math.round(Number(progress) || 0)));
+  const stage = value < 34 ? 0 : value < 67 ? 1 : value < 100 ? 2 : 3;
+  return <div className={`kart-boot kart-v2 ${light ? "is-light" : ""} ${stage === 3 ? "is-ready" : ""}`} role="region" aria-label="Introduction Mario Kart, Route Arc-en-ciel">
+    <RainbowDrive light={light} effects={effects} boost={stage === 3} />
+    <header className="kart-boot-header">
+      <span className="kart-grand-prix"><i aria-hidden="true"/> GRAND PRIX</span>
+      {onRequestClose && <button type="button" className="kart-skip" onClick={onRequestClose}>Passer l’intro <span aria-hidden="true">›</span></button>}
+    </header>
+    <div className="kart-boot-title"><span>MARIO KART</span><h1>CHECKPOINT</h1><p>Route Arc-en-ciel</p></div>
+    <div className="kart-start-signal" aria-hidden="true">
+      <div className="kart-start-lights">{[0, 1, 2].map(index => <i key={index} className={stage >= index ? "lit" : ""}/>)}</div>
+      <strong>{stage === 3 ? "GO!" : 3 - stage}</strong>
+    </div>
+    <DriverCockpit light={light}/>
+    <div className="kart-loading">
+      <div><span>{value >= 100 ? "C’est parti !" : "Sur la grille de départ"}</span><strong>{value}%</strong></div>
+      <div className="kart-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><span style={{width:`${value}%`}}/></div>
+    </div>
+  </div>;
+}
+
+export function KartTransition({ direction = "right", effects = "balanced", light = false }) {
+  const reduced = light || effects === "calm";
+  return <div className={`kart-tab-transition kart-v2 direction-${direction} ${reduced ? "is-light" : ""}`} aria-hidden="true">
+    <div className="kart-boost-stage"><RainbowDrive light={reduced} effects={effects} transition direction={direction}/></div>
+    <div className="kart-boost-label"><span>★</span> BOOST <span>»</span></div>
+    <div className="kart-exit-ribbon"/>
+  </div>;
 }

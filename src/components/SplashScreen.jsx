@@ -28,7 +28,7 @@ import { TokyoIntro } from "./TokyoEffects";
 import { TamerIntro } from "./TamerEffects";
 import { SlayerIntro } from "./SlayerEffects";
 
-export default function SplashScreen({ showSplash, progress = 0, onRequestClose }) {
+export default function SplashScreen({ showSplash, progress = 0, onRequestClose, effects = "balanced", light = false }) {
   const safeProgress = Math.max(0, Math.min(100, Math.round(progress)));
   const splashTheme = useMemo(() => {
     try {
@@ -102,7 +102,7 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose 
   if (splashTheme === "theme-matrix") return <CodeGreenIntro progress={safeProgress} />;
   if (splashTheme === "theme-ring") return <PacIntro progress={safeProgress} />;
   if (splashTheme === "theme-crystal") return <CrystalIntro progress={safeProgress} />;
-  if (splashTheme === "theme-kart") return <KartIntro progress={safeProgress} />;
+  if (splashTheme === "theme-kart") return <KartIntro progress={safeProgress} effects={effects} light={light} onRequestClose={onRequestClose} />;
   if (splashTheme === "theme-hunter") return <HunterIntro progress={safeProgress} />;
   if (splashTheme === "theme-cubic") return <CubicIntro progress={safeProgress} />;
   if (splashTheme === "theme-blocks") return <BlocksIntro progress={safeProgress} />;

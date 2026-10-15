@@ -1,0 +1,46 @@
+/* Rainbow Road: plum space, pearl lettering, gold trim and coloured track tiles.
+   Scope and specificity keep this palette out of the other themes. */
+html[data-theme="theme-kart"] { --theme-chrome-bg:#100b24 !important; }
+html body[data-theme="theme-kart"] {
+  --bg-main:radial-gradient(ellipse at 3% 0%,#8c40722c,transparent 32%),radial-gradient(ellipse at 100% 32%,#486b9824,transparent 40%),linear-gradient(170deg,#100b24,#211432 52%,#0d1022) !important;
+  --panel-bg:linear-gradient(150deg,#30213be8,#1c182feF) !important;
+  --surface-bg:#a99bc015 !important;
+  --surface-border:#bdb1d33d !important;
+  --panel-border:#c2a8dd36 !important;
+  --input-bg:#120e24 !important;
+  --muted-bg:#c4b0e312 !important;
+  --text-main:#fff9ed !important;
+  --text-soft:#e2d9e9 !important;
+  --text-muted:#baadcb !important;
+  --genre-color:#f7daa3 !important;
+  --accent:linear-gradient(115deg,#ab345f,#97522e 18%,#63722b 35%,#177360 52%,#236d98 68%,#65429c 84%,#963e8f) !important;
+  --accent-solid:#f4d594 !important;
+  --accent-shadow:0 4px 20px #c17bd330,0 1px 5px #08051350 !important;
+  --control-bg:linear-gradient(155deg,#44364e,#241f36) !important;
+  --control-border:#b9a9cf64 !important;
+  --theme-aurora:radial-gradient(ellipse at 10% 20%,#c5629c25,transparent 40%),radial-gradient(ellipse at 90% 65%,#73cad521,transparent 40%) !important;
+  --checkpoint-title-gradient:linear-gradient(180deg,#fffbed 5%,#f5e5db 44%,#b1dce0 60%,#c8b1e9 100%) !important;
+  --checkpoint-title-glow:#cba8f64a !important;
+  --checkpoint-splash-primary:#f4b5db !important;
+  --checkpoint-splash-secondary:#8de5ec !important;
+  --checkpoint-splash-glow:#f8d78350 !important;
+  --checkpoint-splash-fill:linear-gradient(90deg,#f56c96,#ffad69,#f6df76,#72dbac,#68d9ec,#8792f4,#cc86ea) !important;
+}
+html body[data-theme="theme-kart"] .app-shell::before {
+  content:""; position:fixed; inset:0; pointer-events:none; z-index:-1;
+  background:radial-gradient(circle at 13% 22%,#fff5dba8 0 1px,transparent 1.7px),radial-gradient(circle at 76% 13%,#d8d1fa70 0 1px,transparent 1.6px),radial-gradient(circle at 89% 71%,#f5e6cf60 0 .8px,transparent 1.5px),radial-gradient(circle at 40% 81%,#b0dde66b 0 1px,transparent 1.6px);
+  background-size:243px 311px,327px 239px,197px 337px,389px 293px;
+  opacity:.7; animation:none !important; filter:none !important; transform:none !important;
+}
+html body[data-theme="theme-kart"] .app-shell::after {
+  background:var(--theme-aurora) !important; opacity:.55 !important; animation:none !important; filter:none !important; transform:none !important;
+}
+html body[data-theme="theme-kart"] .bottom-tabs { background:linear-gradient(180deg,#2d203b,#130f24) !important; border-color:#c2a8dd45 !important; }
+html body[data-theme="theme-kart"] .bottom-tabs .tab-btn.active {
+  background:var(--accent) !important; color:#fff9ed !important; border-color:#efd6a78a !important;
+  box-shadow:inset 0 1px #fff6db75,0 3px 12px #08051350 !important;
+}
+html body[data-theme="theme-kart"] .bottom-tabs .tab-btn.active::after { background:#ffe7ae !important; }
+html body[data-theme="theme-kart"] .notification-trigger { background:#20182e !important; border-color:#cbb7e56b !important; }
+html body[data-theme="theme-kart"] :is(.xp-fill,.completion-fill) { background:linear-gradient(90deg,#d76393,#e2b661,#7fcfbd,#739edc,#bd7bce) !important; }
+html body[data-theme="theme-kart"] .option-pill.theme-theme-kart.active { background:var(--accent) !important; border-color:#f4d594 !important; }

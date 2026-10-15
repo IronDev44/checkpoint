@@ -134,7 +134,7 @@ export default function ThemeTransition({ theme, direction, effects, fullMotion 
   if (theme === "theme-wasteland") return createPortal(<WastelandTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-ring") return createPortal(<PacTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-crystal") return createPortal(<CrystalTransition effects={effects} />, document.body);
-  if (theme === "theme-kart") return createPortal(<KartTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-kart") return createPortal(<KartTransition direction={direction} effects={effects} light={light} />, document.body);
   if (theme === "theme-hunter") return createPortal(<HunterTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-blocks") return createPortal(<BlocksTransition effects={effects} />, document.body);
   if (theme === "theme-blueblur") return createPortal(<BlueBlurTransition direction={direction} effects={effects} />, document.body);

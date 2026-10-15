@@ -1,6 +1,10 @@
 import { act, render } from "@testing-library/react";
 import ThemeTransition from "./ThemeTransition";
 
+let canvasContext;
+beforeAll(() => { canvasContext = jest.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null); });
+afterAll(() => canvasContext.mockRestore());
+
 test("light Matrix reduces rendered columns while complete Matrix retains all columns", () => {
   const view = render(<ThemeTransition theme="theme-matrix" direction="right" effects="balanced" fullMotion />);
   expect(document.querySelectorAll(".matrix-screen-column")).toHaveLength(64);
@@ -30,7 +34,7 @@ test("Android reduced motion keeps a stationary cue and responds to system chang
   window.matchMedia = previous;
 });
 
-test.each(["theme-indigo", "theme-matrix", "theme-cubic", "theme-slayer"])("explicit full animations override Android reduction for %s", (theme) => {
+test.each(["theme-indigo", "theme-matrix", "theme-cubic", "theme-slayer", "theme-kart"])("explicit full animations override Android reduction for %s", (theme) => {
   const previous = window.matchMedia;
   window.matchMedia = jest.fn(() => ({ matches: true, addEventListener: jest.fn(), removeEventListener: jest.fn() }));
   const view = render(<ThemeTransition theme={theme} direction="right" effects="balanced" fullMotion />);

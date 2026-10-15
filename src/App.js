@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import "./App.css";
 import "./polish.css";
 import "./components/OnePieceTheme.css";
+import "./components/KartTheme.css";
 import "./documentScroll.css";
 import { db, auth } from "./firebase";
 import { ownerUid } from "./services/accountConfig";
@@ -18860,7 +18861,7 @@ useEffect(() => {
       "theme-blocks": "#14051d",
       "theme-cubic": "#0b1f12",
       "theme-hunter": "#08111b",
-      "theme-kart": "#08051f",
+      "theme-kart": "#100b24",
       "theme-crystal": "#070c23",
       "theme-ring": "#050715",
       "theme-matrix": "#020a06",
@@ -20461,7 +20462,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
           <Toast message={toast} />
           <BadgeUnlockToast badge={newUnlockedBadge} />
-{ <SplashScreen showSplash={showSplash} progress={splashProgress} onRequestClose={closeSplash} /> }
+{ <SplashScreen showSplash={showSplash} progress={splashProgress} onRequestClose={closeSplash} effects={appOptions.visualEffects} light={appOptions.transitionMotion === "light" || uiMode === "reduced"} /> }
           {pendingCheckpointLevel &&
             dismissedCheckpointLevel !== pendingCheckpointLevel &&
             !activeTrialLevel &&
