@@ -1,5 +1,8 @@
+import { POP_CULTURE_THEMES } from "../data/popCultureThemes";
+import { GAME_UNIVERSE_THEMES } from "../data/gameUniverseThemes";
 const KEY = "checkpoint-startup-appearance";
 const themeIds = new Set(["indigo", "emerald", "crimson", "graphite", "retro", "cyberpunk", "playstation", "xbox", "steamdeck", "arcane", "stellar", "multiverse", "relic", "tamer", "mushroom", "blueblur", "blocks", "cubic", "hunter", "kart", "crystal", "ring", "matrix", "wasteland", "treasure", "vigilante", "slayer"].map(id => `theme-${id}`));
+[...POP_CULTURE_THEMES, ...GAME_UNIVERSE_THEMES].forEach(theme => themeIds.add(theme.id));
 const validTheme = theme => themeIds.has(theme) ? theme : "theme-indigo";
 
 // Only visual preferences are available before authentication. Never read the

@@ -27,6 +27,10 @@ import { ArcadeIntro } from "./ArcadeEffects";
 import { TokyoIntro } from "./TokyoEffects";
 import { TamerIntro } from "./TamerEffects";
 import { SlayerIntro } from "./SlayerEffects";
+import { PopCultureIntro } from "./PopCultureEffects";
+import { getPopCultureTheme } from "../data/popCultureThemes";
+import { GameUniverseIntro } from "./GameUniverseEffects";
+import { getGameUniverseTheme } from "../data/gameUniverseThemes";
 
 export default function SplashScreen({ showSplash, progress = 0, onRequestClose, effects = "balanced", light = false, theme: explicitTheme, managed = false }) {
   const safeProgress = Math.max(0, Math.min(100, Math.round(progress)));
@@ -89,6 +93,10 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
   }, [managed, onRequestClose, showSplash]);
 
   if (!showSplash) return null;
+
+  if (getGameUniverseTheme(splashTheme)) return <GameUniverseIntro theme={splashTheme} progress={safeProgress} light={light} effects={effects} onRequestClose={onRequestClose}/>;
+
+  if (getPopCultureTheme(splashTheme)) return <PopCultureIntro theme={splashTheme} progress={safeProgress} light={light} effects={effects} onRequestClose={onRequestClose}/>;
 
   if (splashTheme === "theme-tamer") return <TamerIntro progress={safeProgress} />;
   if (splashTheme === "theme-slayer") return <SlayerIntro progress={safeProgress} />;

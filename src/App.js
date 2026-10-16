@@ -4,6 +4,10 @@ import "./App.css";
 import "./polish.css";
 import "./components/OnePieceTheme.css";
 import "./components/KartTheme.css";
+import "./components/PopCultureThemes.css";
+import { POP_CULTURE_THEMES } from "./data/popCultureThemes";
+import "./components/GameUniverseThemes.css";
+import { GAME_UNIVERSE_THEMES } from "./data/gameUniverseThemes";
 import "./documentScroll.css";
 import { db, auth } from "./firebase";
 import { ownerUid } from "./services/accountConfig";
@@ -14741,6 +14745,8 @@ function OptionsTab({
   { id: "theme-treasure", label: "One Piece" },
   { id: "theme-slayer", label: "Demon Slayer" },
   { id: "theme-vigilante", label: "Batman" },
+  ...GAME_UNIVERSE_THEMES,
+  ...POP_CULTURE_THEMES,
   { id: "theme-emerald", label: "Circuit Mint" },
   { id: "theme-crimson", label: "Redline" },
   { id: "theme-graphite", label: "Carbon Ice" },
@@ -18634,6 +18640,7 @@ useEffect(() => {
       "theme-treasure": "#0b2038",
       "theme-slayer": "#081b1d",
       "theme-vigilante": "#050711",
+      ...Object.fromEntries([...POP_CULTURE_THEMES, ...GAME_UNIVERSE_THEMES].map(item => [item.id, item.chrome])),
           };
 
     if (metaTheme) {

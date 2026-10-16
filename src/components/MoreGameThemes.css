@@ -1,0 +1,43 @@
+html[data-theme="theme-hollow"] { --theme-chrome-bg:#101321; }
+html[data-theme="theme-outlaw"] { --theme-chrome-bg:#2a100c; }
+html[data-theme="theme-assassin"] { --theme-chrome-bg:#1e2328; }
+html[data-theme="theme-hades"] { --theme-chrome-bg:#21101a; }
+html[data-theme="theme-resident"] { --theme-chrome-bg:#201a12; }
+html[data-theme="theme-codec"] { --theme-chrome-bg:#0b1916; }
+body[data-theme="theme-hollow"] {
+  --game-bg:#101321; --game-panel:#1e2638f2; --game-surface:#2c354a; --game-input:#0d1220; --game-border:#a6bdcf4f;
+  --game-accent:linear-gradient(120deg,#4c617f,#52546f); --game-edge:#c6dbe5; --game-secondary:#b2b5df;
+  --game-ink:#f4f5f9; --game-soft:#d0d9e8; --game-muted:#a6b6cf; --game-glow:#7d9bc92b;
+  --game-pattern:radial-gradient(ellipse at 50% 0%,#a2c2e619,transparent 60%);
+}
+body[data-theme="theme-outlaw"] {
+  --game-bg:#2a100c; --game-panel:#431e18f2; --game-surface:#562f23; --game-input:#250d09; --game-border:#e4ad6d50;
+  --game-accent:linear-gradient(120deg,#a53c29,#9d4d2c); --game-edge:#efc28a; --game-secondary:#db9a6d;
+  --game-ink:#fff0d7; --game-soft:#e9ccb0; --game-muted:#caa58b; --game-glow:#e08f3329;
+  --game-pattern:radial-gradient(ellipse at 60% 0%,#d96a321a,transparent 65%);
+}
+body[data-theme="theme-assassin"] {
+  --game-bg:#1e2328; --game-panel:#2e363df2; --game-surface:#414a51; --game-input:#161e24; --game-border:#d7ded759;
+  --game-accent:linear-gradient(120deg,#5e6975,#59636d); --game-edge:#e6e3d5; --game-secondary:#dba49b;
+  --game-ink:#f7f4e9; --game-soft:#d4d8d5; --game-muted:#b3c0c2; --game-glow:#ccd6d51b;
+  --game-pattern:linear-gradient(#d3dbd70a 1px,transparent 1px),linear-gradient(90deg,#d3dbd70a 1px,transparent 1px);
+}
+body[data-theme="theme-hades"] {
+  --game-bg:#21101a; --game-panel:#341f2ef2; --game-surface:#493140; --game-input:#1c0d17; --game-border:#b9cf8e50;
+  --game-accent:linear-gradient(120deg,#8a3c3b,#65653f); --game-edge:#d1dfae; --game-secondary:#f0b095;
+  --game-ink:#fff0dc; --game-soft:#e7d3bb; --game-muted:#c7b4a5; --game-glow:#c76a4924;
+  --game-pattern:radial-gradient(ellipse at 20% 0%,#de764c1e,transparent 50%),radial-gradient(ellipse at 90% 80%,#a4c78c10,transparent 50%);
+}
+body[data-theme="theme-resident"] {
+  --game-bg:#201a12; --game-panel:#32291ff2; --game-surface:#453e2d; --game-input:#19170f; --game-border:#ccb98d50;
+  --game-accent:linear-gradient(120deg,#666849,#756342); --game-edge:#e0cba5; --game-secondary:#b0c7ad;
+  --game-ink:#f7eddb; --game-soft:#ddd0b6; --game-muted:#bdaf92; --game-glow:#c6a05a20;
+  --game-pattern:repeating-linear-gradient(90deg,transparent 0 119px,#e0bd8008 119px 120px);
+}
+body[data-theme="theme-codec"] {
+  --game-bg:#0b1916; --game-panel:#152e26f2; --game-surface:#284437; --game-input:#071711; --game-border:#98ba8c50;
+  --game-accent:linear-gradient(120deg,#3b6950,#3d635a); --game-edge:#b6d99d; --game-secondary:#d3bc78;
+  --game-ink:#eaf5df; --game-soft:#c8dcc0; --game-muted:#a2bda1; --game-glow:#84b3701c;
+  --game-pattern:linear-gradient(#98c78708 1px,transparent 1px),linear-gradient(90deg,#98c78708 1px,transparent 1px);
+}
+body:is([data-theme="theme-hollow"],[data-theme="theme-outlaw"],[data-theme="theme-hades"]) .app-shell::after { background-size:auto !important; }

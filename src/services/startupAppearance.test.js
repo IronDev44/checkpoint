@@ -1,6 +1,13 @@
 import { readStartupAppearance, saveStartupAppearance } from "./startupAppearance";
+import { POP_CULTURE_THEMES } from "../data/popCultureThemes";
+import { GAME_UNIVERSE_THEMES } from "../data/gameUniverseThemes";
 
 beforeEach(() => localStorage.clear());
+
+test.each([...POP_CULTURE_THEMES, ...GAME_UNIVERSE_THEMES])("keeps the new $label theme for the next opening", theme => {
+  saveStartupAppearance({theme:theme.id,effects:"balanced",light:false});
+  expect(readStartupAppearance().theme).toBe(theme.id);
+});
 test("remembers only the visual options needed before sign-in", () => {
   saveStartupAppearance({ theme:"theme-kart", effects:"boost", light:true, email:"private@example.com", uid:"secret" });
   expect(readStartupAppearance()).toEqual({ theme:"theme-kart", effects:"boost", light:true });

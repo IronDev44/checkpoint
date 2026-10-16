@@ -1,0 +1,51 @@
+/* These palettes own every surface, including Android's opaque navigation. */
+html[data-theme="theme-tron"] { --theme-chrome-bg:#060719; }
+html[data-theme="theme-tronlegacy"] { --theme-chrome-bg:#020b10; }
+html[data-theme="theme-future"] { --theme-chrome-bg:#180e0a; }
+html[data-theme="theme-jurassic"] { --theme-chrome-bg:#0c120b; }
+body[data-theme="theme-tron"] {
+  --pop-bg:#060719; --pop-panel:#10132ceb; --pop-surface:#17213a; --pop-input:#090d23; --pop-border:#5579a55c;
+  --pop-glow:#2277ff26; --pop-edge:#92cbff; --pop-secondary:#ff7484;
+  --pop-accent:linear-gradient(110deg,#294cb7,#266fba); --pop-ink:#edf5ff; --pop-soft:#bbcee9; --pop-muted:#9aaed0;
+  --pop-backdrop:linear-gradient(#518eff0b 1px,transparent 1px),linear-gradient(90deg,#518eff0b 1px,transparent 1px);
+}
+body[data-theme="theme-tronlegacy"] {
+  --pop-bg:#020b10; --pop-panel:#091b23f0; --pop-surface:#102631; --pop-input:#031018; --pop-border:#508b9d54;
+  --pop-glow:#3be5ff20; --pop-edge:#7ce8f5; --pop-secondary:#ffb35b;
+  --pop-accent:linear-gradient(110deg,#08768c,#185e78); --pop-ink:#effcff; --pop-soft:#c0dbe2; --pop-muted:#92b6c2;
+  --pop-backdrop:repeating-linear-gradient(90deg,transparent 0 119px,#87edff08 119px 120px);
+}
+body[data-theme="theme-future"] {
+  --pop-bg:#180e0a; --pop-panel:#2b1d17ef; --pop-surface:#3a2c23; --pop-input:#170e0a; --pop-border:#d8a06c55;
+  --pop-glow:#ff7e2424; --pop-edge:#ffc078; --pop-secondary:#8ce5ec;
+  --pop-accent:linear-gradient(110deg,#a63c21,#a55c15); --pop-ink:#fff5e4; --pop-soft:#e5cbb0; --pop-muted:#c2a58b;
+  --pop-backdrop:repeating-linear-gradient(0deg,transparent 0 39px,#ffc87906 39px 40px);
+}
+body[data-theme="theme-jurassic"] {
+  --pop-bg:#0c120b; --pop-panel:#19251bef; --pop-surface:#263a2a; --pop-input:#0b160d; --pop-border:#a9ac6950;
+  --pop-glow:#c38f2520; --pop-edge:#e3bb64; --pop-secondary:#b4d3a0;
+  --pop-accent:linear-gradient(110deg,#8e391f,#8c541b); --pop-ink:#fff5df; --pop-soft:#d2d6b6; --pop-muted:#acb396;
+  --pop-backdrop:radial-gradient(ellipse at 5% 20%,#4e79451c,transparent 45%),radial-gradient(ellipse at 95% 70%,#bb8e1d10,transparent 42%);
+}
+body:is([data-theme="theme-tron"],[data-theme="theme-tronlegacy"],[data-theme="theme-future"],[data-theme="theme-jurassic"]) {
+  --bg-main:radial-gradient(ellipse at 10% 0%,var(--pop-glow),transparent 50%),var(--pop-bg) !important;
+  --panel-bg:var(--pop-panel) !important; --panel-border:var(--pop-border) !important;
+  --surface-bg:var(--pop-surface) !important; --surface-border:var(--pop-border) !important;
+  --input-bg:var(--pop-input) !important; --muted-bg:var(--pop-glow) !important;
+  --accent:var(--pop-accent) !important; --accent-solid:var(--pop-edge) !important;
+  --accent-shadow:0 5px 22px var(--pop-glow) !important; --text-main:var(--pop-ink) !important;
+  --text-soft:var(--pop-soft) !important; --text-muted:var(--pop-muted) !important; --genre-color:var(--pop-secondary) !important;
+  --checkpoint-title-gradient:linear-gradient(180deg,var(--pop-ink),var(--pop-edge)) !important;
+  --checkpoint-title-glow:var(--pop-glow) !important; --theme-aurora:var(--pop-backdrop) !important;
+  --checkpoint-splash-primary:var(--pop-edge) !important; --checkpoint-splash-secondary:var(--pop-secondary) !important;
+  --checkpoint-splash-glow:var(--pop-glow) !important;
+}
+body:is([data-theme="theme-tron"],[data-theme="theme-tronlegacy"],[data-theme="theme-future"],[data-theme="theme-jurassic"]) .app-shell::before {
+  background:radial-gradient(ellipse at 50% 0%,var(--pop-glow),transparent 70%) !important;
+  opacity:.6 !important; filter:none !important; animation:none !important;
+}
+body:is([data-theme="theme-tron"],[data-theme="theme-tronlegacy"],[data-theme="theme-future"],[data-theme="theme-jurassic"]) .app-shell::after {
+  background:var(--pop-backdrop) !important; background-size:80px 80px !important;
+  opacity:.55 !important; filter:none !important; animation:none !important; transform:none !important;
+}
+body[data-theme="theme-jurassic"] .app-shell::after { background-size:auto !important; }

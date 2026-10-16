@@ -1,0 +1,64 @@
+@import "./MoreGameThemes.css";
+
+html[data-theme="theme-elden"] { --theme-chrome-bg:#14130c; }
+html[data-theme="theme-halo"] { --theme-chrome-bg:#0d1718; }
+html[data-theme="theme-bioshock"] { --theme-chrome-bg:#061d22; }
+html[data-theme="theme-portal"] { --theme-chrome-bg:#161c23; }
+html[data-theme="theme-godwar"] { --theme-chrome-bg:#111e26; }
+html[data-theme="theme-crossing"] { --theme-chrome-bg:#17332e; }
+body[data-theme="theme-elden"] {
+  --game-bg:#14130c; --game-panel:#252319f2; --game-surface:#353121; --game-input:#11120c;
+  --game-border:#d1b87650; --game-accent:linear-gradient(120deg,#75612b,#856537); --game-edge:#e0c687; --game-secondary:#a4b39a;
+  --game-ink:#f8efdc; --game-soft:#d9cbb1; --game-muted:#b5a98c; --game-glow:#c8ab4829;
+  --game-pattern:radial-gradient(ellipse at 50% 0%,#c7a84a18,transparent 55%);
+}
+body[data-theme="theme-halo"] {
+  --game-bg:#0d1718; --game-panel:#192b2df2; --game-surface:#2b3e3c; --game-input:#091416;
+  --game-border:#9cba9b50; --game-accent:linear-gradient(120deg,#46684d,#316475); --game-edge:#b4dba4; --game-secondary:#8bd3ed;
+  --game-ink:#eef6e8; --game-soft:#c5dacc; --game-muted:#9eb9ad; --game-glow:#6ab7ba20;
+  --game-pattern:repeating-linear-gradient(0deg,transparent 0 79px,#95c8c409 79px 80px);
+}
+body[data-theme="theme-bioshock"] {
+  --game-bg:#061d22; --game-panel:#102f35f2; --game-surface:#1f4246; --game-input:#06171c;
+  --game-border:#d3ae6b59; --game-accent:linear-gradient(120deg,#326d6b,#626139); --game-edge:#e5bc79; --game-secondary:#8bd3c4;
+  --game-ink:#fff0d5; --game-soft:#dccca8; --game-muted:#afbcac; --game-glow:#51bdb72b;
+  --game-pattern:repeating-linear-gradient(90deg,transparent 0 99px,#e3c58809 99px 100px);
+}
+body[data-theme="theme-portal"] {
+  --game-bg:#161c23; --game-panel:#252e38f2; --game-surface:#35434e; --game-input:#101820;
+  --game-border:#c5d6de55; --game-accent:linear-gradient(120deg,#a24f23,#9c6128); --game-edge:#ffc07b; --game-secondary:#89d7ff;
+  --game-ink:#f1f5f6; --game-soft:#ccd8de; --game-muted:#a8bbc5; --game-glow:#579ece1c;
+  --game-pattern:linear-gradient(#bcd7e008 1px,transparent 1px),linear-gradient(90deg,#bcd7e008 1px,transparent 1px);
+}
+body[data-theme="theme-godwar"] {
+  --game-bg:#111e26; --game-panel:#20313df2; --game-surface:#304552; --game-input:#0d1b24;
+  --game-border:#b0cddb50; --game-accent:linear-gradient(120deg,#95463f,#803c40); --game-edge:#c5e7ed; --game-secondary:#e7a293;
+  --game-ink:#f1f5f2; --game-soft:#cbdde0; --game-muted:#a4bdc6; --game-glow:#8bbcd925;
+  --game-pattern:radial-gradient(ellipse at 90% 0%,#ad55401a,transparent 50%);
+}
+body[data-theme="theme-crossing"] {
+  --game-bg:#17332e; --game-panel:#28483ff2; --game-surface:#3b5c4b; --game-input:#17332b;
+  --game-border:#d6d8a359; --game-accent:linear-gradient(120deg,#397759,#45744d); --game-edge:#f0d6a1; --game-secondary:#b3e0c5;
+  --game-ink:#fff5da; --game-soft:#e0dfbc; --game-muted:#bdcaaa; --game-glow:#b4d79c24;
+  --game-pattern:radial-gradient(ellipse at 10% 10%,#f0c48d18,transparent 45%),radial-gradient(ellipse at 90% 70%,#95cb9e10,transparent 45%);
+}
+body:is([data-theme="theme-elden"],[data-theme="theme-halo"],[data-theme="theme-bioshock"],[data-theme="theme-portal"],[data-theme="theme-godwar"],[data-theme="theme-crossing"],[data-theme="theme-hollow"],[data-theme="theme-outlaw"],[data-theme="theme-assassin"],[data-theme="theme-hades"],[data-theme="theme-resident"],[data-theme="theme-codec"]) {
+  --bg-main:radial-gradient(ellipse at 10% 0%,var(--game-glow),transparent 50%),var(--game-bg) !important;
+  --panel-bg:var(--game-panel) !important; --panel-border:var(--game-border) !important;
+  --surface-bg:var(--game-surface) !important; --surface-border:var(--game-border) !important; --input-bg:var(--game-input) !important;
+  --muted-bg:var(--game-glow) !important; --accent:var(--game-accent) !important; --accent-solid:var(--game-edge) !important;
+  --accent-shadow:0 5px 22px var(--game-glow) !important; --text-main:var(--game-ink) !important;
+  --text-soft:var(--game-soft) !important; --text-muted:var(--game-muted) !important; --genre-color:var(--game-secondary) !important;
+  --checkpoint-title-gradient:linear-gradient(180deg,var(--game-ink),var(--game-edge)) !important;
+  --checkpoint-title-glow:var(--game-glow) !important; --theme-aurora:var(--game-pattern) !important;
+  --checkpoint-splash-primary:var(--game-edge) !important; --checkpoint-splash-secondary:var(--game-secondary) !important;
+  --checkpoint-splash-glow:var(--game-glow) !important;
+}
+body:is([data-theme="theme-elden"],[data-theme="theme-halo"],[data-theme="theme-bioshock"],[data-theme="theme-portal"],[data-theme="theme-godwar"],[data-theme="theme-crossing"],[data-theme="theme-hollow"],[data-theme="theme-outlaw"],[data-theme="theme-assassin"],[data-theme="theme-hades"],[data-theme="theme-resident"],[data-theme="theme-codec"]) .app-shell::before {
+  background:radial-gradient(ellipse at 50% 0%,var(--game-glow),transparent 70%) !important; opacity:.6 !important; filter:none !important; animation:none !important;
+}
+body:is([data-theme="theme-elden"],[data-theme="theme-halo"],[data-theme="theme-bioshock"],[data-theme="theme-portal"],[data-theme="theme-godwar"],[data-theme="theme-crossing"],[data-theme="theme-hollow"],[data-theme="theme-outlaw"],[data-theme="theme-assassin"],[data-theme="theme-hades"],[data-theme="theme-resident"],[data-theme="theme-codec"]) .app-shell::after {
+  background:var(--game-pattern) !important; background-size:100px 100px !important; opacity:.5 !important; filter:none !important; animation:none !important; transform:none !important;
+}
+body:is([data-theme="theme-elden"],[data-theme="theme-godwar"],[data-theme="theme-crossing"],[data-theme="theme-hollow"],[data-theme="theme-outlaw"],[data-theme="theme-hades"],[data-theme="theme-resident"]) .app-shell::after { background-size:auto !important; }
+body[data-theme="theme-crossing"] .search-panel { border-radius:28px; }

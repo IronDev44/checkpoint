@@ -26,6 +26,10 @@ import { RedlineTransition } from "./RedlineEffects";
 import { CarbonTransition } from "./CarbonEffects";
 import { ArcadeTransition } from "./ArcadeEffects";
 import { TokyoTransition } from "./TokyoEffects";
+import { PopCultureTransition } from "./PopCultureEffects";
+import { getPopCultureTheme } from "../data/popCultureThemes";
+import { GameUniverseTransition } from "./GameUniverseEffects";
+import { getGameUniverseTheme } from "../data/gameUniverseThemes";
 
 // Each theme has its own motif; motion stays short enough to finish before cleanup.
 export const THEME_TRANSITION_DURATION = 840;
@@ -123,6 +127,8 @@ export default function ThemeTransition({ theme, direction, effects, fullMotion 
     <div className="checkpoint-transition-still" aria-hidden="true" />,
     document.body
   );
+  if (getGameUniverseTheme(theme)) return createPortal(<GameUniverseTransition theme={theme} direction={direction} light={light} effects={effects}/>, document.body);
+  if (getPopCultureTheme(theme)) return createPortal(<PopCultureTransition theme={theme} direction={direction} light={light} effects={effects}/>, document.body);
   if (theme === "theme-slayer") return createPortal(<SlayerTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-cyberpunk") return createPortal(<TokyoTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-retro") return createPortal(<ArcadeTransition effects={effects} />, document.body);

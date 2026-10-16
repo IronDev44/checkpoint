@@ -1,0 +1,143 @@
+.gu-elden { --pc-bg:#11120c; --pc-glow:#e5ca87; --pc-alt:#a2b497; --pc-text:#fff1d5; }
+.gu-halo { --pc-bg:#07171d; --pc-glow:#c6e3b2; --pc-alt:#a4e0f4; --pc-text:#edf5e8; }
+.gu-bioshock { --pc-bg:#041d25; --pc-glow:#e4c180; --pc-alt:#98d9ce; --pc-text:#fff0d4; }
+.gu-portal { --pc-bg:#151e28; --pc-glow:#ffc887; --pc-alt:#91dfff; --pc-text:#f3f6f8; }
+.gu-godwar { --pc-bg:#101f29; --pc-glow:#cce8ee; --pc-alt:#dc9b87; --pc-text:#f0f5f3; }
+.gu-crossing { --pc-bg:#173c33; --pc-glow:#f4d7a0; --pc-alt:#bae0b9; --pc-text:#fff6d9; }
+html.checkpoint-game-intro-active { overflow:hidden !important; overscroll-behavior:none; }
+.gu-world { position:absolute; inset:0; overflow:hidden; }
+.gu-hero { position:absolute; width:clamp(205px,35vw,285px); top:13%; left:50%; transform:translateX(-50%); }
+.gu-boot .pc-boot-copy h1 { text-shadow:none; }
+.gu-elden .pc-boot-copy h1,.gu-bioshock .pc-boot-copy h1,.gu-godwar .pc-boot-copy h1 { font-family:Georgia,serif; letter-spacing:.08em; }
+.gu-crossing .pc-boot-copy h1 { font-family:Georgia,serif; letter-spacing:.025em; color:#fff2cf; }
+.gu-halo .pc-boot-copy h1 { letter-spacing:.12em; }
+.gu-portal .pc-boot-copy h1 { letter-spacing:.04em; }
+.gu-particles { position:absolute; inset:0; overflow:hidden; pointer-events:none; }
+.gu-particles i { position:absolute; left:var(--x); top:var(--y); width:var(--size); height:var(--size); background:var(--pc-glow); opacity:0; animation:guParticleRise 5s ease-in-out var(--delay) infinite; }
+.gu-embers i { border-radius:60% 10% 60% 30%; }
+.gu-stars i { border-radius:50%; animation-name:guStarBreathe; }
+.gu-bubbles i { width:calc(var(--size)*3); height:calc(var(--size)*3); background:transparent; border:1px solid #badfdc66; border-radius:50%; animation-name:guBubbleRise; animation-duration:6s; }
+.gu-test-dust i { background:#b4d9ea; animation-duration:7s; }
+.gu-snow i { background:#e2f7ff; animation-name:guSnowDrift; animation-duration:5s; }
+.gu-fireflies i { width:3px; height:3px; background:#fae6ab; border-radius:50%; animation-name:guFirefly; animation-duration:6s; }
+.gu-elden-world { background:radial-gradient(ellipse at 50% 30%,#9b853a30,transparent 65%),linear-gradient(#15190e,#0c100b); }
+.gu-golden-tree { position:absolute; inset:0; width:100%; height:100%; opacity:.14; }
+.gu-grace { top:10%; width:clamp(215px,35vw,295px); }
+.gu-grace-line { stroke-dasharray:1; animation:guGraceTrace 1.5s ease-out both; }
+.gu-grace-ground { position:absolute; bottom:0; left:0; right:0; height:25%; background:radial-gradient(ellipse at 50% 90%,#b89b4328,transparent 65%); }
+.gu-halo-world { background:radial-gradient(ellipse at 35% 10%,#5e9fa944,transparent 65%),linear-gradient(#07151c,#1c3c42 55%,#09181b); }
+.gu-ringworld { position:absolute; inset:0; width:100%; height:100%; opacity:.6; }
+.gu-spartan { width:clamp(210px,33vw,280px); animation:guSpartanBoot 900ms ease-out both; }
+.gu-halo-ridge { position:absolute; inset:0; width:100%; height:100%; }
+.gu-hud { position:absolute; top:49%; left:max(24px,calc((100% - 420px)/2)); right:max(24px,calc((100% - 420px)/2)); display:flex; align-items:center; gap:14px; color:#acd8c0; font:600 8px ui-monospace,monospace; letter-spacing:.08em; }
+.gu-hud i { flex:1; height:3px; background:repeating-linear-gradient(90deg,#a9ccad 0 7px,transparent 7px 10px); opacity:.7; }
+.gu-hud b { font-size:14px; }
+.gu-hud-scan { display:none; }
+.gu-bioshock-world { background:radial-gradient(ellipse at 40% 0%,#568c7d55,transparent 65%),linear-gradient(#082f3b,#061921); }
+.gu-ocean-shafts { position:absolute; inset:0; }
+.gu-ocean-shafts i { position:absolute; top:-20%; width:14%; height:140%; background:linear-gradient(90deg,transparent,#bfe9cf12,transparent); transform:rotate(18deg); animation:guOceanLight 9s ease-in-out infinite; }
+.gu-deco-frame { position:absolute; inset:0; width:100%; height:100%; }
+.gu-porthole { top:13%; width:clamp(220px,35vw,290px); }
+.gu-waterline { position:absolute; inset:0; background:repeating-linear-gradient(0deg,transparent 0 39px,#b9e6e906 39px 40px); opacity:.45; }
+.gu-portal-world { background:radial-gradient(ellipse at 50% 30%,#688eaa2b,transparent 60%),#131f2b; }
+.gu-test-tiles { position:absolute; inset:0; background-image:linear-gradient(#b3c7d918 1px,transparent 1px),linear-gradient(90deg,#b3c7d918 1px,transparent 1px); background-size:100px 100px; }
+.gu-test-light { position:absolute; left:15%; right:15%; top:8%; height:3px; background:#d3e4ed; opacity:.35; }
+.gu-portal-door { position:absolute; top:16%; width:21%; height:34%; box-sizing:border-box; border:5px solid #ffc06b; border-radius:50%; background:radial-gradient(ellipse,#411e0a, #102330 65%); box-shadow:0 0 16px #ffa44540,inset 0 0 12px #ffd08a44; transform:rotate(-7deg); overflow:hidden; }
+.gu-portal-door.orange { left:6%; }
+.gu-portal-door.blue { right:6%; border-color:#8cddff; background:radial-gradient(ellipse,#134b69,#0d1a28 65%); box-shadow:0 0 16px #67caff40,inset 0 0 12px #98ddff44; transform:rotate(7deg); }
+.gu-portal-door i { position:absolute; inset:9%; border:1px dashed #f5e0bb66; border-radius:50%; animation:guPortalFlow 5s linear infinite; }
+.gu-companion { width:clamp(170px,28vw,230px); top:20%; animation:guCubeFloat 5s ease-in-out infinite; }
+.gu-test-line { position:absolute; left:10%; right:10%; top:50%; display:flex; align-items:center; gap:10px; color:#b3d8e9; font:11px ui-monospace,monospace; }
+.gu-test-line i { flex:1; border-top:2px dashed #9eb4bd55; }
+.gu-godwar-world { background:radial-gradient(ellipse at 70% 10%,#698d9c42,transparent 60%),linear-gradient(#152b39,#0c1a25); }
+.gu-red-mark { position:absolute; left:18%; top:-25%; height:160%; width:12%; background:#a64b3b; opacity:.12; transform:rotate(28deg); clip-path:polygon(0 0,100% 0,65% 45%,100% 50%,15% 100%,0 100%,35% 46%,0 41%); }
+.gu-frost-peaks { position:absolute; inset:0; width:100%; height:100%; opacity:.7; }
+.gu-axe { width:clamp(220px,34vw,280px); top:11%; animation:guAxeFloat 5s ease-in-out infinite; }
+.gu-axe-slash,.gu-ice-shards { display:none; }
+.gu-crossing-world { background:radial-gradient(ellipse at 50% 8%,#b8916a60,transparent 60%),linear-gradient(#3c665c,#235246 50%,#133c34); }
+.gu-island-sunset { position:absolute; left:50%; top:12%; width:260px; height:260px; border-radius:50%; transform:translateX(-50%); background:radial-gradient(circle,#f4c88a38,transparent 70%); }
+.gu-island { width:clamp(270px,45vw,385px); top:12%; }
+.gu-gift-balloon { position:absolute; width:70px; height:126px; right:14%; top:10%; animation:guBalloonFloat 7s ease-in-out infinite; }
+.gu-soft-cloud { position:absolute; width:180px; height:35px; border-radius:50%; background:#b5d4c520; }
+.gu-soft-cloud.one { left:-25px; top:15%; }
+.gu-soft-cloud.two { right:-30px; top:39%; width:130px; }
+.gu-leaf-wipe { display:none; }
+.gu-tab-transition .gu-grace { animation:guGraceOpen 810ms ease-in both; }
+.gu-tab-transition .gu-grace-line { animation:guGraceTransfer 650ms ease-out both; }
+.gu-tab-transition .gu-spartan { opacity:.15; animation:none; }
+.gu-tab-transition .gu-ringworld { animation:guRingArrival 810ms ease-in both; }
+.gu-tab-transition .gu-hud-scan { display:block; position:absolute; left:0; right:0; top:0; height:4px; background:#c0edc8; box-shadow:0 8px 36px #8bd3de55; animation:guHaloScan 810ms ease-in-out both; }
+.gu-tab-transition .gu-porthole { animation:guRaptureDive 810ms cubic-bezier(.35,.05,.45,1) both; }
+.gu-tab-transition .gu-deco-frame { animation:guRaptureFrame 810ms ease-in both; }
+.gu-tab-transition .gu-portal-door { animation:guPortalOpen 750ms ease-in-out both; }
+.gu-tab-transition .gu-portal-door.blue { animation-delay:35ms; }
+.gu-tab-transition .gu-companion { animation:guCubeTransfer 810ms cubic-bezier(.25,.6,.3,1) both; }
+.gu-tab-transition.direction-left .gu-portal-world { transform:scaleX(-1); }
+.gu-tab-transition .gu-axe { animation:guAxeRecall 810ms cubic-bezier(.2,.7,.3,1) both; }
+.gu-tab-transition .gu-axe-slash { display:block; position:absolute; inset:0; width:100%; height:100%; stroke-dasharray:1600; stroke-dashoffset:1600; animation:guFrostCut 810ms ease-out both; }
+.gu-tab-transition .gu-ice-shards { display:block; position:absolute; inset:0; }
+.gu-ice-shards i { position:absolute; left:50%; top:45%; width:55px; height:120px; background:#b8e3ec; clip-path:polygon(0 0,100% 15%,20% 100%); transform-origin:50% 0; animation:guIceBurst 810ms ease-out both; }
+.gu-tab-transition.direction-left .gu-axe-slash { transform:scaleX(-1); }
+.gu-tab-transition .gu-island,.gu-tab-transition .gu-gift-balloon { opacity:.35; animation:none; }
+.gu-tab-transition .gu-leaf-wipe { display:block; position:absolute; left:50%; top:45%; width:300px; height:330px; animation:guIslandLeaf 810ms cubic-bezier(.3,.6,.4,1) both; }
+.gu-tab-transition.gu-crossing .pc-transition-label { top:48%; color:#143e2e; z-index:1; animation:guIslandCaption 810ms ease both; }
+.gu-tab-transition .gu-particles i { animation-duration:1.5s; }
+.gu-boot.is-light .gu-hero,.is-light .gu-ocean-shafts i,.is-light .gu-portal-door i,.is-light .gu-gift-balloon { animation:none; }
+.is-light .gu-portal-door { box-shadow:none; }
+.gu-boot.is-light .gu-grace-line { animation:none;stroke-dashoffset:0; }
+.gu-tab-transition.is-light .gu-grace { animation:guGraceOpenLight 810ms ease both; }
+.gu-tab-transition.is-light .gu-porthole { animation:guRaptureDiveLight 810ms ease both; }
+.gu-tab-transition.is-light .gu-ringworld { animation:none; }
+.gu-tab-transition.is-light .gu-hero { will-change:auto; }
+@keyframes guParticleRise { 0%,100% { opacity:0; } 25%,70% { opacity:.6; } 100% { transform:translate(var(--drift),-100px) rotate(var(--turn)); } }
+@keyframes guStarBreathe { 20%,80% { opacity:.15; } 50% { opacity:.8; } }
+@keyframes guBubbleRise { 0% { transform:translate(0,150px);opacity:0; } 25%,65% { opacity:.5; } 100% { transform:translate(var(--drift),-150px);opacity:0; } }
+@keyframes guSnowDrift { 0% { transform:translate(0,-100px);opacity:0; } 20%,80% { opacity:.65; } 100% { transform:translate(var(--drift),160px);opacity:0; } }
+@keyframes guFirefly { 0%,100% { opacity:0;transform:translate(0,0); } 50% { opacity:.75;transform:translate(var(--drift),-35px); } }
+@keyframes guGraceTrace { 0% { stroke-dashoffset:1;opacity:.4; } 45%,100% { stroke-dashoffset:0;opacity:1; } }
+@keyframes guSpartanBoot { from { opacity:0;transform:translate(-50%,12px) scale(.95); } to { opacity:1;transform:translate(-50%,0) scale(1); } }
+@keyframes guOceanLight { 50% { transform:translateX(25px) rotate(22deg);opacity:.6; } }
+@keyframes guPortalFlow { to { transform:rotate(360deg); } }
+@keyframes guCubeFloat { 50% { transform:translate(-50%,-10px) rotate(5deg); } }
+@keyframes guAxeFloat { 50% { transform:translate(-50%,-7px) rotate(-4deg); } }
+@keyframes guBalloonFloat { 50% { transform:translate(-10px,-14px) rotate(-5deg); } }
+@keyframes guGraceOpen { 0% { transform:translate(-50%,20px) scale(.6);opacity:0; } 35%,60% { opacity:1; } 100% { transform:translate(-50%,-30px) scale(3);opacity:0; } }
+@keyframes guGraceTransfer { from { stroke-dashoffset:1; } to { stroke-dashoffset:0; } }
+@keyframes guGraceOpenLight { 0%,100% { opacity:0; } 25%,70% { opacity:1; } }
+@keyframes guRingArrival { from { transform:scale(.7);opacity:0; } 35% { opacity:.85; } to { transform:scale(1.8);opacity:0; } }
+@keyframes guHaloScan { 0% { transform:translateY(100vh);opacity:0; } 25%,65% { opacity:1; } 100% { transform:translateY(-10vh);opacity:0; } }
+@keyframes guRaptureDive { 0% { transform:translate(-50%,-12vh) scale(.5); } 50% { transform:translate(-50%,0) scale(1.1); } 100% { transform:translate(-50%,25vh) scale(4); } }
+@keyframes guRaptureFrame { to { transform:translateY(-35vh); } }
+@keyframes guRaptureDiveLight { 0% { transform:translate(-50%,-15px);opacity:0; } 30%,65% { opacity:1; } 100% { transform:translate(-50%,20px);opacity:0; } }
+@keyframes guPortalOpen { 0% { opacity:0;transform:scaleY(.1); } 30%,65% { opacity:1;transform:scaleY(1.15); } 100% { opacity:0;transform:scaleY(.1); } }
+@keyframes guCubeTransfer { 0% { transform:translate(-100vw,20px) rotate(-60deg) scale(.5); } 45%,55% { transform:translate(-50%,0) rotate(0) scale(1); } 100% { transform:translate(100vw,-20px) rotate(60deg) scale(.5); } }
+@keyframes guAxeRecall { 0% { transform:translate(100vw,-30vh) rotate(100deg) scale(.5); } 45%,55% { transform:translate(-50%,0) rotate(0) scale(1); } 100% { transform:translate(-100vw,40vh) rotate(-100deg) scale(1.8); } }
+@keyframes guFrostCut { 0% { stroke-dashoffset:1600;opacity:0; } 25% { opacity:.8; } 65% { stroke-dashoffset:0;opacity:.8; } 100% { stroke-dashoffset:-1600;opacity:0; } }
+@keyframes guIceBurst { 0%,20% { transform:rotate(var(--angle)) translateY(0) scale(0);opacity:0; } 45% { opacity:.6; } 100% { transform:rotate(var(--angle)) translateY(-65vh) scale(1);opacity:0; } }
+@keyframes guIslandLeaf { 0% { transform:translate(-140vw,10vh) rotate(-70deg) scale(.1); } 40%,65% { transform:translate(-50%,-40%) rotate(10deg) scale(4); } 100% { transform:translate(110vw,-80vh) rotate(55deg) scale(.4); } }
+@keyframes guIslandCaption { 0%,30%,100% { opacity:0; } 40%,65% { opacity:1; } }
+@media(max-height:600px) {
+  .gu-hero { top:12%;width:200px; }
+  .gu-grace { width:190px;top:9%; }
+  .gu-axe { width:200px;top:10%; }
+  .gu-companion { width:165px;top:18%; }
+  .gu-island { width:260px;top:11%; }
+  .gu-gift-balloon { width:55px;height:100px;top:12%;right:10%; }
+  .gu-boot .pc-boot-copy h1 { font-size:28px; }
+}
+@media(max-height:460px) and (min-width:600px) {
+  .gu-hero { left:25%;top:18%;width:185px; }
+  .gu-grace { top:12%;width:190px; }
+  .gu-companion { width:155px;top:21%; }
+  .gu-island { width:260px;top:15%; }
+  .gu-gift-balloon { width:50px;height:90px;top:20%;right:58%; }
+  .gu-portal-door { top:22%;width:10%;height:49%; }
+  .gu-portal-door.orange { left:7%; }
+  .gu-portal-door.blue { right:55%; }
+  .gu-hud { top:28%;left:48%;right:8%;font-size:7px; }
+  .gu-test-line { left:9%;right:57%;top:74%; }
+  .gu-boot .pc-boot-copy h1 { font-size:clamp(20px,4vw,32px); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .gu-boot :is(.gu-hero,.gu-grace-line,.gu-particles i,.gu-ocean-shafts i,.gu-portal-door i,.gu-gift-balloon) { animation:none; }
+}
