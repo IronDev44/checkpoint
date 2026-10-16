@@ -1,4 +1,5 @@
 import "./SteamDeckEffects.css";
+import IntroVignette from "./IntroVignettes";
 
 export function SteamDeckDevice() {
   return <svg className="deck-device" viewBox="0 0 360 160" fill="none" aria-hidden="true">
@@ -20,7 +21,7 @@ export function SteamDeckIntro({ progress }) {
     <div className="deck-boot-grid" aria-hidden="true" />
     <main className="deck-boot-content">
       <span className="deck-boot-kicker">TA BIBLIOTHÈQUE, PARTOUT</span>
-      <SteamDeckDevice />
+      <IntroVignette kind="steamdeck"/>
       <h1>Checkpoint</h1>
       <p>Prêt pour ta prochaine session.</p>
       <div className="deck-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div>

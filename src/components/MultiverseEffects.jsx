@@ -1,10 +1,11 @@
+import IntroVignette from "./IntroVignettes";
 import "./MultiverseEffects.css";
 function Portal({ count }) {
   return <div className="hero-mystic-portal" aria-hidden="true"><div className="hero-portal-window" /><div className="hero-portal-rim" /><div className="hero-portal-sparks">{Array.from({length:count},(_,i)=><i key={i} style={{"--ember-angle":i*360/count+"deg","--ember-delay":(-i%11*90)+"ms","--ember-length":(9+i%4*6)+"px"}} />)}</div></div>;
 }
 export function MultiverseIntro({ progress }) {
   return <div className="hero-boot"><div className="hero-cosmic-clouds" aria-hidden="true" /><main className="hero-boot-content">
-    <Portal count={64} /><span className="hero-kicker">UNE PORTE VERS TES UNIVERS</span><h1>Checkpoint</h1><p>Chaque aventure ouvre une nouvelle réalité.</p>
+    <IntroVignette kind="multiverse"/><span className="hero-kicker">TES UNIVERS PRENNENT VIE</span><h1>Checkpoint</h1><p>Chaque aventure ouvre une nouvelle réalité.</p>
     <div className="hero-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div>
     <small>Ouverture du multivers <strong>{progress}%</strong></small>
   </main></div>;

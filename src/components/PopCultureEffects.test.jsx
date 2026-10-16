@@ -38,11 +38,11 @@ test.each(POP_CULTURE_THEMES)("%s reduces decorative nodes in light mode", confi
 
 test("both Tron scenes remain visibly different",()=>{
   const view=render(<PopCultureIntro theme="theme-tron"/>);
-  expect(document.querySelector(".pc-recognizer")).not.toBeNull();
-  expect(document.querySelector(".pc-identity-disc")).toBeNull();
+  expect(document.querySelector(".rv-encom")).not.toBeNull();
+  expect(document.querySelector(".rv-grid-arrival")).toBeNull();
   view.rerender(<PopCultureIntro theme="theme-tronlegacy"/>);
-  expect(document.querySelector(".pc-recognizer")).toBeNull();
-  expect(document.querySelector(".pc-identity-disc")).not.toBeNull();
+  expect(document.querySelector(".rv-encom")).toBeNull();
+  expect(document.querySelector(".rv-grid-arrival")).not.toBeNull();
 });
 
 test("intro scroll locking is removed when returning to the app",()=>{
@@ -52,10 +52,10 @@ test("intro scroll locking is removed when returning to the app",()=>{
   expect(document.documentElement).not.toHaveClass("checkpoint-pop-intro-active");
 });
 
-test("simultaneous amber previews use unique gradient references",()=>{
+test("Jurassic intro shows the park entrance and bounds loading progress",()=>{
   render(<><PopCultureIntro theme="theme-jurassic" progress={-10}/><PopCultureIntro theme="theme-jurassic" progress={200}/></>);
-  const ids=[...document.querySelectorAll("radialGradient")].map(node=>node.id);
-  expect(new Set(ids).size).toBe(2);
+  expect([...document.querySelectorAll('.rv-cinematic-plate')].map(node=>node.getAttribute('src'))).toEqual(['/theme-scenes/park-gates-v2.webp','/theme-scenes/park-gates-v2.webp']);
+  expect(document.querySelector('.pc-amber')).toBeNull();
   expect(screen.getAllByRole("progressbar").map(node=>node.getAttribute("aria-valuenow"))).toEqual(["0","100"]);
 });
 

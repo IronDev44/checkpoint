@@ -12,22 +12,6 @@ function HollowScene({light,boost}) {
   </div>;
 }
 
-function OutlawScene({light,boost}) {
-  return <div className="gu-world gx-outlaw-world" aria-hidden="true">
-    <svg className="gu-hero gx-rider" viewBox="0 0 420 420"><circle cx="210" cy="162" r="143" fill="#df8b49"/><path d="M70 196Q175 184 214 207Q250 216 276 195L298 145L333 128L351 148L331 180L316 192L300 252L273 266L250 331L232 332L247 263L178 261L147 327H129L145 251L121 240Q100 220 70 238Z" fill="#281315"/><path d="M322 137L328 124L339 135M77 209Q43 220 51 275" fill="none" stroke="#281315" strokeWidth="11"/><path d="M171 204L181 142H224L239 217L217 244L217 294H202L198 242L166 237Z" fill="#201013"/><path d="M173 126L183 103H218L229 126M159 129Q204 118 241 130" fill="none" stroke="#201013" strokeWidth="11"/><circle cx="204" cy="141" r="15" fill="#201013"/><path d="M229 169L276 176L309 147" fill="none" stroke="#2b1517" strokeWidth="7"/><path d="M137 354H283" stroke="#6e3224" strokeWidth="5"/></svg>
-    <svg className="gx-western-land" viewBox="0 0 1000 800" preserveAspectRatio="none"><path d="M0 590L62 557L79 466L119 449L152 464L173 540L220 559L253 618L385 646V720H0ZM1000 581L944 548L923 474L881 458L847 481L824 553L783 574L738 628L670 658V722H1000Z" fill="#6e3228"/><path d="M0 690L190 640L360 685L550 632L760 687L1000 631V800H0Z" fill="#321518"/></svg>
-    <div className="gx-western-bars top"/><div className="gx-western-bars bottom"/><Ambient kind="sand" light={light} boost={boost}/>
-  </div>;
-}
-
-function AssassinScene({light,boost}) {
-  return <div className="gu-world gx-assassin-world" aria-hidden="true">
-    <svg className="gx-animus-grid" viewBox="0 0 1000 800" preserveAspectRatio="none" fill="none" stroke="#d4dfdf20">{Array.from({length:light?7:13},(_,i)=><path key={i} d={`M${i*(light?167:84)-200} 800L500 250L${i*(light?167:84)-200} 0`}/>)}<path d="M0 400H1000M0 500H1000M0 650H1000"/></svg>
-    <svg className="gu-hero gx-assassin" viewBox="0 0 360 400"><path d="M180 25Q88 77 72 185L101 245L69 366H291L259 245L288 185Q272 77 180 25Z" fill="#cdd2cf" stroke="#f0f0e2" strokeWidth="4"/><path d="M180 71Q117 107 110 183L139 241H221L250 183Q241 109 180 71Z" fill="#424d54"/><path d="M126 162L180 136L234 162L222 207L180 244L138 207Z" fill="#7f8a8b"/><path d="M104 181Q150 122 180 112Q210 122 256 181L180 151Z" fill="#f0eee3"/><path d="M99 245L180 296L261 245L242 344H118Z" fill="#929c9d"/><path d="M104 267L180 315L255 267M180 315V366" fill="none" stroke="#e9e9da" strokeWidth="5"/><path d="M172 296H189L198 367L180 348L165 370Z" fill="#a45348"/><path d="M115 314L45 372L39 386L130 337" fill="#b8ced5" stroke="#edf4ed" strokeWidth="2"/></svg>
-    <div className="gx-animus-shards">{Array.from({length:light?5:14},(_,i)=><i key={i} style={{"--x":`${i*61.8%100}%`,"--y":`${i*37.7%100}%`,"--angle":`${i*31}deg`,"--drift":`${(i%2?1:-1)*(40+i*8)}px`}}/>)}</div><Ambient kind="animus-dust" light={light} boost={boost}/>
-  </div>;
-}
-
 function HadesScene({light,boost}) {
   return <div className="gu-world gx-hades-world" aria-hidden="true">
     <svg className="gx-greek-pillars" viewBox="0 0 1000 800" preserveAspectRatio="none" fill="none" stroke="#b1856744"><path d="M70 800V110H180V800M820 800V110H930V800M45 110H205M795 110H955M55 90H195M805 90H945" strokeWidth="12"/><path d="M100 790V155M150 790V155M850 790V155M900 790V155" strokeWidth="4"/></svg>
@@ -52,4 +36,4 @@ function CodecScene({light,boost,id}) {
   </div>;
 }
 
-export const MORE_GAME_SCENES = {hollow:HollowScene,outlaw:OutlawScene,assassin:AssassinScene,hades:HadesScene,resident:ResidentScene,codec:CodecScene};
+export const MORE_GAME_SCENES = {hollow:HollowScene,hades:HadesScene,resident:ResidentScene,codec:CodecScene};

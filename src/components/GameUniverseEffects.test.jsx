@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import SplashScreen from "./SplashScreen";
 import ThemeTransition from "./ThemeTransition";
-import { GameUniverseIntro } from "./GameUniverseEffects";
+import { GameUniverseIntro, GameUniverseTransition } from "./GameUniverseEffects";
 import { GAME_UNIVERSE_THEMES } from "../data/gameUniverseThemes";
 import { POP_CULTURE_THEMES } from "../data/popCultureThemes";
 import { MORE_GAME_THEMES } from "../data/moreGameThemes";
@@ -50,14 +50,14 @@ test("intro locks page scrolling only while it is mounted and bounds its progres
   expect(document.documentElement).not.toHaveClass("checkpoint-game-intro-active");
 });
 
-test.each(MORE_GAME_THEMES)("$label includes its own scene rather than an empty frame",theme=>{
-  const selectors={hollow:".gx-knight",outlaw:".gx-rider",assassin:".gx-assassin",hades:".gx-laurel",resident:".gx-typewriter",codec:".gx-codec"};
+test.each(MORE_GAME_THEMES)("$label opens on an establishing scene rather than its transition artwork",theme=>{
   render(<GameUniverseIntro theme={theme.id} progress={50}/>);
-  expect(document.querySelector(selectors[theme.motif])).not.toBeNull();
+  expect(document.querySelector(`.rv-intro-${theme.motif}`)).not.toBeNull();
+  expect(document.querySelector('[data-scene-purpose="transition"]')).toBeNull();
 });
 
 test("two Rapture scenes do not share SVG clip or gradient ids",()=>{
-  render(<><GameUniverseIntro theme="theme-bioshock"/><GameUniverseIntro theme="theme-bioshock"/></>);
+  render(<><GameUniverseTransition theme="theme-bioshock"/><GameUniverseTransition theme="theme-bioshock"/></>);
   const ids=[...document.querySelectorAll("clipPath,radialGradient")].map(element=>element.id);
   expect(ids).toHaveLength(4);
   expect(new Set(ids).size).toBe(4);

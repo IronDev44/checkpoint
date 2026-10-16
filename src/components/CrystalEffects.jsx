@@ -1,4 +1,5 @@
 import "./CrystalEffects.css";
+import IntroVignette from "./IntroVignettes";
 
 function Crystal() {
   return <svg className="ff-crystal" viewBox="0 0 160 240" fill="none" aria-hidden="true">
@@ -16,7 +17,7 @@ function CrystalDust({ count }) {
 }
 export function CrystalIntro({ progress }) {
   return <div className="ff-crystal-boot"><div className="ff-crystal-nebula" aria-hidden="true" /><CrystalDust count={38} />
-    <main className="ff-crystal-boot-content"><div className="ff-crystal-altar"><div className="ff-crystal-altar-ring" /><Crystal /></div>
+    <main className="ff-crystal-boot-content"><IntroVignette kind="crystal"/>
       <span className="ff-crystal-kicker">LE CRISTAL S’ÉVEILLE</span><h1>Checkpoint</h1><p>Chaque aventure écrit sa légende.</p>
       <div className="ff-crystal-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div>
       <small>Éveil des souvenirs <strong>{progress}%</strong></small>

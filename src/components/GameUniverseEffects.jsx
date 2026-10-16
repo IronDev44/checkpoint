@@ -4,6 +4,7 @@ import "./PopCultureEffects.css";
 import "./GameUniverseThemes.css";
 import "./GameUniverseEffects.css";
 import { MORE_GAME_SCENES } from "./MoreGameScenes";
+import { RevisedIntroScene, RevisedTransitionScene, REVISED_TRANSITIONS } from "./ThemeSceneRevision";
 
 function Particles({ kind="embers", light, boost }) {
   const count=light?5:boost?38:24;
@@ -15,15 +16,6 @@ function EldenScene({ light, boost }) {
     <svg className="gu-golden-tree" viewBox="0 0 1000 800" preserveAspectRatio="xMidYMid slice" fill="none" stroke="#c4aa58" strokeLinecap="round"><path d="M500 850Q540 510 492 310Q480 230 510 60" strokeWidth="17"/><path d="M500 430Q390 250 180 230M493 315Q660 190 840 175M491 300Q380 120 270 70M505 195Q610 95 700 20" strokeWidth="8"/>{!light&&<g strokeWidth="3"><path d="M355 282Q315 143 170 110M410 330Q165 359 50 245M620 234Q690 63 850 50M695 208Q870 325 1040 290M510 110Q426 67 380 -20M320 151Q445 123 460 20"/></g>}</svg>
     <svg className="gu-hero gu-grace" viewBox="0 0 360 370" fill="none"><g stroke="#e9cd83" strokeWidth="3"><path className="gu-grace-line" pathLength="1" d="M180 18V348M134 44Q180 79 226 44M126 319Q180 291 234 319"/><circle className="gu-grace-line" pathLength="1" cx="180" cy="141" r="88"/><circle className="gu-grace-line" pathLength="1" cx="137" cy="217" r="88"/><circle className="gu-grace-line" pathLength="1" cx="223" cy="217" r="88"/><circle cx="180" cy="190" r="145" stroke="#c4a454" strokeWidth="1" strokeDasharray="8 14"/>{Array.from({length:light?6:12},(_,i)=><path key={i} d="M177 28L183 18L189 28M183 18V38" transform={`rotate(${i*(light?60:30)} 180 190)`} strokeWidth="1.5"/>)}</g><path d="M95 160L116 169M215 72L226 80M269 231L281 237M152 285L144 301" stroke="#17150c" strokeWidth="8"/></svg>
     <div className="gu-grace-ground"/><Particles kind="embers" light={light} boost={boost}/>
-  </div>;
-}
-
-function HaloScene({ light, boost }) {
-  return <div className="gu-world gu-halo-world" aria-hidden="true">
-    <svg className="gu-ringworld" viewBox="0 0 1000 800" preserveAspectRatio="xMidYMid slice" fill="none"><path d="M-80 870C10 20 887 -210 1160 850" stroke="#254952" strokeWidth="60"/><path d="M-80 870C10 20 887 -210 1160 850" stroke="#b4d4c1" strokeWidth="18"/><path d="M-80 870C10 20 887 -210 1160 850" stroke="#7b9f8f" strokeWidth="6" strokeDasharray="6 22"/></svg>
-    <svg className="gu-hero gu-spartan" viewBox="0 0 360 360"><path d="M80 127L114 57L247 57L283 127L293 249L253 304H108L68 248Z" fill="#3c5342" stroke="#8fa38a" strokeWidth="4"/><path d="M114 57L125 108H235L247 57M80 127L114 157L105 220L76 236M283 127L249 157L258 220L288 236" fill="none" stroke="#1d302a" strokeWidth="14"/><path d="M105 124Q180 101 255 124L248 172Q180 201 112 171Z" fill="#d7a85b" stroke="#f8d695" strokeWidth="3"/><path d="M120 137Q181 120 240 136" fill="none" stroke="#fff0be" strokeWidth="5" opacity=".7"/><path d="M109 221L132 202H230L253 221L233 275H128Z" fill="#263e35" stroke="#7c967e" strokeWidth="3"/><path d="M145 228H216M150 242H211M155 256H206" stroke="#0d221d" strokeWidth="7"/><path d="M127 77H232M85 194H100M260 194H276" stroke="#b9c5a8" strokeWidth="4"/></svg>
-    <svg className="gu-halo-ridge" viewBox="0 0 1000 800" preserveAspectRatio="none"><path d="M0 580L120 460L170 510L290 390L420 540L560 460L660 560L800 400L1000 570V800H0Z" fill="#132b2b"/><path d="M0 680L180 610L310 650L470 550L690 670L840 580L1000 650V800H0Z" fill="#0a1a1c"/></svg>
-    <div className="gu-hud"><span>MJOLNIR / SYSTÈMES EN LIGNE</span><i/><b>117</b></div><div className="gu-hud-scan"/><Particles kind="stars" light={light} boost={boost}/>
   </div>;
 }
 
@@ -48,16 +40,6 @@ function PortalScene({ light, boost }) {
   </div>;
 }
 
-function GodWarScene({ light, boost }) {
-  return <div className="gu-world gu-godwar-world" aria-hidden="true">
-    <div className="gu-red-mark"/>
-    <svg className="gu-frost-peaks" viewBox="0 0 1000 800" preserveAspectRatio="none"><path d="M0 630L120 410L220 520L360 290L500 540L690 350L780 510L900 390L1000 610V800H0Z" fill="#34505b"/><path d="M297 399L360 290L426 407L371 374L347 395L329 371ZM638 422L690 350L735 430L696 410L676 422Z" fill="#b1d6dd"/><path d="M0 730L230 610L430 700L610 560L800 650L1000 590V800H0Z" fill="#142b36"/></svg>
-    <svg className="gu-hero gu-axe" viewBox="0 0 360 400"><g transform="rotate(24 180 200)"><path d="M170 35Q186 190 166 365L188 370Q211 196 194 35Z" fill="#80583e" stroke="#b48e62" strokeWidth="3"/><path d="M188 42Q219 30 260 52Q285 73 300 64Q300 139 240 179Q226 139 193 133Z" fill="#a7c6d2" stroke="#e0edf1" strokeWidth="4"/><path d="M260 52Q285 73 300 64Q300 139 240 179" fill="none" stroke="#f3fcff" strokeWidth="7"/><path d="M205 63L246 76L234 94L259 117M209 82L220 101L213 123M250 105L263 93" fill="none" stroke="#426d81" strokeWidth="3"/><path d="M168 49L148 61L151 107L190 120" fill="#5f7a88" stroke="#a7c9d4" strokeWidth="3"/>{[0,1,2,3,4,5,6].map(i=><path key={i} d={`M169 ${245+i*15}l25 10`} stroke="#342b26" strokeWidth="6"/>)}<path d="M167 350L155 395L177 382L196 397L188 351Z" fill="#b04b41"/></g></svg>
-    <svg className="gu-axe-slash" viewBox="0 0 1000 800" preserveAspectRatio="none"><path d="M-150 720Q240 50 1160 270" fill="none" stroke="#b8e8f0" strokeWidth="38"/><path d="M-150 760Q240 90 1160 310" fill="none" stroke="#a7483d" strokeWidth="16"/></svg>
-    <div className="gu-ice-shards">{Array.from({length:light?4:12},(_,i)=><i key={i} style={{"--angle":`${i*(light?90:30)}deg`}}/>)}</div><Particles kind="snow" light={light} boost={boost}/>
-  </div>;
-}
-
 function CrossingScene({ light, boost }) {
   return <div className="gu-world gu-crossing-world" aria-hidden="true">
     <div className="gu-island-sunset"/><div className="gu-soft-cloud one"/><div className="gu-soft-cloud two"/>
@@ -70,6 +52,7 @@ function CrossingScene({ light, boost }) {
 function GameScene({ motif, light, boost }) {
   const id=`gu-window-${useId().replace(/:/g,"")}`;
   const props={light,boost,id};
+  if(REVISED_TRANSITIONS.has(motif))return <RevisedTransitionScene motif={motif} light={light}/>;
   const MoreScene=MORE_GAME_SCENES[motif];
   if(MoreScene)return <MoreScene {...props}/>;
   switch(motif){
@@ -93,7 +76,7 @@ export function GameUniverseIntro({ theme, progress=0, effects="balanced", light
   if(!config)return null;
   const value=Math.max(0,Math.min(100,Math.round(Number(progress)||0))),reduced=light||effects==="calm";
   return <section className={`pc-boot gu-boot gu-${config.motif} ${reduced?"is-light":""} ${value===100?"is-ready":""}`} aria-label={`Introduction ${config.label}`}>
-    <GameScene motif={config.motif} light={reduced} boost={effects==="boost"}/><div className="pc-scene-shade"/>
+    <RevisedIntroScene motif={config.motif} light={reduced}/><div className="pc-scene-shade"/>
     <header className="pc-boot-header"><span>{config.universe}</span>{onRequestClose&&<button type="button" onClick={onRequestClose}>Passer l’intro <span aria-hidden="true">›</span></button>}</header>
     <div className="pc-boot-copy"><span>{config.kicker}</span><h1>CHECKPOINT</h1><p>{config.subtitle}</p></div>
     <footer className="pc-boot-loading"><div><span>{value===100?"Tout est prêt":"Chargement…"}</span><strong>{value} %</strong></div><div className="pc-load-track" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><i style={{width:`${value}%`}}/></div></footer>
