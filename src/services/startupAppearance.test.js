@@ -20,7 +20,7 @@ test("reads legacy theme preferences without examining account data", () => {
 });
 test("invalid or unavailable storage never blocks the intro", () => {
   localStorage.setItem("checkpoint-startup-appearance", "invalid json");
-  expect(readStartupAppearance().theme).toBe("theme-indigo");
-  expect(readStartupAppearance({ getItem:()=>{throw new Error("denied");} }).theme).toBe("theme-indigo");
+  expect(readStartupAppearance().theme).toBe("theme-checkpoint");
+  expect(readStartupAppearance({ getItem:()=>{throw new Error("denied");} }).theme).toBe("theme-checkpoint");
   expect(()=>saveStartupAppearance({ theme:"theme-kart" }, { setItem:()=>{throw new Error("denied");} })).not.toThrow();
 });

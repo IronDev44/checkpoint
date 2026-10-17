@@ -1,5 +1,6 @@
 import { accountStorage as localStorage } from "../services/accountData";
 import { useEffect, useMemo } from "react";
+import { CheckpointIntro } from "./CheckpointEffects";
 import PlayStationSymbol from "./PlayStationSymbol";
 import { SteamDeckIntro } from "./SteamDeckEffects";
 import { AuroraIntro } from "./AuroraEffects";
@@ -36,9 +37,9 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
   const safeProgress = Math.max(0, Math.min(100, Math.round(progress)));
   const storedTheme = useMemo(() => {
     try {
-      return localStorage.getItem("checkpoint-theme") || "theme-indigo";
+      return localStorage.getItem("checkpoint-theme") || "theme-checkpoint";
     } catch (error) {
-      return "theme-indigo";
+      return "theme-checkpoint";
     }
   }, []);
   const splashTheme = explicitTheme || storedTheme;
@@ -93,6 +94,8 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
   }, [managed, onRequestClose, showSplash]);
 
   if (!showSplash) return null;
+
+  if (splashTheme === "theme-checkpoint") return <CheckpointIntro progress={safeProgress} light={light} onRequestClose={onRequestClose}/>;
 
   if (getGameUniverseTheme(splashTheme)) return <GameUniverseIntro theme={splashTheme} progress={safeProgress} light={light} effects={effects} onRequestClose={onRequestClose}/>;
 

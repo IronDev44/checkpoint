@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal as renderPortal } from "react-dom";
 import "./ThemeTransition.css";
+import { CheckpointTransition } from "./CheckpointEffects";
 import PlayStationSymbol from "./PlayStationSymbol";
 import { SteamDeckTransition } from "./SteamDeckEffects";
 import { AuroraTransition } from "./AuroraEffects";
@@ -127,6 +128,7 @@ export default function ThemeTransition({ theme, direction, effects, fullMotion 
     <div className="checkpoint-transition-still" aria-hidden="true" />,
     document.body
   );
+  if (theme === "theme-checkpoint") return createPortal(<CheckpointTransition light={light} direction={direction}/>, document.body);
   if (getGameUniverseTheme(theme)) return createPortal(<GameUniverseTransition theme={theme} direction={direction} light={light} effects={effects}/>, document.body);
   if (getPopCultureTheme(theme)) return createPortal(<PopCultureTransition theme={theme} direction={direction} light={light} effects={effects}/>, document.body);
   if (theme === "theme-slayer") return createPortal(<SlayerTransition direction={direction} effects={effects} />, document.body);

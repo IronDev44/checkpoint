@@ -9,6 +9,8 @@ import { POP_CULTURE_THEMES } from "./data/popCultureThemes";
 import "./components/GameUniverseThemes.css";
 import { GAME_UNIVERSE_THEMES } from "./data/gameUniverseThemes";
 import "./documentScroll.css";
+import "./components/CheckpointTheme.css";
+import { CheckpointMark } from "./components/CheckpointEffects";
 import { db, auth } from "./firebase";
 import { ownerUid } from "./services/accountConfig";
 import { collection, doc, accountsEnabled, accountStorage as localStorage } from "./services/accountData";
@@ -9333,7 +9335,8 @@ export function SocialTab({
   );
 }
 
-function HomeTab({
+export function HomeTab({
+  theme,
   games,
   hardware = [],
   badges,
@@ -9947,9 +9950,7 @@ function HomeTab({
     fetchRecommendations();
   }, [games]);
 
-  return (
-    <div className="home-page">
-      <XPCard
+  const levelSection = <><XPCard
         totalXP={totalXP}
         level={level}
         title={getRankTitle(level)}
@@ -9966,11 +9967,10 @@ function HomeTab({
           {!proposedActions.length && <p>Tout est à jour ici. Tu peux découvrir un autre jeu ou tenter le quiz.</p>}
         </div>
         <p className="option-value">Ton profil se dessine avec tes jeux et ton matériel. L’XP dépend des informations enregistrées : les modifier plusieurs fois ne cumule pas les récompenses.</p>
-      </section>
-
-      <div className="home-hero">
+      </section></>;
+  const sessionSection = (<div className="home-hero">
         <div>
-          <div className="home-kicker">{homeGreeting}</div>
+          <div className="home-kicker">{theme === "theme-checkpoint" ? "Ta prochaine session" : homeGreeting}</div>
           <h2>{nextPlayCandidate?.name || (total > 0 ? "Tes jeux, tout simplement" : "On commence ?")}</h2>
           <p>{homeHeroCopy}</p>
           <div className="home-analysis-tags">
@@ -9982,7 +9982,38 @@ function HomeTab({
 
         {nextPlayCandidate?.image && <img className="home-current-cover" src={nextPlayCandidate.image} alt="" />}
         <button type="button" className="save-review-btn home-resume-action" onClick={() => dashboardAction.game ? onOpenDetail(dashboardAction.game) : setActiveTab(dashboardAction.tab)}>{dashboardAction.label}</button>
-      </div>
+      </div>);
+  const collectionSection = (<section className="home-collection-overview" aria-label="Ta collection">
+        <h2 className="panel-title">Ta collection en bref</h2>
+          <div className="home-cockpit-side">
+            <div className="home-dashboard-stats">
+              {dashboardStats.map((stat) => (
+                <div key={stat.label} className="home-dashboard-stat">
+                  <strong>{stat.value}</strong>
+                  <span>{stat.label}</span>
+                  <small>{stat.detail}</small>
+                </div>
+              ))}
+            </div>
+
+            <div className="home-actions-grid home-main-actions">
+              {homeQuickActions.map((action) => (
+                <button
+                  key={action.tab}
+                  type="button"
+                  onClick={() => setActiveTab(action.tab)}
+                >
+                  {action.label}
+                </button>
+              ))}
+            </div>
+          </div>
+      </section>);
+
+  return (
+    <div className="home-page">
+      {theme === "theme-checkpoint" ? <>{sessionSection}{collectionSection}{levelSection}</> : <>{levelSection}{sessionSection}</>}
+
 
       <div className="home-dashboard-panel home-library-preview">
         {sessionQueue.some((game) => game.id !== nextPlayCandidate?.id) && (
@@ -10027,32 +10058,7 @@ function HomeTab({
         )}
       </div>
 
-      <section className="home-collection-overview" aria-label="Ta collection">
-        <h2 className="panel-title">Ta collection en bref</h2>
-          <div className="home-cockpit-side">
-            <div className="home-dashboard-stats">
-              {dashboardStats.map((stat) => (
-                <div key={stat.label} className="home-dashboard-stat">
-                  <strong>{stat.value}</strong>
-                  <span>{stat.label}</span>
-                  <small>{stat.detail}</small>
-                </div>
-              ))}
-            </div>
-
-            <div className="home-actions-grid home-main-actions">
-              {homeQuickActions.map((action) => (
-                <button
-                  key={action.tab}
-                  type="button"
-                  onClick={() => setActiveTab(action.tab)}
-                >
-                  {action.label}
-                </button>
-              ))}
-            </div>
-          </div>
-      </section>
+      {theme !== "theme-checkpoint" && collectionSection}
 
       <HomeDealsPreview
         dealPreferences={dealPreferences}
@@ -14723,6 +14729,7 @@ function OptionsTab({
     data: false,
   });
   const themes = [
+  { id: "theme-checkpoint", label: "Checkpoint — Noir & Or" },
   { id: "theme-indigo", label: "Aurora Neon" },
   { id: "theme-playstation", label: "PlayStation 5" },
   { id: "theme-xbox", label: "Xbox Dashboard" },
@@ -17460,7 +17467,7 @@ export default function App({ startupVisible = false, onStartupProgress } = {}) 
   })
   
   const [theme, setTheme] = useState(
-    localStorage.getItem("checkpoint-theme") || "theme-indigo"
+    localStorage.getItem("checkpoint-theme") || "theme-checkpoint"
   );
   const [uiMode, setUiMode] = useState(
     localStorage.getItem("checkpoint-ui-mode") === "pixel"
@@ -18613,6 +18620,7 @@ useEffect(() => {
 
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     const colors = {
+      "theme-checkpoint": "#090a0c",
       "theme-indigo": "#07091f",
       "theme-emerald": "#121a24",
       "theme-crimson": "#111419",
@@ -20187,7 +20195,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       <div className={`app-shell ${showSplash ? "app-hidden" : "app-visible"}`}>
         <div className="container">
           <div className="app-title-row">
-            <h1 className="title" data-title="Checkpoint">Checkpoint</h1>
+            <h1 className="title" data-title="Checkpoint"><CheckpointMark className="checkpoint-header-mark"/>Checkpoint</h1>
             <NotificationCenter
               notifications={visibleNotifications}
               open={notificationPanelOpen}
@@ -20229,6 +20237,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
 {activeTab === "home" && (
   <HomeTab
+  theme={theme}
   games={games}
   hardware={hardware}
   badges={badges}
