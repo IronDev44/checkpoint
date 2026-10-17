@@ -15375,8 +15375,8 @@ function OptionsTab({
 
             <div className="option-setting-card">
               <div>
-                <strong>Icône de l'app</strong>
-                <span>Choisis l'icône utilisée par le navigateur et l'app installée.</span>
+                <strong>Icône du navigateur</strong>
+                <span>L’app installée utilise le C doré de Checkpoint. Choisis ici l’icône de ton onglet.</span>
               </div>
               <div className="option-pill-grid two compact">
                 <button
@@ -15384,14 +15384,14 @@ function OptionsTab({
                   className={`option-pill ${appOptions.appIcon === "theme" ? "active" : ""}`}
                   onClick={() => onOptionChange("appIcon", "theme")}
                 >
-                  Thème
+                  C doré
                 </button>
                 <button
                   type="button"
                   className={`option-pill ${appOptions.appIcon === "classic" ? "active" : ""}`}
                   onClick={() => onOptionChange("appIcon", "classic")}
                 >
-                  CP
+                  CP classique
                 </button>
               </div>
             </div>
@@ -18681,8 +18681,11 @@ useEffect(() => {
 
     iconLink.setAttribute(
       "href",
-      appOptions.appIcon === "classic" ? "/favicon.ico" : "/logo-cp-transparent.png"
+      appOptions.appIcon === "classic" ? "/favicon-classic.ico" : "/checkpoint-icon-64.png"
     );
+    iconLink.setAttribute("type", appOptions.appIcon === "classic" ? "image/x-icon" : "image/png");
+    if (appOptions.appIcon === "classic") iconLink.removeAttribute("sizes");
+    else iconLink.setAttribute("sizes", "64x64");
   }, [appOptions]);
 
 useEffect(() => {

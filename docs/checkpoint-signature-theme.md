@@ -12,4 +12,6 @@ Original flagship theme, based on the approved black and champagne gold concept.
 
 Implementation: `CheckpointEffects.jsx`, `CheckpointTheme.css`, `App.js`, `SplashScreen.jsx`, `ThemeTransition.js`, `startupAppearance.js`, `public/index.html`.
 
+Installed app identity: `public/checkpoint-icon.svg` is rendered directly from `CheckpointMark` by `scripts/generate-checkpoint-icons.cjs`, with an opaque near-black background and centered gold geometry inside Android's safe circle. PNGs cover favicon (64), Apple touch (180), PWA (192/512) and Android maskable (512); legacy image URLs and the multi-resolution ICO also receive the new artwork. The old CP remains an opt-in browser favicon only, using `favicon-classic.ico`. OS launcher icon refresh timing is controlled by the OS/browser; changing the in-app browser-icon option does not change the installed launcher icon.
+
 Validation: targeted startup and theme suites, production compilation, real Chromium screenshots at mobile and desktop viewport sizes. Browser viewport checks do not replace physical Android/iPhone testing.
