@@ -132,7 +132,7 @@ export default function ThemeTransition({ theme, direction, effects, fullMotion 
   if (theme === "theme-checkpoint") return createPortal(<CheckpointTransition light={light} direction={direction}/>, document.body);
   if (getGameUniverseTheme(theme)) return createPortal(<GameUniverseTransition theme={theme} direction={direction} light={light} effects={effects}/>, document.body);
   if (getPopCultureTheme(theme)) return createPortal(<PopCultureTransition theme={theme} direction={direction} light={light} effects={effects}/>, document.body);
-  if (theme === "theme-slayer") return createPortal(<SlayerTransition direction={direction} effects={effects} />, document.body);
+  if (theme === "theme-slayer") return createPortal(<SlayerTransition direction={direction} effects={effects} light={light} />, document.body);
   if (theme === "theme-cyberpunk") return createPortal(<TokyoTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-retro") return createPortal(<ArcadeTransition effects={effects} />, document.body);
   if (theme === "theme-graphite") return createPortal(<CarbonTransition direction={direction} effects={effects} />, document.body);

@@ -122,8 +122,8 @@ html body[data-theme="theme-checkpointpremium"] :is(.xp-card,.profile-tab .curre
   animation:var(--premium-progress-glint) !important;
 }
 html body[data-theme="theme-checkpointpremium"] .bottom-tabs .tab-btn.active {
-  background:linear-gradient(155deg,#f6edff30,transparent 45%),linear-gradient(135deg,#3a344d,#191d29) !important;
-  color:#f4edff !important; box-shadow:inset 0 1px #fff8,inset 0 -1px #c7e4f233,0 0 18px #c0a9e52b !important;
+  background:var(--accent) !important;
+  color:var(--signature-button-ink) !important; box-shadow:inset 0 1px #ffffffd9,inset 0 -2px #8d83ad80,0 0 18px #c0a9e547 !important;
 }
 html body[data-theme="theme-checkpointpremium"] .app-title-row .title { text-shadow:0 0 18px #d7c5fa45 !important; }
 html body[data-theme="theme-checkpointpremium"] .checkpoint-wordmark {
