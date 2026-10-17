@@ -35,7 +35,7 @@ function PortalScene({ light, boost }) {
   return <div className="gu-world gu-portal-world" aria-hidden="true">
     <div className="gu-test-tiles"/><div className="gu-test-light"/>
     <div className="gu-portal-door orange"><i/></div><div className="gu-portal-door blue"><i/></div>
-    <svg className="gu-hero gu-companion" viewBox="0 0 360 360"><path d="M180 50L300 119V257L180 326L60 257V119Z" fill="#aab8c2" stroke="#e4edf0" strokeWidth="5"/><path d="M60 119L180 188L300 119M180 188V326" fill="none" stroke="#536b7a" strokeWidth="6"/><path d="M90 137V236L160 277V199ZM203 199V277L272 237V138ZM104 113L181 69L257 113L181 158Z" fill="#849ba9" stroke="#dce8eb" strokeWidth="4"/><g transform="translate(98 164) skewY(30)"><circle cx="28" cy="28" r="27" fill="#d8e2e6" stroke="#e5b2cc" strokeWidth="6"/><path d="M28 43L11 26C1 13 17 5 28 18C39 5 55 13 45 26Z" fill="#d783b3"/></g><g transform="translate(205 191) skewY(-30)"><circle cx="28" cy="28" r="27" fill="#d8e2e6" stroke="#e5b2cc" strokeWidth="6"/><path d="M28 43L11 26C1 13 17 5 28 18C39 5 55 13 45 26Z" fill="#d783b3"/></g><path d="M61 119L90 137M300 119L272 138M180 50V80M60 257L90 236M180 326V277M300 257L272 237" stroke="#f5f8fa" strokeWidth="14"/></svg>
+    <svg className="gu-hero gu-companion" viewBox="0 0 360 360" fill="none"><path d="M180 35L290 105L315 235L180 328L45 235L70 105Z" fill="#314c5d" stroke="#b6d8da" strokeWidth="3"/><path d="M180 35L180 328M70 105L290 105L180 328L70 105L315 235H45L290 105L180 35" stroke="#a5cbd277" strokeWidth="2"/><path d="M180 35L290 105L180 180L70 105Z" fill="#c4dddd22"/><path d="M180 180L315 235L180 328Z" fill="#e0b78b22"/><circle cx="180" cy="180" r="24" stroke="#d4d9c4" strokeWidth="2"/><path d="M160 180H200M180 160V200" stroke="#d9ded3" strokeWidth="2"/></svg>
     <div className="gu-test-line"><span>01</span><i/><span>02</span></div><Particles kind="test-dust" light={light} boost={boost}/>
   </div>;
 }
@@ -57,10 +57,8 @@ function GameScene({ motif, light, boost }) {
   if(MoreScene)return <MoreScene {...props}/>;
   switch(motif){
     case "elden":return <EldenScene {...props}/>;
-    case "halo":return <HaloScene {...props}/>;
     case "bioshock":return <BioShockScene {...props}/>;
     case "portal":return <PortalScene {...props}/>;
-    case "godwar":return <GodWarScene {...props}/>;
     case "crossing":return <CrossingScene {...props}/>;
     default:return null;
   }
@@ -77,7 +75,7 @@ export function GameUniverseIntro({ theme, progress=0, effects="balanced", light
   const value=Math.max(0,Math.min(100,Math.round(Number(progress)||0))),reduced=light||effects==="calm";
   return <section className={`pc-boot gu-boot gu-${config.motif} ${reduced?"is-light":""} ${value===100?"is-ready":""}`} aria-label={`Introduction ${config.label}`}>
     <RevisedIntroScene motif={config.motif} light={reduced}/><div className="pc-scene-shade"/>
-    <header className="pc-boot-header"><span>{config.universe}</span>{onRequestClose&&<button type="button" onClick={onRequestClose}>Passer l’intro <span aria-hidden="true">›</span></button>}</header>
+    <header className="pc-boot-header"><span>{config.sceneTitle||config.universe}</span>{onRequestClose&&<button type="button" onClick={onRequestClose}>Passer l’intro <span aria-hidden="true">›</span></button>}</header>
     <div className="pc-boot-copy"><span>{config.kicker}</span><h1>CHECKPOINT</h1><p>{config.subtitle}</p></div>
     <footer className="pc-boot-loading"><div><span>{value===100?"Tout est prêt":"Chargement…"}</span><strong>{value} %</strong></div><div className="pc-load-track" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><i style={{width:`${value}%`}}/></div></footer>
   </section>;

@@ -54,7 +54,8 @@ test("intro scroll locking is removed when returning to the app",()=>{
 
 test("Jurassic intro shows the park entrance and bounds loading progress",()=>{
   render(<><PopCultureIntro theme="theme-jurassic" progress={-10}/><PopCultureIntro theme="theme-jurassic" progress={200}/></>);
-  expect([...document.querySelectorAll('.rv-cinematic-plate')].map(node=>node.getAttribute('src'))).toEqual(['/theme-scenes/park-gates-v2.webp','/theme-scenes/park-gates-v2.webp']);
+  expect(document.querySelectorAll('[data-original-world=jurassic] canvas')).toHaveLength(2);
+  expect(document.querySelector('img')).toBeNull();
   expect(document.querySelector('.pc-amber')).toBeNull();
   expect(screen.getAllByRole("progressbar").map(node=>node.getAttribute("aria-valuenow"))).toEqual(["0","100"]);
 });

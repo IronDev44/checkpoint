@@ -30,14 +30,14 @@ test.each([
   expect(document.querySelector('[data-intro-vignette]')).toBeNull();
 });
 
-test('simultaneous Halo previews keep their visor and armor gradient references independent',()=>{
-  render(<><SplashScreen theme="theme-halo" showSplash managed/><SplashScreen theme="theme-halo" showSplash managed/></>);
-  const ids=[...document.querySelectorAll('linearGradient')].map(node=>node.id);
-  expect(ids).toHaveLength(4);
-  expect(new Set(ids).size).toBe(4);
+test.each(['theme-halo','theme-portal','theme-godwar','theme-outlaw','theme-assassin','theme-future','theme-jurassic'])('%s opens an original procedural world without image requests',theme=>{
+  render(<SplashScreen theme={theme} showSplash managed progress={65}/>);
+  expect(document.querySelector('[data-original-world] canvas')).not.toBeNull();
+  expect(document.querySelector('img')).toBeNull();
+  expect(document.querySelector('.rv-spartan,.rv-creed-sigil,.rv-park-lintel')).toBeNull();
 });
 
-test('tab transitions do not fetch the larger cinematic intro plates',()=>{
+test('tab transitions do not request image assets',()=>{
   for(const theme of ['theme-godwar','theme-outlaw','theme-assassin','theme-future','theme-jurassic']){
     const view=render(<ThemeTransition theme={theme} fullMotion/>);
     expect(document.querySelector('img')).toBeNull();

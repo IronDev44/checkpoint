@@ -1,3 +1,5 @@
+> Historique : les cinq illustrations ci-dessous ont été retirées de la version publiée le 17 octobre 2026. Voir [les scènes animées originales](theme-scenes-v3.md).
+
 # Intros and tab transitions — 16 October 2026
 
 The 16 recent universes now have separate startup establishing shots. Short tab

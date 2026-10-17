@@ -1,0 +1,6 @@
+.iw-world,.iw-sky-fallback,.iw-world-canvas,.iw-scene-fade{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.iw-world{overflow:hidden;background:var(--pc-bg);contain:strict}
+.iw-sky-fallback{background:radial-gradient(ellipse at 50% 30%,#8aafa526,transparent 65%),var(--pc-bg)}
+.iw-world-canvas{display:block}
+.iw-scene-fade{background:linear-gradient(180deg,#020a101c,transparent 18%,transparent 34%,var(--pc-bg) 70%)}
+@media(min-aspect-ratio:1/1) and (min-width:600px){.iw-scene-fade{background:linear-gradient(90deg,transparent 25%,var(--pc-bg) 60%),linear-gradient(0deg,var(--pc-bg),transparent 22%)}}
