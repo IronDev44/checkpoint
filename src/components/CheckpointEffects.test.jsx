@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import SplashScreen from "./SplashScreen";
 import ThemeTransition from "./ThemeTransition";
-import { CheckpointIntro } from "./CheckpointEffects";
+import { CheckpointIntro, CheckpointMark } from "./CheckpointEffects";
 import { readStartupAppearance, saveStartupAppearance } from "../services/startupAppearance";
 
 test("new visitors get Checkpoint while existing choices survive", () => {
@@ -11,6 +11,22 @@ test("new visitors get Checkpoint while existing choices survive", () => {
   expect(readStartupAppearance().theme).toBe("theme-indigo");
   saveStartupAppearance({theme:"theme-checkpoint",light:true});
   expect(readStartupAppearance()).toEqual({theme:"theme-checkpoint",light:true,effects:"balanced"});
+});
+
+test("concurrent emblems reference their own metallic paints and reveal mask", () => {
+  const view=render(<><CheckpointMark className="checkpoint-header-mark"/><CheckpointIntro progress={50}/><CheckpointMark/></>);
+  const marks=[...view.container.querySelectorAll("svg.checkpoint-mark")];
+  expect(marks).toHaveLength(3);
+  const ids=[...view.container.querySelectorAll("[id]")].map(node=>node.id);
+  expect(new Set(ids).size).toBe(ids.length);
+  marks.forEach(mark=>{
+    mark.querySelectorAll("[fill],[stroke],[mask]").forEach(node=>{
+      ["fill","stroke","mask"].forEach(attr=>{
+        const value=node.getAttribute(attr)||"";
+        if(value.startsWith("url(#")) expect([...mark.querySelectorAll("[id]")].some(def=>def.id===value.slice(5,-1))).toBe(true);
+      });
+    });
+  });
 });
 
 test("startup uses the original emblem and exposes real loading progress and skip", () => {

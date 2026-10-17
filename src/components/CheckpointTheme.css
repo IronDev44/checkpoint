@@ -56,10 +56,12 @@ html body[data-theme="theme-checkpoint"] .account-welcome .welcome-reset { color
 html body[data-theme="theme-checkpoint"] :is(button,input,a):focus-visible { outline:2px solid #e7cc8c; outline-offset:4px; }
 .checkpoint-gold-intro { position:fixed; inset:0; z-index:100000; background:radial-gradient(ellipse at 50% 40%,#342a164a,transparent 55%),#090a0c; color:#d6b66f; display:grid; place-items:center; overflow:hidden; isolation:isolate; font-family:inherit; }
 .checkpoint-gold-intro-content { position:relative; text-align:center; width:min(90%,760px); padding-bottom:60px; }
-.checkpoint-gold-emblem { width:clamp(125px,23vw,220px); margin:0 auto 48px; filter:drop-shadow(0 0 22px #d6b66f33); }
+.checkpoint-gold-emblem { width:clamp(140px,25vw,236px); margin:0 auto 48px; filter:drop-shadow(0 5px 14px #0008); }
 .checkpoint-mark { display:block; width:100%; height:auto; }
-.checkpoint-gold-intro .checkpoint-gateway { stroke-dasharray:290; animation:checkpoint-trace 2.2s ease-out both; }
-.checkpoint-gold-intro .checkpoint-diamond { transform-origin:82px 56px; animation:checkpoint-arrive 1.8s ease-out both; }
+.checkpoint-gold-intro .checkpoint-mark-reveal { stroke-dasharray:1; animation:checkpoint-trace 2.2s cubic-bezier(.3,.05,.2,1) both; }
+.checkpoint-gold-intro .checkpoint-diamond { transform-origin:96px 64px; animation:checkpoint-arrive 1.8s ease-out both; }
+.checkpoint-header-mark :is(.checkpoint-facet,.checkpoint-gem-edge) { display:none; }
+.checkpoint-header-mark .checkpoint-mark-edge { opacity:.55; }
 .checkpoint-gold-intro h1 { font-family:var(--checkpoint-brand-font,"Orbitron",sans-serif); font-size:clamp(25px,6vw,64px); letter-spacing:.08em; color:#f4f0e7; margin:0 0 18px; }
 .checkpoint-gold-intro p { color:#cfbd98; font-size:clamp(13px,2.6vw,19px); letter-spacing:.12em; margin:0; }
 .checkpoint-gold-skip { position:absolute; top:max(24px,env(safe-area-inset-top)); right:24px; padding:12px; color:#e7cc8c; background:transparent; border:1px solid #d6b66f40; border-radius:12px; cursor:pointer; }
@@ -73,13 +75,13 @@ html body[data-theme="theme-checkpoint"] :is(button,input,a):focus-visible { out
 .checkpoint-gold-transition { position:fixed; inset:0; z-index:99990; pointer-events:none; overflow:hidden; display:grid; place-items:center; color:#d6b66f; animation:checkpoint-transition-fade 840ms ease both; }
 .checkpoint-gold-wipe { position:absolute; inset:0; background:#090a0cf5; }
 .checkpoint-gold-trail { position:absolute; height:1px; width:150%; background:linear-gradient(90deg,transparent,#e7cc8c,transparent); transform:rotate(-24deg); animation:checkpoint-pass 840ms cubic-bezier(.2,.7,.3,1) both; }
-.checkpoint-gold-transition > .checkpoint-mark { position:relative; width:74px; animation:checkpoint-save 840ms ease both; }
+.checkpoint-gold-transition > .checkpoint-mark { position:relative; width:86px; animation:checkpoint-save 840ms ease both; }
 .checkpoint-gold-sparks { position:absolute; inset:0; }
 .checkpoint-gold-sparks i { position:absolute; left:calc(12% + var(--point)*6.5%); top:calc(25% + var(--point)*4%); width:3px; height:3px; border-radius:50%; background:#d6b66f; animation:checkpoint-spark 840ms ease-out both; }
 .checkpoint-gold-intro.is-light .checkpoint-gold-orbit i { animation:none; }
 .checkpoint-gold-transition.is-light .checkpoint-gold-trail { display:none; }
 .checkpoint-gold-transition.direction-left .checkpoint-gold-trail { animation-direction:reverse; }
-@keyframes checkpoint-trace { from { stroke-dashoffset:290; } to { stroke-dashoffset:0; } }
+@keyframes checkpoint-trace { from { stroke-dashoffset:1; } to { stroke-dashoffset:0; } }
 @keyframes checkpoint-arrive { 0%,45% { opacity:0; transform:translateX(20px) scale(.5); } 100% { opacity:1; transform:none; } }
 @keyframes checkpoint-orbit { to { rotate:360deg; } }
 @keyframes checkpoint-transition-fade { 0%,100% { opacity:0; } 20%,68% { opacity:1; } }
