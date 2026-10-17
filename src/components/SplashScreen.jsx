@@ -1,6 +1,6 @@
 import { accountStorage as localStorage } from "../services/accountData";
 import { useEffect, useMemo } from "react";
-import { CheckpointIntro, CheckpointPremiumIntro } from "./CheckpointEffects";
+import { CheckpointIntro, CheckpointPremiumIntro, CheckpointUltimateIntro } from "./CheckpointEffects";
 import PlayStationSymbol from "./PlayStationSymbol";
 import { SteamDeckIntro } from "./SteamDeckEffects";
 import { AuroraIntro } from "./AuroraEffects";
@@ -95,6 +95,7 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
 
   if (!showSplash) return null;
 
+  if (splashTheme === "theme-checkpointultimate") return <CheckpointUltimateIntro progress={safeProgress} light={light} onRequestClose={onRequestClose}/>;
   if (splashTheme === "theme-checkpointpremium") return <CheckpointPremiumIntro progress={safeProgress} light={light} onRequestClose={onRequestClose}/>;
   if (splashTheme === "theme-checkpoint") return <CheckpointIntro progress={safeProgress} light={light} onRequestClose={onRequestClose}/>;
 

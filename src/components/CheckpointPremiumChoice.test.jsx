@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import CheckpointPremiumChoice from "./CheckpointPremiumChoice";
 import SplashScreen from "./SplashScreen";
 import ThemeTransition from "./ThemeTransition";
-import { CHECKPOINT_PREMIUM_THEME as premium } from "../services/themeRewards";
+import { CHECKPOINT_PREMIUM_THEME as premium, CHECKPOINT_ULTIMATE_THEME as ultimate } from "../services/themeRewards";
 import { readStartupAppearance, saveStartupAppearance } from "../services/startupAppearance";
 
 test("locked reward shows its requirement and never selects itself", () => {
@@ -37,4 +37,35 @@ test("premium transitions differ from gold, reduce facets and clean up their por
   expect(document.querySelector(".checkpoint-premium-transition.is-light.direction-left")).not.toBeNull();
   expect(document.querySelector(".checkpoint-premium-transition-facets")).toBeNull();
   view.unmount(); expect(document.querySelector(".checkpoint-premium-transition")).toBeNull();
+});
+
+
+test("ultimate is locked before earning, then selects the right theme without colour descriptions", () => {
+  const select=jest.fn();
+  const view=render(<CheckpointPremiumChoice rewardTheme={ultimate} level={99} theme={premium} unlockedThemes={[premium]} onSelect={select}/>);
+  const choice=screen.getByRole("button",{name:/Checkpoint Ultime/});
+  expect(choice).toBeDisabled();
+  expect(choice).toHaveAccessibleName(/niveau 100, niveau actuel 99/);
+  fireEvent.click(choice);expect(select).not.toHaveBeenCalled();
+  view.rerender(<CheckpointPremiumChoice rewardTheme={ultimate} level={10} theme={ultimate} unlockedThemes={[ultimate]} onSelect={select}/>);
+  expect(choice).toBeEnabled();expect(choice).toHaveAttribute("aria-pressed","true");
+  expect(choice.querySelector("small")).toBeNull();
+  fireEvent.click(choice);expect(select).toHaveBeenCalledWith(ultimate);
+});
+
+test("ultimate startup and portal have distinct compositions and reduce geometry", () => {
+  saveStartupAppearance({theme:ultimate,light:true});
+  expect(readStartupAppearance().theme).toBe(ultimate);
+  const view=render(<SplashScreen showSplash managed theme={ultimate} progress={64}/>);
+  expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow","64");
+  expect(document.querySelector(".checkpoint-ultimate-intro .checkpoint-mark-diamond")).not.toBeNull();
+  expect(document.querySelectorAll(".checkpoint-ultimate-iris i")).toHaveLength(12);
+  view.rerender(<ThemeTransition theme={ultimate} fullMotion effects="balanced"/>);
+  expect(document.querySelector(".checkpoint-ultimate-intro")).toBeNull();
+  expect(document.querySelectorAll(".checkpoint-ultimate-rays i")).toHaveLength(8);
+  expect(document.querySelector(".checkpoint-premium-shutter")).toBeNull();
+  view.rerender(<ThemeTransition theme={ultimate} fullMotion light direction="left" effects="calm"/>);
+  expect(document.querySelector(".checkpoint-ultimate-transition.is-light.direction-left")).not.toBeNull();
+  expect(document.querySelector(".checkpoint-ultimate-rays")).toBeNull();
+  view.unmount();expect(document.querySelector(".checkpoint-ultimate-transition")).toBeNull();
 });

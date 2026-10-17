@@ -1,14 +1,16 @@
 import { useId } from "react";
 import "./CheckpointTheme.css";
 import "./CheckpointPremium.css";
+import "./CheckpointUltimate.css";
 
 // A gateway and its save point: one original mark shared by the app and boot.
 export function CheckpointMark({ className = "", variant = "gold" }) {
   // Instances coexist in the header, boot and portal. SVG paint IDs must not collide.
   const id = `checkpoint-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
-  const platinum = variant === "platinum";
-  const metal = platinum ? ["#fcfcff", "#d8dbe5", "#8c91a5", "#eeeaf9", "#8d91a4"] : ["#fff0bf", "#ddbd76", "#b58a3e", "#f1d89b", "#b28a43"];
-  return <svg className={`checkpoint-mark${platinum ? " checkpoint-mark-platinum" : ""} ${className}`} viewBox="0 0 120 128" fill="none" aria-hidden="true" focusable="false">
+  const diamond = variant === "diamond";
+  const platinum = variant === "platinum" || diamond;
+  const metal = diamond ? ["#ffffff", "#d7e5e4", "#697986", "#f6e4c8", "#96c6ce"] : platinum ? ["#fcfcff", "#d8dbe5", "#8c91a5", "#eeeaf9", "#8d91a4"] : ["#fff0bf", "#ddbd76", "#b58a3e", "#f1d89b", "#b28a43"];
+  return <svg className={`checkpoint-mark${platinum ? " checkpoint-mark-platinum" : ""}${diamond ? " checkpoint-mark-diamond" : ""} ${className}`} viewBox="0 0 120 128" fill="none" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id={`${id}-gold`} x1="21" y1="12" x2="93" y2="119" gradientUnits="userSpaceOnUse">
         <stop stopColor={metal[0]}/><stop offset=".24" stopColor={metal[1]}/>
@@ -88,4 +90,22 @@ export function CheckpointPremiumTransition({ light = false, direction = "right"
     <div className="checkpoint-premium-transition-seal"><CheckpointMark variant="platinum"/><span>PREMIUM</span></div>
     {!light && <div className="checkpoint-premium-transition-facets">{Array.from({length:6},(_,i)=><i key={i} style={{"--plane":i}}/>)}</div>}
   </div>;
+}
+
+// An aperture of light assembles the mark at boot; a travelling diamond seam
+// opens the next tab. Both keep their own composition and the shared 840ms exit.
+function UltimateIris({light}) {
+  return <div className="checkpoint-ultimate-iris" aria-hidden="true">{Array.from({length:light?4:12},(_,i)=><i key={i} style={{'--facet':i,'--facets':light?4:12}}/>)}</div>;
+}
+export function CheckpointUltimateIntro({progress=0,light=false,onRequestClose}) {
+  const value=Math.max(0,Math.min(100,Math.round(progress)));
+  return <div className={`checkpoint-gold-intro checkpoint-ultimate-intro${light?' is-light':''}`}>
+    <UltimateIris light={light}/><div className="checkpoint-ultimate-horizon" aria-hidden="true"/>
+    {onRequestClose&&<button className="checkpoint-gold-skip" onClick={onRequestClose}>Passer</button>}
+    <main className="checkpoint-gold-intro-content"><span className="checkpoint-ultimate-edition">LE SOMMET DE TON PARCOURS</span><div className="checkpoint-gold-emblem"><CheckpointMark variant="diamond"/></div><h1>CHECKPOINT</h1><p className="checkpoint-ultimate-wordmark">ULTIME</p><p className="checkpoint-ultimate-caption">Chaque partie t’a mené ici.</p></main>
+    <div className="checkpoint-gold-loading"><div><span>Ton espace se prépare</span><strong>{value}%</strong></div><div className="checkpoint-gold-progress" role="progressbar" aria-label="Chargement de Checkpoint Ultime" aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><span style={{width:`${value}%`}}/></div></div>
+  </div>;
+}
+export function CheckpointUltimateTransition({light=false,direction='right'}) {
+  return <div className={`checkpoint-ultimate-transition direction-${direction}${light?' is-light':''}`} aria-hidden="true"><div className="checkpoint-ultimate-veil"/><div className="checkpoint-ultimate-seam"/>{!light&&<div className="checkpoint-ultimate-rays">{Array.from({length:8},(_,i)=><i key={i} style={{'--facet':i}}/>)}</div>}<div className="checkpoint-ultimate-seal"><CheckpointMark variant="diamond"/><span>ULTIME</span></div></div>;
 }

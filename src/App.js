@@ -11,7 +11,7 @@ import { GAME_UNIVERSE_THEMES } from "./data/gameUniverseThemes";
 import "./documentScroll.css";
 import "./components/CheckpointTheme.css";
 import CheckpointPremiumChoice from "./components/CheckpointPremiumChoice";
-import { CHECKPOINT_PREMIUM_THEME, normalizeThemeUnlocks, mergeThemeUnlocks, resolveThemeRewards, canUseTheme, isCheckpointTheme } from "./services/themeRewards";
+import { CHECKPOINT_PREMIUM_THEME, CHECKPOINT_ULTIMATE_THEME, normalizeThemeUnlocks, mergeThemeUnlocks, resolveThemeRewards, canUseTheme, isCheckpointTheme } from "./services/themeRewards";
 import { CheckpointMark } from "./components/CheckpointEffects";
 import { db, auth } from "./firebase";
 import { ownerUid } from "./services/accountConfig";
@@ -49,6 +49,7 @@ import { restorePublicBadge, toPublicBadge } from "./services/publicBadges";
 import TrialRoom from "./components/TrialRoom";
 import TesterFeedback from "./components/TesterFeedback";
 import FeedbackInbox from "./components/FeedbackInbox";
+import DeveloperTools from "./components/DeveloperTools";
 import { sendTesterFeedback } from "./services/testerFeedback";
 import {
   GameService,
@@ -14702,6 +14703,8 @@ function OptionsTab({
   checkpointTrialProgress = DEFAULT_CHECKPOINT_TRIAL_PROGRESS,
   onImportSteamGames,
   onImportXboxGames,
+  developerEvents = [],
+  onImportNews,
 }) {
   const [helpTopic, setHelpTopic] = useState(null);
   const [isRepairingGameData, setIsRepairingGameData] = useState(false);
@@ -15280,7 +15283,7 @@ function OptionsTab({
     </div>
   );
   const activeThemeLabel =
-    theme === CHECKPOINT_PREMIUM_THEME ? "Checkpoint Premium" : themes.find((item) => item.id === theme)?.label || "Theme actif";
+    theme === CHECKPOINT_ULTIMATE_THEME ? "Checkpoint Ultime" : theme === CHECKPOINT_PREMIUM_THEME ? "Checkpoint Premium" : themes.find((item) => item.id === theme)?.label || "Theme actif";
   const helpModal = helpTopic
     ? createPortal(
         <div className="option-help-backdrop" onClick={() => setHelpTopic(null)}>
@@ -15336,6 +15339,7 @@ function OptionsTab({
                 <CheckpointMark/><span>Checkpoint</span>
               </button>
               <CheckpointPremiumChoice theme={theme} level={level} unlockedThemes={unlockedThemes} onSelect={setTheme}/>
+              <CheckpointPremiumChoice rewardTheme={CHECKPOINT_ULTIMATE_THEME} theme={theme} level={level} unlockedThemes={unlockedThemes} onSelect={setTheme}/>
               {themes.filter(item => item.id !== "theme-checkpoint").map((item) => (
                 <button
                   key={item.id}
@@ -16074,12 +16078,12 @@ function OptionsTab({
 
         </OptionGroup>
 
-        {(!accountsEnabled || auth.currentUser?.uid === ownerUid) && <OptionGroup id="development" isOpen={!!openOptionGroups.development} onToggle={() => setOpenOptionGroups((current) => ({ ...current, development: !current.development }))}
-          title="Développement"
-          description="Accès internes pour tester les grands systèmes sans attendre le bon niveau."
-          summary="Tests internes"
+        {auth.currentUser?.uid === ownerUid && <OptionGroup id="development" isOpen={!!openOptionGroups.development} onToggle={() => setOpenOptionGroups((current) => ({ ...current, development: !current.development }))}
+          title="Accès développeur"
+          description="Tes outils de test, les prochains lives et les retours des testeurs."
+          summary="Tests · Lives · Retours"
         >
-
+          <DeveloperTools accountUid={auth.currentUser?.uid} tests={
           <div className="option-section">
             <div className="option-setting-card option-setting-card-featured">
               <div>
@@ -16103,7 +16107,7 @@ function OptionsTab({
                 ))}
               </div>
             </div>
-          </div>
+          </div>} events={<AdminPanel events={developerEvents} onImportNews={onImportNews}/>} feedback={<FeedbackInbox/>}/>
         </OptionGroup>}
 
         <OptionGroup id="data" isOpen={!!openOptionGroups.data} onToggle={() => setOpenOptionGroups((current) => ({ ...current, data: !current.data }))}
@@ -18638,6 +18642,7 @@ useEffect(() => {
     const colors = {
       "theme-checkpoint": "#090a0c",
       "theme-checkpointpremium": "#08090d",
+      "theme-checkpointultimate": "#060709",
       "theme-indigo": "#07091f",
       "theme-emerald": "#121a24",
       "theme-crimson": "#111419",
@@ -18807,10 +18812,10 @@ useEffect(() => {
   const themeRewardsReady = privateSettingsReady && bootReady.games && bootReady.hardware && trialProgressReady;
   useEffect(() => {
     if (!themeRewardsReady) return;
-    const next = resolveThemeRewards({theme, unlockedThemes, level, ready:themeRewardsReady});
+    const next = resolveThemeRewards({theme, unlockedThemes, level, ready:themeRewardsReady, accountUid:auth.currentUser?.uid});
     if (next.justUnlocked) {
       setUnlockedThemes(next.unlockedThemes);
-      showToast("Checkpoint Premium est débloqué ! Retrouve-le dans les thèmes.", 4000);
+      showToast(next.newlyUnlocked.includes(CHECKPOINT_ULTIMATE_THEME) ? "Checkpoint Ultime est débloqué ! Retrouve-le dans les thèmes." : "Checkpoint Premium est débloqué ! Retrouve-le dans les thèmes.", 4000);
     }
     if (next.theme !== theme) setTheme(next.theme);
   }, [themeRewardsReady, level, unlockedThemes, theme]);
@@ -20228,7 +20233,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       <div className={`app-shell ${showSplash ? "app-hidden" : "app-visible"}`}>
         <div className="container">
           <div className="app-title-row">
-            <h1 className="title" data-title="Checkpoint"><CheckpointMark className="checkpoint-header-mark" variant={theme === CHECKPOINT_PREMIUM_THEME ? "platinum" : "gold"}/><span className="checkpoint-wordmark">Checkpoint</span></h1>
+            <h1 className="title" data-title="Checkpoint"><CheckpointMark className="checkpoint-header-mark" variant={theme === CHECKPOINT_ULTIMATE_THEME ? "diamond" : theme === CHECKPOINT_PREMIUM_THEME ? "platinum" : "gold"}/><span className="checkpoint-wordmark">Checkpoint</span></h1>
             <NotificationCenter
               notifications={visibleNotifications}
               open={notificationPanelOpen}
@@ -20751,9 +20756,10 @@ const setPlayedPlatforms = async (id, platforms) => {
                 checkpointTrialProgress={checkpointTrialProgress}
                 onImportSteamGames={importSteamGamesToLibrary}
                 onImportXboxGames={importXboxGamesToLibrary}
+                developerEvents={gamingEvents}
+                onImportNews={importNewsFromRSS}
               />
 
-              {(!accountsEnabled || auth.currentUser?.uid === ownerUid) && <><FeedbackInbox /><AdminPanel events={gamingEvents} onImportNews={importNewsFromRSS} /></>}
             </>
           )}
 
