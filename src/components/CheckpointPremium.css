@@ -72,3 +72,67 @@ html body[data-theme] button.checkpoint-premium-choice.option-pill.active { back
 @media(max-width:380px) { html body[data-theme] button.checkpoint-premium-choice.option-pill { grid-template-columns:34px minmax(0,1fr); gap:10px; padding:14px !important; } .checkpoint-premium-choice .checkpoint-mark { width:34px; } .checkpoint-premium-choice-status { grid-column:2; } .checkpoint-premium-choice-progress { grid-column:2; } }
 @media(max-height:500px) { .checkpoint-premium-intro .checkpoint-gold-intro-content { padding-bottom:28px; } .checkpoint-premium-intro .checkpoint-gold-emblem { width:75px; margin-bottom:12px; } .checkpoint-premium-edition { margin-bottom:12px; } .checkpoint-premium-intro .checkpoint-premium-caption { margin-top:12px; } .checkpoint-premium-intro .checkpoint-premium-wordmark { font-size:10px; } }
 @media(prefers-reduced-motion:reduce) { .checkpoint-premium-transition,.checkpoint-premium-transition * { animation:none !important; } .checkpoint-full-tab-motion .checkpoint-premium-transition { animation:checkpoint-premium-veil 840ms ease both !important; } }
+
+/* More visible pearl highlights, restricted to Premium's meaningful controls.
+   Moving highlights use transforms; cards keep their reflections stationary. */
+html body[data-theme="theme-checkpointpremium"] {
+  --accent:linear-gradient(115deg,#9aa6bc 0%,#d5d9e9 24%,#fffaff 44%,#d9c9ec 69%,#acd6de 100%) !important;
+  --premium-action-glint:checkpoint-premium-glint 6.8s ease-in-out infinite;
+  --premium-progress-glint:checkpoint-premium-glint 9s ease-in-out infinite;
+}
+html body[data-theme="theme-checkpointpremium"] :is(.save-review-btn,.trial-primary-btn,.wishlist-upcoming-btn,.checkpoint-primary-action,.home-resume-action,.input-container > button):not(:disabled) {
+  position:relative; isolation:isolate; overflow:hidden;
+  border-color:#f2eaff !important;
+  box-shadow:inset 0 2px 0 #ffffffb3,inset 0 -3px 0 #75809c66,0 0 0 1px #ddd0f34d,0 5px 22px #b9a4e54a,0 1px 8px #c7eff22e !important;
+}
+html body[data-theme="theme-checkpointpremium"] :is(.save-review-btn,.trial-primary-btn,.wishlist-upcoming-btn,.checkpoint-primary-action,.home-resume-action,.input-container > button):not(:disabled)::after {
+  content:""; position:absolute; inset:-45% auto -45% -65%; width:45%; border-radius:0; z-index:-1;
+  background:linear-gradient(90deg,transparent 0%,#ffffff12 18%,#fffafcba 48%,#d5f5ff5e 58%,transparent 100%);
+  pointer-events:none; opacity:0; transform:translate3d(0,0,0) skewX(-22deg);
+  animation:var(--premium-action-glint) !important;
+}
+html body[data-theme="theme-checkpointpremium"] .game-rating-save-btn::after { animation-delay:.7s !important; }
+/* Release lists can contain dozens of wishlist buttons: keep those sweeps on hover. */
+html body[data-theme="theme-checkpointpremium"] .wishlist-upcoming-btn::after { animation:none !important; }
+html body[data-theme="theme-checkpointpremium"] :is(.option-pill,.choice-pill,.status-btn,.profile-toggle-btn,.library-switch-btn,.top5-score-tabs button):is(.active,[aria-pressed="true"]):not(:disabled):not(.checkpoint-signature-choice) {
+  box-shadow:inset 0 2px 0 #ffffff8a,inset 0 -3px 0 #626a8b55,0 0 0 1px #e1d4ff66,0 3px 16px #b6a0e433 !important;
+  border-color:#eee6ff !important;
+}
+html body[data-theme="theme-checkpointpremium"] button.checkpoint-premium-choice.option-pill.active {
+  background:linear-gradient(125deg,#ffffff1a,transparent 42%,#c4e7f016),linear-gradient(120deg,#333346,#221d32) !important;
+  box-shadow:inset 0 2px #ffffff80,inset 0 -1px #d1dcf54d,0 0 0 1px #cfc2f24d,0 5px 22px #ae98d82e !important;
+}
+html body[data-theme="theme-checkpointpremium"] :is(.home-hero,.xp-card,.profile-tab .current-rank-card) {
+  background:linear-gradient(125deg,#ffffff13,transparent 30%,transparent 72%,#bcdde70b),var(--signature-hero-bg) !important;
+  border-color:#d5caed66 !important;
+  box-shadow:inset 0 1px 0 #fff5,inset 0 -1px 0 #cbd8f026,0 10px 26px #0006,0 0 22px #b7a1db12 !important;
+}
+html body[data-theme="theme-checkpointpremium"] :is(.xp-card,.profile-tab .current-rank-card) .xp-fill { position:relative; overflow:hidden; box-shadow:0 0 10px #cfc0ef55,inset 0 1px #ffffffa6; }
+html body[data-theme="theme-checkpointpremium"] :is(.xp-card,.profile-tab .current-rank-card) .xp-fill::after {
+  content:""; position:absolute; inset:-45% auto -45% -65%; width:45%; pointer-events:none;
+  background:linear-gradient(90deg,transparent,#ffffffd9,transparent); opacity:0;
+  animation:var(--premium-progress-glint) !important;
+}
+html body[data-theme="theme-checkpointpremium"] .bottom-tabs .tab-btn.active {
+  background:linear-gradient(155deg,#f6edff30,transparent 45%),linear-gradient(135deg,#3a344d,#191d29) !important;
+  color:#f4edff !important; box-shadow:inset 0 1px #fff8,inset 0 -1px #c7e4f233,0 0 18px #c0a9e52b !important;
+}
+html body[data-theme="theme-checkpointpremium"] .app-title-row .title { text-shadow:0 0 18px #d7c5fa45 !important; }
+html body[data-theme="theme-checkpointpremium"] .notification-trigger { border-color:#e0d4f28a !important; box-shadow:inset 0 1px #ffffff59,0 0 15px #c5b0e624 !important; }
+@keyframes checkpoint-premium-glint {
+  0%,8% { opacity:0; transform:translate3d(0,0,0) skewX(-22deg); }
+  12% { opacity:1; }
+  32% { opacity:1; transform:translate3d(480%,0,0) skewX(-22deg); }
+  34%,100% { opacity:0; transform:translate3d(480%,0,0) skewX(-22deg); }
+}
+@media(hover:hover) and (pointer:fine) {
+  html body[data-theme="theme-checkpointpremium"] .wishlist-upcoming-btn:hover:not(:disabled)::after { animation:var(--premium-action-glint) !important; }
+  html body[data-theme="theme-checkpointpremium"] :is(.save-review-btn,.trial-primary-btn,.wishlist-upcoming-btn,.checkpoint-primary-action,.home-resume-action):hover:not(:disabled) {
+    box-shadow:inset 0 2px #fff,inset 0 -3px #8996b666,0 0 0 1px #f5eaff99,0 6px 28px #c9b6ee70 !important;
+  }
+}
+/* Keep the polished metal when motion is reduced, without repeated sweeps. */
+html body[data-theme="theme-checkpointpremium"]:is([data-effects="calm"],[data-ui="reduced"]) { --premium-action-glint:none; --premium-progress-glint:none; }
+@media(prefers-reduced-motion:reduce) {
+  html body[data-theme="theme-checkpointpremium"] { --premium-action-glint:none; --premium-progress-glint:none; }
+}
