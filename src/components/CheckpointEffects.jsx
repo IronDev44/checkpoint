@@ -7,10 +7,10 @@ import "./CheckpointUltimate.css";
 export function CheckpointMark({ className = "", variant = "gold" }) {
   // Instances coexist in the header, boot and portal. SVG paint IDs must not collide.
   const id = `checkpoint-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
-  const diamond = variant === "diamond";
-  const platinum = variant === "platinum" || diamond;
-  const metal = diamond ? ["#fff1e2", "#eaa0aa", "#6a123a", "#e36285", "#972e50"] : platinum ? ["#fcfcff", "#d8dbe5", "#8c91a5", "#eeeaf9", "#8d91a4"] : ["#fff0bf", "#ddbd76", "#b58a3e", "#f1d89b", "#b28a43"];
-  return <svg className={`checkpoint-mark${platinum ? " checkpoint-mark-platinum" : ""}${diamond ? " checkpoint-mark-diamond" : ""} ${className}`} viewBox="0 0 120 128" fill="none" aria-hidden="true" focusable="false">
+  if (variant === "diamond") return <DiamondMark id={id} className={className}/>;
+  const platinum = variant === "platinum";
+  const metal = platinum ? ["#fcfcff", "#d8dbe5", "#8c91a5", "#eeeaf9", "#8d91a4"] : ["#fff0bf", "#ddbd76", "#b58a3e", "#f1d89b", "#b28a43"];
+  return <svg className={`checkpoint-mark${platinum ? " checkpoint-mark-platinum" : ""} ${className}`} viewBox="0 0 120 128" fill="none" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id={`${id}-gold`} x1="21" y1="12" x2="93" y2="119" gradientUnits="userSpaceOnUse">
         <stop stopColor={metal[0]}/><stop offset=".24" stopColor={metal[1]}/>
@@ -20,7 +20,7 @@ export function CheckpointMark({ className = "", variant = "gold" }) {
         <stop stopColor={platinum ? "#ffffff" : "#fff9df"}/><stop offset=".48" stopColor={platinum ? "#d6d0f7" : "#f5dca1"} stopOpacity=".2"/><stop offset="1" stopColor={platinum ? "#c7e0e5" : "#eed395"} stopOpacity=".75"/>
       </linearGradient>
       <linearGradient id={`${id}-gem`} x1="85" y1="52" x2="108" y2="77" gradientUnits="userSpaceOnUse">
-        <stop stopColor={diamond ? "#ffe4d4" : platinum ? "#ffffff" : "#fff3ca"}/><stop offset=".5" stopColor={diamond ? "#f07b9a" : platinum ? "#ded8f4" : "#e9c884"}/><stop offset="1" stopColor={diamond ? "#641734" : platinum ? "#838ba5" : "#a77c33"}/>
+        <stop stopColor={platinum ? "#ffffff" : "#fff3ca"}/><stop offset=".5" stopColor={platinum ? "#ded8f4" : "#e9c884"}/><stop offset="1" stopColor={platinum ? "#838ba5" : "#a77c33"}/>
       </linearGradient>
       <mask id={`${id}-reveal`} maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="128">
         <path className="checkpoint-mark-reveal" d="m92 37-32-19-40 23v46l40 23 32-19" pathLength="1" stroke="white" strokeWidth="28"/>
@@ -92,20 +92,58 @@ export function CheckpointPremiumTransition({ light = false, direction = "right"
   </div>;
 }
 
-// An aperture of light assembles the mark at boot; a travelling diamond seam
-// opens the next tab. Both keep their own composition and the shared 840ms exit.
-function UltimateIris({light}) {
-  return <div className="checkpoint-ultimate-iris" aria-hidden="true">{Array.from({length:light?4:12},(_,i)=><i key={i} style={{'--facet':i,'--facets':light?4:12}}/>)}</div>;
+// Original cut-crystal geometry. Dark tables and narrow illuminated bevels
+// keep Ultime distinct from Premium's solid platinum surface.
+function DiamondMark({id,className}) {
+  const outline="m60 8 36 21-9 15-27-16-31 18v36l31 18 27-16 9 15-36 21-49-28V36Z";
+  return <svg className={`checkpoint-mark checkpoint-mark-diamond ${className}`} viewBox="0 0 120 128" fill="none" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id={`${id}-table`} x1="15" y1="16" x2="91" y2="117" gradientUnits="userSpaceOnUse"><stop stopColor="#334851"/><stop offset=".22" stopColor="#0c151b"/><stop offset=".5" stopColor="#17222a"/><stop offset=".66" stopColor="#060d12"/><stop offset="1" stopColor="#30454f"/></linearGradient>
+      <linearGradient id={`${id}-bevel`} x1="12" y1="14" x2="102" y2="113" gradientUnits="userSpaceOnUse"><stop stopColor="#f7ffff"/><stop offset=".23" stopColor="#89a5b3"/><stop offset=".42" stopColor="#eefcff"/><stop offset=".48" stopColor="#3c5366"/><stop offset=".7" stopColor="#759da8"/><stop offset=".83" stopColor="#e5e4dc"/><stop offset="1" stopColor="#718e9c"/></linearGradient>
+      <linearGradient id={`${id}-rim`} x1="16" y1="17" x2="87" y2="116" gradientUnits="userSpaceOnUse"><stop stopColor="white"/><stop offset=".36" stopColor="#c7edf1"/><stop offset=".52" stopColor="#8a9eae" stopOpacity=".2"/><stop offset=".76" stopColor="#f9f0df"/><stop offset="1" stopColor="#a7c7d4"/></linearGradient>
+      <linearGradient id={`${id}-scan`}><stop stopColor="#98deed" stopOpacity="0"/><stop offset=".42" stopColor="#c5c5ff" stopOpacity=".25"/><stop offset=".5" stopColor="#ffffff" stopOpacity=".95"/><stop offset=".57" stopColor="#e7d6ad" stopOpacity=".3"/><stop offset="1" stopColor="#98deed" stopOpacity="0"/></linearGradient>
+      <clipPath id={`${id}-cut`}><path d={outline}/><path d="m96 50 14 14-14 14-14-14Z"/></clipPath>
+    </defs>
+    <path className="checkpoint-crystal-table" d={outline} fill={`url(#${id}-table)`}/>
+    <g className="checkpoint-crystal-bevels" fill={`url(#${id}-bevel)`}>
+      <path d="m60 8 36 21-6 3-30-18-43 25-6-3Z"/>
+      <path d="m11 36 6 3v50l-6 3Z"/>
+      <path d="m11 92 6-3 43 25v6Z"/>
+      <path d="m60 120 36-21-6-3-30 18Z"/>
+      <path d="m96 29-9 15-3-6 6-6Z"/>
+      <path d="m60 28 27 16-3-6-24-14-35 20 4 2Z"/>
+      <path d="m29 46-4-2v40l4-2Z"/>
+      <path d="m29 82-4 2 35 20v-4Z"/>
+      <path d="m60 100 27-16-3 6-24 14Z"/>
+      <path d="m87 84 9 15-6-3-6-6Z"/>
+    </g>
+    <g className="checkpoint-crystal-inclusions" stroke="#bad9e3" strokeWidth=".45" opacity=".28"><path d="m60 14 0 10M17 39l8 5M17 89l8-5M60 104v10M47 21l-22 40M25 61l35 43M25 61l-8 28M60 104l30-8"/></g>
+    <path className="checkpoint-crystal-rim" d={outline} stroke={`url(#${id}-rim)`} strokeWidth=".7" pathLength="1"/>
+    <path d="m60 18 29 17M21 46v35M33 98l27 16" stroke="#f3ffff" strokeWidth=".55" opacity=".7"/>
+    <g className="checkpoint-crystal-gem"><path d="m96 50 14 14-14 14-14-14Z" fill="#12222d" stroke="#dceff3" strokeWidth=".5"/><path d="m96 50 2 9-16 5Z" fill="#e3f5f8"/><path d="m96 50 14 14-8 1-4-6Z" fill="#91afbd"/><path d="m82 64 10 2 4 12Z" fill="#80a5b3"/><path d="m96 78 6-13 8-1Z" fill="#d9dee6"/><path d="m98 59 4 6-6 7-4-6Z" fill="#2a404c"/><path d="m96 51 12 13" stroke="#fff" strokeWidth=".7"/></g>
+    <g className="checkpoint-crystal-caustic" clipPath={`url(#${id}-cut)`}><path className="checkpoint-crystal-scan" d="m-55-20 30 0 95 180H40Z" fill={`url(#${id}-scan)`}/></g>
+  </svg>;
 }
+
 export function CheckpointUltimateIntro({progress=0,light=false,onRequestClose}) {
   const value=Math.max(0,Math.min(100,Math.round(progress)));
-  return <div className={`checkpoint-gold-intro checkpoint-ultimate-intro${light?' is-light':''}`}>
-    <UltimateIris light={light}/><div className="checkpoint-ultimate-horizon" aria-hidden="true"/>
+  return <div className={`checkpoint-ultimate-intro${light?' is-light':''}`}>
+    <div className="checkpoint-ultimate-studio" aria-hidden="true"><div className="ultimate-studio-light"/><div className="ultimate-studio-floor"/></div>
     {onRequestClose&&<button className="checkpoint-gold-skip" onClick={onRequestClose}>Passer</button>}
-    <main className="checkpoint-gold-intro-content"><span className="checkpoint-ultimate-edition">LE SOMMET DE TON PARCOURS</span><div className="checkpoint-gold-emblem"><CheckpointMark variant="diamond"/></div><h1>CHECKPOINT</h1><p className="checkpoint-ultimate-wordmark">ULTIME</p><p className="checkpoint-ultimate-caption">Chaque partie t’a mené ici.</p></main>
+    <main className="checkpoint-ultimate-stage">
+      <span className="checkpoint-ultimate-edition">LA SIGNATURE CHECKPOINT</span>
+      <div className="checkpoint-ultimate-object"><CheckpointMark variant="diamond"/>{!light&&<div className="checkpoint-ultimate-reflection" aria-hidden="true"><CheckpointMark variant="diamond"/></div>}</div>
+      <div className="checkpoint-ultimate-lockup"><h1>CHECKPOINT</h1><p className="checkpoint-ultimate-wordmark"><span/>ULTIME<span/></p></div>
+    </main>
     <div className="checkpoint-gold-loading"><div><span>Ton espace se prépare</span><strong>{value}%</strong></div><div className="checkpoint-gold-progress" role="progressbar" aria-label="Chargement de Checkpoint Ultime" aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><span style={{width:`${value}%`}}/></div></div>
   </div>;
 }
+
 export function CheckpointUltimateTransition({light=false,direction='right'}) {
-  return <div className={`checkpoint-ultimate-transition direction-${direction}${light?' is-light':''}`} aria-hidden="true"><div className="checkpoint-ultimate-veil"/><div className="checkpoint-ultimate-seam"/>{!light&&<div className="checkpoint-ultimate-rays">{Array.from({length:8},(_,i)=><i key={i} style={{'--facet':i}}/>)}</div>}<div className="checkpoint-ultimate-seal"><CheckpointMark variant="diamond"/><span>ULTIME</span></div></div>;
+  return <div className={`checkpoint-ultimate-transition direction-${direction}${light?' is-light':''}`} aria-hidden="true">
+    <div className="checkpoint-ultimate-veil"/>
+    {!light&&<div className="checkpoint-ultimate-glass" aria-hidden="true"><i/><i/><i/></div>}
+    <div className="checkpoint-ultimate-seam"/>
+    <div className="checkpoint-ultimate-seal"><CheckpointMark variant="diamond"/><span>ULTIME</span></div>
+  </div>;
 }

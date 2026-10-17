@@ -59,13 +59,14 @@ test("ultimate startup and portal have distinct compositions and reduce geometry
   const view=render(<SplashScreen showSplash managed theme={ultimate} progress={64}/>);
   expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow","64");
   expect(document.querySelector(".checkpoint-ultimate-intro .checkpoint-mark-diamond")).not.toBeNull();
-  expect(document.querySelectorAll(".checkpoint-ultimate-iris i")).toHaveLength(12);
+  expect(document.querySelector(".checkpoint-ultimate-object .checkpoint-crystal-bevels")).not.toBeNull();
+  expect(document.querySelector(".checkpoint-ultimate-reflection")).not.toBeNull();
   view.rerender(<ThemeTransition theme={ultimate} fullMotion effects="balanced"/>);
   expect(document.querySelector(".checkpoint-ultimate-intro")).toBeNull();
-  expect(document.querySelectorAll(".checkpoint-ultimate-rays i")).toHaveLength(8);
+  expect(document.querySelectorAll(".checkpoint-ultimate-glass i")).toHaveLength(3);
   expect(document.querySelector(".checkpoint-premium-shutter")).toBeNull();
   view.rerender(<ThemeTransition theme={ultimate} fullMotion light direction="left" effects="calm"/>);
   expect(document.querySelector(".checkpoint-ultimate-transition.is-light.direction-left")).not.toBeNull();
-  expect(document.querySelector(".checkpoint-ultimate-rays")).toBeNull();
+  expect(document.querySelector(".checkpoint-ultimate-glass")).toBeNull();
   view.unmount();expect(document.querySelector(".checkpoint-ultimate-transition")).toBeNull();
 });

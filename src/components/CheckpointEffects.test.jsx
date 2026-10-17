@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import SplashScreen from "./SplashScreen";
 import ThemeTransition from "./ThemeTransition";
-import { CheckpointIntro, CheckpointMark } from "./CheckpointEffects";
+import { CheckpointIntro, CheckpointMark, CheckpointUltimateIntro } from "./CheckpointEffects";
 import { readStartupAppearance, saveStartupAppearance } from "../services/startupAppearance";
 
 test("new visitors get Checkpoint while existing choices survive", () => {
@@ -55,4 +55,23 @@ test("reduced transition drops particles, full transition and portal clean up", 
   expect(document.querySelector(".checkpoint-gold-sparks")).toBeNull();
   view.unmount();
   expect(document.querySelector(".checkpoint-gold-transition")).toBeNull();
+});
+
+
+test("cut-crystal marks use independent paint references in the header, intro and reflection", () => {
+ const view=render(<><CheckpointMark variant="diamond" className="checkpoint-header-mark"/><CheckpointUltimateIntro progress={84}/></>);
+ const marks=[...view.container.querySelectorAll('svg.checkpoint-mark-diamond')];
+ expect(marks).toHaveLength(3);
+ const ids=[...view.container.querySelectorAll('[id]')].map(n=>n.id);
+ expect(new Set(ids).size).toBe(ids.length);
+ marks.forEach(mark=>mark.querySelectorAll('[fill],[stroke],[clip-path]').forEach(node=>['fill','stroke','clip-path'].forEach(attr=>{
+  const ref=node.getAttribute(attr)||'';
+  if(ref.startsWith('url(#'))expect([...mark.querySelectorAll('[id]')].some(def=>def.id===ref.slice(5,-1))).toBe(true);
+ })));
+ expect(document.querySelector('.checkpoint-premium-prism')).toBeNull();
+ expect(document.querySelector('img')).toBeNull();
+ expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow','84');
+ view.rerender(<CheckpointUltimateIntro light progress={42}/>);
+ expect(document.querySelector('.checkpoint-ultimate-reflection')).toBeNull();
+ expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow','42');
 });
