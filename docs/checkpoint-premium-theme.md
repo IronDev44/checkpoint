@@ -28,3 +28,8 @@ Header sizing is shared with standard Checkpoint: larger responsive lettering an
 - Validation for the crystal revision: 63 tests across six focused suites, final SVG/intro checks rerun after the clipped-light correction, production build, and browser checks at 320×568, 390×844, 844×390 and 1440×900. Full/reduced appearance, real loading value, skip, restored scrolling, unique paint references and transition teardown were checked. Physical iPhone/Android testing remains separate.
 
 The authenticated configured owner receives early Ultime access after private account data has loaded. Ownership uses the configured UID, never a public profile flag or display name. The grant is stored in the same private unlock list and does not change the selected theme.
+
+
+Home polish: the collection overview now uses the shared panel material, a semantic stats grid (two columns on phones, four on desktop) and three explicit actions. The secondary library preview is a single panel with cover thumbnails, two-line titles, status/rating metadata and direct game links. It is absent when no secondary game is available.
+
+Premium/Ultime card-edge reflections now use a one-pixel rounded perimeter mask, with no side inset. The gradient travels at a constant rate from fully outside one edge to fully outside the other, so the cycle resets invisibly. When motion is disabled the overlay has zero opacity, rather than leaving a bright band parked on the card. Controls ignore pointer events. Home navigation and game-opening callbacks remain unchanged.

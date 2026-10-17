@@ -13,6 +13,7 @@ import "./components/CheckpointTheme.css";
 import CheckpointPremiumChoice from "./components/CheckpointPremiumChoice";
 import { CHECKPOINT_PREMIUM_THEME, CHECKPOINT_ULTIMATE_THEME, normalizeThemeUnlocks, mergeThemeUnlocks, resolveThemeRewards, canUseTheme, isCheckpointTheme } from "./services/themeRewards";
 import { CheckpointMark } from "./components/CheckpointEffects";
+import "./components/HomeOverview.css";
 import { db, auth } from "./firebase";
 import { ownerUid } from "./services/accountConfig";
 import { collection, doc, accountsEnabled, accountStorage as localStorage } from "./services/accountData";
@@ -9454,10 +9455,10 @@ export function HomeTab({
   }, {});
 
   const dashboardStats = [
-    { label: "Jeux", value: total, detail: `${dashboardFinished} termines` },
-    { label: "En cours", value: inProgressCount, detail: `${wishlistCount} wishlist` },
-    { label: "Note moy.", value: averageRating ? formatRating10(averageRating, "-") : "-", detail: `${ratedGames.length} notes` },
-    { label: "Materiel", value: ownedHardwareCount, detail: `${hardwareByType.console || 0} plateformes` },
+    { label: "Jeux", value: total, detail: `${dashboardFinished} terminés`, icon: Library },
+    { label: "En cours", value: inProgressCount, detail: `${wishlistCount} en wishlist`, icon: Play },
+    { label: "Note moyenne", value: averageRating ? formatRating10(averageRating, "-") : "—", detail: `${ratedGames.length} notes`, icon: StarIcon },
+    { label: "Matériel", value: ownedHardwareCount, detail: `${hardwareByType.console || 0} plateformes`, icon: Joystick },
   ];
   const sessionQueue = [
     ...inProgressGames,
@@ -9465,10 +9466,11 @@ export function HomeTab({
       (candidate) => !inProgressGames.some((game) => game.id === candidate.id)
     ),
   ].slice(0, 3);
+  const libraryPreviewGames = sessionQueue.filter(game => game.id !== nextPlayCandidate?.id);
   const homeQuickActions = [
-    { label: "Ajouter", tab: "search" },
-    { label: "Promos", tab: "deals" },
-    { label: "Top 5", tab: "top5" },
+    { label: "Ajouter", tab: "search", icon: BookmarkPlus },
+    { label: "Promos", tab: "deals", icon: Sparkles },
+    { label: "Top 5", tab: "top5", icon: Trophy },
   ];
   const favoriteGamesCount = games.filter((game) => game.favorite).length;
   const primaryRecommendation = recommendations[0] || null;
@@ -9986,80 +9988,33 @@ export function HomeTab({
         {nextPlayCandidate?.image && <img className="home-current-cover" src={nextPlayCandidate.image} alt="" />}
         <button type="button" className="save-review-btn home-resume-action" onClick={() => dashboardAction.game ? onOpenDetail(dashboardAction.game) : setActiveTab(dashboardAction.tab)}>{dashboardAction.label}</button>
       </div>);
-  const collectionSection = (<section className="home-collection-overview" aria-label="Ta collection">
-        <h2 className="panel-title">Ta collection en bref</h2>
-          <div className="home-cockpit-side">
-            <div className="home-dashboard-stats">
-              {dashboardStats.map((stat) => (
-                <div key={stat.label} className="home-dashboard-stat">
-                  <strong>{stat.value}</strong>
-                  <span>{stat.label}</span>
-                  <small>{stat.detail}</small>
-                </div>
-              ))}
-            </div>
-
-            <div className="home-actions-grid home-main-actions">
-              {homeQuickActions.map((action) => (
-                <button
-                  key={action.tab}
-                  type="button"
-                  onClick={() => setActiveTab(action.tab)}
-                >
-                  {action.label}
-                </button>
-              ))}
-            </div>
-          </div>
-      </section>);
+  const collectionSection = (<section className="home-collection-overview home-overview-card" aria-labelledby="home-overview-title">
+    <div className="home-overview-heading"><h2 id="home-overview-title">Ta collection en bref</h2><Library size={20} aria-hidden="true"/></div>
+    <dl className="home-overview-stats">
+      {dashboardStats.map(stat=><div key={stat.label} className="home-overview-stat">
+        <dt><stat.icon size={15} aria-hidden="true"/>{stat.label}</dt>
+        <dd>{stat.value}<small>{stat.detail}</small></dd>
+      </div>)}
+    </dl>
+    <div className="home-overview-actions">{homeQuickActions.map(action=><button key={action.tab} type="button" onClick={()=>setActiveTab(action.tab)}><action.icon size={16} aria-hidden="true"/><span>{action.label}</span></button>)}</div>
+  </section>);
 
   return (
     <div className="home-page">
       {isCheckpointTheme(theme) ? <>{sessionSection}{collectionSection}{levelSection}</> : <>{levelSection}{sessionSection}</>}
 
 
-      <div className="home-dashboard-panel home-library-preview">
-        {sessionQueue.some((game) => game.id !== nextPlayCandidate?.id) && (
-          <div className="home-session-queue">
-            <div className="home-section-head">
-              <div>
-                <div className="home-card-title">À retrouver dans ta bibliothèque</div>
-                <p className="home-section-subtitle">
-                  En cours ou à découvrir, à toi de choisir.
-                </p>
-              </div>
-
-              <button type="button" onClick={() => setActiveTab("library")}>
-                Bibliothèque
-              </button>
-            </div>
-
-            <div className="home-session-list">
-              {sessionQueue.filter((game) => game.id !== nextPlayCandidate?.id).map((game) => (
-                <button
-                  key={game.id}
-                  type="button"
-                  className="home-session-card"
-                  onClick={() => onOpenDetail(game)}
-                >
-                  {game.image ? (
-                    <img src={game.image} alt={game.name} loading="lazy" />
-                  ) : (
-                    <div className="home-game-placeholder">CP</div>
-                  )}
-                  <div>
-                    <strong>{game.name}</strong>
-                    <span>
-                      {game.status === "en cours" ? "En cours" : "À lancer"} -{" "}
-                      {formatRating10(getGameRating(game), "non note")}
-                    </span>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+      {libraryPreviewGames.length > 0 && <section className="home-library-preview home-library-card" aria-labelledby="home-library-preview-title">
+        <div className="home-library-heading">
+          <div><p className="home-section-eyebrow">Ta bibliothèque</p><h2 id="home-library-preview-title">À retrouver</h2></div>
+          <button type="button" className="home-library-open" onClick={()=>setActiveTab("library")}>Tout voir<ArrowLeft className="home-forward-arrow" size={16} aria-hidden="true"/></button>
+        </div>
+        <div className="home-library-list">{libraryPreviewGames.map(game=><button key={game.id} type="button" className="home-library-game" onClick={()=>onOpenDetail(game)}>
+          {game.image?<img src={game.image} alt="" loading="lazy"/>:<span className="home-library-placeholder" aria-hidden="true"><Gamepad2 size={24}/></span>}
+          <span className="home-library-game-copy"><strong>{game.name}</strong><span className="home-library-game-meta"><span className={`home-library-status${game.status === "en cours" ? " is-playing" : ""}`}>{game.status === "en cours" ? "En cours" : "À découvrir"}</span><span aria-hidden="true">·</span><span>{formatRating10(getGameRating(game), "Pas encore noté")}</span></span></span>
+          <ArrowLeft className="home-forward-arrow" size={16} aria-hidden="true"/>
+        </button>)}</div>
+      </section>}
 
       {!isCheckpointTheme(theme) && collectionSection}
 
@@ -15313,8 +15268,6 @@ function OptionsTab({
 
   return (
     <div className="progression-stack options-tab">
-      <AccountOptions />
-      <TesterFeedback onSubmit={sendTesterFeedback} />
       <div className="search-panel options-panel">
         <div className="options-header">
           <div>
@@ -15325,6 +15278,9 @@ function OptionsTab({
           </div>
         </div>
 
+      </div>
+      <TesterFeedback onSubmit={sendTesterFeedback} />
+      <div className="search-panel options-panel">
         <OptionGroup id="interface" isOpen={!!openOptionGroups.interface} onToggle={() => setOpenOptionGroups((current) => ({ ...current, interface: !current.interface }))}
           title="Interface"
           description="Ce qui change l'identité visuelle et les retours de l'app."
@@ -15575,6 +15531,8 @@ function OptionsTab({
           description="Profil public, comptes liés et sources externes."
           summary={`${socialProfile.visibility === "public" ? "Public" : "Privé"} · Steam ${steamProfile.steamId ? "lié" : "off"}`}
         >
+
+          <AccountOptions />
 
           <div className="option-section option-section-split">
             <div className="option-setting-card">

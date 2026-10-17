@@ -111,9 +111,13 @@ html body:is([data-theme="theme-checkpointpremium"],[data-theme="theme-checkpoin
   box-shadow:inset 0 1px 0 #fff5,inset 0 -1px 0 #cbd8f026,0 10px 26px #0006,0 0 22px #b7a1db12 !important;
 }
 html body:is([data-theme="theme-checkpointpremium"],[data-theme="theme-checkpointultimate"]) :is(.home-hero,.xp-card,.profile-tab .current-rank-card)::before {
-  content:""; position:absolute; inset:0 24px auto; height:1px; pointer-events:none;
-  background:linear-gradient(90deg,transparent 20%,#a89cb94d 36%,#fff3ff 49%,#b9edf5 54%,#b4a0c04d 68%,transparent 80%);
-  background-size:240% 100%; opacity:.85; animation:var(--premium-edge-glint) !important;
+  content:""; position:absolute; inset:0; padding:1px; border-radius:inherit; pointer-events:none;
+  background:linear-gradient(110deg,transparent 40%,#c4bad866 46%,#fff3ff 50%,#b9edf5 52%,transparent 59%);
+  background-size:300% 100%; background-position:150% 0;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  opacity:0; animation:var(--premium-edge-glint) !important;
 }
 html body:is([data-theme="theme-checkpointpremium"],[data-theme="theme-checkpointultimate"]) :is(.xp-card,.profile-tab .current-rank-card) .xp-fill { position:relative; overflow:hidden; box-shadow:0 0 10px #cfc0ef55,inset 0 1px #ffffffa6; }
 html body:is([data-theme="theme-checkpointpremium"],[data-theme="theme-checkpointultimate"]) :is(.xp-card,.profile-tab .current-rank-card) .xp-fill::after {
@@ -138,7 +142,11 @@ html body:is([data-theme="theme-checkpointpremium"],[data-theme="theme-checkpoin
   88% { opacity:1; transform:translate3d(480%,0,0) skewX(-22deg); }
   94%,100% { opacity:0; transform:translate3d(480%,0,0) skewX(-22deg); }
 }
-@keyframes checkpoint-premium-edge { from { background-position:140% 0; } to { background-position:-100% 0; } }
+@keyframes checkpoint-premium-edge {
+  0% { background-position:150% 0; opacity:0; }
+  5%,95% { opacity:.85; }
+  100% { background-position:-50% 0; opacity:0; }
+}
 @keyframes checkpoint-premium-wordmark { from { background-position:140% 50%; } to { background-position:-100% 50%; } }
 @media(hover:hover) and (pointer:fine) {
   html body:is([data-theme="theme-checkpointpremium"],[data-theme="theme-checkpointultimate"]) .wishlist-upcoming-btn:hover:not(:disabled)::after { animation:var(--premium-action-glint) !important; }
