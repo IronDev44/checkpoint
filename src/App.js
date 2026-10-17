@@ -249,6 +249,10 @@ function isAbortError(error) {
 /* ==================== STATS AVANCÉES & PROFIL JOUEUR ==================== */
 
 const APP_RATING_MAX = 10;
+const APP_TAB_LABELS = {
+  home:"Accueil",news:"Actu",search:"Recherche",upcoming:"Sorties",deals:"Promos",live:"Live",social:"Social",
+  library:"Bibliothèque",series:"Séries",hardware:"Matériel",favorites:"Sanctuaire",top5:"Top 5",profile:"Profil",options:"Options",
+};
 const APP_TAB_IDS = [
   "home",
   "news",
@@ -2546,22 +2550,29 @@ const playClick = () => {
   playSound("click");
 };
 
+export function AppHeaderBrand({theme,activeTab}) {
+  return <div className="app-brand">
+    <h1 className="title" data-title="Checkpoint"><CheckpointMark className="checkpoint-header-mark" variant={theme === CHECKPOINT_ULTIMATE_THEME ? "diamond" : theme === CHECKPOINT_PREMIUM_THEME ? "platinum" : "gold"}/><span className="checkpoint-wordmark">Checkpoint</span></h1>
+    <p className="app-tab-label">{APP_TAB_LABELS[activeTab] || "Accueil"}</p>
+  </div>;
+}
+
 function BottomTabs({ activeTab, setActiveTab, soundStyle }) {
   const tabs = [
-  { id: "home", Icon: Home, label: "Accueil" },
-  { id: "news", Icon: Newspaper, label: "Actu" },
-  { id: "search", Icon: Search, label: "Recherche" },
-  { id: "upcoming", Icon: CalendarDays, label: "Sorties" },
-  { id: "deals", Icon: Sparkles, label: "Promos" },
-  { id: "live", Icon: Radio, label: "Live" },
-  { id: "social", Icon: Users, label: "Social" },
-  { id: "library", Icon: Library, label: "Bibliothèque" },
-  { id: "series", Icon: Puzzle, label: "Séries" },
-  { id: "hardware", Icon: Joystick, label: "Matériel" },
-  { id: "favorites", Icon: Landmark, label: "Sanctuaire" },
-  { id: "top5", Icon: Trophy, label: "Top 5" },
-  { id: "profile", Icon: Medal, label: "Profil" },
-  { id: "options", Icon: Settings, label: "Options" },
+  { id: "home", Icon: Home, label: APP_TAB_LABELS.home },
+  { id: "news", Icon: Newspaper, label: APP_TAB_LABELS.news },
+  { id: "search", Icon: Search, label: APP_TAB_LABELS.search },
+  { id: "upcoming", Icon: CalendarDays, label: APP_TAB_LABELS.upcoming },
+  { id: "deals", Icon: Sparkles, label: APP_TAB_LABELS.deals },
+  { id: "live", Icon: Radio, label: APP_TAB_LABELS.live },
+  { id: "social", Icon: Users, label: APP_TAB_LABELS.social },
+  { id: "library", Icon: Library, label: APP_TAB_LABELS.library },
+  { id: "series", Icon: Puzzle, label: APP_TAB_LABELS.series },
+  { id: "hardware", Icon: Joystick, label: APP_TAB_LABELS.hardware },
+  { id: "favorites", Icon: Landmark, label: APP_TAB_LABELS.favorites },
+  { id: "top5", Icon: Trophy, label: APP_TAB_LABELS.top5 },
+  { id: "profile", Icon: Medal, label: APP_TAB_LABELS.profile },
+  { id: "options", Icon: Settings, label: APP_TAB_LABELS.options },
   ];
 
   return (
@@ -9955,14 +9966,13 @@ export function HomeTab({
     fetchRecommendations();
   }, [games]);
 
-  const levelSection = <><XPCard
+  const levelSection = <XPCard
         totalXP={totalXP}
         level={level}
         title={getRankTitle(level)}
         progress={progress}
-      />
-
-      <section className="search-panel home-next-level">
+      />;
+  const nextLevelSection = (<section className="search-panel home-next-level">
         <div className="home-section-head">
           <div><h2 className="panel-title">{level >= 100 ? "Ton parcours" : "Ton prochain niveau"}</h2><p className="option-value">{level >= 100 ? "Niveau maximum atteint. Ton profil continue d’évoluer avec tes découvertes." : `Encore ${Math.max(0, progress.xpToNext - progress.currentXP)} XP pour le niveau ${level + 1}.`}</p></div>
           <button type="button" className="profile-toggle-btn" disabled={levelActions.length <= 3} onClick={() => setSuggestionOffset((offset) => (offset + 3) % levelActions.length)}>D’autres idées</button>
@@ -9972,7 +9982,7 @@ export function HomeTab({
           {!proposedActions.length && <p>Tout est à jour ici. Tu peux découvrir un autre jeu ou tenter le quiz.</p>}
         </div>
         <p className="option-value">Ton profil se dessine avec tes jeux et ton matériel. L’XP dépend des informations enregistrées : les modifier plusieurs fois ne cumule pas les récompenses.</p>
-      </section></>;
+      </section>);
   const sessionSection = (<div className="home-hero">
         <div>
           <div className="home-kicker">{isCheckpointTheme(theme) ? "Ta prochaine session" : homeGreeting}</div>
@@ -10001,7 +10011,7 @@ export function HomeTab({
 
   return (
     <div className="home-page">
-      {isCheckpointTheme(theme) ? <>{sessionSection}{collectionSection}{levelSection}</> : <>{levelSection}{sessionSection}</>}
+      {levelSection}{collectionSection}{nextLevelSection}{sessionSection}
 
 
       {libraryPreviewGames.length > 0 && <section className="home-library-preview home-library-card" aria-labelledby="home-library-preview-title">
@@ -10016,7 +10026,6 @@ export function HomeTab({
         </button>)}</div>
       </section>}
 
-      {!isCheckpointTheme(theme) && collectionSection}
 
       <HomeDealsPreview
         dealPreferences={dealPreferences}
@@ -20100,7 +20109,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       <div className={`app-shell ${showSplash ? "app-hidden" : "app-visible"}`}>
         <div className="container">
           <div className="app-title-row">
-            <h1 className="title" data-title="Checkpoint"><CheckpointMark className="checkpoint-header-mark" variant={theme === CHECKPOINT_ULTIMATE_THEME ? "diamond" : theme === CHECKPOINT_PREMIUM_THEME ? "platinum" : "gold"}/><span className="checkpoint-wordmark">Checkpoint</span></h1>
+            <AppHeaderBrand theme={theme} activeTab={activeTab}/>
             <NotificationCenter
               notifications={visibleNotifications}
               open={notificationPanelOpen}

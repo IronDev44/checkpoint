@@ -134,3 +134,15 @@ test("other players can send feedback but cannot see developer tools or the inbo
  expect(screen.queryByRole('heading',{name:/Accès administrateur/})).toBeNull();
  expect(document.querySelector('.developer-tools')).toBeNull();
 });
+
+test("the header follows the active tab and home starts with level, collection, next level and session",async()=>{
+ render(<App/>);
+ await screen.findByText('Options',{selector:'.app-tab-label'});
+ fireEvent.click(screen.getByRole('button',{name:'Accueil',exact:true}));
+ expect(await screen.findByText('Accueil',{selector:'.app-tab-label'})).toBeVisible();
+ const blocks=[...document.querySelector('.home-page').children];
+ expect(blocks[0]).toHaveClass('xp-card');
+ expect(blocks[1]).toHaveClass('home-overview-card');
+ expect(blocks[2]).toHaveClass('home-next-level');
+ expect(blocks[3]).toHaveClass('home-hero');
+});

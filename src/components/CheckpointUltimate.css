@@ -9,8 +9,8 @@ html body[data-theme="theme-checkpointultimate"] {
  --accent:linear-gradient(125deg,#2e424e,#172630 48%,#354953)!important;--accent-solid:#c2dbe5!important;--accent-shadow:0 4px 24px #9bc9da1f!important;
  --control-bg:linear-gradient(150deg,#1c2a34,#0c141c)!important;--control-border:#a8c1d14d!important;
  --signature-bright:#e5f5fc;--signature-button-ink:#eef8ff;--signature-selected-panel:#192b37;
- --signature-hero-bg:linear-gradient(120deg,#1b2b35,#0c151d 65%,#111b23);
- --premium-action-glint:checkpoint-premium-glint 5.8s linear infinite;
+ --signature-hero-bg:linear-gradient(120deg,#263b48,#14232d 65%,#1c2c37);
+ --premium-action-glint:checkpoint-premium-glint 3.2s linear infinite;
  --premium-edge-glint:checkpoint-premium-edge 7.5s linear infinite;
  --checkpoint-title-gradient:linear-gradient(120deg,#f4fbff,#aac7d8,#e1ebea)!important;
  --checkpoint-splash-primary:#c9e1ed!important;--checkpoint-splash-secondary:#d4d5e2!important;
@@ -18,6 +18,11 @@ html body[data-theme="theme-checkpointultimate"] {
 }
 html body[data-theme="theme-checkpointultimate"] .checkpoint-wordmark {background:linear-gradient(110deg,#a2b7c5 20%,#f5fcff 45%,#c5dee7 53%,#dbd7e5 62%,#a2b7c5 80%);background-size:240% 100%;background-clip:text;-webkit-background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent}
 html body[data-theme="theme-checkpointultimate"] :is(.home-hero,.xp-card,.profile-tab .current-rank-card){background:linear-gradient(125deg,#d0edff08,transparent 35%,transparent 70%,#e6dbca05),var(--signature-hero-bg)!important;border-color:#bdd8e347!important;box-shadow:inset 0 1px #e4f3ff1f,0 12px 28px #0007!important}
+html body[data-theme="theme-checkpointultimate"] .home-page :is(.home-overview-card,.home-next-level) {
+ background:linear-gradient(135deg,#253640,#14212a 65%,#192832)!important;
+ border:1px solid #bdd8e347!important;border-radius:var(--ui-radius-xl,24px)!important;
+ box-shadow:inset 0 1px #e4f3ff1f,0 10px 24px #0004!important;
+}
 html body[data-theme="theme-checkpointultimate"] .bottom-tabs {background:linear-gradient(130deg,#111c24,#070d13 65%,#15212a)!important;border-color:#aac5d438!important}
 html body[data-theme="theme-checkpointultimate"] .bottom-tabs .tab-btn.active {background:var(--accent)!important;color:#f0f8ff!important;box-shadow:inset 0 1px #d2eeff9c,inset 0 -2px #040b11,0 0 16px #acd5e529!important}
 html body[data-theme="theme-checkpointultimate"] .notification-trigger {border-color:#b5d6e36b!important;box-shadow:inset 0 1px #e1f2ff3d,0 0 18px #acd0dd14!important}
@@ -106,3 +111,10 @@ html:has(.checkpoint-ultimate-intro),body:has(.checkpoint-ultimate-intro) {overf
 @media(max-height:620px){.checkpoint-ultimate-edition{margin-bottom:22px}.checkpoint-ultimate-object{width:140px}.checkpoint-ultimate-lockup{margin-top:36px}.checkpoint-ultimate-stage{transform:translateY(-3vh)}.checkpoint-ultimate-lockup h1{font-size:24px}.checkpoint-ultimate-lockup .checkpoint-ultimate-wordmark{margin-top:12px}.checkpoint-ultimate-intro .checkpoint-gold-loading{bottom:24px}}
 @media(max-height:420px){.checkpoint-ultimate-object{width:95px}.checkpoint-ultimate-edition{margin-bottom:12px;font-size:8px}.checkpoint-ultimate-lockup{margin-top:18px}.checkpoint-ultimate-lockup h1{font-size:21px}.checkpoint-ultimate-lockup .checkpoint-ultimate-wordmark{font-size:8px;margin-top:7px}.checkpoint-ultimate-intro .checkpoint-gold-loading{bottom:12px;width:52%}.checkpoint-ultimate-stage{transform:translateY(-10px)}}
 @media(prefers-reduced-motion:reduce){.checkpoint-ultimate-intro *,.checkpoint-ultimate-intro *::before,.checkpoint-ultimate-transition *{animation:none!important}.checkpoint-ultimate-intro .checkpoint-crystal-caustic{display:none}.checkpoint-ultimate-transition{animation:none!important}.checkpoint-full-tab-motion .checkpoint-ultimate-transition{animation:ultimateVeilOpacity 840ms ease both!important}}
+
+/* Slightly brighter progress metal, independent from dark action surfaces. */
+html body[data-theme="theme-checkpointultimate"] :is(.xp-fill,.completion-fill,.progress-fill,.badge-progress-fill,.console-xp-fill) {
+ background:linear-gradient(105deg,#526f80,#8ca5b1 58%,#b0c5ce)!important;
+ box-shadow:inset 0 1px #e4f7ff70,0 0 8px #b7ddeb20;
+}
+html body[data-theme="theme-checkpointultimate"] :is(.xp-bar,.progress-bar,.badge-progress-bar,.console-xp-bar) {background:#b7d4e113!important;border-color:#bfd9e52e!important}

@@ -77,7 +77,7 @@ html body[data-theme] button.checkpoint-premium-choice.option-pill.active { back
    Main controls use transforms; card-edge strips repaint only a single pixel. */
 html body:is([data-theme="theme-checkpointpremium"],[data-theme="theme-checkpointultimate"]) {
   --accent:linear-gradient(115deg,#acb8ce 0%,#cfd3e5 30%,#d5c5e6 68%,#afd2dd 100%) !important;
-  --premium-action-glint:checkpoint-premium-glint 3.6s linear infinite;
+  --premium-action-glint:checkpoint-premium-glint 2.8s linear infinite;
   --premium-progress-glint:checkpoint-premium-glint 5.4s linear infinite;
   --premium-edge-glint:checkpoint-premium-edge 5s linear infinite;
   --premium-wordmark-glint:checkpoint-premium-wordmark 6s linear infinite;

@@ -415,7 +415,7 @@ body[data-theme] :is(.checkpoint-primary-action, .home-resume-action,
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.22), transparent);
   transform: skewX(-20deg);
   pointer-events: none;
-  animation: checkpointActionSheen 12s ease-in-out infinite;
+  animation: checkpointActionSheen 8s ease-in-out infinite;
 }
 @keyframes checkpointActionSheen {
   0%, 75% { left: -60%; opacity: 0; }
@@ -812,3 +812,8 @@ body[data-theme] .option-choice-indicator > svg {
 .player-notes-summary p, .player-notes-suggestion { margin: 8px 0 0; color: var(--text-soft); line-height: 1.6; overflow-wrap: anywhere; }
 .player-notes-panel .player-analysis-meta { margin: 0; }
 .player-notes-panel .player-notes-suggestion { margin: 0; font-size: .85rem; color: var(--text-muted); }
+
+/* The active page name stays separate from the themed wordmark. */
+.app-title-row .app-brand {display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-width:0;max-width:100%;width:100%}
+.app-title-row .app-brand .title {margin:0!important}
+.app-title-row .app-tab-label {margin:0;color:var(--text-soft);font:500 12px/1.4 system-ui,sans-serif;letter-spacing:.045em;text-align:center}
