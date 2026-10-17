@@ -9,7 +9,7 @@ export function CheckpointMark({ className = "", variant = "gold" }) {
   const id = `checkpoint-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const diamond = variant === "diamond";
   const platinum = variant === "platinum" || diamond;
-  const metal = diamond ? ["#ffffff", "#d7e5e4", "#697986", "#f6e4c8", "#96c6ce"] : platinum ? ["#fcfcff", "#d8dbe5", "#8c91a5", "#eeeaf9", "#8d91a4"] : ["#fff0bf", "#ddbd76", "#b58a3e", "#f1d89b", "#b28a43"];
+  const metal = diamond ? ["#fff1e2", "#eaa0aa", "#6a123a", "#e36285", "#972e50"] : platinum ? ["#fcfcff", "#d8dbe5", "#8c91a5", "#eeeaf9", "#8d91a4"] : ["#fff0bf", "#ddbd76", "#b58a3e", "#f1d89b", "#b28a43"];
   return <svg className={`checkpoint-mark${platinum ? " checkpoint-mark-platinum" : ""}${diamond ? " checkpoint-mark-diamond" : ""} ${className}`} viewBox="0 0 120 128" fill="none" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id={`${id}-gold`} x1="21" y1="12" x2="93" y2="119" gradientUnits="userSpaceOnUse">
@@ -20,7 +20,7 @@ export function CheckpointMark({ className = "", variant = "gold" }) {
         <stop stopColor={platinum ? "#ffffff" : "#fff9df"}/><stop offset=".48" stopColor={platinum ? "#d6d0f7" : "#f5dca1"} stopOpacity=".2"/><stop offset="1" stopColor={platinum ? "#c7e0e5" : "#eed395"} stopOpacity=".75"/>
       </linearGradient>
       <linearGradient id={`${id}-gem`} x1="85" y1="52" x2="108" y2="77" gradientUnits="userSpaceOnUse">
-        <stop stopColor={platinum ? "#ffffff" : "#fff3ca"}/><stop offset=".5" stopColor={platinum ? "#ded8f4" : "#e9c884"}/><stop offset="1" stopColor={platinum ? "#838ba5" : "#a77c33"}/>
+        <stop stopColor={diamond ? "#ffe4d4" : platinum ? "#ffffff" : "#fff3ca"}/><stop offset=".5" stopColor={diamond ? "#f07b9a" : platinum ? "#ded8f4" : "#e9c884"}/><stop offset="1" stopColor={diamond ? "#641734" : platinum ? "#838ba5" : "#a77c33"}/>
       </linearGradient>
       <mask id={`${id}-reveal`} maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="128">
         <path className="checkpoint-mark-reveal" d="m92 37-32-19-40 23v46l40 23 32-19" pathLength="1" stroke="white" strokeWidth="28"/>

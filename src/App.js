@@ -15385,29 +15385,6 @@ function OptionsTab({
               <span className="option-header-note">Les statistiques restent masquées dans Actu, Sorties, Promos, Live, Sanctuaire et Top 5.</span>
             </div>
 
-            <div className="option-setting-card">
-              <div>
-                <strong>Icône du navigateur</strong>
-                <span>L’app installée utilise le C doré de Checkpoint. Choisis ici l’icône de ton onglet.</span>
-              </div>
-              <div className="option-pill-grid two compact">
-                <button
-                  type="button"
-                  className={`option-pill ${appOptions.appIcon === "theme" ? "active" : ""}`}
-                  onClick={() => onOptionChange("appIcon", "theme")}
-                >
-                  C doré
-                </button>
-                <button
-                  type="button"
-                  className={`option-pill ${appOptions.appIcon === "classic" ? "active" : ""}`}
-                  onClick={() => onOptionChange("appIcon", "classic")}
-                >
-                  CP classique
-                </button>
-              </div>
-            </div>
-
             <SoundSettings value={appOptions.sound} onChange={(value) => onOptionChange("sound", value)} />
           </div>
         </OptionGroup>
@@ -16350,78 +16327,14 @@ function EventsAdminList({ events, onEdit }) {
 
 function AdminPanel({ events, onImportNews }) {
   const [editingEvent, setEditingEvent] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [password, setPassword] = useState("");
-  const [open, setOpen] = useState(false);
-
-  const SECRET = "1102"; // 🔑 change ça
-
-  const handleLogin = () => {
-    if (password === SECRET) {
-      setIsAdmin(true);
-      setPassword("");
-    } else {
-      alert("Code incorrect");
-    }
-  };
-
-  return (
-    <div className="search-panel">
-      {!isAdmin ? (
-        <>
-          <h2 className="panel-title">🔒 Accès administrateur</h2>
-
-          <div className="input-container">
-            <input
-              type="password"
-              placeholder="Entrer le code"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </div>
-
-          <button onClick={handleLogin}>
-            Se connecter
-          </button>
-        </>
-      ) : (
-        <>
-          <div className="home-section-head">
-            <h2 className="panel-title">⚙️ Gestion des événements</h2>
-
-            <button
-              type="button"
-              onClick={() => setOpen(!open)}
-            >
-              {open ? "Fermer" : "Ouvrir"}
-            </button>
-          </div>
-
-          <button
-            type="button"
-            className="filter-toggle-btn"
-            onClick={() => onImportNews({ force: true })}
-          >
-            📰 Importer les actus RSS
-          </button>
-
-          {open && (
-            <div style={{ marginTop: "14px" }}>
-              <AddEventForm
-                editingEvent={editingEvent}
-                onCancelEdit={() => setEditingEvent(null)}
-              />
-
-              <EventsAdminList
-                events={events}
-                onEdit={(event) => setEditingEvent(event)}
-              />
-            </div>
-          )}
-        </>
-      )}
+  return <div className="search-panel">
+    <h2 className="panel-title">Lives et actualités</h2>
+    <button type="button" className="filter-toggle-btn" onClick={() => onImportNews({ force: true })}>Importer les actus RSS</button>
+    <div style={{marginTop:14}}>
+      <AddEventForm editingEvent={editingEvent} onCancelEdit={() => setEditingEvent(null)}/>
+      <EventsAdminList events={events} onEdit={setEditingEvent}/>
     </div>
-  );
+  </div>;
 }
 
 function NewsTab({ newsItems }) {
@@ -18690,7 +18603,7 @@ useEffect(() => {
       "data-background-motion",
       appOptions.animatedBackground ? "on" : "off"
     );
-    document.body.setAttribute("data-app-icon", appOptions.appIcon || "theme");
+    document.body.setAttribute("data-app-icon", "theme");
     document.body.setAttribute("data-header-mode", appOptions.headerMode || "standard");
     document.body.setAttribute("data-mobile-nav", appOptions.mobileNavMode || "standard");
 
@@ -18701,13 +18614,9 @@ useEffect(() => {
       document.head.appendChild(iconLink);
     }
 
-    iconLink.setAttribute(
-      "href",
-      appOptions.appIcon === "classic" ? "/favicon-classic.ico" : "/checkpoint-icon-64.png"
-    );
-    iconLink.setAttribute("type", appOptions.appIcon === "classic" ? "image/x-icon" : "image/png");
-    if (appOptions.appIcon === "classic") iconLink.removeAttribute("sizes");
-    else iconLink.setAttribute("sizes", "64x64");
+    iconLink.setAttribute("href", "/checkpoint-icon-64.png");
+    iconLink.setAttribute("type", "image/png");
+    iconLink.setAttribute("sizes", "64x64");
   }, [appOptions]);
 
 useEffect(() => {

@@ -21,8 +21,8 @@ Header sizing is shared with standard Checkpoint: larger responsive lettering an
 ## Checkpoint Ultime
 
 - ID `theme-checkpointultimate`; automatically earned at displayed level 100 via the same permanent, account-scoped reward system. Standard and Premium keep their own IDs and level rules.
-- Obsidian base, diamond/cyan metal and a fine champagne edge. Shared signature layouts and specular effects retain the same mobile navigation and enlarged wordmark.
-- The shared original C has a diamond palette. Intro: a faceted aperture assembles around the mark. Transition: a travelling light seam opens an obsidian veil, with eight rays and a central seal. It uses the existing 840ms cleanup.
+- Obsidian base, cut ruby metal, dark lacquered actions and warm highlights, deliberately distinct from pearl Premium. Shared signature layouts and specular effects retain the same mobile navigation and enlarged wordmark.
+- The shared original C has a ruby palette. Intro: a ruby halo and radial cut shards assemble around the mark. Transition: a travelling light seam opens an obsidian veil, with eight rays and a central seal. It uses the existing 840ms cleanup.
 - Reduced mode omits transition rays and moving geometry. Calm UI and system reduced motion stop continuous reflections. Unique SVG paint IDs, pre-auth appearance-only storage and private-settings sync also apply to Ultime.
 - No changes to installed icons, XP calculations, collections or database schema.
 

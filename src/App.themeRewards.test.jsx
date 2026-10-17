@@ -10,7 +10,7 @@ const mockAccountStorage = {
   setItem: jest.fn((key,value)=>mockStore.set(key,value)),
   removeItem: key => mockStore.delete(key),
 };
-jest.mock("./firebase",()=>({db:{},auth:{currentUser:{uid:"theme-reward-fixture",displayName:"Fixture",email:"fixture@example.test"}}}));
+jest.mock("./firebase",()=>({db:{},auth:{currentUser:{uid:"theme-reward-fixture",displayName:"Fixture",email:"fixture@example.test",getIdToken:async()=>"fixture-token"}}}));
 jest.mock("./services/accountData",()=>({
   accountsEnabled:true,
   accountStorage:{getItem:(...args)=>mockAccountStorage.getItem(...args),setItem:(...args)=>mockAccountStorage.setItem(...args),removeItem:(...args)=>mockAccountStorage.removeItem(...args)},
@@ -35,7 +35,7 @@ beforeEach(()=>{
   mockTrialCompleted={25:true,50:true};
   jest.spyOn(window,"scrollTo").mockImplementation(()=>{});
   window.matchMedia=jest.fn(()=>({matches:false,addEventListener:jest.fn(),removeEventListener:jest.fn()}));
-  global.fetch=jest.fn().mockResolvedValue({ok:true,json:async()=>[],headers:{get:()=>"application/json"}});
+  global.fetch=jest.fn().mockResolvedValue({ok:true,json:async()=>({items:[],cursor:null}),headers:{get:()=>"application/json"}});
 });
 afterEach(()=>{jest.restoreAllMocks();global.fetch=mockOriginalFetch;});
 
@@ -110,14 +110,18 @@ test("owner management tools live together inside developer access",async()=>{
   const access=await screen.findByRole('button',{name:/Accès développeur/});
   expect(screen.queryByRole('heading',{name:'Retours des testeurs'})).toBeNull();
   fireEvent.click(access);
+  fireEvent.change(screen.getByLabelText('Code de l’espace développeur'),{target:{value:'1102'}});
+  fireEvent.click(screen.getByRole('button',{name:'Déverrouiller'}));
   const workspace=screen.getByRole('group',{name:'Rubriques développeur'}).parentElement;
   expect(within(workspace).getByRole('button',{name:'Checkpoint 25',exact:true})).toBeVisible();
   fireEvent.click(within(workspace).getByRole('button',{name:'Retours',exact:true}));
   expect(screen.getAllByText('Retours des testeurs')).toHaveLength(1);
   expect(within(workspace).getByRole('heading',{name:'Retours des testeurs'})).toBeVisible();
+  await screen.findByText('Aucun retour pour le moment.');
   fireEvent.click(within(workspace).getByRole('button',{name:'Lives et actus',exact:true}));
-  expect(within(workspace).getByRole('heading',{name:/Accès administrateur/})).toBeVisible();
-  expect(screen.getAllByText(/Accès administrateur/)).toHaveLength(1);
+  expect(within(workspace).getByRole('heading',{name:'Lives et actualités'})).toBeVisible();
+  expect(screen.queryByPlaceholderText('Entrer le code')).toBeNull();
+  expect(screen.queryByLabelText('Code privé de la boîte de réception')).toBeNull();
  } finally {auth.currentUser=previous;}
 });
 

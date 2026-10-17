@@ -1,4 +1,4 @@
-import { handleAccountApi } from "./account-api.js";
+import { handleAccountApi, verifyFirebaseToken } from "./account-api.js";
 
 const DEFAULT_DEAL_REGION = {
   country: "FR",
@@ -1859,18 +1859,17 @@ async function getDeals(requestUrl) {
   };
 }
 
-async function handleTesterFeedback(request, env) {
+export async function handleTesterFeedback(request, env, verify = verifyFirebaseToken) {
   const reply = (body, status = 200) => privateJsonResponse(body, { status });
-  if (!env.FEEDBACK_STORE || String(env.FEEDBACK_ADMIN_SECRET || "").length < 20) return reply({ error: "La boîte de retours n’est pas encore configurée." }, 503);
+  if (!env.FEEDBACK_STORE) return reply({ error: "La boîte de retours n’est pas encore configurée." }, 503);
   const url = new URL(request.url);
   const admin = url.pathname === "/api/feedback/admin";
   if (admin) {
-    const supplied = request.headers.get("authorization") || "";
-    const expected = "Bearer " + env.FEEDBACK_ADMIN_SECRET;
-    const a = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(supplied)));
-    const b = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(expected)));
-    let diff = 0; for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
-    if (diff) return reply({ error: "Code d’accès incorrect." }, 401);
+    const token = request.headers.get("authorization")?.match(/^Bearer (.+)$/)?.[1];
+    if (!token) return reply({ error: "Connexion nécessaire." }, 401);
+    let uid;
+    try { uid = await verify(token); } catch { return reply({ error: "Reconnecte-toi pour ouvrir les retours." }, 401); }
+    if (!env.ACCOUNT_OWNER_UID || uid !== env.ACCOUNT_OWNER_UID) return reply({ error: "Accès réservé au propriétaire." }, 403);
     if (request.method === "GET") {
       const page = await env.FEEDBACK_STORE.list({ prefix: "report:", limit: 50, cursor: url.searchParams.get("cursor") || undefined });
       const items = (await Promise.all(page.keys.map(key => env.FEEDBACK_STORE.get(key.name, "json")))).filter(Boolean);

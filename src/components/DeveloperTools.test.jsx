@@ -9,6 +9,12 @@ test.each([undefined,'another-player'])('does not mount internal tools for %s',a
 });
 test('switching owner sections preserves the live form draft and hides other tools',()=>{
  render(<DeveloperTools accountUid={ownerUid} tests={<button>Lancer une épreuve</button>} events={<label>Nom du live<input/></label>} feedback={<h2>Boîte de réception</h2>}/>);
+ expect(screen.queryByRole('button',{name:'Lancer une épreuve'})).toBeNull();
+ fireEvent.change(screen.getByLabelText('Code de l’espace développeur'),{target:{value:'wrong'}});
+ fireEvent.click(screen.getByRole('button',{name:'Déverrouiller'}));
+ expect(screen.getByRole('alert')).toHaveTextContent('Code incorrect');
+ fireEvent.change(screen.getByLabelText('Code de l’espace développeur'),{target:{value:'1102'}});
+ fireEvent.click(screen.getByRole('button',{name:'Déverrouiller'}));
  expect(screen.getByRole('button',{name:'Lancer une épreuve'})).toBeVisible();
  fireEvent.click(screen.getByRole('button',{name:'Lives et actus',exact:true}));
  fireEvent.change(screen.getByLabelText('Nom du live'),{target:{value:'Prochain direct'}});
@@ -18,4 +24,8 @@ test('switching owner sections preserves the live form draft and hides other too
  fireEvent.click(screen.getByRole('button',{name:'Lives et actus',exact:true}));
  expect(screen.getByLabelText('Nom du live')).toHaveValue('Prochain direct');
  expect(screen.getByRole('button',{name:'Lives et actus',exact:true})).toHaveAttribute('aria-pressed','true');
+ fireEvent.click(screen.getByRole('button',{name:'Verrouiller'}));
+ expect(screen.queryByRole('group',{name:'Rubriques développeur'})).toBeNull();
+ expect(screen.queryByLabelText('Nom du live')).toBeNull();
+ expect(screen.getByLabelText('Code de l’espace développeur')).toHaveValue('');
 });

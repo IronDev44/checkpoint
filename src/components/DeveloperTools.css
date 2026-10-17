@@ -6,3 +6,10 @@ html body .developer-tools-nav .option-pill {min-width:0;min-height:44px;padding
 .developer-tool-panel > :is(.search-panel,.option-section) {margin:0}
 .developer-tool-panel > .search-panel {padding:0;border:0;border-radius:0;background:transparent;box-shadow:none}
 .developer-tool-panel .trial-dev-grid {margin-top:16px}
+.developer-access-form {display:grid;gap:12px;max-width:420px}
+.developer-access-form label {font-weight:650;color:var(--text-main)}
+.developer-access-form input {width:100%;box-sizing:border-box;min-height:48px;border:1px solid var(--control-border,var(--surface-border));border-radius:12px;padding:12px;background:var(--input-bg);color:var(--text-main);font-size:18px;letter-spacing:.2em}
+.developer-access-form button {min-height:44px;padding:12px 18px;border-radius:12px;cursor:pointer}
+.developer-access-form p {margin:0;color:var(--text-soft)}
+.developer-tools-head {display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--text-muted);font-size:12px}
+html body .developer-tools-head .option-pill {min-height:36px;padding:8px 12px;font-size:12px}
