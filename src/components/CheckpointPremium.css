@@ -73,12 +73,14 @@ html body[data-theme] button.checkpoint-premium-choice.option-pill.active { back
 @media(max-height:500px) { .checkpoint-premium-intro .checkpoint-gold-intro-content { padding-bottom:28px; } .checkpoint-premium-intro .checkpoint-gold-emblem { width:75px; margin-bottom:12px; } .checkpoint-premium-edition { margin-bottom:12px; } .checkpoint-premium-intro .checkpoint-premium-caption { margin-top:12px; } .checkpoint-premium-intro .checkpoint-premium-wordmark { font-size:10px; } }
 @media(prefers-reduced-motion:reduce) { .checkpoint-premium-transition,.checkpoint-premium-transition * { animation:none !important; } .checkpoint-full-tab-motion .checkpoint-premium-transition { animation:checkpoint-premium-veil 840ms ease both !important; } }
 
-/* More visible pearl highlights, restricted to Premium's meaningful controls.
-   Moving highlights use transforms; cards keep their reflections stationary. */
+/* Sustained specular movement: darker pearl metal makes the light sweep visible.
+   Main controls use transforms; card-edge strips repaint only a single pixel. */
 html body[data-theme="theme-checkpointpremium"] {
-  --accent:linear-gradient(115deg,#9aa6bc 0%,#d5d9e9 24%,#fffaff 44%,#d9c9ec 69%,#acd6de 100%) !important;
-  --premium-action-glint:checkpoint-premium-glint 6.8s ease-in-out infinite;
-  --premium-progress-glint:checkpoint-premium-glint 9s ease-in-out infinite;
+  --accent:linear-gradient(115deg,#acb8ce 0%,#cfd3e5 30%,#d5c5e6 68%,#afd2dd 100%) !important;
+  --premium-action-glint:checkpoint-premium-glint 3.6s linear infinite;
+  --premium-progress-glint:checkpoint-premium-glint 5.4s linear infinite;
+  --premium-edge-glint:checkpoint-premium-edge 5s linear infinite;
+  --premium-wordmark-glint:checkpoint-premium-wordmark 6s linear infinite;
 }
 html body[data-theme="theme-checkpointpremium"] :is(.save-review-btn,.trial-primary-btn,.wishlist-upcoming-btn,.checkpoint-primary-action,.home-resume-action,.input-container > button):not(:disabled) {
   position:relative; isolation:isolate; overflow:hidden;
@@ -86,8 +88,8 @@ html body[data-theme="theme-checkpointpremium"] :is(.save-review-btn,.trial-prim
   box-shadow:inset 0 2px 0 #ffffffb3,inset 0 -3px 0 #75809c66,0 0 0 1px #ddd0f34d,0 5px 22px #b9a4e54a,0 1px 8px #c7eff22e !important;
 }
 html body[data-theme="theme-checkpointpremium"] :is(.save-review-btn,.trial-primary-btn,.wishlist-upcoming-btn,.checkpoint-primary-action,.home-resume-action,.input-container > button):not(:disabled)::after {
-  content:""; position:absolute; inset:-45% auto -45% -65%; width:45%; border-radius:0; z-index:-1;
-  background:linear-gradient(90deg,transparent 0%,#ffffff12 18%,#fffafcba 48%,#d5f5ff5e 58%,transparent 100%);
+  content:""; position:absolute; inset:-45% auto -45% -45%; width:32%; border-radius:0; z-index:-1;
+  background:linear-gradient(90deg,transparent 0%,#353d642e 18%,#ebe9ff55 32%,#ffffff 46%,#ffffffed 52%,#c9f5ffc2 59%,#76659133 78%,transparent 100%);
   pointer-events:none; opacity:0; transform:translate3d(0,0,0) skewX(-22deg);
   animation:var(--premium-action-glint) !important;
 }
@@ -103,9 +105,15 @@ html body[data-theme="theme-checkpointpremium"] button.checkpoint-premium-choice
   box-shadow:inset 0 2px #ffffff80,inset 0 -1px #d1dcf54d,0 0 0 1px #cfc2f24d,0 5px 22px #ae98d82e !important;
 }
 html body[data-theme="theme-checkpointpremium"] :is(.home-hero,.xp-card,.profile-tab .current-rank-card) {
+  position:relative;
   background:linear-gradient(125deg,#ffffff13,transparent 30%,transparent 72%,#bcdde70b),var(--signature-hero-bg) !important;
   border-color:#d5caed66 !important;
   box-shadow:inset 0 1px 0 #fff5,inset 0 -1px 0 #cbd8f026,0 10px 26px #0006,0 0 22px #b7a1db12 !important;
+}
+html body[data-theme="theme-checkpointpremium"] :is(.home-hero,.xp-card,.profile-tab .current-rank-card)::before {
+  content:""; position:absolute; inset:0 24px auto; height:1px; pointer-events:none;
+  background:linear-gradient(90deg,transparent 20%,#a89cb94d 36%,#fff3ff 49%,#b9edf5 54%,#b4a0c04d 68%,transparent 80%);
+  background-size:240% 100%; opacity:.85; animation:var(--premium-edge-glint) !important;
 }
 html body[data-theme="theme-checkpointpremium"] :is(.xp-card,.profile-tab .current-rank-card) .xp-fill { position:relative; overflow:hidden; box-shadow:0 0 10px #cfc0ef55,inset 0 1px #ffffffa6; }
 html body[data-theme="theme-checkpointpremium"] :is(.xp-card,.profile-tab .current-rank-card) .xp-fill::after {
@@ -118,13 +126,20 @@ html body[data-theme="theme-checkpointpremium"] .bottom-tabs .tab-btn.active {
   color:#f4edff !important; box-shadow:inset 0 1px #fff8,inset 0 -1px #c7e4f233,0 0 18px #c0a9e52b !important;
 }
 html body[data-theme="theme-checkpointpremium"] .app-title-row .title { text-shadow:0 0 18px #d7c5fa45 !important; }
+html body[data-theme="theme-checkpointpremium"] .checkpoint-wordmark {
+  background:linear-gradient(110deg,#c1c7dc 20%,#ece4f7 38%,#ffffff 48%,#bcebf1 53%,#d4bfe8 61%,#c1c7dc 80%);
+  background-size:240% 100%; background-clip:text; -webkit-background-clip:text;
+  color:transparent !important; -webkit-text-fill-color:transparent; animation:var(--premium-wordmark-glint) !important;
+}
 html body[data-theme="theme-checkpointpremium"] .notification-trigger { border-color:#e0d4f28a !important; box-shadow:inset 0 1px #ffffff59,0 0 15px #c5b0e624 !important; }
 @keyframes checkpoint-premium-glint {
-  0%,8% { opacity:0; transform:translate3d(0,0,0) skewX(-22deg); }
-  12% { opacity:1; }
-  32% { opacity:1; transform:translate3d(480%,0,0) skewX(-22deg); }
-  34%,100% { opacity:0; transform:translate3d(480%,0,0) skewX(-22deg); }
+  0% { opacity:0; transform:translate3d(0,0,0) skewX(-22deg); }
+  6% { opacity:1; }
+  88% { opacity:1; transform:translate3d(480%,0,0) skewX(-22deg); }
+  94%,100% { opacity:0; transform:translate3d(480%,0,0) skewX(-22deg); }
 }
+@keyframes checkpoint-premium-edge { from { background-position:140% 0; } to { background-position:-100% 0; } }
+@keyframes checkpoint-premium-wordmark { from { background-position:140% 50%; } to { background-position:-100% 50%; } }
 @media(hover:hover) and (pointer:fine) {
   html body[data-theme="theme-checkpointpremium"] .wishlist-upcoming-btn:hover:not(:disabled)::after { animation:var(--premium-action-glint) !important; }
   html body[data-theme="theme-checkpointpremium"] :is(.save-review-btn,.trial-primary-btn,.wishlist-upcoming-btn,.checkpoint-primary-action,.home-resume-action):hover:not(:disabled) {
@@ -132,7 +147,7 @@ html body[data-theme="theme-checkpointpremium"] .notification-trigger { border-c
   }
 }
 /* Keep the polished metal when motion is reduced, without repeated sweeps. */
-html body[data-theme="theme-checkpointpremium"]:is([data-effects="calm"],[data-ui="reduced"]) { --premium-action-glint:none; --premium-progress-glint:none; }
+html body[data-theme="theme-checkpointpremium"]:is([data-effects="calm"],[data-ui="reduced"]) { --premium-action-glint:none; --premium-progress-glint:none; --premium-edge-glint:none; --premium-wordmark-glint:none; }
 @media(prefers-reduced-motion:reduce) {
-  html body[data-theme="theme-checkpointpremium"] { --premium-action-glint:none; --premium-progress-glint:none; }
+  html body[data-theme="theme-checkpointpremium"] { --premium-action-glint:none; --premium-progress-glint:none; --premium-edge-glint:none; --premium-wordmark-glint:none; }
 }

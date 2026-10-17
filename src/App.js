@@ -20228,7 +20228,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       <div className={`app-shell ${showSplash ? "app-hidden" : "app-visible"}`}>
         <div className="container">
           <div className="app-title-row">
-            <h1 className="title" data-title="Checkpoint"><CheckpointMark className="checkpoint-header-mark" variant={theme === CHECKPOINT_PREMIUM_THEME ? "platinum" : "gold"}/>Checkpoint</h1>
+            <h1 className="title" data-title="Checkpoint"><CheckpointMark className="checkpoint-header-mark" variant={theme === CHECKPOINT_PREMIUM_THEME ? "platinum" : "gold"}/><span className="checkpoint-wordmark">Checkpoint</span></h1>
             <NotificationCenter
               notifications={visibleNotifications}
               open={notificationPanelOpen}
