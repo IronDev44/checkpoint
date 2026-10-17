@@ -16,7 +16,7 @@
           var theme = saved && /^theme-[a-z]+$/.test(saved.theme) ? saved.theme : localStorage.getItem("checkpoint-theme") || "theme-checkpoint";
           var isMatrix = theme === "theme-matrix";
           document.documentElement.setAttribute("data-theme", theme);
-          if (theme === "theme-checkpoint") {
+          if (theme === "theme-checkpoint" || theme === "theme-checkpointpremium") {
             document.documentElement.style.backgroundColor = "#090a0c";
             document.querySelector('meta[name="theme-color"]').setAttribute("content", "#090a0c");
           }
@@ -36,7 +36,7 @@
         margin: 0;
       }
 
-      html[data-theme="theme-checkpoint"], html[data-theme="theme-checkpoint"] body, html[data-theme="theme-checkpoint"] #root { background:#090a0c; }
+      html[data-theme="theme-checkpoint"], html[data-theme="theme-checkpoint"] body, html[data-theme="theme-checkpoint"] #root, html[data-theme="theme-checkpointpremium"], html[data-theme="theme-checkpointpremium"] body, html[data-theme="theme-checkpointpremium"] #root { background:#090a0c; }
 
       html[data-theme="theme-matrix"],
       html[data-theme="theme-matrix"] body,

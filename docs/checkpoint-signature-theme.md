@@ -1,6 +1,8 @@
-# Checkpoint — Noir & Or
+# Checkpoint
 
 Original flagship theme, based on the approved black and champagne gold concept.
+
+The level-50 platinum reward theme is documented in [Checkpoint Premium](checkpoint-premium-theme.md).
 
 - ID: `theme-checkpoint`. First in Options; default for new profiles and missing or invalid startup preferences. Existing saved themes remain selected.
 - Palette: near-black `#090a0c`, charcoal `#17181c`, champagne `#d6b66f`, ivory `#f4f0e7`. Gold buttons use dark text for contrast; ordinary surfaces remain neutral.

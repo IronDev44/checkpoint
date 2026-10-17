@@ -10,6 +10,8 @@ import "./components/GameUniverseThemes.css";
 import { GAME_UNIVERSE_THEMES } from "./data/gameUniverseThemes";
 import "./documentScroll.css";
 import "./components/CheckpointTheme.css";
+import CheckpointPremiumChoice from "./components/CheckpointPremiumChoice";
+import { CHECKPOINT_PREMIUM_THEME, normalizeThemeUnlocks, mergeThemeUnlocks, resolveThemeRewards, canUseTheme, isCheckpointTheme } from "./services/themeRewards";
 import { CheckpointMark } from "./components/CheckpointEffects";
 import { db, auth } from "./firebase";
 import { ownerUid } from "./services/accountConfig";
@@ -9970,7 +9972,7 @@ export function HomeTab({
       </section></>;
   const sessionSection = (<div className="home-hero">
         <div>
-          <div className="home-kicker">{theme === "theme-checkpoint" ? "Ta prochaine session" : homeGreeting}</div>
+          <div className="home-kicker">{isCheckpointTheme(theme) ? "Ta prochaine session" : homeGreeting}</div>
           <h2>{nextPlayCandidate?.name || (total > 0 ? "Tes jeux, tout simplement" : "On commence ?")}</h2>
           <p>{homeHeroCopy}</p>
           <div className="home-analysis-tags">
@@ -10012,7 +10014,7 @@ export function HomeTab({
 
   return (
     <div className="home-page">
-      {theme === "theme-checkpoint" ? <>{sessionSection}{collectionSection}{levelSection}</> : <>{levelSection}{sessionSection}</>}
+      {isCheckpointTheme(theme) ? <>{sessionSection}{collectionSection}{levelSection}</> : <>{levelSection}{sessionSection}</>}
 
 
       <div className="home-dashboard-panel home-library-preview">
@@ -10058,7 +10060,7 @@ export function HomeTab({
         )}
       </div>
 
-      {theme !== "theme-checkpoint" && collectionSection}
+      {!isCheckpointTheme(theme) && collectionSection}
 
       <HomeDealsPreview
         dealPreferences={dealPreferences}
@@ -14681,6 +14683,8 @@ function OptionGroup({
 
 function OptionsTab({
   theme,
+  level = 1,
+  unlockedThemes = [],
   setTheme,
   uiMode,
   setUiMode,
@@ -14729,7 +14733,7 @@ function OptionsTab({
     data: false,
   });
   const themes = [
-  { id: "theme-checkpoint", label: "Checkpoint — Noir & Or" },
+  { id: "theme-checkpoint", label: "Checkpoint" },
   { id: "theme-indigo", label: "Aurora Neon" },
   { id: "theme-playstation", label: "PlayStation 5" },
   { id: "theme-xbox", label: "Xbox Dashboard" },
@@ -15276,7 +15280,7 @@ function OptionsTab({
     </div>
   );
   const activeThemeLabel =
-    themes.find((item) => item.id === theme)?.label || "Theme actif";
+    theme === CHECKPOINT_PREMIUM_THEME ? "Checkpoint Premium" : themes.find((item) => item.id === theme)?.label || "Theme actif";
   const helpModal = helpTopic
     ? createPortal(
         <div className="option-help-backdrop" onClick={() => setHelpTopic(null)}>
@@ -15328,7 +15332,11 @@ function OptionsTab({
             <SectionTitle title="Thème" />
 
             <div className="option-pill-grid themes">
-              {themes.map((item) => (
+              <button type="button" className={`option-pill checkpoint-signature-choice${theme === "theme-checkpoint" ? " active" : ""}`} onClick={() => setTheme("theme-checkpoint")} aria-pressed={theme === "theme-checkpoint"}>
+                <CheckpointMark/><span>Checkpoint</span>
+              </button>
+              <CheckpointPremiumChoice theme={theme} level={level} unlockedThemes={unlockedThemes} onSelect={setTheme}/>
+              {themes.filter(item => item.id !== "theme-checkpoint").map((item) => (
                 <button
                   key={item.id}
                   type="button"
@@ -17475,6 +17483,10 @@ export default function App({ startupVisible = false, onStartupProgress } = {}) 
       : localStorage.getItem("checkpoint-ui-mode") || "modern"
   );
   const showSplash = startupVisible;
+  const [unlockedThemes, setUnlockedThemes] = useState(() => {
+    try { return normalizeThemeUnlocks(JSON.parse(localStorage.getItem("checkpoint-theme-unlocks") || "[]")); } catch { return []; }
+  });
+  const [trialProgressReady, setTrialProgressReady] = useState(false);
   const [bootReady, setBootReady] = useState({
     events: false, news: false, hardware: false, games: false,
   });
@@ -17567,6 +17579,7 @@ useEffect(() => {
       if (cancelled || !snap.exists()) return;
 
       const remote = snap.data() || {};
+      setUnlockedThemes(current => mergeThemeUnlocks(current, remote.unlockedThemes));
 
       if (remote.theme) {
         setTheme(remote.theme);
@@ -17617,6 +17630,7 @@ useEffect(() => {
       doc(db, PRIVATE_SETTINGS_COLLECTION, PRIVATE_SETTINGS_DOC_ID),
       {
         theme,
+        unlockedThemes,
         uiMode,
         appOptions: normalizeAppOptions(appOptions),
         socialProfile: getCloudSafeSocialProfile(socialProfile),
@@ -17630,7 +17644,7 @@ useEffect(() => {
   }, 800);
 
   return () => window.clearTimeout(timeoutId);
-}, [privateSettingsReady, theme, uiMode, appOptions, socialProfile, socialFriends]);
+}, [privateSettingsReady, theme, unlockedThemes, uiMode, appOptions, socialProfile, socialFriends]);
 
 useEffect(() => {
   localStorage.setItem(
@@ -17997,6 +18011,8 @@ useEffect(() => {
       storeCheckpointTrialProgress(nextProgress);
     } catch (error) {
       console.error("Erreur chargement Salle des Epreuves :", error);
+    } finally {
+      if (!cancelled) setTrialProgressReady(true);
     }
   };
 
@@ -18621,6 +18637,7 @@ useEffect(() => {
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     const colors = {
       "theme-checkpoint": "#090a0c",
+      "theme-checkpointpremium": "#08090d",
       "theme-indigo": "#07091f",
       "theme-emerald": "#121a24",
       "theme-crimson": "#111419",
@@ -18787,6 +18804,19 @@ useEffect(() => {
     [rawTotalXP, checkpointTrialProgress.completed]
   );
   const level = getLevel(totalXP);
+  const themeRewardsReady = privateSettingsReady && bootReady.games && bootReady.hardware && trialProgressReady;
+  useEffect(() => {
+    if (!themeRewardsReady) return;
+    const next = resolveThemeRewards({theme, unlockedThemes, level, ready:themeRewardsReady});
+    if (next.justUnlocked) {
+      setUnlockedThemes(next.unlockedThemes);
+      showToast("Checkpoint Premium est débloqué ! Retrouve-le dans les thèmes.", 4000);
+    }
+    if (next.theme !== theme) setTheme(next.theme);
+  }, [themeRewardsReady, level, unlockedThemes, theme]);
+  useEffect(() => {
+    if (privateSettingsReady) localStorage.setItem("checkpoint-theme-unlocks", JSON.stringify(unlockedThemes));
+  }, [privateSettingsReady, unlockedThemes]);
   const progress = getProgress(totalXP);
   const title = pendingCheckpointLevel
     ? `Checkpoint ${pendingCheckpointLevel}`
@@ -20198,7 +20228,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       <div className={`app-shell ${showSplash ? "app-hidden" : "app-visible"}`}>
         <div className="container">
           <div className="app-title-row">
-            <h1 className="title" data-title="Checkpoint"><CheckpointMark className="checkpoint-header-mark"/>Checkpoint</h1>
+            <h1 className="title" data-title="Checkpoint"><CheckpointMark className="checkpoint-header-mark" variant={theme === CHECKPOINT_PREMIUM_THEME ? "platinum" : "gold"}/>Checkpoint</h1>
             <NotificationCenter
               notifications={visibleNotifications}
               open={notificationPanelOpen}
@@ -20699,7 +20729,9 @@ const setPlayedPlatforms = async (id, platforms) => {
             <>
               <OptionsTab
                 theme={theme}
-                setTheme={setTheme}
+                level={level}
+                unlockedThemes={unlockedThemes}
+                setTheme={next => { if (canUseTheme(next, unlockedThemes)) setTheme(next); }}
                 uiMode={uiMode}
                 setUiMode={setUiMode}
                 appOptions={appOptions}
