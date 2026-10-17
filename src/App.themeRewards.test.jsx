@@ -135,14 +135,21 @@ test("other players can send feedback but cannot see developer tools or the inbo
  expect(document.querySelector('.developer-tools')).toBeNull();
 });
 
-test("the header follows the active tab and home starts with level, collection, next level and session",async()=>{
+test("the introduction follows the active tab and home starts with level, collection, next level and session",async()=>{
  render(<App/>);
- await screen.findByText('Options',{selector:'.app-tab-label'});
+ await screen.findByText('Options',{selector:'#tab-introduction-title'});
  fireEvent.click(screen.getByRole('button',{name:'Accueil',exact:true}));
- expect(await screen.findByText('Accueil',{selector:'.app-tab-label'})).toBeVisible();
+ expect(await screen.findByText('Accueil',{selector:'#tab-introduction-title'})).toBeVisible();
  const blocks=[...document.querySelector('.home-page').children];
  expect(blocks[0]).toHaveClass('xp-card');
  expect(blocks[1]).toHaveClass('home-overview-card');
  expect(blocks[2]).toHaveClass('home-next-level');
  expect(blocks[3]).toHaveClass('home-hero');
+ expect(document.querySelector('.app-tab-label')).toBeNull();
+ for (const name of ['Top 5','Sanctuaire','Options']) {
+  fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name,exact:true}));
+  expect(await screen.findByText(name,{selector:'#tab-introduction-title'})).toBeVisible();
+  expect(document.querySelectorAll('.tab-introduction')).toHaveLength(1);
+ }
+ expect(document.querySelector('.options-header')).toBeNull();
 });

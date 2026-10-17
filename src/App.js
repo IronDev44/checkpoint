@@ -2550,11 +2550,35 @@ const playClick = () => {
   playSound("click");
 };
 
-export function AppHeaderBrand({theme,activeTab}) {
+const APP_TAB_DESCRIPTIONS = {
+  home: "Retrouve ta progression, ta collection et tes prochaines parties.",
+  news: "Les dernières nouvelles du jeu vidéo, à lire quand tu veux.",
+  search: "Trouve un jeu et ajoute-le à ta collection ou à ta wishlist.",
+  upcoming: "Repère les prochaines sorties selon tes plateformes et tes envies.",
+  deals: "Les offres du moment, avec un œil sur les jeux de ta wishlist.",
+  live: "Retrouve les prochains lives et les rendez-vous gaming.",
+  social: "Retrouve tes amis, découvre leurs profils et partage tes jeux du moment.",
+  library: "Tous tes jeux au même endroit : collection, parties en cours et wishlist.",
+  series: "Retrouve tes sagas et les jeux qu’il te reste à découvrir.",
+  hardware: "Garde une trace de ton matériel, d’hier et d’aujourd’hui.",
+  favorites: "Ici, tu gardes ce qui t'a vraiment marqué : jeux cultes, objets, souvenirs et matériel important. Le Top 5 classe, le Sanctuaire raconte ton histoire.",
+  top5: "Classe tes jeux, ton matériel, tes OST et tes GOTY. Pour les jeux et objets qui comptent surtout pour toi, c’est le Sanctuaire.",
+  profile: "Ton parcours de joueur : tes jeux marquants, tes badges et ta progression.",
+  options: "Règle l'app sans toucher à tes jeux ni à ton matériel.",
+};
+
+export function AppHeaderBrand({theme}) {
   return <div className="app-brand">
     <h1 className="title" data-title="Checkpoint"><CheckpointMark className="checkpoint-header-mark" variant={theme === CHECKPOINT_ULTIMATE_THEME ? "diamond" : theme === CHECKPOINT_PREMIUM_THEME ? "platinum" : "gold"}/><span className="checkpoint-wordmark">Checkpoint</span></h1>
-    <p className="app-tab-label">{APP_TAB_LABELS[activeTab] || "Accueil"}</p>
   </div>;
+}
+
+export function TabIntroduction({activeTab}) {
+  const tab = APP_TAB_LABELS[activeTab] ? activeTab : "home";
+  return <section className="search-panel tab-introduction" aria-labelledby="tab-introduction-title">
+    <h2 className="panel-title" id="tab-introduction-title">{APP_TAB_LABELS[tab]}</h2>
+    <p className="option-value">{APP_TAB_DESCRIPTIONS[tab]}</p>
+  </section>;
 }
 
 function BottomTabs({ activeTab, setActiveTab, soundStyle }) {
@@ -4478,17 +4502,6 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
   return (
     <div className="progression-stack top5-page">
       <div className="search-panel top5-dashboard">
-        <div>
-          <h2 className="panel-title">Tes vrais Top 5</h2>
-          <div className="option-value">
-            Classe tes jeux, ton matériel, tes OST et tes GOTY sans mélanger les usages.
-          </div>
-          <p className="section-human-note">
-            Ici, on classe ce qui ressort le plus fort. Pour les jeux et objets qui comptent
-            surtout pour toi, c'est le Sanctuaire.
-          </p>
-        </div>
-
         {contentMode !== "hardware" && (
           <div className="top5-mode-tabs">
             <button
@@ -6345,22 +6358,6 @@ function SanctuaryTab({
 
   return (
     <div className="progression-stack sanctuary-tab">
-      <section className="sanctuary-hero">
-        <div>
-          <span className="sanctuary-kicker">Sanctuaire</span>
-          <h1>Ce qui compte vraiment</h1>
-          <p>
-            Ici, tu gardes ce qui t'a vraiment marqué : jeux cultes, objets,
-            souvenirs et matériel important. Le Top 5 classe, le Sanctuaire
-            raconte ton histoire.
-          </p>
-        </div>
-        <div className="sanctuary-seal">
-          <Landmark size={28} />
-          <span>{sanctuaryGames.length + sanctuaryHardware.length}</span>
-        </div>
-      </section>
-
       <div className="sanctuary-stat-grid">
         <div>
           <strong>{sanctuaryGames.length}</strong>
@@ -15277,17 +15274,6 @@ function OptionsTab({
 
   return (
     <div className="progression-stack options-tab">
-      <div className="search-panel options-panel">
-        <div className="options-header">
-          <div>
-            <h2 className="panel-title">Options</h2>
-            <div className="option-value">
-              Règle l'app sans toucher à tes jeux ni à ton matériel.
-            </div>
-          </div>
-        </div>
-
-      </div>
       <TesterFeedback onSubmit={sendTesterFeedback} />
       <div className="search-panel options-panel">
         <OptionGroup id="interface" isOpen={!!openOptionGroups.interface} onToggle={() => setOpenOptionGroups((current) => ({ ...current, interface: !current.interface }))}
@@ -20109,7 +20095,7 @@ const setPlayedPlatforms = async (id, platforms) => {
       <div className={`app-shell ${showSplash ? "app-hidden" : "app-visible"}`}>
         <div className="container">
           <div className="app-title-row">
-            <AppHeaderBrand theme={theme} activeTab={activeTab}/>
+            <AppHeaderBrand theme={theme}/>
             <NotificationCenter
               notifications={visibleNotifications}
               open={notificationPanelOpen}
@@ -20118,6 +20104,8 @@ const setPlayedPlatforms = async (id, platforms) => {
               onDismiss={dismissNotification}
             />
           </div>
+
+          <TabIntroduction activeTab={activeTab}/>
 
           {showFullHeader && (
   <>
