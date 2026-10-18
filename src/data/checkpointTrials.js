@@ -33,8 +33,8 @@ export const CHECKPOINT_TRIALS = [
       },
       {
         id: "cp25-q3",
-        prompt: "Quelle console a popularisé les cartouches Game Boy Advance ?",
-        answers: ["Game Boy Advance", "Nintendo DS", "PlayStation Portable", "Neo Geo Pocket"],
+        prompt: "Laquelle de ces consoles peut lire les cartouches Game Boy Advance sans adaptateur ?",
+        answers: ["Nintendo DS Lite", "Nintendo DSi", "PlayStation Portable", "Neo Geo Pocket"],
         correctIndex: 0,
       },
       {
@@ -121,8 +121,8 @@ export const CHECKPOINT_TRIALS = [
       },
       {
         id: "cp75-q2",
-        prompt: "Quelle série est souvent citée comme référence moderne du jeu exigeant et punitif ?",
-        answers: ["Dark Souls", "Forza Horizon", "Animal Crossing", "Just Dance"],
+        prompt: "Dans quelle série retrouve-t-on les feux de camp et la cité d’Anor Londo ?",
+        answers: ["Dark Souls", "Bloodborne", "Sekiro", "Demon’s Souls"],
         correctIndex: 0,
       },
       {
@@ -134,7 +134,7 @@ export const CHECKPOINT_TRIALS = [
       {
         id: "cp75-q4",
         prompt: "Quel élément différencie surtout un remake d'un remaster ?",
-        answers: ["Un remake reconstruit largement le jeu", "Un remake change seulement la boîte", "Un remake retire toujours le gameplay", "Un remake est forcément multijoueur"],
+        answers: ["Un remake reconstruit largement le jeu", "Un remake ajuste uniquement la résolution", "Un remake est un portage sur une nouvelle console", "Un remake ajoute seulement une extension"],
         correctIndex: 0,
       },
       {
@@ -171,14 +171,14 @@ export const CHECKPOINT_TRIALS = [
       },
       {
         id: "cp100-q2",
-        prompt: "Quel type de jeu met souvent l'accent sur loot, builds et progression de personnage ?",
-        answers: ["Action-RPG", "Jeu de rythme", "Party game", "Visual novel"],
+        prompt: "Dans Diablo II, quelle classe peut invoquer une armée de squelettes ?",
+        answers: ["Le Nécromancien", "Le Paladin", "Le Barbare", "L’Amazone"],
         correctIndex: 0,
       },
       {
         id: "cp100-q3",
-        prompt: "Quel jeu a fortement popularisé le battle royale auprès du grand public ?",
-        answers: ["Fortnite", "Portal", "Gran Turismo", "Celeste"],
+        prompt: "Quel battle royale a introduit la carte Erangel dès sa première version jouable ?",
+        answers: ["PUBG: Battlegrounds", "Fortnite", "Apex Legends", "Call of Duty: Warzone"],
         correctIndex: 0,
       },
       {

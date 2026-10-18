@@ -1,6 +1,7 @@
 import { render, waitFor, screen, fireEvent, within } from "@testing-library/react";
 import App from "./App";
 import { setDoc } from "./services/d1Data";
+import { getWeeklyQuiz, getWeeklyQuizKey, getQuizAnswerKey } from "./services/weeklyQuiz";
 
 const mockStore = new Map();
 let mockSettings;
@@ -152,4 +153,27 @@ test("the introduction follows the active tab and home starts with level, collec
   expect(document.querySelectorAll('.tab-introduction')).toHaveLength(1);
  }
  expect(document.querySelector('.options-header')).toBeNull();
+});
+
+test("the home quiz records XP once and restores the next unanswered question after remount",async()=>{
+ const quiz=getWeeklyQuiz(getWeeklyQuizKey());
+ const q=quiz.questions[0];
+ const view=render(<App/>);
+ await screen.findByText('Options',{selector:'#tab-introduction-title'});
+ fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name:'Accueil',exact:true}));
+ await screen.findByRole('heading',{name:'Le quiz de la semaine'});
+ const region=screen.getByRole('region',{name:'Le quiz de la semaine'});
+ fireEvent.click(within(region).getByRole('button',{name:new RegExp(q.answers[q.correctIndex].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'))}));
+ fireEvent.click(within(region).getByRole('button',{name:'Valider ma réponse'}));
+ expect(within(region).getByText('+120 XP enregistrés')).toBeVisible();
+ const stored=JSON.parse(mockStore.get('checkpoint-weekly-quiz'));
+ expect(stored.totalXP).toBe(120);
+ expect(stored.answers[getQuizAnswerKey(quiz.weekKey,q.id)].questionId).toBe(q.id);
+ fireEvent.click(within(region).getByRole('button',{name:new RegExp(q.answers[q.correctIndex].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'))}));
+ expect(JSON.parse(mockStore.get('checkpoint-weekly-quiz')).totalXP).toBe(120);
+ view.unmount();
+ render(<App/>);
+ await screen.findByRole('heading',{name:'Le quiz de la semaine'});
+ expect(screen.getByText(quiz.questions[1].question)).toBeVisible();
+ expect(screen.getByRole('progressbar',{name:'Questions terminées'})).toHaveAttribute('aria-valuenow','1');
 });

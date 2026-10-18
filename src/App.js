@@ -21,7 +21,9 @@ import { AccountOptions } from "./components/AccountGate";
 import { applySelectedGamePatch } from "./services/gameSelection";
 import { HARDWARE_CATALOG } from "./data/hardware";
 import { PC_COMPONENT_FIELDS, getPcComponentOptions } from "./data/pcComponents";
-import { WEEKLY_QUIZ_QUESTIONS, WEEKLY_QUIZ_XP } from "./data/weeklyQuiz";
+import { WEEKLY_QUIZ_XP } from "./data/weeklyQuiz";
+import { getWeeklyQuiz, getWeeklyQuizKey, getWeeklyQuizAnswer, submitWeeklyQuizAnswer } from "./services/weeklyQuiz";
+import WeeklyQuiz from "./components/WeeklyQuiz";
 import {
   CHECKPOINT_LEVELS,
   getCheckpointRewardBadges,
@@ -136,55 +138,10 @@ const DEFAULT_CHECKPOINT_GOAL_PROGRESS = {
   totalXP: 0,
 };
 
-function getWeeklyQuizKey(date = new Date()) {
-  const current = new Date(date);
-  current.setHours(0, 0, 0, 0);
-  const day = current.getDay() || 7;
-  current.setDate(current.getDate() + 4 - day);
-  const yearStart = new Date(current.getFullYear(), 0, 1);
-  const week = Math.ceil((((current - yearStart) / 86400000) + 1) / 7);
-  return `${current.getFullYear()}-W${String(week).padStart(2, "0")}`;
-}
-
-function getPreviousWeeklyQuizKey(weekKey) {
-  const [yearPart, weekPart] = String(weekKey).split("-W");
-  const year = Number(yearPart);
-  const week = Number(weekPart);
-
-  if (!year || !week) return "";
-  if (week > 1) return `${year}-W${String(week - 1).padStart(2, "0")}`;
-
-  return `${year - 1}-W${String(getWeeksInYear(year - 1)).padStart(2, "0")}`;
-}
-
-function getWeeksInYear(year) {
-  return getWeeklyQuizKey(new Date(year, 11, 28)).split("-W")[1];
-}
-
 function hashString(value) {
   return String(value)
     .split("")
     .reduce((hash, char) => ((hash << 5) - hash + char.charCodeAt(0)) | 0, 0);
-}
-
-function getQuizAnswerChoices(question) {
-  if (!question?.answers) return [];
-
-  return question.answers
-    .map((answer, originalIndex) => ({
-      answer,
-      originalIndex,
-      sortKey: Math.abs(hashString(`${question.id}-${answer}-${originalIndex}`)),
-    }))
-    .sort((a, b) => a.sortKey - b.sortKey);
-}
-
-function getWeeklyQuizQuestion(weekKey = getWeeklyQuizKey()) {
-  const questions = WEEKLY_QUIZ_QUESTIONS.length ? WEEKLY_QUIZ_QUESTIONS : [];
-  if (questions.length === 0) return null;
-
-  const index = Math.abs(hashString(weekKey)) % questions.length;
-  return questions[index];
 }
 
 function getStoredWeeklyQuizProgress() {
@@ -9369,19 +9326,11 @@ export function HomeTab({
   const [recommendations, setRecommendations] = useState([]);
   const [suggestionOffset, setSuggestionOffset] = useState(0);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
-  const [selectedQuizAnswer, setSelectedQuizAnswer] = useState(null);
-  const [quizQuestionIndex, setQuizQuestionIndex] = useState(() => {
-    if (WEEKLY_QUIZ_QUESTIONS.length === 0) return 0;
-    return Math.abs(hashString(weeklyQuiz?.weekKey || "checkpoint")) % WEEKLY_QUIZ_QUESTIONS.length;
-  });
 
   const profile = getPlayerProfile(games);
   const playerAnalysis = getPlayerAnalysis(games, hardware, badges);
-  const quizQuestion = WEEKLY_QUIZ_QUESTIONS[quizQuestionIndex] || weeklyQuiz?.question;
-  const quizChoices = useMemo(() => getQuizAnswerChoices(quizQuestion), [quizQuestion]);
-  const quizAnswerKey = quizQuestion ? `free-${quizQuestion.id}` : weeklyQuiz?.weekKey;
-  const quizAnswer = weeklyQuizProgress.answers?.[quizAnswerKey];
-  const quizLocked = Boolean(quizAnswer);
+  const quizCompleted = (weeklyQuiz?.questions || []).filter(question => getWeeklyQuizAnswer(weeklyQuizProgress, weeklyQuiz.weekKey, question.id)).length;
+  const quizLocked = quizCompleted === (weeklyQuiz?.questions?.length || 5);
 
   const isFinishedGame = isGameFinishedStatus;
   const isOwnedHardware = (item) =>
@@ -9603,11 +9552,11 @@ export function HomeTab({
     makeCheckpointGoal({
       id: `quiz-${weeklyQuiz?.weekKey || "free"}`,
       title: "Checkpoint quiz",
-      detail: "Repondre au quiz actif pour entretenir ta serie.",
+      detail: "Termine les cinq questions de la semaine à ton rythme.",
       actionLabel: quizLocked ? "Valider" : "Repondre",
       tab: "home",
-      current: quizLocked ? 1 : 0,
-      target: 1,
+      current: quizCompleted,
+      target: weeklyQuiz?.questions?.length || 5,
       xp: 60,
     }),
     buildMilestoneGoal({
@@ -9788,7 +9737,7 @@ export function HomeTab({
       id: "quiz",
       kicker: "XP rapide",
       title: "Quiz disponible",
-      detail: `Une question gaming, +${WEEKLY_QUIZ_XP.correct} XP si tu valides.`,
+      detail: `${5 - quizCompleted} questions cette semaine, +${WEEKLY_QUIZ_XP.correct} XP par bonne réponse.`,
       action: "Jouer",
       onClick: () =>
         document
@@ -9841,10 +9790,6 @@ export function HomeTab({
       setActiveTab(goal.tab);
     }
   };
-
-  useEffect(() => {
-    setSelectedQuizAnswer(null);
-  }, [quizAnswerKey]);
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -10009,6 +9954,7 @@ export function HomeTab({
   return (
     <div className="home-page">
       {levelSection}{collectionSection}{nextLevelSection}{sessionSection}
+      <WeeklyQuiz quiz={weeklyQuiz} progress={weeklyQuizProgress} onAnswer={onAnswerWeeklyQuiz}/>
 
 
       {libraryPreviewGames.length > 0 && <section className="home-library-preview home-library-card" aria-labelledby="home-library-preview-title">
@@ -10029,107 +9975,6 @@ export function HomeTab({
         games={games}
         onOpenDeals={() => setActiveTab("deals")}
       />
-
-      {quizQuestion && (
-        <div className="weekly-quiz-card">
-          <div className="weekly-quiz-top">
-            <div>
-              <div className="home-card-title">Quiz gaming</div>
-              <p>Une pause quiz ? Choisis une question et tente ta chance.</p>
-            </div>
-
-            <div className="weekly-quiz-reward">
-              <span>Récompense</span>
-              <strong>+{WEEKLY_QUIZ_XP.correct} XP</strong>
-            </div>
-          </div>
-
-          <div className="weekly-quiz-meta">
-            <span>{quizQuestion.category}</span>
-            <span>{quizQuestion.difficulty}</span>
-            <span>Question {quizQuestionIndex + 1} / {WEEKLY_QUIZ_QUESTIONS.length}</span>
-          </div>
-
-          <h3 className="weekly-quiz-question">{quizQuestion.question}</h3>
-
-          <div className="weekly-quiz-controls">
-            <button
-              type="button"
-              onClick={() =>
-                setQuizQuestionIndex((index) =>
-                  index === 0 ? WEEKLY_QUIZ_QUESTIONS.length - 1 : index - 1
-                )
-              }
-            >
-              Précédente
-            </button>
-
-            <button
-              type="button"
-              onClick={() =>
-                setQuizQuestionIndex((index) =>
-                  (index + 1) % WEEKLY_QUIZ_QUESTIONS.length
-                )
-              }
-            >
-              Suivante
-            </button>
-          </div>
-
-          <div className="weekly-quiz-answers">
-            {quizChoices.map((choice, index) => {
-              const isSelected =
-                selectedQuizAnswer === choice.originalIndex ||
-                quizAnswer?.answerIndex === choice.originalIndex;
-              const isCorrect = quizLocked && choice.originalIndex === quizQuestion.correctIndex;
-              const isWrong =
-                quizLocked &&
-                quizAnswer?.answerIndex === choice.originalIndex &&
-                !quizAnswer.correct;
-
-              return (
-                <button
-                  key={`${choice.answer}-${choice.originalIndex}`}
-                  type="button"
-                  className={[
-                    "weekly-quiz-answer",
-                    isSelected ? "selected" : "",
-                    isCorrect ? "correct" : "",
-                    isWrong ? "wrong" : "",
-                  ].join(" ")}
-                  disabled={quizLocked}
-                  onClick={() => {
-                    setSelectedQuizAnswer(choice.originalIndex);
-                    onAnswerWeeklyQuiz?.(choice.originalIndex, {
-                      question: quizQuestion,
-                      answerKey: quizAnswerKey,
-                      mode: "free",
-                    });
-                  }}
-                >
-                  <span>{String.fromCharCode(65 + index)}</span>
-                  {choice.answer}
-                </button>
-              );
-            })}
-          </div>
-
-          {quizLocked && (
-            <div className={`weekly-quiz-result ${quizAnswer.correct ? "correct" : "wrong"}`}>
-              <strong>{quizAnswer.correct ? "Bonne réponse" : "Réponse validée"}</strong>
-              <span>
-                +{quizAnswer.earnedXP} XP · {quizQuestion.explanation}
-              </span>
-            </div>
-          )}
-
-          <div className="weekly-quiz-stats">
-            <span>Série : {weeklyQuizProgress.streak || 0}</span>
-            <span>Record : {weeklyQuizProgress.bestStreak || 0}</span>
-            <span>XP quiz : {weeklyQuizProgress.totalXP || 0}</span>
-          </div>
-        </div>
-      )}
 
       {homeActionCards.length > 0 && (
         <div className="home-card home-command-center">
@@ -17893,62 +17738,35 @@ useEffect(() => {
   };
 }, []);
 
-const weeklyQuiz = useMemo(() => {
-  const weekKey = getWeeklyQuizKey();
-  return {
-    weekKey,
-    question: getWeeklyQuizQuestion(weekKey),
+const [quizWeekKey, setQuizWeekKey] = useState(getWeeklyQuizKey);
+useEffect(() => {
+  const refresh = () => setQuizWeekKey(getWeeklyQuizKey());
+  const timer = window.setInterval(refresh, 60000);
+  window.addEventListener("focus", refresh);
+  document.addEventListener("visibilitychange", refresh);
+  return () => {
+    window.clearInterval(timer);
+    window.removeEventListener("focus", refresh);
+    document.removeEventListener("visibilitychange", refresh);
   };
 }, []);
+const weeklyQuiz = useMemo(() => getWeeklyQuiz(quizWeekKey), [quizWeekKey]);
+const quizProgressRef = useRef(weeklyQuizProgress);
+useEffect(() => { quizProgressRef.current = weeklyQuizProgress; }, [weeklyQuizProgress]);
 
 const handleWeeklyQuizAnswer = (answerIndex, options = {}) => {
-  const question = options.question || weeklyQuiz.question;
-  if (!question) return;
-
-  const answerKey = options.answerKey || weeklyQuiz.weekKey;
-  if (weeklyQuizProgress.answers?.[answerKey]) return;
-
-  const correct = answerIndex === question.correctIndex;
-  const previousWeekKey = getPreviousWeeklyQuizKey(weeklyQuiz.weekKey);
-  const nextStreak =
-    options.mode === "free"
-      ? correct
-        ? (weeklyQuizProgress.streak || 0) + 1
-        : 0
-      : correct
-        ? weeklyQuizProgress.lastCorrectWeek === previousWeekKey
-          ? (weeklyQuizProgress.streak || 0) + 1
-          : 1
-        : 0;
-
-  const earnedXP = correct
-    ? WEEKLY_QUIZ_XP.correct +
-      Math.min(Math.max(nextStreak - 1, 0), 4) * WEEKLY_QUIZ_XP.streakBonus
-    : WEEKLY_QUIZ_XP.participation;
-
-  const nextProgress = {
-    ...weeklyQuizProgress,
-    totalXP: (weeklyQuizProgress.totalXP || 0) + earnedXP,
-    streak: nextStreak,
-    bestStreak: Math.max(weeklyQuizProgress.bestStreak || 0, nextStreak),
-    lastCorrectWeek: correct ? weeklyQuiz.weekKey : weeklyQuizProgress.lastCorrectWeek,
-    answers: {
-      ...(weeklyQuizProgress.answers || {}),
-      [answerKey]: {
-        questionId: question.id,
-        answerIndex,
-        correct,
-        earnedXP,
-        mode: options.mode || "weekly",
-        answeredAt: new Date().toISOString(),
-      },
-    },
-  };
-
+  const nextProgress = submitWeeklyQuizAnswer(quizProgressRef.current, { ...options, answerIndex });
+  if (!nextProgress) {
+    setQuizWeekKey(getWeeklyQuizKey());
+    return;
+  }
+  // Claim synchronously before rendering, so rapid taps cannot grant XP twice.
+  quizProgressRef.current = nextProgress;
   setWeeklyQuizProgress(nextProgress);
   storeWeeklyQuizProgress(nextProgress);
-  playSound(correct ? "success" : "click", soundStyle);
-  showToast(correct ? `Bien joué ! +${earnedXP} XP` : `Tentative validée. +${earnedXP} XP`);
+  const answer = getWeeklyQuizAnswer(nextProgress, options.weekKey, options.questionId);
+  playSound(answer.correct ? "success" : "click", soundStyle);
+  showToast(answer.correct ? `Bien joué ! +${answer.earnedXP} XP` : `Tentative validée. +${answer.earnedXP} XP`);
 };
 
 const handleClaimCheckpointGoal = (goal) => {
