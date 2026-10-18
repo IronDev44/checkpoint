@@ -61,7 +61,7 @@ export function TutorialDialog({tab, onClose}) {
         <h2 id={titleId} tabIndex={-1} ref={heading}>{current.title}</h2>
         <p>{current.text}</p>
         <ul>{current.points.map(point => <li key={point}>{point}</li>)}</ul>
-        <p className="tab-tutorial-replay">À retrouver dans Options → Aide et tutoriels.</p>
+        {index === guide.steps.length - 1 && <p className="tab-tutorial-replay">Tu peux revoir ce tutoriel quand tu veux dans Options → Aide et tutoriels.</p>}
       </div>
       <footer className="tab-tutorial-footer">
         <div className="tab-tutorial-dots" aria-hidden="true">{guide.steps.map((_, i) => <span key={i} className={i <= index ? 'active' : ''}/>)}</div>
@@ -76,19 +76,16 @@ export function TutorialDialog({tab, onClose}) {
   </div>, document.body);
 }
 
-export function TabTutorialEntry({tab}) {
-  const progress = useTutorialProgress();
+export function TabTutorialEntry({tab, enabled = true}) {
   const [open, setOpen] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
-  if (!TAB_TUTORIALS[tab]) return null;
-  return <div className="tab-tutorial-entry">
-    {!progress[tab] && !dismissed && <p>Un petit tour pour découvrir cet onglet ?</p>}
-    <div className="tab-tutorial-entry-actions">
-      <button type="button" className="back-btn" onClick={() => setOpen(true)}><BookOpen size={16}/> {progress[tab] || dismissed ? 'Voir le guide' : 'Découvrir l’onglet'}</button>
-      {!progress[tab] && !dismissed && <button type="button" className="tab-tutorial-later" onClick={() => {setDismissed(true); saveProgress(tab, false);}}>Plus tard</button>}
-    </div>
-    {open && <TutorialDialog tab={tab} onClose={completed => {saveProgress(tab, completed || progress[tab] === 'completed'); setDismissed(true); setOpen(false);}}/>}
-  </div>;
+  const shown = useRef(false);
+  useEffect(() => {
+    if (!enabled || !TAB_TUTORIALS[tab] || shown.current || readProgress()[tab]) return;
+    shown.current = true;
+    saveProgress(tab, false);
+    setOpen(true);
+  }, [tab, enabled]);
+  return open ? <TutorialDialog tab={tab} onClose={completed => {if (completed) saveProgress(tab, true); setOpen(false);}}/> : null;
 }
 
 export function TutorialLibrary() {

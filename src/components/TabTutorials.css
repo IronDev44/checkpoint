@@ -1,8 +1,3 @@
-html body[data-theme] .tab-tutorial-entry {margin-top:16px;padding-top:14px;border-top:1px solid var(--surface-border,#ffffff20)}
-html body[data-theme] .tab-tutorial-entry p {margin:0 0 10px;color:var(--text-soft,#c6ccd5);font-size:.88rem;line-height:1.5}
-.tab-tutorial-entry-actions {display:flex;align-items:center;flex-wrap:wrap;gap:10px}
-html body[data-theme] .tab-tutorial-entry .back-btn {width:auto!important;height:auto!important;max-width:100%;margin:0;min-height:44px;gap:8px;padding:10px 16px!important;font-size:.85rem}
-html body[data-theme] .tab-tutorial-later {min-height:42px;padding:8px 14px;border:0;box-shadow:none;background:transparent;color:var(--text-soft,#c6ccd5);font:inherit;font-size:.85rem;text-decoration:underline;text-underline-offset:4px}
 .tab-tutorial-library > p {line-height:1.6;color:var(--text-soft,#c6ccd5);margin:0 0 18px}
 .tab-tutorial-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 html body[data-theme] button.tab-tutorial-choice {display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:10px;min-width:0;width:100%;height:auto;min-height:140px;padding:18px;text-align:left;white-space:normal;border-radius:18px;border:1px solid var(--surface-border,#ffffff25);background:var(--surface-bg,#151b25);color:var(--text-main,#f5f5f5);font:inherit;line-height:1.5;cursor:pointer}
@@ -29,7 +24,7 @@ html body[data-theme] .tab-tutorial-head .back-btn {display:flex;align-items:cen
 .tab-tutorial-actions {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
 html body[data-theme] .tab-tutorial-actions button {display:flex;align-items:center;justify-content:center;gap:8px;width:100%!important;height:auto!important;margin:0;min-width:0;max-width:none;min-height:48px;padding:12px!important;border-radius:14px!important;border:1px solid var(--surface-border,#ffffff30);font:inherit;font-size:.9rem;font-weight:700;white-space:normal;box-sizing:border-box}
 .tab-tutorial-actions button:disabled {opacity:.35;cursor:default}
-.tab-tutorial-dialog button:focus-visible,.tab-tutorial-choice:focus-visible,.tab-tutorial-entry button:focus-visible {outline:2px solid var(--accent-solid,#d6b66f);outline-offset:3px}
+.tab-tutorial-dialog button:focus-visible,.tab-tutorial-choice:focus-visible {outline:2px solid var(--accent-solid,#d6b66f);outline-offset:3px}
 @media(max-width:480px){.tab-tutorial-grid {grid-template-columns:minmax(0,1fr)}.tab-tutorial-body{padding:20px}.tab-tutorial-footer{padding:14px 18px 18px}}
 @media(max-height:500px) and (orientation:landscape){.tab-tutorial-head{padding:10px 20px}.tab-tutorial-footer{padding:10px 20px}.tab-tutorial-dots{margin-bottom:10px}.tab-tutorial-body{padding:16px 22px}}
 html body[data-theme] .hardware-view .hardware-catalog-back.back-btn,

@@ -37,7 +37,7 @@ export default function AccountGate({ children }) {
   const reportAppProgress = useCallback(progress => setAppProgress(previous => Math.max(previous, progress)), []);
   const finishStartup = useCallback(() => setStartupVisible(false), []);
   const startupReady = !creatingProfile && (accountsEnabled ? user === null || Boolean(user && appProgress >= 1) : appProgress >= 1);
-  const app = () => cloneElement(children, { key: user?.uid || "local", startupVisible, onStartupProgress: reportAppProgress });
+  const app = () => cloneElement(children, { key: user?.uid || "local", startupVisible, tutorialsReady: !startupVisible && !creatingProfile && !tour, onStartupProgress: reportAppProgress });
   const withStartup = content => <><div style={{display:"contents"}} inert={startupVisible || creatingProfile ? true : undefined} aria-hidden={startupVisible || creatingProfile ? "true" : undefined}>{content}</div><StartupIntro visible={startupVisible || creatingProfile} appearance={startupAppearance} authReady={!accountsEnabled || user !== undefined} appProgress={appProgress} ready={startupReady} onComplete={finishStartup}/></>;
   useEffect(() => {
     if (user !== undefined) return;

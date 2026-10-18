@@ -1,3 +1,4 @@
+import {TAB_TUTORIALS} from './data/tabTutorials';
 import { render, waitFor, screen, fireEvent, within, act } from "@testing-library/react";
 import App from "./App";
 import {GameService} from "./services/gameService";
@@ -31,7 +32,7 @@ jest.mock("./services/d1Data",()=>({
 // Each case uses an in-memory account; no authentication or network writes.
 const mockOriginalFetch = global.fetch;
 beforeEach(()=>{
-  mockStore.clear();mockAccountStorage.setItem.mockImplementation((key,value)=>mockStore.set(key,value));setDoc.mockResolvedValue(undefined);
+  mockStore.clear();mockStore.set('checkpoint-tab-tutorials-v1',JSON.stringify(Object.fromEntries(Object.keys(TAB_TUTORIALS).map(key=>[key,'completed']))));mockAccountStorage.setItem.mockImplementation((key,value)=>mockStore.set(key,value));setDoc.mockResolvedValue(undefined);
   mockStore.set("checkpoint-app-options",JSON.stringify({startTab:"options",sound:{enabled:false}}));
   mockStore.set("checkpoint-trial-progress",JSON.stringify({completed:{25:true,50:true}}));
   mockSettings={theme:"theme-checkpoint",unlockedThemes:[]};

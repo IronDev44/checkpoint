@@ -2548,12 +2548,12 @@ export function AppHeaderBrand({theme}) {
   </div>;
 }
 
-export function TabIntroduction({activeTab}) {
+export function TabIntroduction({activeTab, tutorialsReady = true}) {
   const tab = APP_TAB_LABELS[activeTab] ? activeTab : "home";
   return <section className="search-panel tab-introduction" aria-labelledby="tab-introduction-title">
     <h2 className="panel-title" id="tab-introduction-title">{APP_TAB_LABELS[tab]}</h2>
     <p className="option-value">{APP_TAB_DESCRIPTIONS[tab]}</p>
-    <TabTutorialEntry key={tab} tab={tab}/>
+    <TabTutorialEntry key={tab} tab={tab} enabled={tutorialsReady}/>
   </section>;
 }
 
@@ -17184,7 +17184,7 @@ function CheckpointReachedOverlay({ checkpointLevel, onEnter, onClose }) {
 
 /* ==================== APP PRINCIPALE ==================== */
 
-export default function App({ startupVisible = false, onStartupProgress } = {}) {
+export default function App({ startupVisible = false, onStartupProgress, tutorialsReady = true } = {}) {
   const [selectedSearchGame, setSelectedSearchGame] = useState(null);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -19951,7 +19951,7 @@ const setPlayedPlatforms = async (id, platforms) => {
             />
           </div>
 
-          <TabIntroduction activeTab={activeTab}/>
+          <TabIntroduction activeTab={activeTab} tutorialsReady={tutorialsReady && !showSplash}/>
           {["home","profile"].includes(activeTab) && <ProgressSync {...progressSync}/>}
 
           {showFullHeader && (
