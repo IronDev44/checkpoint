@@ -25,16 +25,19 @@ import { WEEKLY_QUIZ_XP } from "./data/weeklyQuiz";
 import { WEEKLY_QUIZ_SIZE, getWeeklyQuiz, getWeeklyQuizKey, getWeeklyQuizAnswer, submitWeeklyQuizAnswer } from "./services/weeklyQuiz";
 import WeeklyQuiz from "./components/WeeklyQuiz";
 import { sortSearchResults } from "./services/searchSort";
+import { isFanGame, getDiscoveryMetadata, isMainGameResult } from "./services/fanGames";
+import "./components/SearchFanFilter.css";
 import { compareLatestLibraryAdditions } from "./services/libraryOrder";
 import { getWishlistOriginLabel, getDealAlertLabel } from "./services/wishlistLabels";
 import ProgressSync, { useProgressSync } from "./components/ProgressSync";
 import LibraryBulkEditor from "./components/LibraryBulkEditor";
 import FriendComparison from "./components/FriendComparison";
-import PlayerShareCard from "./components/PlayerShareCard";
+import { TabTutorialEntry, TutorialLibrary } from "./components/TabTutorials";
 import { buildBulkGamePatch } from "./services/libraryBulk";
 import "./components/CollectionImprovements.css";
 import "./components/LandscapeLayout.css";
 import SeriesCatalogProgress from "./components/SeriesCatalogProgress";
+import { loadSeriesCatalog, dedupeSeriesGames, findSeriesLibraryMatch, isSeriesLibraryEpisode, seriesCatalogTitle } from "./services/seriesCatalog";
 import "./components/SeriesCatalogProgress.css";
 import {
   CHECKPOINT_LEVELS,
@@ -248,6 +251,7 @@ const DEFAULT_PUBLIC_SECTIONS = {
 };
 
 const DEFAULT_APP_OPTIONS = {
+  searchIncludeFanGames: false,
   sound: DEFAULT_SOUND_SETTINGS,
   startTab: "home",
   visualEffects: "balanced",
@@ -321,6 +325,7 @@ function normalizeAppOptions(options = {}) {
   return {
     ...DEFAULT_APP_OPTIONS,
     ...source,
+    searchIncludeFanGames: source.searchIncludeFanGames === true,
     schemaVersion: APP_OPTIONS_SCHEMA_VERSION,
     sound: normalizeSoundSettings(source.sound, readLegacySoundSettings(localStorage)),
     startTab,
@@ -844,6 +849,7 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
   if (!game) return null;
 
   const buildPayload = (status) => ({
+    discoveryMetadata: getDiscoveryMetadata(game, details),
     name: game.name,
     rating: 0,
     favorite: false,
@@ -2547,6 +2553,7 @@ export function TabIntroduction({activeTab}) {
   return <section className="search-panel tab-introduction" aria-labelledby="tab-introduction-title">
     <h2 className="panel-title" id="tab-introduction-title">{APP_TAB_LABELS[tab]}</h2>
     <p className="option-value">{APP_TAB_DESCRIPTIONS[tab]}</p>
+    <TabTutorialEntry key={tab} tab={tab}/>
   </section>;
 }
 
@@ -2665,6 +2672,7 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
   const [swipeState, setSwipeState] = useState("");
 
   const buildGamePayload = (status) => ({
+    discoveryMetadata: getDiscoveryMetadata(game),
     rawgId: game.id,
     name: game.name,
     rating: 0,
@@ -2829,6 +2837,7 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
 
         <div className="game-overlay">
           <div className="game-title">{game.name}</div>
+          {isFanGame(game) && <span className="search-fan-badge">Jeu de fans</span>}
 
           <div className="game-meta">
             <span>
@@ -10838,8 +10847,6 @@ export function ProfileTab({
         </div>
       </div>
 
-      <PlayerShareCard profile={socialProfile} games={games} level={level}/>
-
       <div className="search-panel profile-living-panel">
         <div className="profile-living-main">
           <span>Ta signature de joueur</span>
@@ -11625,9 +11632,13 @@ function gameMatchesSearchFilters(game, filters = {}) {
 }
 
 function detectSeriesName(gameName) {
-  const name = normalizeGameName(gameName);
+  const name = normalizeSearchText(String(gameName || '').replace(/['’]/g, ''));
 
   const seriesRules = [
+    { key: "splinter cell", label: "Tom Clancy's Splinter Cell" },
+    { key: "rainbow six", label: "Tom Clancy's Rainbow Six" },
+    { key: "ghost recon", label: "Tom Clancy's Ghost Recon" },
+    { key: "the division", label: "Tom Clancy's The Division" },
     { key: "lego star wars", label: "Lego Star Wars" },
     { key: "star wars", label: "Star Wars" },
     { key: "lord of the rings", label: "The Lord of the Rings" },
@@ -11687,6 +11698,7 @@ function detectSeriesName(gameName) {
 
   const found = seriesRules.find((series) => name.includes(series.key));
   if (found) return found.label;
+  if (name.startsWith('tom clancys')) return null;
 
   const words = name.split(" ").filter(Boolean);
   if (words.length < 2) return null;
@@ -11704,6 +11716,7 @@ function getDetectedGameSeries(games) {
   const groups = {};
 
   games.forEach((game) => {
+    if (!isSeriesLibraryEpisode(game)) return;
     const seriesName = detectSeriesName(game.name);
     if (!seriesName) return;
 
@@ -11714,7 +11727,9 @@ function getDetectedGameSeries(games) {
 
   return Object.entries(groups)
     .filter(([, items]) => items.length >= 2)
-    .map(([name, items]) => {
+    .map(([name, rawItems]) => {
+      const items = dedupeSeriesGames(rawItems, name, isGameFinishedStatus)
+        .sort((a,b) => String(a.released || '').localeCompare(String(b.released || '')) || a.name.localeCompare(b.name));
       const finished = items.filter(isGameFinishedStatus).length;
 
       const total = items.length;
@@ -11726,18 +11741,25 @@ function getDetectedGameSeries(games) {
         total,
         percent: Math.round((finished / total) * 100),
       };
-    });
+    })
+    .filter(series => series.total >= 2);
 }
 
-function GameSeriesTab({ games, onAddGameToLibrary }) {
+export function GameSeriesTab({ games, onAddGameToLibrary }) {
   const [seriesDisplayMode, setSeriesDisplayMode] = useState("compact");
   const [enrichedSeries, setEnrichedSeries] = useState([]);
   const [selectedSeries, setSelectedSeries] = useState(null);
   const [seriesView, setSeriesView] = useState("owned");
   const [seriesSuggestions, setSeriesSuggestions] = useState([]);
+  const [suggestionsStatus, setSuggestionsStatus] = useState('idle');
+  const [suggestionsComplete, setSuggestionsComplete] = useState(false);
+  const suggestionsRequest = useRef(null);
+  useEffect(() => () => suggestionsRequest.current?.abort(), []);
+  const activeSeries = selectedSeries ? enrichedSeries.find(series => series.name === selectedSeries.name) || selectedSeries : null;
   const [seriesScrollY, setSeriesScrollY] = useState(0);
 
   const openSeries = (series) => {
+    suggestionsRequest.current?.abort();
     setSeriesScrollY(window.scrollY);
     setSelectedSeries(series);
     setSeriesView("owned");
@@ -11745,6 +11767,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
   };
 
   const closeSeries = () => {
+    suggestionsRequest.current?.abort();
     setSelectedSeries(null);
     setSeriesSuggestions([]);
     setSeriesView("owned");
@@ -11755,28 +11778,21 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
   };
 
   const loadSeriesSuggestions = async (seriesName) => {
-    const data = await rawgApiRequest(
-      "/games",
-      {
-        search: seriesName,
-        page_size: "30",
-      }
-    );
-
-    const cleanSeriesName = seriesName.toLowerCase();
-
-    const filteredGames = (data.results || []).filter((game) => {
-      const name = (game.name || "").toLowerCase();
-
-      if (cleanSeriesName === "the last of us") {
-        return name.startsWith("the last of us") || name.startsWith("last of us");
-      }
-
-      return name.includes(cleanSeriesName);
-    });
-
-    setSeriesSuggestions(filteredGames);
+    suggestionsRequest.current?.abort();
+    const controller = new AbortController();
+    suggestionsRequest.current = controller;
     setSeriesView("suggestions");
+    setSuggestionsStatus("loading");
+    setSeriesSuggestions([]);
+    try {
+      const catalog = await loadSeriesCatalog(seriesName, {signal:controller.signal});
+      if (controller.signal.aborted) return;
+      setSeriesSuggestions(catalog.games);
+      setSuggestionsComplete(catalog.complete);
+      setSuggestionsStatus("ready");
+    } catch (error) {
+      if (!controller.signal.aborted) setSuggestionsStatus("error");
+    }
   };
 
   useEffect(() => {
@@ -11848,6 +11864,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
             className="back-btn series-back-btn"
             onClick={() => {
               if (seriesView === "suggestions") {
+                suggestionsRequest.current?.abort();
                 setSeriesView("owned");
                 return;
               }
@@ -11859,20 +11876,20 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
             Retour
           </button>
 
-          <h2 className="panel-title">{selectedSeries.name}</h2>
-          <SeriesCatalogProgress name={selectedSeries.name} games={selectedSeries.games} isFinished={isGameFinishedStatus}/>
+          <h2 className="panel-title">{activeSeries.name}</h2>
+          <SeriesCatalogProgress name={activeSeries.name} games={activeSeries.games} isFinished={isGameFinishedStatus}/>
 
           <div className="series-detail-summary">
             <div>
-              <strong>{selectedSeries.finished}/{selectedSeries.total}</strong>
+              <strong>{activeSeries.finished}/{activeSeries.total}</strong>
               <span>terminés biblio</span>
             </div>
             <div>
-              <strong>{selectedSeries.unfinished.length}</strong>
+              <strong>{activeSeries.unfinished.length}</strong>
               <span>à suivre</span>
             </div>
             <div>
-              <strong>{formatRating10(selectedSeries.averageRating, "—")}</strong>
+              <strong>{formatRating10(activeSeries.averageRating, "—")}</strong>
               <span>note moy.</span>
             </div>
           </div>
@@ -11882,7 +11899,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
               <h3 className="hardware-group-title">Ma série</h3>
 
               <div className="series-list">
-                {selectedSeries.games.map((game) => (
+                {activeSeries.games.map((game) => (
                   <div key={game.id} className="series-game-row">
                     <span>{game.name}</span>
                     <span>
@@ -11899,7 +11916,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
               <button
                 type="button"
                 className="save-review-btn series-suggestions-btn"
-                onClick={() => loadSeriesSuggestions(selectedSeries.name)}
+                onClick={() => loadSeriesSuggestions(activeSeries.name)}
               >
                 Dans la même série...
               </button>
@@ -11908,22 +11925,27 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
 
           {seriesView === "suggestions" && (
             <>
-              <h3 className="hardware-group-title">Propositions RAWG</h3>
+              <h3 className="hardware-group-title">Les épisodes de la série</h3>
+              <p className="series-scope-note">Les épisodes sortis, sans compilations ni rééditions.</p>
+              {suggestionsStatus === 'loading' && <p role="status">Chargement des épisodes…</p>}
+              {suggestionsStatus === 'error' && <div role="status">
+                <p>Le catalogue est indisponible pour le moment.</p>
+                <button type="button" className="back-btn" onClick={() => loadSeriesSuggestions(activeSeries.name)}>Réessayer</button>
+              </div>}
+              {suggestionsStatus === 'ready' && !suggestionsComplete && <p className="series-scope-note">Catalogue partiel : d’autres épisodes peuvent manquer.</p>}
+              {suggestionsStatus === 'ready' && !seriesSuggestions.length && <p>Aucun autre épisode confirmé dans le catalogue.</p>}
 
               <div className="series-list">
                 {seriesSuggestions.map((rawgGame) => {
-                  const alreadyInLibrary = games.some(
-                    (game) =>
-                      game.rawgId === rawgGame.id ||
-                      game.name.toLowerCase() === rawgGame.name.toLowerCase()
-                  );
+                  const libraryMatch = findSeriesLibraryMatch(rawgGame, activeSeries.games, activeSeries.name, seriesSuggestions);
+                  const alreadyInLibrary = Boolean(libraryMatch);
 
                   return (
                     <div key={rawgGame.id} className="series-game-row">
-                      <span>{rawgGame.name}</span>
+                      <span>{seriesCatalogTitle(rawgGame, seriesSuggestions)}</span>
 
                       {alreadyInLibrary ? (
-                        <span className="already-added">✔ Déjà ajouté</span>
+                        <span className="already-added">{isGameFinishedStatus(libraryMatch) ? "Terminé" : libraryMatch.status === "wishlist" ? "Dans ta wishlist" : "Dans ta bibliothèque"}</span>
                       ) : (
                         <div className="quick-status-actions">
                           <button
@@ -11932,6 +11954,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
                             title="Wishlist"
                             onClick={() =>
                               onAddGameToLibrary({
+                                discoveryMetadata: getDiscoveryMetadata(rawgGame),
                                 name: rawgGame.name,
                                 rating: 0,
                                 favorite: false,
@@ -11966,6 +11989,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
                             title="Collection"
                             onClick={() =>
                               onAddGameToLibrary({
+                                discoveryMetadata: getDiscoveryMetadata(rawgGame),
                                 name: rawgGame.name,
                                 rating: 0,
                                 favorite: false,
@@ -12030,7 +12054,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
       </div>
       <div>
         <strong>{seriesStats.completedSeries}</strong>
-        <span>à jour</span>
+        <span>biblio à jour</span>
       </div>
       <div>
         <strong>{seriesStats.nearComplete}</strong>
@@ -12063,7 +12087,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
       </div>
 
       <p className="series-scope-note">
-        La barre suit tes jeux. Le compteur cherche aussi les autres titres sortis de la série, hors DLC et rééditions. Le catalogue peut être incomplet.
+        Chaque épisode compte une fois dans ta biblio, même avec un remaster. Les autres jeux sortis sont indiqués à part, hors DLC et compilations. Le catalogue peut être incomplet.
       </p>
 
       <div className="library-view-toggle">
@@ -13782,7 +13806,7 @@ export function HardwareTab({
               <div className="hardware-view hardware-all-view">
                 <button
                   type="button"
-                  className="hardware-back-button"
+                  className="back-btn hardware-catalog-back"
                   onClick={() => {
                     setShowAllHardwareByBrand(false);
                     setSelectedHardwareBrandView(null);
@@ -14026,14 +14050,14 @@ export function HardwareTab({
               <div className="hardware-view">
                 <button
                   type="button"
-                  className="hardware-back-button"
+                  className="back-btn hardware-catalog-back"
                   onClick={() => {
                     setSelectedHardwareBrandView(null);
                     setSelectedHardwareId(null);
                     scrollToHardwareArea(hardwareTopRef);
                   }}
                 >
-                  <span>⬅</span> Marques
+                  <ArrowLeft size={16} aria-hidden="true" /> Marques
                 </button>
 
                 <h3 className="hardware-group-title">
@@ -14084,7 +14108,7 @@ export function HardwareTab({
               <div className="hardware-view hardware-detail-view">
                 <button
                   type="button"
-                  className="hardware-back-button"
+                  className="back-btn hardware-catalog-back"
                   onClick={() => {
                     setSelectedHardwareId(null);
                     if (returnToAllHardware) {
@@ -14094,7 +14118,7 @@ export function HardwareTab({
                     scrollToHardwareArea(hardwareTopRef);
                   }}
                 >
-                  <span>⬅</span>{" "}
+                  <ArrowLeft size={16} aria-hidden="true" />{" "}
                   {returnToAllHardware ? allHardwareCatalogLabel : selectedHardwareBrandView}
                 </button>
 
@@ -14536,6 +14560,7 @@ function OptionsTab({
   const [isXboxImporting, setIsXboxImporting] = useState(false);
   const [connectedServicesExpanded, setConnectedServicesExpanded] = useState(false);
   const [openOptionGroups, setOpenOptionGroups] = useState({
+    help: false,
     interface: true,
     behavior: false,
     rating: false,
@@ -15123,6 +15148,10 @@ function OptionsTab({
     <div className="progression-stack options-tab">
       <TesterFeedback onSubmit={sendTesterFeedback} />
       <div className="search-panel options-panel">
+        <OptionGroup id="help" isOpen={!!openOptionGroups.help} onToggle={() => setOpenOptionGroups(current => ({...current, help:!current.help}))}
+          title="Aide et tutoriels" description="Un guide pour chaque onglet, à revoir quand tu veux." summary="14 guides">
+          <TutorialLibrary/>
+        </OptionGroup>
         <OptionGroup id="interface" isOpen={!!openOptionGroups.interface} onToggle={() => setOpenOptionGroups((current) => ({ ...current, interface: !current.interface }))}
           title="Interface"
           description="Ce qui change l'identité visuelle et les retours de l'app."
@@ -17212,6 +17241,9 @@ export default function App({ startupVisible = false, onStartupProgress } = {}) 
   const [sortBy, setSortBy] = useState("relevance");
   const searchRequestRef = useRef(0);
   const searchContextRef = useRef({query: "", ordering: "relevance"});
+  const visibleSearchResults = useMemo(() => appOptions.searchIncludeFanGames
+    ? results : results.filter(game => !isFanGame(game)), [results, appOptions.searchIncludeFanGames]);
+  const hiddenFanCount = results.length - visibleSearchResults.length;
   const [newsItems, setNewsItems] = useState([]);
   const [bootWave, setBootWave] = useState(true);
 
@@ -18758,6 +18790,7 @@ useEffect(() => {
 
       const isFinished = isGameFinishedStatus(game);
       const newGame = {
+        discoveryMetadata: getDiscoveryMetadata(game),
         rawgId: game.rawgId || game.id || null,
         name: game.name,
         completed: game.completed || isFinished || false,
@@ -19053,47 +19086,6 @@ useEffect(() => {
     if (search.trim() || yearFilter || platformFilter || genreFilter) searchGames(search, value, true);
   };
 
-  const isMainGameResult = (game) => {
-  const name = (game.name || "").toLowerCase();
-
-  const allowedWords = [
-    "complete edition",
-    "definitive edition",
-    "ultimate edition",
-    "deluxe edition",
-    "gold edition",
-    "game of the year",
-    "goty",
-    "remastered",
-    "remake",
-    "director's cut",
-    "anniversary edition",
-    "collection",
-    "trilogy",
-  ];
-
-  if (allowedWords.some((word) => name.includes(word))) {
-    return true;
-  }
-
-  const blockedWords = [
-    "dlc",
-    "season pass",
-    "battle pass",
-    "expansion",
-    "add-on",
-    "addon",
-    "skin",
-    "costume",
-    "soundtrack",
-    "ost",
-    "demo",
-    "beta",
-  ];
-
-  return !blockedWords.some((word) => name.includes(word));
-};
-
   const searchGames = async (forcedSearch = null, ordering = sortBy, keepFiltersOpen = false) => {
   const cleanSearch = (forcedSearch ?? search ?? debouncedSearch).trim();
 
@@ -19121,6 +19113,7 @@ useEffect(() => {
         );
       })
       .map((game) => ({
+        discoveryMetadata: getDiscoveryMetadata(game),
         id: game.rawgId || `local-${game.id}`,
         name: game.name,
         slug: normalizeSearchText(game.name).replace(/\s+/g, "-"),
@@ -20100,6 +20093,15 @@ const setPlayedPlatforms = async (id, platforms) => {
                       </div>
                     </div>
 
+                    <div className="filter-block search-fan-filter">
+                      <div className="filter-label">Jeux de fans</div>
+                      <button type="button"
+                        className={`chip ${appOptions.searchIncludeFanGames ? "active" : ""}`}
+                        aria-pressed={appOptions.searchIncludeFanGames}
+                        onClick={() => setAppOptions(current => ({ ...current, searchIncludeFanGames: !current.searchIncludeFanGames }))}
+                      >Inclure les jeux de fans</button>
+                      <p>Les titres au statut incertain restent visibles. Les mods sont distingués des jeux de fans.</p>
+                    </div>
                     <div className="filter-block">
                       <div className="filter-label">Année</div>
                       <div className="chips-group">
@@ -20185,6 +20187,7 @@ const setPlayedPlatforms = async (id, platforms) => {
                           setPlatformFilter("");
                           setGenreFilter("");
                           setSortBy("relevance");
+                          setAppOptions(current => ({ ...current, searchIncludeFanGames: false }));
                           searchRequestRef.current += 1;
                           searchContextRef.current = {...searchContextRef.current, ordering: "relevance"};
                           setIsSearching(false);
@@ -20216,7 +20219,10 @@ const setPlayedPlatforms = async (id, platforms) => {
                   </div>
 
                   <div className="results-container">
-                    {results.map((game) => (
+                    {hiddenFanCount > 0 && <p className="search-fan-notice" role="status">
+                      {hiddenFanCount} {hiddenFanCount === 1 ? "jeu de fans masqué" : "jeux de fans masqués"}. Active « Inclure les jeux de fans » dans les filtres pour les afficher.
+                    </p>}
+                    {visibleSearchResults.map((game) => (
                       <SearchResultCard
                         key={game.id}
                         game={game}

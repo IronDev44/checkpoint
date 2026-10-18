@@ -1,0 +1,36 @@
+html body[data-theme] .tab-tutorial-entry {margin-top:16px;padding-top:14px;border-top:1px solid var(--surface-border,#ffffff20)}
+html body[data-theme] .tab-tutorial-entry p {margin:0 0 10px;color:var(--text-soft,#c6ccd5);font-size:.88rem;line-height:1.5}
+.tab-tutorial-entry-actions {display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+html body[data-theme] .tab-tutorial-entry .back-btn {width:auto!important;height:auto!important;max-width:100%;margin:0;min-height:44px;gap:8px;padding:10px 16px!important;font-size:.85rem}
+html body[data-theme] .tab-tutorial-later {min-height:42px;padding:8px 14px;border:0;box-shadow:none;background:transparent;color:var(--text-soft,#c6ccd5);font:inherit;font-size:.85rem;text-decoration:underline;text-underline-offset:4px}
+.tab-tutorial-library > p {line-height:1.6;color:var(--text-soft,#c6ccd5);margin:0 0 18px}
+.tab-tutorial-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+html body[data-theme] button.tab-tutorial-choice {display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:10px;min-width:0;width:100%;height:auto;min-height:140px;padding:18px;text-align:left;white-space:normal;border-radius:18px;border:1px solid var(--surface-border,#ffffff25);background:var(--surface-bg,#151b25);color:var(--text-main,#f5f5f5);font:inherit;line-height:1.5;cursor:pointer}
+.tab-tutorial-choice-head {display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tab-tutorial-choice-head svg {flex-shrink:0;color:var(--accent-solid,#d6b66f)}
+.tab-tutorial-choice > span:not(:first-child) {color:var(--text-soft,#c6ccd5);font-size:.88rem;font-weight:400}
+.tab-tutorial-choice small {margin-top:auto;color:var(--accent-solid,#d6b66f);font-size:.78rem}
+.tab-tutorial-overlay {position:fixed;inset:0;z-index:100100;display:grid;place-items:center;padding: max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(16px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));background:#000b;isolation:isolate;box-sizing:border-box}
+html body[data-theme] .tab-tutorial-dialog {width:min(100%,560px);min-width:0;max-height:calc(100dvh - 48px);max-height:calc(100svh - 48px);display:flex;flex-direction:column;border:1px solid var(--surface-border,#ffffff30);border-radius:26px;background:var(--bg-main,#10151d);color:var(--text-main,#f5f5f5);box-shadow:0 28px 100px #0008;overflow:hidden;box-sizing:border-box;text-align:left}
+.tab-tutorial-head {display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;border-bottom:1px solid var(--surface-border,#ffffff20)}
+.tab-tutorial-head > span {display:flex;align-items:center;gap:10px;min-width:0;font-size:.9rem;font-weight:700}
+html body[data-theme] .tab-tutorial-head .back-btn {display:flex;align-items:center;justify-content:center;flex-shrink:0;width:42px;min-width:42px;min-height:42px;padding:8px;margin:0;box-sizing:border-box}
+.tab-tutorial-body {padding:24px;overflow-y:auto;overscroll-behavior:contain;min-height:0;-webkit-overflow-scrolling:touch}
+.tab-tutorial-counter {margin:0 0 12px;color:var(--accent-solid,#d6b66f);font-size:.8rem;font-weight:700}
+.tab-tutorial-body h2 {margin:0 0 18px;font-size:clamp(1.35rem,5vw,1.85rem);line-height:1.2;outline:none}
+.tab-tutorial-body > p:not(.tab-tutorial-counter),.tab-tutorial-body li {color:var(--text-soft,#c6ccd5);line-height:1.65;font-size:.95rem}
+.tab-tutorial-body ul {padding-left:20px;margin:18px 0}
+.tab-tutorial-body li + li {margin-top:10px}
+.tab-tutorial-body .tab-tutorial-replay {margin:22px 0 0;font-size:.78rem}
+.tab-tutorial-footer {padding:16px 22px 22px;border-top:1px solid var(--surface-border,#ffffff20);flex-shrink:0}
+.tab-tutorial-dots {display:flex;gap:6px;margin:0 0 16px}
+.tab-tutorial-dots span {height:3px;flex:1;border-radius:4px;background:var(--surface-border,#ffffff20)}
+.tab-tutorial-dots .active {background:var(--accent-solid,#d6b66f)}
+.tab-tutorial-actions {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+html body[data-theme] .tab-tutorial-actions button {display:flex;align-items:center;justify-content:center;gap:8px;width:100%!important;height:auto!important;margin:0;min-width:0;max-width:none;min-height:48px;padding:12px!important;border-radius:14px!important;border:1px solid var(--surface-border,#ffffff30);font:inherit;font-size:.9rem;font-weight:700;white-space:normal;box-sizing:border-box}
+.tab-tutorial-actions button:disabled {opacity:.35;cursor:default}
+.tab-tutorial-dialog button:focus-visible,.tab-tutorial-choice:focus-visible,.tab-tutorial-entry button:focus-visible {outline:2px solid var(--accent-solid,#d6b66f);outline-offset:3px}
+@media(max-width:480px){.tab-tutorial-grid {grid-template-columns:minmax(0,1fr)}.tab-tutorial-body{padding:20px}.tab-tutorial-footer{padding:14px 18px 18px}}
+@media(max-height:500px) and (orientation:landscape){.tab-tutorial-head{padding:10px 20px}.tab-tutorial-footer{padding:10px 20px}.tab-tutorial-dots{margin-bottom:10px}.tab-tutorial-body{padding:16px 22px}}
+html body[data-theme] .hardware-view .hardware-catalog-back.back-btn,
+html body[data-theme] .hardware-all-view .hardware-catalog-back.back-btn {display:inline-flex;align-items:center;justify-content:center;gap:8px;width:auto!important;height:auto!important;max-width:100%;min-height:44px;padding:12px 18px!important;line-height:1.2;box-sizing:border-box}

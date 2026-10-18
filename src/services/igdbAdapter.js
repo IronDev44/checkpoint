@@ -1,4 +1,5 @@
 import { GAME_SOURCE } from "./gameTypes";
+import { getDiscoveryMetadata } from "./fanGames";
 
 function cleanText(value) {
   return typeof value === "string" ? value.trim() : "";
@@ -69,6 +70,7 @@ export function normalizeIgdbGame(igdbGame = {}) {
     genres: namesFromIgdbList(igdbGame.genres),
     developers: companiesByRole(igdbGame.involved_companies, "developer"),
     publishers: companiesByRole(igdbGame.involved_companies, "publisher"),
+    keywords: namesFromIgdbList(igdbGame.keywords),
     rating: Number.isFinite(Number(igdbGame.total_rating || igdbGame.rating))
       ? Number(igdbGame.total_rating || igdbGame.rating) / 20
       : null,
@@ -99,6 +101,7 @@ export function toRawgCompatibleIgdbGame(igdbGame = {}) {
     canonicalId: normalized.canonicalId,
     source: GAME_SOURCE.IGDB,
     sourceIds: normalized.sourceIds,
+    discoveryMetadata: getDiscoveryMetadata(igdbGame),
     title: normalized.title,
     name: normalized.title,
     slug: normalized.slug,
@@ -117,6 +120,7 @@ export function toRawgCompatibleIgdbGame(igdbGame = {}) {
     genres: normalized.genres.map((name) => ({ name })),
     developers: normalized.developers.map((name) => ({ name })),
     publishers: normalized.publishers.map((name) => ({ name })),
+    keywords: normalized.keywords.map((name) => ({ name })),
     short_screenshots: toArray(igdbGame.screenshots).map((screenshot) => ({
       id: screenshot.id,
       image: igdbImageUrl(screenshot.image_id, "screenshot_big"),

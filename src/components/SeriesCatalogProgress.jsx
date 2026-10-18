@@ -22,12 +22,12 @@ export default function SeriesCatalogProgress({name, games, isFinished}) {
       .catch(() => {if (!controller.signal.aborted) setState({status:'error'});});
     return () => controller.abort();
   }, [name, visible]);
-  const count = state.catalog ? seriesRemaining(state.catalog, games, isFinished) : null;
+  const count = state.catalog ? seriesRemaining({...state.catalog, name}, games, isFinished) : null;
   return <span ref={root} className="series-catalog-progress" aria-live="polite">
     {state.status === 'loading' ? 'Recherche des autres jeux de la série…'
       : state.status === 'error' ? 'Autres jeux de la série : catalogue indisponible'
       : !state.catalog.games.length ? 'Pas d’autre titre confirmé dans le catalogue'
       : count.remaining ? `${state.catalog.complete ? '' : 'Au moins '}${count.remaining} jeu${count.remaining > 1 ? 'x' : ''} répertorié${count.remaining > 1 ? 's' : ''} à terminer · ${count.outside} hors bibliothèque`
-      : 'Tous les jeux répertoriés sont terminés'}
+      : `Tous les jeux répertoriés sont terminés${state.catalog.complete ? '' : ' · catalogue partiel'}`}
   </span>;
 }

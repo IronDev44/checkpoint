@@ -17,3 +17,11 @@ test('search names are escaped and sort fields are limited to the available opti
  const {query}=queryFor(new URLSearchParams({search:'Halo"; sort id desc;',ordering:'name'}));assert.ok(query.includes('Halo\\"; sort id desc;'));assert.doesNotMatch(query,/search "/);
  const invalid=queryFor(new URLSearchParams({search:'Halo',ordering:'constructor'})).query;assert.doesNotMatch(invalid,/sort /);
 });
+
+test('search retrieves fan tags and publication evidence without excluding them upstream',()=>{
+ const {query}=queryFor(new URLSearchParams({search:'Sonic'}));
+ assert.ok(query.includes('keywords.name'));
+ assert.ok(query.includes('involved_companies.publisher'));
+ assert.ok(query.includes('involved_companies.company.name'));
+ assert.doesNotMatch(query,/keywords\s*(?:!=|=|!~)/);
+});

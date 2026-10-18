@@ -44,9 +44,15 @@ afterEach(()=>{jest.restoreAllMocks();global.fetch=mockOriginalFetch;});
 
 const searchGames=[{id:'a',name:'Halo Z',rating:5,released:'2020-01-01'},{id:'b',name:'Halo',rating:2,released:'2001-11-15'},{id:'c',name:'Halo A',rating:4,released:'2010-01-01'}];
 const resultNames=()=>[...document.querySelectorAll('.results-container .game-title')].map(el=>el.textContent);
-const openSearch=async()=>{
+const fanSearchGames = [
+ {id:'fan',name:'Halo Fan Adventure',keywords:[{name:'fan game'}]},
+ {id:'official',name:'Ghost of Tsushima',keywords:[{name:'fan game'}],publishers:[{name:'Sony'}]},
+ {id:'unknown',name:'Halo Unknown'},
+ {id:'mod',name:'Halo Mod',keywords:[{name:'fan game'}],normalized:{gameType:{type:'Mod'}}},
+];
+const openSearch=async(options={})=>{
  GameService.getUpcomingGames.mockResolvedValue({results:[]});
- mockStore.set('checkpoint-app-options',JSON.stringify({startTab:'search',sound:{enabled:false}}));
+ mockStore.set('checkpoint-app-options',JSON.stringify({startTab:'search',sound:{enabled:false},...options}));
  GameService.rawg.mockImplementation(async(path,params)=>String(path)==='/games'?{results:searchGames,meta:{source:'igdb'},next:'/api/igdb/games?search=Halo&page=2'}:{results:[]});
  GameService.igdb.mockResolvedValue({results:[{id:'d',name:'Halo 2',rating:3,released:'2004-11-09'}],next:null});
  render(<App/>);
@@ -82,4 +88,47 @@ test('a delayed answer cannot overwrite a newer sorting choice',async()=>{
  await act(async()=>{finish({results:[{id:'stale',name:'Outdated result'}],meta:{source:'igdb'}});});
  await waitFor(()=>expect(screen.queryByText('Outdated result')).toBeNull());
  expect(resultNames()).toEqual(['Halo Z','Halo A','Halo']);
+});
+
+test('fan preference only hides explicit fans, keeps official and uncertain titles, and persists without refetching',async()=>{
+ await openSearch();
+ GameService.rawg.mockResolvedValue({results:fanSearchGames,meta:{source:'igdb'},next:'/api/igdb/games?page=2'});
+ fireEvent.click(screen.getByRole('button',{name:'Rechercher',exact:true}));
+ await waitFor(()=>expect(resultNames()).toHaveLength(3));
+ expect(resultNames()).toEqual(expect.arrayContaining(['Ghost of Tsushima','Halo Unknown','Halo Mod']));
+ expect(screen.getByText(/1 jeu de fans masqué/)).toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'Ouvrir les filtres'}));
+ const toggle=screen.getByRole('button',{name:'Inclure les jeux de fans',exact:true});
+ expect(toggle).toHaveAttribute('aria-pressed','false');
+ const requests=GameService.rawg.mock.calls.length;
+ fireEvent.click(toggle);
+ expect(resultNames()).toHaveLength(4);
+ expect(document.querySelectorAll('.search-fan-badge')).toHaveLength(1);
+ expect(GameService.rawg.mock.calls).toHaveLength(requests);
+ await waitFor(()=>expect(JSON.parse(mockStore.get('checkpoint-app-options')).searchIncludeFanGames).toBe(true));
+ fireEvent.click(screen.getByRole('button',{name:'Charger plus'}));
+ await waitFor(()=>expect(resultNames()).toHaveLength(5));
+ expect(toggle).toHaveAttribute('aria-pressed','true');
+ fireEvent.click(screen.getByRole('button',{name:'Réinitialiser les filtres'}));
+ expect(toggle).toHaveAttribute('aria-pressed','false');
+ expect(resultNames()).not.toContain('Halo Fan Adventure');
+});
+
+test('an entirely hidden fan page still permits loading the next page',async()=>{
+ await openSearch();
+ GameService.rawg.mockResolvedValue({results:[fanSearchGames[0]],meta:{source:'igdb'},next:'/api/igdb/games?page=2'});
+ fireEvent.click(screen.getByRole('button',{name:'Rechercher',exact:true}));
+ await waitFor(()=>expect(screen.getByText(/1 jeu de fans masqué/)).toBeInTheDocument());
+ expect(resultNames()).toHaveLength(0);
+ fireEvent.click(screen.getByRole('button',{name:'Charger plus'}));
+ await waitFor(()=>expect(resultNames()).toEqual(['Halo 2']));
+});
+
+test('a saved inclusion preference is restored at startup',async()=>{
+ await openSearch({searchIncludeFanGames:true});
+ GameService.rawg.mockResolvedValue({results:fanSearchGames,meta:{source:'igdb'}});
+ fireEvent.click(screen.getByRole('button',{name:'Rechercher',exact:true}));
+ await waitFor(()=>expect(resultNames()).toHaveLength(4));
+ fireEvent.click(screen.getByRole('button',{name:'Ouvrir les filtres'}));
+ expect(screen.getByRole('button',{name:'Inclure les jeux de fans',exact:true})).toHaveAttribute('aria-pressed','true');
 });
