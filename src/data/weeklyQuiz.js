@@ -1,4 +1,5 @@
 import { WEEKLY_QUIZ_ADDITIONS } from "./weeklyQuizExpansion";
+import { WEEKLY_QUIZ_RESERVE } from "./weeklyQuizReserve";
 
 export const WEEKLY_QUIZ_XP = { correct: 120, streakBonus: 30, participation: 20 };
 
@@ -1617,4 +1618,6 @@ const REVIEWED_QUESTIONS = [
   }
 ];
 
-export const WEEKLY_QUIZ_QUESTIONS = [...REVIEWED_QUESTIONS, ...WEEKLY_QUIZ_ADDITIONS];
+// Keep the published first season intact for already-open weekly rounds.
+export const WEEKLY_QUIZ_LEGACY_QUESTIONS = [...REVIEWED_QUESTIONS, ...WEEKLY_QUIZ_ADDITIONS];
+export const WEEKLY_QUIZ_QUESTIONS = [...WEEKLY_QUIZ_LEGACY_QUESTIONS, ...WEEKLY_QUIZ_RESERVE];

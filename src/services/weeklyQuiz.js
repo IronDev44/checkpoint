@@ -1,8 +1,9 @@
-import { WEEKLY_QUIZ_QUESTIONS, WEEKLY_QUIZ_XP } from "../data/weeklyQuiz";
+import { WEEKLY_QUIZ_QUESTIONS, WEEKLY_QUIZ_LEGACY_QUESTIONS, WEEKLY_QUIZ_XP } from "../data/weeklyQuiz";
 
-export const WEEKLY_QUIZ_SIZE = 5;
+export const WEEKLY_QUIZ_SIZE = 3;
 const DAY = 86400000;
 const EPOCH = Date.UTC(2026, 0, 5);
+const THREE_QUESTION_ROLLOUT = Date.UTC(2026, 9, 19);
 
 // The editorial week follows France, including when a device is used abroad.
 function parisDay(date) {
@@ -41,13 +42,13 @@ function hash(value) {
 
 // A fixed editorial deck, dealt without replacement. Avoid adjacent questions
 // from the same category inside a weekly pack whenever the bank allows it.
-function makeDeck() {
-  const remaining = [...WEEKLY_QUIZ_QUESTIONS].sort((a, b) => hash(`season-1:${a.id}`) - hash(`season-1:${b.id}`) || a.id.localeCompare(b.id));
+function makeDeck(questions, size) {
+  const remaining = [...questions].sort((a, b) => hash(`season-1:${a.id}`) - hash(`season-1:${b.id}`) || a.id.localeCompare(b.id));
   const deck = [];
   while (remaining.length) {
     const used = new Set();
-    for (let slot = 0; slot < WEEKLY_QUIZ_SIZE && remaining.length; slot += 1) {
-      const preferred = slot === 0 ? "facile" : slot === 4 ? "difficile" : "moyen";
+    for (let slot = 0; slot < size && remaining.length; slot += 1) {
+      const preferred = slot === 0 ? "facile" : slot === size - 1 ? "difficile" : "moyen";
       let index = remaining.findIndex(q => !used.has(q.category) && q.difficulty === preferred);
       if (index < 0) index = remaining.findIndex(q => !used.has(q.category));
       if (index < 0) index = 0;
@@ -58,15 +59,28 @@ function makeDeck() {
   }
   return deck;
 }
-const DECK = makeDeck();
+const LEGACY_DECK = makeDeck(WEEKLY_QUIZ_LEGACY_QUESTIONS, 5);
+function getLegacyQuestions(monday) {
+  const weekIndex = Math.floor((monday.getTime() - EPOCH) / (7 * DAY));
+  const packs = LEGACY_DECK.length / 5;
+  const pack = ((weekIndex % packs) + packs) % packs;
+  return LEGACY_DECK.slice(pack * 5, pack * 5 + 5);
+}
+// Put the last published pack at the end, so the first new Monday cannot
+// immediately repeat something just shown. History and XP stay untouched.
+const publishedIds = new Set(getLegacyQuestions(new Date(THREE_QUESTION_ROLLOUT - 7 * DAY)).map(q => q.id));
+const newDeck = makeDeck(WEEKLY_QUIZ_QUESTIONS, WEEKLY_QUIZ_SIZE);
+const DECK = [...newDeck.filter(q => !publishedIds.has(q.id)), ...newDeck.filter(q => publishedIds.has(q.id))];
 
 export function getWeeklyQuiz(weekKey = getWeeklyQuizKey()) {
   const monday = weekMonday(weekKey);
   if (!monday || !DECK.length) return { weekKey, questions: [] };
-  const packs = Math.ceil(DECK.length / WEEKLY_QUIZ_SIZE);
-  const weekIndex = Math.floor((monday.getTime() - EPOCH) / (7 * DAY));
-  const pack = ((weekIndex % packs) + packs) % packs;
-  const questions = DECK.slice(pack * WEEKLY_QUIZ_SIZE, (pack + 1) * WEEKLY_QUIZ_SIZE);
+  const weekIndex = Math.floor((monday.getTime() - THREE_QUESTION_ROLLOUT) / (7 * DAY));
+  const offset = ((weekIndex * WEEKLY_QUIZ_SIZE % DECK.length) + DECK.length) % DECK.length;
+  // 500 is not divisible by three: deal across the boundary rather than
+  // publishing a final week of two questions or silently dropping two entries.
+  const questions = monday.getTime() < THREE_QUESTION_ROLLOUT ? getLegacyQuestions(monday) :
+    Array.from({ length: WEEKLY_QUIZ_SIZE }, (_, slot) => DECK[(offset + slot) % DECK.length]);
   const nextMonday = new Date(monday.getTime() + 7 * DAY);
   return { weekKey, questions, nextMonday: nextMonday.toISOString() };
 }

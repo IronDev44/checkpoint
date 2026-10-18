@@ -29,7 +29,7 @@ function QuizRound({ quiz, progress = {}, onAnswer }) {
       <div><span className="weekly-quiz-eyebrow">Le rendez-vous du lundi</span><h2 id="weekly-quiz-title">Le quiz de la semaine</h2></div>
       <span className="weekly-quiz-counter">{completed} / {quiz.questions.length}</span>
     </div>
-    <p className="weekly-quiz-intro">Cinq questions, des univers différents. Tu peux les faire à ton rythme jusqu’à dimanche soir.</p>
+    <p className="weekly-quiz-intro">{quiz.questions.length} questions, des univers différents. Tu peux les faire à ton rythme jusqu’à dimanche soir.</p>
     <div className="weekly-quiz-round-progress" role="progressbar" aria-label="Questions terminées" aria-valuemin={0} aria-valuemax={quiz.questions.length} aria-valuenow={completed}><span style={{width:`${completed / quiz.questions.length * 100}%`}}/></div>
     {allDone && <p className="weekly-quiz-complete" role="status">C’est tout pour cette semaine ! Prochain quiz le lundi {nextDate}. Tu peux relire tes réponses ci-dessous.</p>}
     <div className="weekly-quiz-round-meta"><span>Question {index + 1} / {quiz.questions.length}</span><span>{question.category} · {question.difficulty}</span></div>

@@ -7,9 +7,9 @@ const quiz = getWeeklyQuiz(getWeeklyQuizKey(now));
 const request = (q = quiz.questions[0], index = q.correctIndex) => ({ weekKey:quiz.weekKey, questionId:q.id, answerIndex:index });
 
 test("editorial bank has unique questions, four distinct answers and no invalid solutions", () => {
-  expect(WEEKLY_QUIZ_QUESTIONS).toHaveLength(260);
-  expect(new Set(WEEKLY_QUIZ_QUESTIONS.map(q=>q.id)).size).toBe(260);
-  expect(new Set(WEEKLY_QUIZ_QUESTIONS.map(q=>q.question.toLocaleLowerCase("fr")) ).size).toBe(260);
+  expect(WEEKLY_QUIZ_QUESTIONS).toHaveLength(500);
+  expect(new Set(WEEKLY_QUIZ_QUESTIONS.map(q=>q.id)).size).toBe(500);
+  expect(new Set(WEEKLY_QUIZ_QUESTIONS.map(q=>q.question.toLocaleLowerCase("fr")) ).size).toBe(500);
   for (const q of WEEKLY_QUIZ_QUESTIONS) {
     expect(q.answers).toHaveLength(4);
     expect(new Set(q.answers.map(a=>a.toLocaleLowerCase("fr"))).size).toBe(4);
@@ -21,18 +21,39 @@ test("editorial bank has unique questions, four distinct answers and no invalid 
   expect(CHECKPOINT_TRIALS.flatMap(t=>t.questions).some(q=>q.prompt.includes("popularisé les cartouches"))).toBe(false);
 });
 
-test("52 successive weeks contain 260 different questions, with a stable pack after reload", () => {
+test("166 full three-question weeks do not repeat; the next pack uses the two remaining entries before wrapping", () => {
   const all = [];
-  for (let week=0; week<52; week+=1) {
-    const key=getWeeklyQuizKey(new Date(Date.UTC(2026,0,5+week*7,12)));
+  for (let week=0; week<166; week+=1) {
+    const key=getWeeklyQuizKey(new Date(Date.UTC(2026,9,19+week*7,12)));
     const pack=getWeeklyQuiz(key);
-    expect(pack.questions).toHaveLength(5);
-    expect(new Set(pack.questions.map(q=>q.category)).size).toBeGreaterThanOrEqual(3);
+    expect(pack.questions).toHaveLength(3);
+    expect(new Set(pack.questions.map(q=>q.category)).size).toBeGreaterThanOrEqual(2);
     expect(getWeeklyQuiz(key)).toEqual(pack);
     all.push(...pack.questions.map(q=>q.id));
   }
-  expect(new Set(all).size).toBe(260);
+  expect(new Set(all).size).toBe(498);
+  const tail=getWeeklyQuiz(getWeeklyQuizKey(new Date(Date.UTC(2026,9,19+166*7,12))));
+  expect(tail.questions).toHaveLength(3);
+  expect(new Set([...all,...tail.questions.slice(0,2).map(q=>q.id)]).size).toBe(500);
+  expect(tail.questions[2].id).toBe(all[0]);
   expect(getWeeklyQuiz("invalid").questions).toEqual([]);
+});
+
+test("the published five-question round stays unchanged through Sunday; Monday introduces three without immediately repeating it", () => {
+  const old=getWeeklyQuiz("2026-W42");
+  expect(old.questions.map(q=>q.id)).toEqual(["re2-partners","zelda-majora-days","burnout-takedown","diablo-tristram","gta-v-three"]);
+  const next=getWeeklyQuiz("2026-W43");
+  expect(next.questions).toHaveLength(3);
+  expect(next.questions.some(q=>old.questions.some(previous=>previous.id===q.id))).toBe(false);
+  let progress={totalXP:0,answers:{}};
+  const sunday=new Date("2026-10-18T12:00:00Z");
+  old.questions.forEach(q=>{progress=submitWeeklyQuizAnswer(progress,{weekKey:old.weekKey,questionId:q.id,answerIndex:q.correctIndex},sunday);});
+  expect(progress.totalXP).toBe(900);
+  expect(getWeeklyQuizAnswer(progress,old.weekKey,old.questions[4].id)).toBeTruthy();
+  const q=next.questions[0];
+  const monday=submitWeeklyQuizAnswer(progress,{weekKey:next.weekKey,questionId:q.id,answerIndex:q.correctIndex},now);
+  expect(monday.totalXP).toBe(1140);
+  expect(getWeeklyQuizAnswer(monday,old.weekKey,old.questions[4].id)).toBeTruthy();
 });
 
 test("the week changes on Monday midnight in Paris across DST and ISO year boundaries", () => {
@@ -56,21 +77,21 @@ test("submissions are idempotent, validate the weekly selection and preserve exi
   expect(original.totalXP).toBe(500);
 });
 
-test("all five questions award XP once; a miss resets the streak, a missed week resets its bonus", () => {
+test("all three questions award XP once; a miss resets the streak, a missed week resets its bonus", () => {
   let state={totalXP:0,streak:0,bestStreak:0,answers:{}};
   quiz.questions.forEach(q=>{state=submitWeeklyQuizAnswer(state,request(q),now);});
-  expect(state.totalXP).toBe(900);
-  expect(state.streak).toBe(5);
+  expect(state.totalXP).toBe(450);
+  expect(state.streak).toBe(3);
   const nextDate=new Date("2026-10-28T12:00:00Z");
   const nextQuiz=getWeeklyQuiz(getWeeklyQuizKey(nextDate));
   const q=nextQuiz.questions[0];
   const miss=submitWeeklyQuizAnswer(state,{weekKey:nextQuiz.weekKey,questionId:q.id,answerIndex:(q.correctIndex+1)%4},nextDate);
-  expect(miss.totalXP).toBe(920);expect(miss.streak).toBe(0);
+  expect(miss.totalXP).toBe(470);expect(miss.streak).toBe(0);
   const laterDate=new Date("2026-11-04T12:00:00Z");
   const later=getWeeklyQuiz(getWeeklyQuizKey(laterDate));
   const reset=submitWeeklyQuizAnswer(state,{weekKey:later.weekKey,questionId:later.questions[0].id,answerIndex:later.questions[0].correctIndex},laterDate);
   expect(reset.totalXP-state.totalXP).toBe(120);
-  expect(reset.bestStreak).toBe(5);
+  expect(reset.bestStreak).toBe(3);
 });
 
 test("legacy weekly answers are respected, free-play answers do not consume this week's questions", () => {

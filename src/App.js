@@ -22,7 +22,7 @@ import { applySelectedGamePatch } from "./services/gameSelection";
 import { HARDWARE_CATALOG } from "./data/hardware";
 import { PC_COMPONENT_FIELDS, getPcComponentOptions } from "./data/pcComponents";
 import { WEEKLY_QUIZ_XP } from "./data/weeklyQuiz";
-import { getWeeklyQuiz, getWeeklyQuizKey, getWeeklyQuizAnswer, submitWeeklyQuizAnswer } from "./services/weeklyQuiz";
+import { WEEKLY_QUIZ_SIZE, getWeeklyQuiz, getWeeklyQuizKey, getWeeklyQuizAnswer, submitWeeklyQuizAnswer } from "./services/weeklyQuiz";
 import WeeklyQuiz from "./components/WeeklyQuiz";
 import {
   CHECKPOINT_LEVELS,
@@ -9330,7 +9330,7 @@ export function HomeTab({
   const profile = getPlayerProfile(games);
   const playerAnalysis = getPlayerAnalysis(games, hardware, badges);
   const quizCompleted = (weeklyQuiz?.questions || []).filter(question => getWeeklyQuizAnswer(weeklyQuizProgress, weeklyQuiz.weekKey, question.id)).length;
-  const quizLocked = quizCompleted === (weeklyQuiz?.questions?.length || 5);
+  const quizLocked = quizCompleted === (weeklyQuiz?.questions?.length || WEEKLY_QUIZ_SIZE);
 
   const isFinishedGame = isGameFinishedStatus;
   const isOwnedHardware = (item) =>
@@ -9552,11 +9552,11 @@ export function HomeTab({
     makeCheckpointGoal({
       id: `quiz-${weeklyQuiz?.weekKey || "free"}`,
       title: "Checkpoint quiz",
-      detail: "Termine les cinq questions de la semaine à ton rythme.",
+      detail: `Termine les ${weeklyQuiz?.questions?.length || WEEKLY_QUIZ_SIZE} questions de la semaine à ton rythme.`,
       actionLabel: quizLocked ? "Valider" : "Repondre",
       tab: "home",
       current: quizCompleted,
-      target: weeklyQuiz?.questions?.length || 5,
+      target: weeklyQuiz?.questions?.length || WEEKLY_QUIZ_SIZE,
       xp: 60,
     }),
     buildMilestoneGoal({
@@ -9737,7 +9737,7 @@ export function HomeTab({
       id: "quiz",
       kicker: "XP rapide",
       title: "Quiz disponible",
-      detail: `${5 - quizCompleted} questions cette semaine, +${WEEKLY_QUIZ_XP.correct} XP par bonne réponse.`,
+      detail: `${(weeklyQuiz?.questions?.length || WEEKLY_QUIZ_SIZE) - quizCompleted} questions cette semaine, +${WEEKLY_QUIZ_XP.correct} XP par bonne réponse.`,
       action: "Jouer",
       onClick: () =>
         document
