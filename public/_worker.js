@@ -39,7 +39,15 @@ const IGDB_GAME_FIELDS = [
   "slug",
   "summary",
   "first_release_date",
+  "rating",
+  "rating_count",
+  "total_rating",
+  "total_rating_count",
   "game_type.type",
+  "version_parent",
+  "parent_game",
+  "collections.name",
+  "franchises.name",
   "cover.image_id",
   "artworks.image_id",
   "screenshots.image_id",
@@ -54,10 +62,6 @@ const IGDB_GAME_DETAIL_FIELDS = [
   "videos.video_id",
   "videos.name",
   "category",
-  "rating",
-  "rating_count",
-  "total_rating",
-  "total_rating_count",
 ].join(",");
 
 const RAWG_TO_IGDB_PLATFORMS = {
@@ -578,8 +582,9 @@ function mappedIds(csvValue, mapping) {
     .filter(Boolean);
 }
 
-function buildIgdbWhere(params, { upcoming = false, includeCategory = true } = {}) {
+function buildIgdbWhere(params, { upcoming = false, includeCategory = true, sortedSearch = "" } = {}) {
   const clauses = [];
+  if (sortedSearch) clauses.push(`name ~ *"${escapeIgdbString(sortedSearch)}"*`);
   const platformIds = mappedIds(params.get("platforms"), RAWG_TO_IGDB_PLATFORMS);
   const genreIds = mappedIds(params.get("genres"), RAWG_TO_IGDB_GENRES);
   const dates = String(params.get("dates") || "").split(",");
@@ -624,18 +629,15 @@ function buildIgdbSearchQuery(params, { upcoming = false } = {}) {
   const offset = (page - 1) * pageSize;
   const search = String(params.get("search") || "").trim();
   const ordering = params.get("ordering") || "";
+  const sortFields = { "-rating": "total_rating desc", "-released": "first_release_date desc", released: "first_release_date asc", name: "name asc" };
+  const sortField = Object.hasOwn(sortFields, ordering) ? sortFields[ordering] : "";
+  const sortedSearch = !upcoming && search && sortField ? search : "";
   const sortClause =
-    search && !upcoming
-      ? ""
-      : upcoming
-        ? "sort first_release_date asc;"
-        : ordering.includes("released")
-          ? "sort first_release_date desc;"
-          : "sort total_rating_count desc;";
+    upcoming ? "sort first_release_date asc;" : sortField ? `sort ${sortField};` : search ? "" : "sort total_rating_count desc;";
   const query = [
     `fields ${IGDB_GAME_FIELDS};`,
-    search && !upcoming ? `search "${escapeIgdbString(search)}";` : "",
-    buildIgdbWhere(params, { upcoming, includeCategory: !search || upcoming }),
+    search && !upcoming && !sortedSearch ? `search "${escapeIgdbString(search)}";` : "",
+    buildIgdbWhere(params, { upcoming, includeCategory: !search || upcoming, sortedSearch }),
     sortClause,
     `limit ${pageSize};`,
     `offset ${offset};`,

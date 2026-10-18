@@ -177,3 +177,14 @@ test("the home quiz records XP once and restores the next unanswered question af
  expect(screen.getByText(quiz.questions[1].question)).toBeVisible();
  expect(screen.getByRole('progressbar',{name:'Questions terminées'})).toHaveAttribute('aria-valuenow','1');
 });
+
+
+test("account progression is restored and the profile offers a player card",async()=>{
+ global.fetch=jest.fn(async url=>({ok:true,json:async()=>String(url).includes('account-data')?{data:{quiz:{totalXP:120,answers:{}},goals:{totalXP:60,claimed:{}}}}:{items:[],cursor:null},headers:{get:()=>"application/json"}}));
+ render(<App/>);
+ await waitFor(()=>expect(JSON.parse(mockStore.get('checkpoint-weekly-quiz')||'{}').totalXP).toBe(120),{timeout:2500});
+ expect(JSON.parse(mockStore.get('checkpoint-goals')||'{}').totalXP).toBe(60);
+ fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name:'Profil',exact:true}));
+ expect(await screen.findByRole('heading',{name:'Ta carte de joueur'})).toBeVisible();
+ expect(await screen.findByText('Progression synchronisée')).toBeVisible();
+});

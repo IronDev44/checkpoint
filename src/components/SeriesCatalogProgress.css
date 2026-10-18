@@ -1,0 +1,18 @@
+html body[data-theme] .series-catalog-progress {
+  display: block;
+  min-width: 0;
+  margin-top: 8px;
+  color: var(--text-soft);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.6;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+html body[data-theme] .compact-series-card {grid-template-rows:112px auto 8px auto auto !important;}
+html body[data-theme] .compact-series-card > .series-catalog-progress {
+  margin-top: 0;
+  padding: 0 12px 14px;
+  box-sizing: border-box;
+}

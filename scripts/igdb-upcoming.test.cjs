@@ -5,6 +5,7 @@ const path = require('node:path');
 
 function loadEndpoint(fetchGames) {
   const source = fs.readFileSync(path.join(__dirname, '../public/_worker.js'), 'utf8')
+    .replace(/^import .*;\r?\n/gm, '').replace(/^export (?=(?:async )?function)/gm, '')
     .replace('export default', 'const worker =');
   return new Function('fetchGames', `${source}\nfetchIgdb = fetchGames; return getIgdbUpcoming;`)(fetchGames);
 }

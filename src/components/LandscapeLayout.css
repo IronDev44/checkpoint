@@ -1,0 +1,122 @@
+/* Keep releases readable in two columns when a phone is turned sideways. */
+@media (min-width: 560px) and (orientation: landscape) {
+  html body[data-theme] .upcoming-page .upcoming-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  html body[data-theme] .upcoming-list > .upcoming-card {
+    display: grid;
+    grid-template-columns: 92px minmax(0, 1fr) !important;
+    width: 100%;
+    min-width: 0;
+    min-height: 178px !important;
+    box-sizing: border-box;
+    padding: 0;
+    align-items: stretch !important;
+  }
+
+  html body[data-theme] .upcoming-list .upcoming-image-frame {
+    position: relative;
+    width: calc(100% - 16px) !important;
+    height: auto !important;
+    min-height: 128px !important;
+    margin: 8px !important;
+    align-self: stretch !important;
+    overflow: hidden;
+    border-radius: 12px;
+  }
+
+  html body[data-theme] .upcoming-list .upcoming-image-frame img {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
+
+  html body[data-theme] .upcoming-list .upcoming-content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 12px !important;
+    overflow-wrap: anywhere;
+  }
+
+  html body[data-theme] .upcoming-list .upcoming-title {
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  html body[data-theme] .upcoming-list :is(.upcoming-date, .upcoming-meta, .grid-countdown) {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  html body[data-theme] .upcoming-list .wishlist-upcoming-btn {
+    min-width: 0;
+    min-height: 44px;
+    height: auto;
+    margin-top: auto;
+    padding: 8px 10px;
+    font-size: 12px;
+    line-height: 1.4;
+    white-space: normal;
+  }
+}
+
+@media (min-width: 560px) and (max-width: 650px) and (orientation: landscape) {
+  html body[data-theme] .upcoming-list > .upcoming-card {
+    grid-template-columns: 76px minmax(0, 1fr) !important;
+  }
+}
+
+/* A short landscape screen needs less chrome, while preserving touch targets. */
+@media (orientation: landscape) and (max-height: 700px) {
+  html body[data-theme] .bottom-tabs {
+    left: max(8px, env(safe-area-inset-left)) !important;
+    right: max(8px, env(safe-area-inset-right)) !important;
+    bottom: calc(5px + env(safe-area-inset-bottom)) !important;
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+    min-height: 0 !important;
+    transform: none !important;
+    box-sizing: border-box;
+    padding: 5px !important;
+    gap: 5px !important;
+    border-radius: 18px !important;
+  }
+
+  html body[data-theme] .bottom-tabs .tab-btn {
+    flex: 0 0 auto !important;
+    flex-direction: row;
+    gap: 7px !important;
+    width: auto !important;
+    min-width: 94px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    box-sizing: border-box;
+    padding: 8px 12px !important;
+    border-radius: 12px !important;
+  }
+
+  html body[data-theme] .bottom-tabs .tab-btn.active::after {
+    bottom: 3px;
+  }
+
+  html body[data-theme] .bottom-tabs .tab-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  html body[data-theme] .bottom-tabs .tab-label {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+
+  html body[data-theme] .container {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+  }
+}

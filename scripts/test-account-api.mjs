@@ -29,6 +29,31 @@ assert.equal((await (await call('bob','GET','publicProfiles','alice')).json()).d
 assert.equal((await call('bob','POST','publicProfiles','alice',{data:{name:'taken'}})).status,403);
 assert.equal((await call('bob','DELETE','publicProfiles','alice')).status,403);
 assert.deepEqual(mergeDocument({tags:['one'],nested:{a:1}},{tags:{__checkpointOperation:'union',values:['one','two']},'nested.b':2},true),{tags:['one','two'],nested:{a:1,b:2}});
+// Two devices merge different reward keys; a replay keeps the first answer.
+const first={quiz:{totalXP:620,answers:{old:{earnedXP:500},'2026-W42:a':{earnedXP:120,correct:true,answeredAt:'2026-10-18T10:00:00Z'}}},goals:{totalXP:60,claimed:{one:{earnedXP:60}}}};
+let merged=await (await call('alice','POST','playerProgress','gaming',{mode:'progress',data:first})).json();
+assert.equal(merged.data.quiz.totalXP,620);
+const second={quiz:{totalXP:650,answers:{old:{earnedXP:500},'2026-W42:b':{earnedXP:150,correct:true,answeredAt:'2026-10-18T10:01:00Z'}}},goals:{totalXP:90,claimed:{two:{earnedXP:90}}}};
+merged=await (await call('alice','POST','playerProgress','gaming',{mode:'progress',data:second})).json();
+assert.equal(merged.data.quiz.totalXP,770);assert.equal(merged.data.goals.totalXP,150);
+merged=await (await call('alice','POST','playerProgress','gaming',{mode:'progress',data:first})).json();
+assert.equal(merged.data.quiz.totalXP,770);assert.equal(merged.data.goals.totalXP,150);
+assert.equal((await (await call('bob','GET','playerProgress','gaming')).json()).exists,false);
+assert.equal((await call('alice','POST','games','bad',{mode:'progress',data:first})).status,400);
+// Unattributed legacy XP is retained once, rather than duplicated on each device.
+const legacy={quiz:{totalXP:1000,answers:{}},goals:{totalXP:0,claimed:{}}};
+await call('bob','POST','playerProgress','gaming',{mode:'progress',data:legacy});
+merged=await (await call('bob','POST','playerProgress','gaming',{mode:'progress',data:{quiz:{totalXP:1120,answers:{'2026-W42:a':{earnedXP:120,correct:true,answeredAt:'2026-10-18T10:00:00Z'}}}}})).json();
+assert.equal(merged.data.quiz.totalXP,1120);
+// A conflicting replay keeps the original reward; trial seals from both devices survive.
+merged=await (await call('alice','POST','playerProgress','gaming',{mode:'progress',data:{quiz:{totalXP:999,answers:{'2026-W42:a':{earnedXP:999,correct:false,answeredAt:'2026-10-18T10:02:00Z'}}},trials:{completed:{10:{score:3}},attempts:{10:2},exclusiveBadges:{ten:true},history:[{level:10,completedAt:'2026-10-18T10:00:00Z'}],lastUnlockedLevel:10}}})).json();
+assert.equal(merged.data.quiz.totalXP,770);assert.equal(merged.data.quiz.answers['2026-W42:a'].correct,true);
+merged=await (await call('alice','POST','playerProgress','gaming',{mode:'progress',data:{trials:{completed:{20:{score:4}},attempts:{10:1,20:1},exclusiveBadges:{twenty:true},history:[{level:20,completedAt:'2026-10-18T11:00:00Z'}],lastUnlockedLevel:20}}})).json();
+assert.deepEqual(Object.keys(merged.data.trials.completed),['10','20']);
+assert.equal(merged.data.trials.attempts[10],2);assert.equal(merged.data.trials.lastUnlockedLevel,20);
+assert.deepEqual(merged.data.trials.history.map(entry=>entry.level),[20,10]);
+assert.deepEqual(merged.data.trials.exclusiveBadges,{twenty:true,ten:true});
+assert.equal(merged.data.quiz.streak,2);
 await assert.rejects(()=>verifyFirebaseToken('invalid'));
 const pair=await crypto.subtle.generateKey({name:'RSASSA-PKCS1-v1_5',modulusLength:2048,publicExponent:new Uint8Array([1,0,1]),hash:'SHA-256'},true,['sign','verify']);
 const jwk=await crypto.subtle.exportKey('jwk',pair.publicKey);jwk.kid='test';

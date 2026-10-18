@@ -24,6 +24,18 @@ import { PC_COMPONENT_FIELDS, getPcComponentOptions } from "./data/pcComponents"
 import { WEEKLY_QUIZ_XP } from "./data/weeklyQuiz";
 import { WEEKLY_QUIZ_SIZE, getWeeklyQuiz, getWeeklyQuizKey, getWeeklyQuizAnswer, submitWeeklyQuizAnswer } from "./services/weeklyQuiz";
 import WeeklyQuiz from "./components/WeeklyQuiz";
+import { sortSearchResults } from "./services/searchSort";
+import { compareLatestLibraryAdditions } from "./services/libraryOrder";
+import { getWishlistOriginLabel, getDealAlertLabel } from "./services/wishlistLabels";
+import ProgressSync, { useProgressSync } from "./components/ProgressSync";
+import LibraryBulkEditor from "./components/LibraryBulkEditor";
+import FriendComparison from "./components/FriendComparison";
+import PlayerShareCard from "./components/PlayerShareCard";
+import { buildBulkGamePatch } from "./services/libraryBulk";
+import "./components/CollectionImprovements.css";
+import "./components/LandscapeLayout.css";
+import SeriesCatalogProgress from "./components/SeriesCatalogProgress";
+import "./components/SeriesCatalogProgress.css";
 import {
   CHECKPOINT_LEVELS,
   getCheckpointRewardBadges,
@@ -2512,14 +2524,14 @@ const APP_TAB_DESCRIPTIONS = {
   news: "Les dernières nouvelles du jeu vidéo, à lire quand tu veux.",
   search: "Trouve un jeu et ajoute-le à ta collection ou à ta wishlist.",
   upcoming: "Repère les prochaines sorties selon tes plateformes et tes envies.",
-  deals: "Les offres du moment, avec un œil sur les jeux de ta wishlist.",
+  deals: "Les offres Steam et Epic, et les vitrines officielles PlayStation et Xbox.",
   live: "Retrouve les prochains lives et les rendez-vous gaming.",
   social: "Retrouve tes amis, découvre leurs profils et partage tes jeux du moment.",
   library: "Tous tes jeux au même endroit : collection, parties en cours et wishlist.",
   series: "Retrouve tes sagas et les jeux qu’il te reste à découvrir.",
   hardware: "Garde une trace de ton matériel, d’hier et d’aujourd’hui.",
-  favorites: "Ici, tu gardes ce qui t'a vraiment marqué : jeux cultes, objets, souvenirs et matériel important. Le Top 5 classe, le Sanctuaire raconte ton histoire.",
-  top5: "Classe tes jeux, ton matériel, tes OST et tes GOTY. Pour les jeux et objets qui comptent surtout pour toi, c’est le Sanctuaire.",
+  favorites: "Rassemble les jeux, les objets et le matériel qui comptent pour toi.",
+  top5: "Classe tes jeux, ton matériel et tes bandes-son, et choisis tes jeux de l’année.",
   profile: "Ton parcours de joueur : tes jeux marquants, tes badges et ta progression.",
   options: "Règle l'app sans toucher à tes jeux ni à ton matériel.",
 };
@@ -5536,7 +5548,28 @@ function GameDetailModal({
 
 function LibraryShelf3D({ games, onOpenDetail }) {
   const displayedGames = games;
-  const gamesPerShelf = 14;
+  const [gamesPerShelf, setGamesPerShelf] = useState(14);
+  const shelfRef = useRef(null);
+
+  useEffect(() => {
+    const shelf = shelfRef.current;
+    if (!shelf) return;
+    const resize = () => {
+      const row = shelf.querySelector(".shelf3d-level-games");
+      if (!row) return;
+      const style = getComputedStyle(row);
+      const width = row.clientWidth - parseFloat(style.paddingLeft || 0) - parseFloat(style.paddingRight || 0);
+      if (width <= 0) return;
+      const gap = parseFloat(style.columnGap) || 0;
+      const spine = parseFloat(style.getPropertyValue("--shelf-spine-width")) || 20;
+      setGamesPerShelf(Math.max(1, Math.floor((width + gap) / (spine + gap))));
+    };
+    resize();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(resize) : null;
+    observer?.observe(shelf);
+    window.addEventListener("resize", resize);
+    return () => { observer?.disconnect(); window.removeEventListener("resize", resize); };
+  }, [games.length]);
 
   const groupedByPlatform = displayedGames.reduce((acc, game) => {
     const platforms =
@@ -5568,7 +5601,7 @@ function LibraryShelf3D({ games, onOpenDetail }) {
   }
 
   return (
-    <div className="shelf3d-scene shelf3d-multi shelf3d-platforms">
+    <div ref={shelfRef} className="shelf3d-scene shelf3d-multi shelf3d-platforms" style={{"--shelf-capacity": gamesPerShelf}}>
       <div className="shelf3d-title-block">
         <h2>Bibliothèque 3D</h2>
         <p>
@@ -6593,8 +6626,9 @@ function SanctuaryTab({
   );
 }
 
-function LibrarySection({
+export function LibrarySection({
   title,
+  onBulkUpdate,
   games,
   onDelete,
   onSetStatus,
@@ -6604,6 +6638,7 @@ function LibrarySection({
   libraryCardMode,
   setLibraryCardMode,
 }) {
+  const [bulkMode,setBulkMode]=useState(false);
   const [sortBy, setSortBy] = useState("recent");
 
   const sortedGames = [...games].sort((a, b) => {
@@ -6635,7 +6670,7 @@ function LibrarySection({
       );
     }
 
-    return 0;
+    return compareLatestLibraryAdditions(a, b);
   });
 
   const groupedGames = sortedGames.reduce((acc, game) => {
@@ -6907,6 +6942,8 @@ function LibrarySection({
         <span className="section-count">{games.length} jeux</span>
       </div>
 
+      {onBulkUpdate && <LibraryBulkEditor games={games} onApply={onBulkUpdate} active={bulkMode} onActiveChange={setBulkMode}/>}
+      {!bulkMode && <>
       <div className="library-view-toggle">
         <button
           type="button"
@@ -6982,7 +7019,7 @@ function LibrarySection({
         />
       ) : libraryCardMode === "shelf" ? (
         <LibraryShelf3D
-          games={games}
+          games={sortedGames}
           onOpenDetail={onOpenDetail}
         />
       ) : (
@@ -7017,6 +7054,7 @@ function LibrarySection({
               ))}
         </div>
       )}
+      </>}
     </div>
   );
 }
@@ -8859,6 +8897,7 @@ export function SocialTab({
         <button type="button" className={socialFeedSource === "friends" ? "active" : ""} aria-pressed={socialFeedSource === "friends"} onClick={() => setSocialFeedSource("friends")}>Mes amis</button>
         <button type="button" className={socialFeedSource === "mine" ? "active" : ""} aria-pressed={socialFeedSource === "mine"} onClick={() => setSocialFeedSource("mine")}>Mon activité</button>
       </div>}
+      {sharedProfile && <FriendComparison games={games} profile={sharedProfile}/>}
       {sharedProfile && (
         <PublicProfilePreview
           profile={sharedProfile}
@@ -10799,6 +10838,8 @@ export function ProfileTab({
         </div>
       </div>
 
+      <PlayerShareCard profile={socialProfile} games={games} level={level}/>
+
       <div className="search-panel profile-living-panel">
         <div className="profile-living-main">
           <span>Ta signature de joueur</span>
@@ -11329,48 +11370,6 @@ function formatSteamPlaytime(minutes = 0) {
   return `${hours} h`;
 }
 
-function getSearchRelevanceScore(game, query) {
-  const normalizedQuery = normalizeSearchText(query);
-  const normalizedName = normalizeSearchText(game?.name || "");
-
-  if (!normalizedQuery || !normalizedName) return 0;
-
-  const queryWords = normalizedQuery.split(" ").filter(Boolean);
-  const nameWords = normalizedName.split(" ").filter(Boolean);
-  let score = 0;
-
-  if (normalizedName === normalizedQuery) score += 10000;
-  if (normalizedName.startsWith(normalizedQuery)) score += 5000;
-  if (normalizedName.includes(normalizedQuery)) score += 2500;
-
-  queryWords.forEach((word, index) => {
-    if (nameWords[index] === word) score += 450;
-    if (nameWords.includes(word)) score += 260;
-    if (normalizedName.includes(word)) score += 120;
-  });
-
-  const missingWords = queryWords.filter((word) => !normalizedName.includes(word)).length;
-  score -= missingWords * 900;
-  score -= Math.abs(nameWords.length - queryWords.length) * 35;
-  score += Math.min(Number(game?.ratings_count) || 0, 12000) / 40;
-  score += (Number(game?.rating) || 0) * 35;
-
-  return score;
-}
-
-function sortSearchResultsByRelevance(results, query) {
-  if (!query?.trim()) return results;
-
-  return [...results].sort((a, b) => {
-    const relevanceDiff =
-      getSearchRelevanceScore(b, query) - getSearchRelevanceScore(a, query);
-
-    if (relevanceDiff !== 0) return relevanceDiff;
-
-    return (Number(b.ratings_count) || 0) - (Number(a.ratings_count) || 0);
-  });
-}
-
 function getRawgSlugCandidates(query = "") {
   const base = normalizeSearchText(query)
     .replace(/\s+/g, "-")
@@ -11861,6 +11860,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
           </button>
 
           <h2 className="panel-title">{selectedSeries.name}</h2>
+          <SeriesCatalogProgress name={selectedSeries.name} games={selectedSeries.games} isFinished={isGameFinishedStatus}/>
 
           <div className="series-detail-summary">
             <div>
@@ -12063,7 +12063,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
       </div>
 
       <p className="series-scope-note">
-        Progression calculée avec les épisodes présents dans ta bibliothèque.
+        La barre suit tes jeux. Le compteur cherche aussi les autres titres sortis de la série, hors DLC et rééditions. Le catalogue peut être incomplet.
       </p>
 
       <div className="library-view-toggle">
@@ -12125,6 +12125,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
               <div className="series-card-meta">
                 {series.finished} / {series.total} terminés dans ta biblio
               </div>
+              <SeriesCatalogProgress name={series.name} games={series.games} isFinished={isGameFinishedStatus}/>
             </button>
           ))}
         </div>
@@ -12151,6 +12152,7 @@ function GameSeriesTab({ games, onAddGameToLibrary }) {
                 <div className="xp-fill" style={{ width: `${series.percent}%` }} />
               </div>
 
+              <SeriesCatalogProgress name={series.name} games={series.games} isFinished={isGameFinishedStatus}/>
               <div className="series-games">
                 {series.games.map((game) => (
                   <div key={game.id} className="series-game-row">
@@ -12732,7 +12734,7 @@ function HardwareDetailModal({
   );
 }
 
-function HardwareTab({
+export function HardwareTab({
   hardware,
   games,
   onAddHardware,
@@ -16208,8 +16210,8 @@ const DEAL_SORT_OPTIONS = [
 
 const DEAL_LIBRARY_FILTERS = [
   { id: "all", label: "Toutes" },
-  { id: "smart-wishlist", label: "Alertes wishlist" },
-  { id: "wishlist", label: "Wishlist" },
+  { id: "smart-wishlist", label: "Alertes prix Steam / Epic" },
+  { id: "wishlist", label: "Wishlist Checkpoint" },
   { id: "missing", label: "Pas dans ma bibliothèque" },
   { id: "owned", label: "Déjà possédées" },
 ];
@@ -16293,14 +16295,6 @@ function getSteamAppIdFromDeal(deal = {}) {
 
   const urlMatch = String(deal.url || "").match(/store\.steampowered\.com\/app\/(\d+)/i);
   return urlMatch?.[1] || "";
-}
-
-function getWishlistOriginLabel(game = {}) {
-  if (game.source === "steam-wishlist" || game.steamWishlistAddedAt) {
-    return "Wishlist Steam";
-  }
-
-  return "Wishlist";
 }
 
 function getDealWishlistMatch(deal = {}, games = []) {
@@ -16676,11 +16670,11 @@ function HomeDealsPreview({
       <div className="home-section-head">
         <div>
           <div className="home-card-title">
-            {wishlistAlertCount ? "Alertes wishlist" : "Bonnes affaires"}
+            {wishlistAlertCount ? "Alertes prix Steam / Epic" : "Bonnes affaires Steam / Epic"}
           </div>
           <p>
             {wishlistAlertCount
-              ? "Un jeu de ta wishlist vient de passer en promo."
+              ? "Une offre Steam ou Epic correspond à un jeu de ta wishlist suivie dans Checkpoint."
               : "Les promos les plus interessantes remontent ici sans ouvrir l'onglet complet."}
           </p>
         </div>
@@ -16692,7 +16686,7 @@ function HomeDealsPreview({
 
       <div className="home-deals-summary">
         <span>{previewDeals.length || (isLoading ? "..." : 0)} offres</span>
-        <span>{wishlistAlertCount ? `${wishlistAlertCount} alerte${wishlistAlertCount > 1 ? "s" : ""}` : `${wishlistCount} wishlist`}</span>
+        <span>{wishlistAlertCount ? `${wishlistAlertCount} alerte${wishlistAlertCount > 1 ? "s" : ""}` : `${wishlistCount} suivis dans Checkpoint`}</span>
         <span>{bestDiscount ? `-${bestDiscount}% max` : "Steam / Epic / consoles"}</span>
       </div>
 
@@ -16723,7 +16717,7 @@ function HomeDealsPreview({
                 <strong>{deal.title}</strong>
                 <small>
                   {deal.smartWishlistMatch
-                    ? `${deal.wishlistOrigin || "Wishlist"} - ${deal.salePrice || "Prix indisponible"}`
+                    ? `${deal.wishlistOrigin || "Wishlist Checkpoint"} - ${deal.salePrice || "Prix indisponible"}`
                     : deal.salePrice || "Prix indisponible"}
                 </small>
               </div>
@@ -16731,9 +16725,9 @@ function HomeDealsPreview({
               <div className="home-deal-side">
                 {deal.discount > 0 && <b>-{deal.discount}%</b>}
                 {deal.smartWishlistMatch ? (
-                  <em>Alerte</em>
+                  <em>{getDealAlertLabel(deal)}</em>
                 ) : (
-                  deal.libraryStatus === "wishlist" && <em>Wishlist</em>
+                  deal.libraryStatus === "wishlist" && <em>Wishlist Checkpoint</em>
                 )}
               </div>
             </a>
@@ -16924,7 +16918,8 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
       <div className="section-header deals-header">
         <div>
           <h2>Promos du moment</h2>
-          <p>Steam et Epic sont chargés en direct. PlayStation et Xbox ouvrent leurs vitrines officielles.</p>
+          <p>Promos Steam et Epic en direct. PlayStation et Xbox ouvrent leurs vitrines officielles.</p>
+          <p>Les alertes comparent ces offres à ta wishlist Checkpoint, y compris tes imports Steam. Elles ne synchronisent pas automatiquement les wishlists Steam ou Epic.</p>
         </div>
         <button type="button" className="deals-refresh-btn" onClick={loadDeals} disabled={isLoading}>
           {isLoading ? "Actualisation..." : "Actualiser"}
@@ -16933,14 +16928,14 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
 
       <div className="deals-dashboard">
         <div className={`deals-spotlight ${bestDeal?.smartWishlistMatch ? "wishlist-alert" : ""}`}>
-          <span className="deals-spotlight-kicker">{bestDeal?.smartWishlistMatch ? "Alerte wishlist" : "Offre a surveiller"}</span>
+          <span className="deals-spotlight-kicker">{bestDeal?.smartWishlistMatch ? getDealAlertLabel(bestDeal) : "Offre à surveiller"}</span>
           {bestDeal ? (
             <a href={bestDeal.url} target="_blank" rel="noreferrer">
               <div>
                 <strong>{bestDeal.title}</strong>
                 <span>
                   {bestDeal.smartWishlistMatch
-                    ? `${bestDeal.wishlistOrigin || "Wishlist"} - ${bestDeal.storeLabel} - -${bestDeal.discount || 0}% - ${bestDeal.salePrice || "Prix indisponible"}`
+                    ? `${bestDeal.wishlistOrigin || "Wishlist Checkpoint"} - ${bestDeal.storeLabel} - -${bestDeal.discount || 0}% - ${bestDeal.salePrice || "Prix indisponible"}`
                     : `${bestDeal.storeLabel} - -${bestDeal.discount || 0}% - ${bestDeal.salePrice || "Prix indisponible"}`}
                 </span>
               </div>
@@ -16958,7 +16953,7 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
           </div>
           <div>
             <strong>{smartWishlistDealCount || wishlistDealCount}</strong>
-            <span>{smartWishlistDealCount ? "alertes" : "wishlist"}</span>
+            <span>{smartWishlistDealCount ? "alertes prix boutiques" : "suivis dans Checkpoint"}</span>
           </div>
           <div>
             <strong>{freeCount}</strong>
@@ -17086,10 +17081,10 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
                 {deal.libraryStatus !== "missing" && (
                   <span className={`deal-library-badge ${deal.smartWishlistMatch ? "smart-wishlist" : deal.libraryStatus}`}>
                     {deal.smartWishlistMatch
-                      ? deal.wishlistOrigin || "Alerte wishlist"
+                      ? deal.wishlistOrigin || "Wishlist Checkpoint"
                       : deal.libraryStatus === "wishlist"
-                        ? "Wishlist"
-                        : "Deja possede"}
+                        ? "Wishlist Checkpoint"
+                        : "Déjà possédé"}
                   </span>
                 )}
               </div>
@@ -17175,6 +17170,11 @@ export default function App({ startupVisible = false, onStartupProgress } = {}) 
   const [checkpointTrialProgress, setCheckpointTrialProgress] = useState(() =>
     getStoredCheckpointTrialProgress()
   );
+  const progressSync = useProgressSync(weeklyQuizProgress, checkpointGoalProgress, checkpointTrialProgress, ({quiz,goals,trials}) => {
+    if(quiz) {setWeeklyQuizProgress(current=>JSON.stringify(current)===JSON.stringify(quiz)?current:quiz);storeWeeklyQuizProgress(quiz);}
+    if(goals) {setCheckpointGoalProgress(current=>JSON.stringify(current)===JSON.stringify(goals)?current:goals);storeCheckpointGoalProgress(goals);}
+    if(trials) {setCheckpointTrialProgress(current=>JSON.stringify(current)===JSON.stringify(trials)?current:trials);storeCheckpointTrialProgress(trials);}
+  });
   const [activeTrialLevel, setActiveTrialLevel] = useState(null);
   const [dismissedCheckpointLevel, setDismissedCheckpointLevel] = useState(null);
   const [appOptions, setAppOptions] = useState(() => getStoredAppOptions());
@@ -17209,7 +17209,9 @@ export default function App({ startupVisible = false, onStartupProgress } = {}) 
   const [yearFilter, setYearFilter] = useState("");
   const [platformFilter, setPlatformFilter] = useState("");
   const [genreFilter, setGenreFilter] = useState("");
-  const [sortBy, setSortBy] = useState("-rating");
+  const [sortBy, setSortBy] = useState("relevance");
+  const searchRequestRef = useRef(0);
+  const searchContextRef = useRef({query: "", ordering: "relevance"});
   const [newsItems, setNewsItems] = useState([]);
   const [bootWave, setBootWave] = useState(true);
 
@@ -17722,8 +17724,10 @@ useEffect(() => {
         history: Array.isArray(remote.history) ? remote.history : [],
       };
 
-      setCheckpointTrialProgress(nextProgress);
-      storeCheckpointTrialProgress(nextProgress);
+      setCheckpointTrialProgress(current => {
+        const merged={...nextProgress,completed:{...nextProgress.completed,...current.completed},exclusiveBadges:{...nextProgress.exclusiveBadges,...current.exclusiveBadges},attempts:{...nextProgress.attempts,...current.attempts},history:[...(current.history||[]),...(nextProgress.history||[])].filter((entry,index,list)=>list.findIndex(other=>String(other.level)===String(entry.level))===index).slice(0,24)};
+        storeCheckpointTrialProgress(merged);return merged;
+      });
     } catch (error) {
       console.error("Erreur chargement Salle des Epreuves :", error);
     } finally {
@@ -18706,6 +18710,8 @@ useEffect(() => {
       return;
     }
 
+    const requestId = searchRequestRef.current;
+    const context = searchContextRef.current;
     try {
       let url = nextPage;
       let validResults = [];
@@ -18725,6 +18731,7 @@ useEffect(() => {
         safety++;
       }
 
+      if (requestId !== searchRequestRef.current) return;
       setResults((prev) => {
         const merged = [...prev, ...validResults];
 
@@ -18732,7 +18739,7 @@ useEffect(() => {
           (game, index, self) => index === self.findIndex((g) => g.id === game.id)
         );
 
-        return sortSearchResultsByRelevance(uniqueResults, search);
+        return sortSearchResults(uniqueResults, context.query, context.ordering);
       });
 
       setNextPage(nextUrl);
@@ -19031,6 +19038,8 @@ useEffect(() => {
     };
 
   const clearSearchResults = () => {
+    searchRequestRef.current += 1;
+    setIsSearching(false);
     setSearch("");
     setDebouncedSearch("");
     setResults([]);
@@ -19038,7 +19047,10 @@ useEffect(() => {
   };
 
   const chooseSort = (value) => {
+    if (value === sortBy) return;
     setSortBy(value);
+    setResults(current => sortSearchResults(current, searchContextRef.current.query, value));
+    if (search.trim() || yearFilter || platformFilter || genreFilter) searchGames(search, value, true);
   };
 
   const isMainGameResult = (game) => {
@@ -19082,13 +19094,17 @@ useEffect(() => {
   return !blockedWords.some((word) => name.includes(word));
 };
 
-  const searchGames = async (forcedSearch = null) => {
+  const searchGames = async (forcedSearch = null, ordering = sortBy, keepFiltersOpen = false) => {
   const cleanSearch = (forcedSearch ?? search ?? debouncedSearch).trim();
 
   if (!cleanSearch && !yearFilter && !platformFilter && !genreFilter) {
     alert("Tape un jeu ou choisis au moins un filtre.");
     return;
   }
+
+  const requestId = ++searchRequestRef.current;
+  const isCurrent = () => requestId === searchRequestRef.current;
+  searchContextRef.current = {query: cleanSearch, ordering};
 
   const buildOfflineSearchResults = () => {
     if (!cleanSearch) return [];
@@ -19133,9 +19149,9 @@ useEffect(() => {
   try {
     setIsSearching(true);
 
-    const offlineSeed = sortSearchResultsByRelevance(
+    const offlineSeed = sortSearchResults(
       buildOfflineSearchResults(),
-      cleanSearch
+      cleanSearch, ordering
     );
     if (offlineSeed.length > 0) {
       setResults(offlineSeed);
@@ -19156,9 +19172,7 @@ useEffect(() => {
     if (platformFilter) params.append("platforms", platformFilter);
     if (genreFilter) params.append("genres", genreFilter);
 
-    if (!cleanSearch) {
-      params.append("ordering", sortBy);
-    }
+    if (ordering !== "relevance") params.append("ordering", ordering);
 
     const fastSearchOptions = cleanSearch
       ? { timeout: 5000, preferIgdb: true }
@@ -19166,6 +19180,7 @@ useEffect(() => {
 
     const data = await rawgApiRequest("/games", params, fastSearchOptions);
 
+    if (!isCurrent()) return;
     let resultsList = (data.results || []).filter(isMainGameResult);
 
     if (
@@ -19177,6 +19192,7 @@ useEffect(() => {
       relaxedParams.append("page_size", "20");
       relaxedParams.append("page", "1");
       relaxedParams.append("search", searchTerm);
+      if (ordering !== "relevance") relaxedParams.set("ordering", ordering);
 
       const relaxedData = await rawgApiRequest("/games", relaxedParams, fastSearchOptions);
       resultsList = (relaxedData.results || []).filter(isMainGameResult);
@@ -19188,6 +19204,7 @@ useEffect(() => {
         aliasParams.append("page_size", "20");
         aliasParams.append("page", "1");
         aliasParams.append("search", alias);
+        if (ordering !== "relevance") aliasParams.set("ordering", ordering);
 
         const aliasData = await rawgApiRequest("/games", aliasParams, fastSearchOptions);
         const aliasResults = (aliasData.results || []).filter(isMainGameResult);
@@ -19248,7 +19265,8 @@ useEffect(() => {
       resultsList = buildOfflineSearchResults();
     }
 
-    resultsList = sortSearchResultsByRelevance(resultsList, cleanSearch);
+    if (!isCurrent()) return;
+    resultsList = sortSearchResults(resultsList, cleanSearch, ordering);
 
     const nextParams = new URLSearchParams(params);
     nextParams.set("page", "2");
@@ -19265,25 +19283,25 @@ useEffect(() => {
 
     setNextPage(nextSearchUrl);
 
-    setShowFilters(false);
+    if (!keepFiltersOpen) setShowFilters(false);
   } catch (e) {
-    if (isAbortError(e)) return;
+    if (!isCurrent() || isAbortError(e)) return;
     console.error("Erreur recherche RAWG :", e);
-    const offlineResults = sortSearchResultsByRelevance(
+    const offlineResults = sortSearchResults(
       buildOfflineSearchResults(),
-      cleanSearch
+      cleanSearch, ordering
     );
 
     if (offlineResults.length > 0) {
       setResults(offlineResults);
       setNextPage(null);
-      setShowFilters(false);
+      if (!keepFiltersOpen) setShowFilters(false);
       setToast("Source externe indisponible, résultats locaux affichés.");
     } else {
       setToast("La recherche n'a pas répondu correctement.");
     }
   } finally {
-    setIsSearching(false);
+    if (isCurrent()) setIsSearching(false);
   }
 };
 
@@ -19477,6 +19495,23 @@ const setRating = (id, rating) => {
       console.error("Erreur figures cultes :", e);
       setToast("Impossible de mettre à jour les figures cultes.");
     }
+  };
+
+  const bulkUpdateGames = async (ids,changes) => {
+    const ownerUid=auth.currentUser?.uid;
+    const selected=games.filter(game=>ids.includes(String(game.id)));
+    const failedIds=[];let updated=0;
+    for(let index=0;index<selected.length;index+=4){
+      if(auth.currentUser?.uid!==ownerUid){failedIds.push(...selected.slice(index).map(game=>game.id));break;}
+      const results=await Promise.allSettled(selected.slice(index,index+4).map(async game=>{
+        const patch=buildBulkGamePatch(game,changes);
+        await updateDoc(doc(db,"games",game.id),patch);
+        setGames(current=>current.map(item=>item.id===game.id?{...item,...patch}:item));
+        return game.id;
+      }));
+      results.forEach((result,offset)=>{if(result.status==='fulfilled')updated+=1;else failedIds.push(selected[index+offset].id);});
+    }
+    return {updated,failedIds};
   };
 
   const setStatus = async (id, status) => {
@@ -19924,6 +19959,7 @@ const setPlayedPlatforms = async (id, platforms) => {
           </div>
 
           <TabIntroduction activeTab={activeTab}/>
+          {["home","profile"].includes(activeTab) && <ProgressSync {...progressSync}/>}
 
           {showFullHeader && (
   <>
@@ -20022,7 +20058,16 @@ const setPlayedPlatforms = async (id, platforms) => {
                       <div className="filter-label">Trier par</div>
                       <div className="chips-group">
                         <button
+                          className={`chip ${sortBy === "relevance" ? "active" : ""}`}
+                          aria-pressed={sortBy === "relevance"}
+                          onClick={() => chooseSort("relevance")}
+                          type="button"
+                        >
+                          Pertinence
+                        </button>
+                        <button
                           className={`chip ${sortBy === "-rating" ? "active" : ""}`}
+                          aria-pressed={sortBy === "-rating"}
                           onClick={() => chooseSort("-rating")}
                           type="button"
                         >
@@ -20030,6 +20075,7 @@ const setPlayedPlatforms = async (id, platforms) => {
                         </button>
                         <button
                           className={`chip ${sortBy === "-released" ? "active" : ""}`}
+                          aria-pressed={sortBy === "-released"}
                           onClick={() => chooseSort("-released")}
                           type="button"
                         >
@@ -20037,6 +20083,7 @@ const setPlayedPlatforms = async (id, platforms) => {
                         </button>
                         <button
                           className={`chip ${sortBy === "released" ? "active" : ""}`}
+                          aria-pressed={sortBy === "released"}
                           onClick={() => chooseSort("released")}
                           type="button"
                         >
@@ -20044,6 +20091,7 @@ const setPlayedPlatforms = async (id, platforms) => {
                         </button>
                         <button
                           className={`chip ${sortBy === "name" ? "active" : ""}`}
+                          aria-pressed={sortBy === "name"}
                           onClick={() => chooseSort("name")}
                           type="button"
                         >
@@ -20136,7 +20184,12 @@ const setPlayedPlatforms = async (id, platforms) => {
                           setYearFilter("");
                           setPlatformFilter("");
                           setGenreFilter("");
-                          setSortBy("-rating");
+                          setSortBy("relevance");
+                          searchRequestRef.current += 1;
+                          searchContextRef.current = {...searchContextRef.current, ordering: "relevance"};
+                          setIsSearching(false);
+                          setNextPage(null);
+                          setResults(current => sortSearchResults(current, searchContextRef.current.query, "relevance"));
                         }}
                         type="button"
                       >
@@ -20268,6 +20321,7 @@ const setPlayedPlatforms = async (id, platforms) => {
   <LibrarySection
   title="Collection"
   games={collectionGames}
+  onBulkUpdate={bulkUpdateGames}
   onDelete={deleteGame}
   onSetStatus={setStatus}
   onSetRating={setRating}
@@ -20282,6 +20336,7 @@ const setPlayedPlatforms = async (id, platforms) => {
   <LibrarySection
     title="Jeux en cours"
     games={inProgressGames}
+    onBulkUpdate={bulkUpdateGames}
     onDelete={deleteGame}
     onSetStatus={setStatus}
     onSetRating={setRating}
@@ -20296,6 +20351,7 @@ const setPlayedPlatforms = async (id, platforms) => {
   <LibrarySection
     title="Wishlist"
     games={wishlistGames}
+    onBulkUpdate={bulkUpdateGames}
     onDelete={deleteGame}
     onSetStatus={setStatus}
     onSetRating={setRating}

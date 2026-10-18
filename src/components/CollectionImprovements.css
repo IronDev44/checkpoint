@@ -1,0 +1,37 @@
+.progress-sync {display:flex;justify-content:flex-end;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 16px;color:var(--text-muted);font-size:12px;line-height:1.5}
+.progress-sync button {min-height:44px;padding:8px 12px;border:1px solid var(--surface-border);border-radius:12px;background:var(--surface-bg);color:var(--text-main);cursor:pointer}
+html body[data-theme] :is(.library-bulk,.friend-comparison,.player-share-card) {min-width:0;color:var(--text-main)}
+html body[data-theme] :is(.library-bulk,.player-share-card) :is(button,a[download]) {display:inline-flex;justify-content:center;align-items:center;min-height:44px;height:auto;padding:10px 14px;border:1px solid var(--control-border,var(--surface-border));border-radius:12px;background:var(--control-bg,var(--surface-bg));color:var(--text-main);font:inherit;font-size:13px;font-weight:600;line-height:1.4;white-space:normal;text-decoration:none;cursor:pointer}
+html body[data-theme] :is(.library-bulk,.player-share-card) .checkpoint-primary-action {background:var(--accent);color:var(--signature-button-ink,#fff);border-color:var(--accent-solid)}
+.library-bulk {margin:16px 0 22px}
+.library-bulk-heading {display:flex;justify-content:space-between;gap:12px;align-items:center;margin:16px 0}
+.library-bulk-fields {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}
+.library-bulk-fields label {display:flex;flex-direction:column;gap:8px;font-size:13px;min-width:0}
+.library-bulk-fields select {width:100%;min-height:44px;padding:8px;border-radius:10px;background:var(--input-bg);color:var(--text-main);border:1px solid var(--surface-border)}
+.library-bulk-list {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:480px;overflow:auto;margin-top:18px;padding:2px}
+.library-bulk-list label {display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--surface-border);border-radius:12px;background:var(--surface-bg);font-size:13px;line-height:1.45;cursor:pointer;min-width:0}
+.library-bulk-list img {width:36px;height:50px;object-fit:cover;border-radius:5px}
+.library-bulk-list span {overflow-wrap:anywhere}
+.library-bulk input,.player-share-card input {accent-color:var(--accent-solid);width:18px;height:18px;flex:none}
+.library-bulk p,.friend-comparison p,.player-share-card p {color:var(--text-soft);line-height:1.6;font-size:13px}
+.friend-comparison-games {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.friend-comparison-games article {display:flex;flex-direction:column;gap:8px;padding:16px;background:var(--surface-bg);border:1px solid var(--surface-border);border-radius:14px;min-width:0}
+.friend-comparison-games strong {overflow-wrap:anywhere}
+.friend-comparison-games span {font-size:12px;color:var(--text-soft);line-height:1.6}
+.friend-comparison-games small {color:var(--accent-solid);line-height:1.5}
+.player-share-card h2,.friend-comparison h2 {font-size:24px;margin:0 0 12px}
+.player-share-fields,.player-share-actions {display:flex;flex-wrap:wrap;gap:14px;margin:18px 0}
+.player-share-fields label {display:flex;align-items:center;gap:8px;font-size:13px}
+.player-share-preview {display:block;width:100%;max-width:360px;height:auto;border-radius:16px;margin:20px auto;border:1px solid var(--surface-border)}
+.player-share-card > small {display:block;color:var(--text-muted);font-size:12px;line-height:1.6;margin-top:16px}
+html body[data-theme] :is(.library-bulk,.player-share-card) button:disabled {opacity:.5;cursor:default}
+@media(max-width:600px){.library-bulk-fields,.library-bulk-list,.friend-comparison-games {grid-template-columns:1fr}}
+/* Collection cards use the available landscape width; an opened detail remains
+   full-width and never becomes a cramped half-card. Portrait phones keep one. */
+@media(min-width:560px) and (orientation:landscape),(min-width:700px){
+ html body[data-theme] .hardware-collection-grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+ html body[data-theme] .hardware-collection-grid > .hardware-collection-card.hardware-card-v3 {min-width:0;width:100%;box-sizing:border-box;grid-template-columns:78px minmax(0,1fr)!important;gap:12px!important;padding:14px!important}
+ html body[data-theme] .hardware-collection-grid .hardware-card-image-zone {width:78px!important;min-width:78px!important;height:108px!important}
+ html body[data-theme] .hardware-collection-grid .hardware-name {font-size:18px!important;line-height:1.35!important;overflow-wrap:anywhere}
+ html body[data-theme] .hardware-collection-grid > .hardware-inline-detail {grid-column:1/-1;min-width:0}
+}

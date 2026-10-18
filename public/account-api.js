@@ -56,6 +56,31 @@ export function mergeDocument(previous, data, dotted=false){
   }
   return next;
 }
+export function mergeGamingProgress(previous={}, incoming={}) {
+  const amount=value=>Number.isFinite(Number(value))?Math.max(0,Number(value)):0;
+  const mergeLedger=(old={}, local={}, field)=>{
+    const oldEntries=plainObject(old[field])?old[field]:{};
+    const localEntries=plainObject(local[field])?local[field]:{};
+    // A reward key has one canonical record. A second device cannot replace it.
+    const entries={...localEntries,...oldEntries};
+    const sum=map=>Object.values(map).reduce((total,entry)=>total+amount(entry?.earnedXP),0);
+    const baseline=Math.max(amount(old.totalXP)-sum(oldEntries),amount(local.totalXP)-sum(localEntries),0);
+    return {...local,...old,[field]:entries,totalXP:baseline+sum(entries)};
+  };
+  const quiz=mergeLedger(previous.quiz,incoming.quiz,'answers');
+  const dated=Object.entries(quiz.answers).filter(([key,a])=>/^\d{4}-W\d{2}/.test(key)&&Number.isFinite(Date.parse(a?.answeredAt))).sort((a,b)=>Date.parse(a[1].answeredAt)-Date.parse(b[1].answeredAt)||a[0].localeCompare(b[0]));
+  let streak=0,best=0,lastWeek='',lastCorrect='';
+  const weekTime=key=>{const m=/^(\d{4})-W(\d{2})/.exec(key);if(!m)return NaN;const d=new Date(Date.UTC(+m[1],0,4));d.setUTCDate(d.getUTCDate()-(d.getUTCDay()||7)+1+(+m[2]-1)*7);return d.getTime();};
+  for(const [key,answer] of dated){const week=key.slice(0,8);const distance=(weekTime(week)-weekTime(lastWeek))/604800000;streak=answer.correct?((distance===0||distance===1)?streak:0)+1:0;best=Math.max(best,streak);lastWeek=week;if(answer.correct)lastCorrect=week;}
+  const latest=dated.length?{streak,lastAnsweredWeek:lastWeek,lastCorrectWeek:lastCorrect}:{};
+  Object.assign(quiz,latest,{bestStreak:Math.max(best,amount(previous.quiz?.bestStreak),amount(incoming.quiz?.bestStreak))});
+  const oldTrials=previous.trials||{}, localTrials=incoming.trials||{};
+  const attempts={...localTrials.attempts,...oldTrials.attempts};
+  for(const key of Object.keys(attempts))attempts[key]=Math.max(amount(localTrials.attempts?.[key]),amount(oldTrials.attempts?.[key]));
+  const history=[...(oldTrials.history||[]),...(localTrials.history||[])].filter((entry,index,list)=>list.findIndex(other=>String(other.level)===String(entry.level))===index).sort((a,b)=>(Date.parse(b.completedAt)||0)-(Date.parse(a.completedAt)||0)).slice(0,24);
+  const trials={completed:{...localTrials.completed,...oldTrials.completed},exclusiveBadges:{...localTrials.exclusiveBadges,...oldTrials.exclusiveBadges},attempts,history,lastUnlockedLevel:Math.max(amount(oldTrials.lastUnlockedLevel),amount(localTrials.lastUnlockedLevel))};
+  return {quiz,goals:mergeLedger(previous.goals,incoming.goals,'claimed'),trials};
+}
 export async function handleAccountApi(request,env,verify=verifyFirebaseToken){
   if(!env.ACCOUNT_DB)return response({error:'Le stockage des comptes n’est pas encore activé.'},503);
   let uid;try{const match=request.headers.get('Authorization')?.match(/^Bearer (.+)$/);if(!match)return response({error:'Connexion nécessaire.'},401);uid=await verify(match[1]);}catch{return response({error:'Reconnecte-toi pour ouvrir ton espace.'},401);}
@@ -80,11 +105,12 @@ export async function handleAccountApi(request,env,verify=verifyFirebaseToken){
     const raw=await request.text();if(raw.length>900000)return response({error:'Document trop volumineux.'},413);
     const body=JSON.parse(raw);if(!plainObject(body.data))return response({error:'Document invalide.'},400);
     if(body.mode==='update'&&!previous)return response({error:'Document introuvable.'},404);
-    const data=body.mode==='replace'?transform(body.data):mergeDocument(previous,body.data,body.mode==='update');
+    if(body.mode==='progress'&&(name!=='playerProgress'||id!=='gaming'))return response({error:'Progression invalide.'},400);
+    const data=body.mode==='progress'?mergeGamingProgress(previous||{},transform(body.data)):body.mode==='replace'?transform(body.data):mergeDocument(previous,body.data,body.mode==='update');
     if(name==='publicProfiles')data.ownerUid=uid;
     // Optimistic concurrency prevents silently overwriting another simultaneous change.
     if(row){const result=await db.prepare('UPDATE documents SET data=? WHERE owner=? AND collection=? AND id=? AND data=?').bind(JSON.stringify(data),owner,name,id,row.data).run();if(!result.meta.changes)return response({error:'Une modification simultanée a eu lieu. Réessaie.'},409);}
     else{const result=await db.prepare('INSERT OR IGNORE INTO documents(owner,collection,id,data) VALUES(?,?,?,?)').bind(owner,name,id,JSON.stringify(data)).run();if(!result.meta.changes)return response({error:'Ce document vient d’être créé. Réessaie.'},409);}
-    return response({ok:true});
+    return response(body.mode==='progress'?{ok:true,data}:{ok:true});
   }catch{return response({error:'Impossible de traiter la demande. Réessaie.'},503);}
 }

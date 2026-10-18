@@ -9027,7 +9027,7 @@ body[data-ui="modern"] .chip.active {
 
 .profile-trials-badge-row {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 9px;
 }
 
@@ -9063,6 +9063,10 @@ body[data-ui="modern"] .chip.active {
   opacity: 0.55;
 }
 
+.profile-trial-reward > div {
+  min-width: 0;
+}
+
 .profile-trial-reward.locked > span {
   filter: grayscale(0.8);
   box-shadow: none;
@@ -9072,9 +9076,8 @@ body[data-ui="modern"] .chip.active {
 .profile-trial-reward small {
   display: block;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .profile-trial-reward strong {
@@ -21151,6 +21154,9 @@ body {
 }
 
 .library-section-shelf .shelf3d-level-games {
+  --shelf-spine-width: 20px;
+  display: grid;
+  grid-template-columns: repeat(var(--shelf-capacity, 14), minmax(0, 1fr));
   gap: 4px;
   padding-inline: 6px;
   overflow-x: hidden;
@@ -21158,8 +21164,9 @@ body {
 
 .library-section-shelf .shelf3d-case {
   flex-basis: 20px;
-  min-width: 18px;
-  max-width: 23px;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
   height: 128px;
 }
 
@@ -21215,6 +21222,7 @@ body {
   }
 
   .library-section-shelf .shelf3d-level-games {
+    --shelf-spine-width: 18px;
     gap: 3px;
     padding-inline: 4px;
   }
@@ -21223,8 +21231,8 @@ body {
   .library-section-shelf .shelf3d-case:nth-child(3n),
   .library-section-shelf .shelf3d-case:nth-child(5n) {
     flex-basis: 18px !important;
-    min-width: 16px !important;
-    max-width: 18px !important;
+    min-width: 0 !important;
+    max-width: none !important;
     height: 118px;
   }
 
@@ -39765,7 +39773,21 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 .home-pulse-featured {
   display: grid;
   grid-template-columns: 68px minmax(0, 1fr);
+  gap: 14px;
   align-items: center;
+  align-content: center;
+}
+
+.home-pulse-featured img,
+.home-pulse-featured .social-feed-placeholder {
+  width: 68px;
+  height: 68px;
+  margin: 0;
+}
+
+.home-pulse-featured > div,
+.home-pulse-row > div {
+  min-width: 0;
 }
 
 .home-pulse-list {
@@ -40400,12 +40422,24 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 8px !important;
-  padding: 5px !important;
+  padding: 8px !important;
+  width: min(100%, 320px);
+  max-width: 100%;
+  box-sizing: border-box;
+  align-items: stretch;
 }
 
 .series-page .library-view-toggle button {
-  min-height: 42px !important;
+  min-height: 44px !important;
   width: 100% !important;
+  min-width: 0 !important;
+  height: auto !important;
+  box-sizing: border-box;
+  margin: 0 !important;
+  padding: 10px 12px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .series-page .compact-series-card {
