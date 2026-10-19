@@ -8,8 +8,8 @@ import { MORE_GAME_THEMES } from "../data/moreGameThemes";
 jest.mock("../services/accountData",()=>({accountStorage:{getItem:()=>null}}));
 
 test("new themes have unique identifiers without replacing the previous universes",()=>{
-  expect(GAME_UNIVERSE_THEMES).toHaveLength(12);
-  expect(new Set([...GAME_UNIVERSE_THEMES,...POP_CULTURE_THEMES].map(theme=>theme.id)).size).toBe(16);
+  expect(GAME_UNIVERSE_THEMES).toHaveLength(17);
+  expect(new Set([...GAME_UNIVERSE_THEMES,...POP_CULTURE_THEMES].map(theme=>theme.id)).size).toBe(21);
 });
 
 test.each(GAME_UNIVERSE_THEMES)("$label has its own intro and optional skip",theme=>{

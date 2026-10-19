@@ -1,0 +1,17 @@
+html[data-theme="theme-masseffect"]{--theme-chrome-bg:#07121f}
+body[data-theme="theme-masseffect"]{--game-bg:#07121f;--game-panel:#12283b;--game-surface:#1a3b50;--game-input:#07121f;--game-border:#7fcde555;--game-accent:linear-gradient(120deg,#174d6d,#6f333c);--game-edge:#7fcde5;--game-secondary:#f39b79;--game-ink:#eef8ff;--game-soft:#b6d7e5;--game-muted:#91b6cb;--game-glow:#7fcde520;--game-pattern:radial-gradient(ellipse at 80% 10%,#f39b7915,transparent 60%)}
+.gu-masseffect{--pc-bg:#07121f;--pc-glow:#7fcde5;--pc-alt:#f39b79;--pc-text:#eef8ff}
+html[data-theme="theme-skyrim"]{--theme-chrome-bg:#131c20}
+body[data-theme="theme-skyrim"]{--game-bg:#131c20;--game-panel:#213138;--game-surface:#30454b;--game-input:#131c20;--game-border:#c7ddd955;--game-accent:linear-gradient(120deg,#456771,#4a6861);--game-edge:#c7ddd9;--game-secondary:#9ee9c7;--game-ink:#f1f4ee;--game-soft:#ccdad6;--game-muted:#a4bdb6;--game-glow:#c7ddd920;--game-pattern:radial-gradient(ellipse at 80% 10%,#9ee9c715,transparent 60%)}
+.gu-skyrim{--pc-bg:#131c20;--pc-glow:#c7ddd9;--pc-alt:#9ee9c7;--pc-text:#f1f4ee}
+html[data-theme="theme-streetfighter"]{--theme-chrome-bg:#1c1024}
+body[data-theme="theme-streetfighter"]{--game-bg:#1c1024;--game-panel:#302039;--game-surface:#482b4c;--game-input:#1c1024;--game-border:#ffcc7455;--game-accent:linear-gradient(120deg,#995334,#6e345c);--game-edge:#ffcc74;--game-secondary:#f19ab8;--game-ink:#fff1de;--game-soft:#ead1d8;--game-muted:#c5a7c4;--game-glow:#ffcc7420;--game-pattern:radial-gradient(ellipse at 80% 10%,#f19ab815,transparent 60%)}
+.gu-streetfighter{--pc-bg:#1c1024;--pc-glow:#ffcc74;--pc-alt:#f19ab8;--pc-text:#fff1de}
+html[data-theme="theme-splatoon"]{--theme-chrome-bg:#17152a}
+body[data-theme="theme-splatoon"]{--game-bg:#17152a;--game-panel:#2a2540;--game-surface:#3b3357;--game-input:#17152a;--game-border:#e1f77a55;--game-accent:linear-gradient(120deg,#526522,#72399c);--game-edge:#e1f77a;--game-secondary:#c6a8ff;--game-ink:#f8fae8;--game-soft:#e0d8f0;--game-muted:#c0b4d6;--game-glow:#e1f77a20;--game-pattern:radial-gradient(ellipse at 80% 10%,#c6a8ff15,transparent 60%)}
+.gu-splatoon{--pc-bg:#17152a;--pc-glow:#e1f77a;--pc-alt:#c6a8ff;--pc-text:#f8fae8}
+html[data-theme="theme-ori"]{--theme-chrome-bg:#061e23}
+body[data-theme="theme-ori"]{--game-bg:#061e23;--game-panel:#11343b;--game-surface:#1e4950;--game-input:#061e23;--game-border:#a1eee455;--game-accent:linear-gradient(120deg,#286d74,#3c5d83);--game-edge:#a1eee4;--game-secondary:#bbe0ff;--game-ink:#effcf7;--game-soft:#c7e6e2;--game-muted:#a1c8c8;--game-glow:#a1eee420;--game-pattern:radial-gradient(ellipse at 80% 10%,#bbe0ff15,transparent 60%)}
+.gu-ori{--pc-bg:#061e23;--pc-glow:#a1eee4;--pc-alt:#bbe0ff;--pc-text:#effcf7}
+
+.theme-progression-note{line-height:1.5;color:var(--text-soft);font-size:.88rem}.option-pill-grid.themes>.option-pill:disabled{opacity:.58;cursor:not-allowed}.theme-unlock-level{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-size:.7rem;opacity:.85}.option-pill-grid.themes>.option-pill:has(.theme-unlock-level){flex-direction:column;gap:4px}

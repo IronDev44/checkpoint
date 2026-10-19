@@ -1,10 +1,18 @@
+import {ALL_THEME_CATALOG} from "../data/themeCatalog";
 import { ownerUid } from "./accountConfig";
 
 export const CHECKPOINT_PREMIUM_THEME = "theme-checkpointpremium";
 export const CHECKPOINT_PREMIUM_LEVEL = 50;
 export const CHECKPOINT_ULTIMATE_THEME = "theme-checkpointultimate";
 export const CHECKPOINT_ULTIMATE_LEVEL = 100;
-const REWARD_LEVELS = {[CHECKPOINT_PREMIUM_THEME]:CHECKPOINT_PREMIUM_LEVEL,[CHECKPOINT_ULTIMATE_THEME]:CHECKPOINT_ULTIMATE_LEVEL};
+// Stable catalogue order: one reward every two levels, with signature milestones reserved.
+const regular=ALL_THEME_CATALOG.filter(theme=>!['theme-checkpoint',CHECKPOINT_PREMIUM_THEME,CHECKPOINT_ULTIMATE_THEME].includes(theme.id));
+const regularLevels=Array.from({length:50},(_,i)=>(i+1)*2).filter(level=>![CHECKPOINT_PREMIUM_LEVEL,CHECKPOINT_ULTIMATE_LEVEL].includes(level));
+export const THEME_REWARD_LEVELS=Object.freeze({...Object.fromEntries(regular.map((theme,i)=>[theme.id,regularLevels[i]])),[CHECKPOINT_PREMIUM_THEME]:CHECKPOINT_PREMIUM_LEVEL,[CHECKPOINT_ULTIMATE_THEME]:CHECKPOINT_ULTIMATE_LEVEL});
+const REWARD_LEVELS=THEME_REWARD_LEVELS;
+export const getThemeUnlockLevel=theme=>REWARD_LEVELS[theme]||0;
+export const getThemeLabel=theme=>ALL_THEME_CATALOG.find(item=>item.id===theme)?.label||theme;
+
 const REWARD_THEMES = new Set(Object.keys(REWARD_LEVELS));
 
 export function normalizeThemeUnlocks(value) {
@@ -29,15 +37,17 @@ export function canUseTheme(theme, unlocked) {
 }
 
 export function isCheckpointTheme(theme) {
-  return theme === "theme-checkpoint" || REWARD_THEMES.has(theme);
+  return ["theme-checkpoint",CHECKPOINT_PREMIUM_THEME,CHECKPOINT_ULTIMATE_THEME].includes(theme);
 }
 
 export function resolveThemeRewards({ theme, unlockedThemes, level, ready, accountUid }) {
   if (!ready) return { theme, unlockedThemes, justUnlocked: false };
   const earned = earnThemeUnlocks(unlockedThemes, level);
-  // The app's authenticated owner can preview the final cosmetic reward.
+  // The app's authenticated owner can preview the entire theme catalogue.
   // Never infer ownership from a public profile, handle or editable flag.
-  if (ownerUid && accountUid === ownerUid && !earned.includes(CHECKPOINT_ULTIMATE_THEME)) earned.push(CHECKPOINT_ULTIMATE_THEME);
+  if (ownerUid && accountUid === ownerUid) {
+    REWARD_THEMES.forEach(id => { if (!earned.includes(id)) earned.push(id); });
+  }
   return {
     theme: canUseTheme(theme, earned) ? theme : "theme-checkpoint",
     unlockedThemes: earned,

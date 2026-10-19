@@ -1,3 +1,4 @@
+@import "./NewGameThemes.css";
 @import "./MoreGameThemes.css";
 
 html[data-theme="theme-elden"] { --theme-chrome-bg:#14130c; }
@@ -42,7 +43,7 @@ body[data-theme="theme-crossing"] {
   --game-ink:#fff5da; --game-soft:#e0dfbc; --game-muted:#bdcaaa; --game-glow:#b4d79c24;
   --game-pattern:radial-gradient(ellipse at 10% 10%,#f0c48d18,transparent 45%),radial-gradient(ellipse at 90% 70%,#95cb9e10,transparent 45%);
 }
-body:is([data-theme="theme-elden"],[data-theme="theme-halo"],[data-theme="theme-bioshock"],[data-theme="theme-portal"],[data-theme="theme-godwar"],[data-theme="theme-crossing"],[data-theme="theme-hollow"],[data-theme="theme-outlaw"],[data-theme="theme-assassin"],[data-theme="theme-hades"],[data-theme="theme-resident"],[data-theme="theme-codec"]) {
+body:is([data-theme="theme-elden"],[data-theme="theme-halo"],[data-theme="theme-bioshock"],[data-theme="theme-portal"],[data-theme="theme-godwar"],[data-theme="theme-crossing"],[data-theme="theme-hollow"],[data-theme="theme-outlaw"],[data-theme="theme-assassin"],[data-theme="theme-hades"],[data-theme="theme-resident"],[data-theme="theme-codec"],[data-theme="theme-masseffect"],[data-theme="theme-skyrim"],[data-theme="theme-streetfighter"],[data-theme="theme-splatoon"],[data-theme="theme-ori"]) {
   --bg-main:radial-gradient(ellipse at 10% 0%,var(--game-glow),transparent 50%),var(--game-bg) !important;
   --panel-bg:var(--game-panel) !important; --panel-border:var(--game-border) !important;
   --surface-bg:var(--game-surface) !important; --surface-border:var(--game-border) !important; --input-bg:var(--game-input) !important;
@@ -54,10 +55,10 @@ body:is([data-theme="theme-elden"],[data-theme="theme-halo"],[data-theme="theme-
   --checkpoint-splash-primary:var(--game-edge) !important; --checkpoint-splash-secondary:var(--game-secondary) !important;
   --checkpoint-splash-glow:var(--game-glow) !important;
 }
-body:is([data-theme="theme-elden"],[data-theme="theme-halo"],[data-theme="theme-bioshock"],[data-theme="theme-portal"],[data-theme="theme-godwar"],[data-theme="theme-crossing"],[data-theme="theme-hollow"],[data-theme="theme-outlaw"],[data-theme="theme-assassin"],[data-theme="theme-hades"],[data-theme="theme-resident"],[data-theme="theme-codec"]) .app-shell::before {
+body:is([data-theme="theme-elden"],[data-theme="theme-halo"],[data-theme="theme-bioshock"],[data-theme="theme-portal"],[data-theme="theme-godwar"],[data-theme="theme-crossing"],[data-theme="theme-hollow"],[data-theme="theme-outlaw"],[data-theme="theme-assassin"],[data-theme="theme-hades"],[data-theme="theme-resident"],[data-theme="theme-codec"],[data-theme="theme-masseffect"],[data-theme="theme-skyrim"],[data-theme="theme-streetfighter"],[data-theme="theme-splatoon"],[data-theme="theme-ori"]) .app-shell::before {
   background:radial-gradient(ellipse at 50% 0%,var(--game-glow),transparent 70%) !important; opacity:.6 !important; filter:none !important; animation:none !important;
 }
-body:is([data-theme="theme-elden"],[data-theme="theme-halo"],[data-theme="theme-bioshock"],[data-theme="theme-portal"],[data-theme="theme-godwar"],[data-theme="theme-crossing"],[data-theme="theme-hollow"],[data-theme="theme-outlaw"],[data-theme="theme-assassin"],[data-theme="theme-hades"],[data-theme="theme-resident"],[data-theme="theme-codec"]) .app-shell::after {
+body:is([data-theme="theme-elden"],[data-theme="theme-halo"],[data-theme="theme-bioshock"],[data-theme="theme-portal"],[data-theme="theme-godwar"],[data-theme="theme-crossing"],[data-theme="theme-hollow"],[data-theme="theme-outlaw"],[data-theme="theme-assassin"],[data-theme="theme-hades"],[data-theme="theme-resident"],[data-theme="theme-codec"],[data-theme="theme-masseffect"],[data-theme="theme-skyrim"],[data-theme="theme-streetfighter"],[data-theme="theme-splatoon"],[data-theme="theme-ori"]) .app-shell::after {
   background:var(--game-pattern) !important; background-size:100px 100px !important; opacity:.5 !important; filter:none !important; animation:none !important; transform:none !important;
 }
 body:is([data-theme="theme-elden"],[data-theme="theme-godwar"],[data-theme="theme-crossing"],[data-theme="theme-hollow"],[data-theme="theme-outlaw"],[data-theme="theme-hades"],[data-theme="theme-resident"]) .app-shell::after { background-size:auto !important; }

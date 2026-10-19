@@ -1,3 +1,5 @@
+import NewGameScene from "./NewGameScenes";
+import {NEW_GAME_MOTIFS} from "../data/newGameThemes";
 import { useEffect, useId } from "react";
 import { getGameUniverseTheme } from "../data/gameUniverseThemes";
 import "./PopCultureEffects.css";
@@ -52,6 +54,7 @@ function CrossingScene({ light, boost }) {
 function GameScene({ motif, light, boost }) {
   const id=`gu-window-${useId().replace(/:/g,"")}`;
   const props={light,boost,id};
+  if(NEW_GAME_MOTIFS.has(motif))return <NewGameScene motif={motif} light={light}/>;
   if(REVISED_TRANSITIONS.has(motif))return <RevisedTransitionScene motif={motif} light={light}/>;
   const MoreScene=MORE_GAME_SCENES[motif];
   if(MoreScene)return <MoreScene {...props}/>;
@@ -74,7 +77,7 @@ export function GameUniverseIntro({ theme, progress=0, effects="balanced", light
   if(!config)return null;
   const value=Math.max(0,Math.min(100,Math.round(Number(progress)||0))),reduced=light||effects==="calm";
   return <section className={`pc-boot gu-boot gu-${config.motif} ${reduced?"is-light":""} ${value===100?"is-ready":""}`} aria-label={`Introduction ${config.label}`}>
-    <RevisedIntroScene motif={config.motif} light={reduced}/><div className="pc-scene-shade"/>
+    <>{NEW_GAME_MOTIFS.has(config.motif)?<NewGameScene motif={config.motif} intro light={reduced}/>:<RevisedIntroScene motif={config.motif} light={reduced}/>}</><div className="pc-scene-shade"/>
     <header className="pc-boot-header"><span>{config.sceneTitle||config.universe}</span>{onRequestClose&&<button type="button" onClick={onRequestClose}>Passer l’intro <span aria-hidden="true">›</span></button>}</header>
     <div className="pc-boot-copy"><span>{config.kicker}</span><h1>CHECKPOINT</h1><p>{config.subtitle}</p></div>
     <footer className="pc-boot-loading"><div><span>{value===100?"Tout est prêt":"Chargement…"}</span><strong>{value} %</strong></div><div className="pc-load-track" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><i style={{width:`${value}%`}}/></div></footer>

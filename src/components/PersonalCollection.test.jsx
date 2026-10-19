@@ -21,3 +21,12 @@ test('content choices preserve home layout order and keep access to options',()=
 test('private stop note is optional, saved with selected state and failures remain editable',async()=>{
  const onSave=jest.fn().mockResolvedValue(false);render(<GameJourneyEditor game={{id:'a',status:'en cours',progressStatus:'in_progress'}} onSave={onSave}/>);fireEvent.change(screen.getByLabelText('Ma progression'),{target:{value:'abandoned'}});fireEvent.change(screen.getByRole('textbox'),{target:{value:'Trop difficile pour moi'}});fireEvent.click(screen.getByText('Enregistrer ma progression'));expect(await screen.findByText('Modification non enregistrée. Réessaie.')).toBeInTheDocument();expect(onSave).toHaveBeenCalledWith('a','abandoned','Trop difficile pour moi');expect(screen.getByRole('textbox')).toHaveValue('Trop difficile pour moi');
 });
+
+
+test('content preferences provide an explicit expandable header and can close again',()=>{
+ render(<ContentPreferences value={{}} onChange={jest.fn()}/>);
+ const header=screen.getByRole('button',{name:/Préférences de contenu/});
+ expect(header).toHaveAttribute('aria-expanded','false');expect(screen.queryByRole('checkbox')).toBeNull();
+ fireEvent.click(header);expect(header).toHaveAttribute('aria-expanded','true');expect(screen.getByRole('checkbox',{name:'Social',exact:true})).toBeVisible();
+ fireEvent.click(header);expect(header).toHaveAttribute('aria-expanded','false');expect(screen.queryByRole('checkbox')).toBeNull();
+});

@@ -1,0 +1,36 @@
+import {GAME_UNIVERSE_THEMES} from "./gameUniverseThemes";
+import {POP_CULTURE_THEMES} from "./popCultureThemes";
+
+export const THEME_CATALOG = [
+  { id: "theme-checkpoint", label: "Checkpoint" },
+  { id: "theme-indigo", label: "Aurora Neon" },
+  { id: "theme-playstation", label: "PlayStation 5" },
+  { id: "theme-xbox", label: "Xbox Dashboard" },
+  { id: "theme-steamdeck", label: "Steam Deck" },
+  { id: "theme-arcane", label: "Harry Potter" },
+  { id: "theme-stellar", label: "Star Wars" },
+  { id: "theme-multiverse", label: "Marvel (MCU)" },
+  { id: "theme-relic", label: "The Legend of Zelda" },
+  { id: "theme-tamer", label: "Pokémon" },
+  { id: "theme-mushroom", label: "Super Mario" },
+  { id: "theme-blueblur", label: "Sonic" },
+  { id: "theme-blocks", label: "Tetris" },
+  { id: "theme-cubic", label: "Minecraft" },
+  { id: "theme-hunter", label: "Metroid" },
+  { id: "theme-kart", label: "Mario Kart · Route Arc-en-ciel" },
+  { id: "theme-crystal", label: "Final Fantasy" },
+  { id: "theme-ring", label: "Pac-Man" },
+  { id: "theme-matrix", label: "Matrix" },
+  { id: "theme-wasteland", label: "Fallout" },
+  { id: "theme-treasure", label: "One Piece" },
+  { id: "theme-slayer", label: "Demon Slayer" },
+  { id: "theme-vigilante", label: "Batman" },
+  ...GAME_UNIVERSE_THEMES,
+  ...POP_CULTURE_THEMES,
+  { id: "theme-emerald", label: "Circuit Mint" },
+  { id: "theme-crimson", label: "Redline" },
+  { id: "theme-graphite", label: "Carbon Ice" },
+  { id: "theme-retro", label: "Arcade Sunset" },
+  { id: "theme-cyberpunk", label: "Neon Tokyo" },
+];
+export const ALL_THEME_CATALOG=[...THEME_CATALOG,{id:"theme-checkpointpremium",label:"Checkpoint Premium"},{id:"theme-checkpointultimate",label:"Checkpoint Ultime"}];

@@ -1,3 +1,4 @@
+import {THEME_CATALOG} from "./data/themeCatalog";
 import { Fragment, useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import "./App.css";
@@ -11,7 +12,7 @@ import { GAME_UNIVERSE_THEMES } from "./data/gameUniverseThemes";
 import "./documentScroll.css";
 import "./components/CheckpointTheme.css";
 import CheckpointPremiumChoice from "./components/CheckpointPremiumChoice";
-import { CHECKPOINT_PREMIUM_THEME, CHECKPOINT_ULTIMATE_THEME, normalizeThemeUnlocks, mergeThemeUnlocks, resolveThemeRewards, canUseTheme, isCheckpointTheme } from "./services/themeRewards";
+import { CHECKPOINT_PREMIUM_THEME, CHECKPOINT_ULTIMATE_THEME, normalizeThemeUnlocks, mergeThemeUnlocks, resolveThemeRewards, canUseTheme, isCheckpointTheme, getThemeUnlockLevel, getThemeLabel } from "./services/themeRewards";
 import { CheckpointMark } from "./components/CheckpointEffects";
 import "./components/HomeOverview.css";
 import { db, auth } from "./firebase";
@@ -128,6 +129,7 @@ import {
 
 import {
   Home,
+  Lock,
   List,
   Play,
   Radio,
@@ -14718,38 +14720,7 @@ function OptionsTab({
     development: false,
     data: false,
   });
-  const themes = [
-  { id: "theme-checkpoint", label: "Checkpoint" },
-  { id: "theme-indigo", label: "Aurora Neon" },
-  { id: "theme-playstation", label: "PlayStation 5" },
-  { id: "theme-xbox", label: "Xbox Dashboard" },
-  { id: "theme-steamdeck", label: "Steam Deck" },
-  { id: "theme-arcane", label: "Harry Potter" },
-  { id: "theme-stellar", label: "Star Wars" },
-  { id: "theme-multiverse", label: "Marvel (MCU)" },
-  { id: "theme-relic", label: "The Legend of Zelda" },
-  { id: "theme-tamer", label: "Pokémon" },
-  { id: "theme-mushroom", label: "Super Mario" },
-  { id: "theme-blueblur", label: "Sonic" },
-  { id: "theme-blocks", label: "Tetris" },
-  { id: "theme-cubic", label: "Minecraft" },
-  { id: "theme-hunter", label: "Metroid" },
-  { id: "theme-kart", label: "Mario Kart · Route Arc-en-ciel" },
-  { id: "theme-crystal", label: "Final Fantasy" },
-  { id: "theme-ring", label: "Pac-Man" },
-  { id: "theme-matrix", label: "Matrix" },
-  { id: "theme-wasteland", label: "Fallout" },
-  { id: "theme-treasure", label: "One Piece" },
-  { id: "theme-slayer", label: "Demon Slayer" },
-  { id: "theme-vigilante", label: "Batman" },
-  ...GAME_UNIVERSE_THEMES,
-  ...POP_CULTURE_THEMES,
-  { id: "theme-emerald", label: "Circuit Mint" },
-  { id: "theme-crimson", label: "Redline" },
-  { id: "theme-graphite", label: "Carbon Ice" },
-  { id: "theme-retro", label: "Arcade Sunset" },
-  { id: "theme-cyberpunk", label: "Neon Tokyo" },
-];
+  const themes = THEME_CATALOG;
   const startTabs = [
     { id: "home", label: "Accueil" },
     { id: "library", label: "Bibliothèque" },
@@ -15278,6 +15249,7 @@ function OptionsTab({
           <div className="option-section">
             <SectionTitle title="Thème" />
 
+            <p className="theme-progression-note">Un thème à débloquer tous les 2 niveaux. Checkpoint est disponible dès le départ ; Premium au niveau 50 et Ultime au niveau 100.</p>
             <div className="option-pill-grid themes">
               <button type="button" className={`option-pill checkpoint-signature-choice${theme === "theme-checkpoint" ? " active" : ""}`} onClick={() => setTheme("theme-checkpoint")} aria-pressed={theme === "theme-checkpoint"}>
                 <CheckpointMark/><span>Checkpoint</span>
@@ -15291,9 +15263,12 @@ function OptionsTab({
                   className={`option-pill theme-${item.id} ${
                     theme === item.id ? "active" : ""
                   }`}
-                  onClick={() => setTheme(item.id)}
+                  disabled={!canUseTheme(item.id, unlockedThemes)}
+                  aria-pressed={theme === item.id}
+                  aria-label={`${item.label} — ${canUseTheme(item.id,unlockedThemes)?"débloqué":`disponible au niveau ${getThemeUnlockLevel(item.id)}`}`}
+                  onClick={() => {if(canUseTheme(item.id,unlockedThemes))setTheme(item.id);}}
                 >
-                  {item.label}
+                  <span>{item.label}</span>{!canUseTheme(item.id,unlockedThemes)&&<small className="theme-unlock-level"><Lock size={12} aria-hidden="true"/>Niv. {getThemeUnlockLevel(item.id)}</small>}
                 </button>
               ))}
             </div>
@@ -18634,7 +18609,7 @@ useEffect(() => {
     const next = resolveThemeRewards({theme, unlockedThemes, level, ready:themeRewardsReady, accountUid:auth.currentUser?.uid});
     if (next.justUnlocked) {
       setUnlockedThemes(next.unlockedThemes);
-      showToast(next.newlyUnlocked.includes(CHECKPOINT_ULTIMATE_THEME) ? "Checkpoint Ultime est débloqué ! Retrouve-le dans les thèmes." : "Checkpoint Premium est débloqué ! Retrouve-le dans les thèmes.", 4000);
+      showToast(next.newlyUnlocked.length===1 ? `${getThemeLabel(next.newlyUnlocked[0])} est débloqué ! Retrouve-le dans les thèmes.` : `${next.newlyUnlocked.length} thèmes débloqués ! Retrouve-les dans Options → Interface.`, 4000);
     }
     if (next.theme !== theme) setTheme(next.theme);
   }, [themeRewardsReady, level, unlockedThemes, theme]);

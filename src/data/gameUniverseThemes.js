@@ -1,3 +1,4 @@
+import {NEW_GAME_THEMES} from "./newGameThemes";
 import { MORE_GAME_THEMES } from "./moreGameThemes";
 
 export const GAME_UNIVERSE_THEMES = [
@@ -8,5 +9,6 @@ export const GAME_UNIVERSE_THEMES = [
   { id:"theme-godwar", label:"God of War · Nordique", chrome:"#111e26", motif:"godwar", sceneTitle: "LES BRUMES DU NORD", universe:"GOD OF WAR", kicker:"EN ROUTE POUR MIDGARD", subtitle:"Chaque aventure laisse une trace.", transition:"LE GIVRE S’ÉVEILLE" },
   { id:"theme-crossing", label:"Animal Crossing · Soir d’été", chrome:"#17332e", motif:"crossing", universe:"ANIMAL CROSSING", kicker:"UN MOMENT SUR TON ÎLE", subtitle:"Installe-toi, tes jeux peuvent attendre.", transition:"BIENVENUE SUR TON ÎLE" },
   ...MORE_GAME_THEMES,
+  ...NEW_GAME_THEMES,
 ];
 export const getGameUniverseTheme = id => GAME_UNIVERSE_THEMES.find(theme => theme.id === id);

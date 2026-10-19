@@ -1,11 +1,24 @@
 import {trailerSelection} from './experiences';
-import {getKnownGameCover} from './gameCovers';
+import {resolveGameCover} from './gameCovers';
 export function trailerScenes(games,selectedIds,founderIds=[],level=1){
  const selected=new Set(selectedIds.map(String)),founders=new Set(founderIds.map(String));
  return [{kind:'intro',title:'Chaque joueur a son histoire.',duration:2.4},...selectedIds.map(id=>games.find(g=>String(g.id)===String(id))).filter(g=>g&&selected.has(String(g.id))&&g.status!=='wishlist').slice(0,5).map(game=>({kind:'game',game,title:game.name,kicker:founders.has(String(game.id))?'UN JEU FONDATEUR':game.favorite?'UN COUP DE CŒUR':'UNE PARTIE DE MON HISTOIRE',duration:3.2})),{kind:'outro',title:'La suite reste à jouer.',level,duration:3}];
 }
 export function trailerDuration(scenes){return scenes.reduce((sum,scene)=>sum+scene.duration,0);}
-export async function trailerArtwork(scenes){const images=new Map();await Promise.all(scenes.filter(s=>s.game).map(scene=>new Promise(resolve=>{const source=getKnownGameCover(scene.game)||scene.game.image;if(!source){resolve();return;}const img=new Image();img.crossOrigin='anonymous';const timer=setTimeout(()=>{img.src='';resolve();},5000);img.onload=()=>{clearTimeout(timer);images.set(String(scene.game.id),img);resolve();};img.onerror=()=>{clearTimeout(timer);resolve();};img.src=source;})));return images;}
+export async function trailerArtwork(scenes,resolveCover=resolveGameCover){
+ const images=new Map();
+ await Promise.all(scenes.filter(scene=>scene.game).map(async scene=>{
+  let source;try{source=await resolveCover(scene.game);}catch{return;}
+  if(!source)return;
+  await new Promise(resolve=>{
+   const img=new Image();img.crossOrigin='anonymous';
+   const finish=()=>{clearTimeout(timer);img.onload=null;img.onerror=null;resolve();};
+   const timer=setTimeout(()=>{img.src='';finish();},5000);
+   img.onload=()=>{images.set(String(scene.game.id),img);finish();};img.onerror=finish;img.src=source;
+  });
+ }));
+ return images;
+}
 function lines(ctx,text,width,size=48){ctx.font=`700 ${size}px sans-serif`;const words=String(text).split(/\s+/),result=[];let line='';for(const word of words){if(ctx.measureText(line+' '+word).width>width&&line){result.push(line);line=word;}else line=line?line+' '+word:word;}if(line)result.push(line);return result.slice(0,4);}
 function drawMark(ctx,x,y,size,time){
  if(typeof Path2D==='undefined'){ctx.fillStyle='#dfc98f';ctx.font='700 240px serif';ctx.fillText('C',360,y+size);return;}
