@@ -1,0 +1,18 @@
+import {useEffect,useMemo,useState} from 'react';
+import {monthlyRecap,monthKey,recapMonths,renderMonthlyRecap} from '../services/monthlyRecap';
+import ToolDialog from './ToolDialog';
+import './MonthlySocial.css';
+export default function MonthlyRecap({games=[],initialMonth,dialogOnly=false,onCloseDialog}){
+ const [month,setMonth]=useState(()=>initialMonth||monthKey()),[open,setOpen]=useState(dialogOnly),[busy,setBusy]=useState(false),[error,setError]=useState(''),[image,setImage]=useState(null);
+ const recap=useMemo(()=>monthlyRecap(games,month),[games,month]),months=useMemo(()=>recapMonths(games),[games]);
+ useEffect(()=>{if(!image)return undefined;return()=>URL.revokeObjectURL(image.url);},[image]);
+ useEffect(()=>{setImage(null);setError('');},[month,games]);
+ const prepare=async()=>{setBusy(true);setError('');try{const blob=await renderMonthlyRecap(recap);setImage({blob,url:URL.createObjectURL(blob)});}catch(e){setError(e.message);}finally{setBusy(false);}};
+ const share=async()=>{try{const file=new File([image.blob],`checkpoint-${month}.png`,{type:'image/png'});if(navigator.canShare?.({files:[file]})){await navigator.share({files:[file],title:`Mon bilan Checkpoint — ${recap.label}`});}else{const a=document.createElement('a');a.href=image.url;a.download=file.name;a.click();}}catch(e){if(e.name!=='AbortError')setError('Partage impossible. Tu peux enregistrer l’image.');}};
+ return <section className={dialogOnly?"monthly-dialog-only":"monthly-recap home-library-card"}>{!dialogOnly&&<><small>TON PARCOURS</small><h3>Ton bilan du mois</h3><p>Les jeux qui ont marqué {recap.label}.</p><div className="monthly-counts"><span><strong>{recap.added.length}</strong>ajouts</span><span><strong>{recap.completed.length}</strong>terminés</span><span><strong>{recap.favorites.length}</strong>coups de cœur</span></div><button className="option-pill" onClick={()=>setOpen(true)}>Voir mon bilan</button></>}
+ {open&&<ToolDialog title="Mon bilan mensuel" wide onClose={()=>{if(!busy){setOpen(false);onCloseDialog?.();}}} busy={busy}><div className="monthly-detail"><label>Mois du bilan<select value={month} disabled={busy} onChange={e=>setMonth(e.target.value)}>{months.map(key=><option key={key} value={key}>{monthlyRecap([],key).label}</option>)}</select></label><p>Les ajouts correspondent aux entrées enregistrées dans ta bibliothèque, y compris les imports. Le mois en cours évolue avec ta collection.</p>
+ {[[recap.added,'Ajouts à la bibliothèque'],[recap.completed,'Jeux terminés'],[recap.favorites,'Nouveaux coups de cœur']].map(([list,title])=><section key={title}><h3>{title} · {list.length}</h3>{list.length?<ul>{list.map(game=><li key={game.id}>{game.name}</li>)}</ul>:<p>Aucun jeu daté sur cette période.</p>}</section>)}
+ {recap.undatedCompleted>0&&<p className="monthly-note">{recap.undatedCompleted} jeu{recap.undatedCompleted>1?'x':''} terminé{recap.undatedCompleted>1?'s':''} sans date connue : {recap.undatedCompleted>1?'ils ne sont pas attribués':'il n’est pas attribué'} à un mois. Les prochaines fins de jeu et ajouts aux favoris seront datés automatiquement.</p>}
+ <p>Le bilan reste privé. Seule l’image que tu choisis de partager quitte ton espace.</p>{error&&<p role="alert">{error}</p>}<div className="monthly-actions"><button className="option-pill active" disabled={busy} onClick={prepare}>{busy?'Création…':image?'Actualiser l’image':'Préparer mon image à partager'}</button>{image&&<><a className="option-pill" href={image.url} download={`checkpoint-${month}.png`}>Enregistrer l’image</a><button className="option-pill" onClick={share}>Partager</button></>}</div>{image&&<img className="monthly-share-image" src={image.url} alt={`Aperçu du bilan de ${recap.label}`}/>}</div></ToolDialog>}
+ </section>;
+}

@@ -1,3 +1,4 @@
+import SpoilerText from "./SpoilerText";
 import { useEffect, useState } from "react";
 import { getFriendsFeed } from "../services/socialProfiles";
 import { SocialAvatar } from "./ProfilePhoto";
@@ -8,13 +9,13 @@ export function SocialNavigation({ view, onChange, profile, friendCount }) {
   return <>
     <header className="social-hub-header">
       <div><h2>Social</h2><p>Les jeux nous rassemblent.</p></div>
-      <button className="social-hub-account" type="button" onClick={() => onChange("profile")} aria-label="Ouvrir mon profil">
+      <button className="social-hub-account" type="button" onClick={() => onChange("profile")} aria-label="Modifier mon profil public">
         <SocialAvatar name={profile.displayName} src={profile.photoURL} />
         <span><strong>{profile.displayName || "Mon profil"}</strong><small>{profile.handle ? `@${profile.handle}` : "Personnaliser mon profil"}</small></span>
       </button>
     </header>
     <nav className="social-hub-nav" aria-label="Navigation sociale">
-      {[["feed", "Fil"], ["friends", "Amis"], ["profile", "Mon profil"]].map(([key, label]) =>
+      {[["feed", "Fil"], ["friends", "Amis"], ["polls", "Sondages"], ["profile", "Profil public"]].map(([key, label]) =>
         <button key={key} type="button" aria-pressed={key === "profile" ? profileView : view === key}
           className={(key === "profile" ? profileView : view === key) ? "active" : ""} onClick={() => onChange(key)}>
           {label}{key === "friends" && friendCount > 0 && <small>{friendCount}</small>}
@@ -107,7 +108,7 @@ export function FriendsActivityFeed({ friends, loadProfile, onOpen }) {
         <span><strong>{item.profile.displayName || item.profile.handle}</strong><small>@{item.profile.handle}</small></span>
         <span className="social-hub-profile-link">{opening === item.profile.handle ? "Chargement…" : "Voir le profil"}</span>
       </button>
-      <div className="social-hub-post-body">{item.image && <img src={item.image} alt="" loading="lazy" />}<div><small>{item.type || "Activité"}</small><h4>{item.title}</h4>{item.text && <p>{item.text}</p>}{item.detail && <p>{item.detail}</p>}</div></div>
+      <div className="social-hub-post-body">{item.image && <img src={item.image} alt="" loading="lazy" />}<div><small>{item.type || "Activité"}</small><h4>{item.title}</h4>{item.text && <p>{item.text}</p>}{item.detail && <p><SpoilerText text={item.detail}/></p>}{item.reviewText&&<p><SpoilerText text={item.reviewText} whole={item.reviewSpoiler}/></p>}</div></div>
     </article>)}
     {friends.length > limit && <button type="button" disabled={loading} onClick={() => setLimit(n => n + 20)}>Charger les autres amis</button>}
   </section>;

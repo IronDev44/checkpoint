@@ -22,10 +22,12 @@ test('friend comparisons respect hidden sections, separate matches from discover
  const profile={visibility:'public',identityGames:[{id:'friend',name:'Halo',rating:8.5}],favoriteGames:[{name:'Portal',rating:9},{name:'Wish',rating:10}]};
  const result=compareFriendGames(own,profile);
  expect(result.common.find(item=>item.game.name==='Halo').agreement).toBe(true);
- expect(result.discover.map(g=>g.name)).toEqual(['Portal']);
+ expect(result.discover.map(g=>g.name)).toEqual(['Wish','Portal']);
+ expect(result.discover.find(g=>g.name==='Wish').inWishlist).toBe(true);
+ expect(result.common).toHaveLength(1);
  expect(compareFriendGames([],{visibility:'public',identityGames:[{name:'Portal'}],favoriteGames:[{name:'Portal',rating:7}]}).discover).toMatchObject([{name:'Portal',rating:7,favorite:true}]);
- expect(compareFriendGames(own,{...profile,publicSections:{identityGames:false,essential:false}})).toEqual({common:[],discover:[]});
- expect(compareFriendGames(own,{...profile,visibility:'prive'})).toEqual({common:[],discover:[]});
+ expect(compareFriendGames(own,{...profile,publicSections:{identityGames:false,essential:false}})).toEqual({common:[],discover:[],visibleCount:0});
+ expect(compareFriendGames(own,{...profile,visibility:'prive'})).toEqual({common:[],discover:[],visibleCount:0});
 });
 test('player card exports only chosen content and never private notes or an account email',()=>{
  const profile={displayName:'Jordan',photoURL:'data:image/png;base64,abc',identityGameIds:['one'],platform:'PS5',email:'private@example.test',bio:'private bio'};

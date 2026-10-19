@@ -1,6 +1,6 @@
 .social-clean { gap: 16px !important; }
 .social-clean > * { order: 0 !important; }
-.social-clean.social-visiting > :not(.social-public-profile):not(.social-hub-notice) { display:none !important; }
+.social-clean.social-visiting > :not(.social-public-profile):not(.social-hub-notice):not(.friend-comparison) { display:none !important; }
 .social-hub-header { display:flex; justify-content:space-between; gap:16px; align-items:center; padding:8px 0; }
 .social-hub-header h2 { margin:0; font-size:1.7rem; }
 .social-hub-header p { margin:6px 0 0; color:var(--text-soft); }
@@ -8,7 +8,7 @@
 .social-hub-account strong,.social-hub-friend-identity strong,.social-hub-post-author strong { display:block; overflow-wrap:anywhere; }
 .social-hub-account small,.social-hub-friend-identity small,.social-hub-post-author small { display:block; color:var(--text-soft); margin-top:4px; overflow-wrap:anywhere; }
 .social-hub-avatar { display:grid; place-items:center; width:44px; height:44px; flex:0 0 44px; border-radius:50%; background:var(--accent); color:white; font-weight:800; }
-.social-hub-nav { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; padding:5px; border:1px solid var(--panel-border); background:var(--panel-bg); border-radius:18px; }
+.social-hub-nav { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; padding:5px; border:1px solid var(--panel-border); background:var(--panel-bg); border-radius:18px; }
 .social-hub-nav button,.social-hub-profile-tabs button,.social-hub-feed-tabs button { min-height:44px; border:0; border-radius:12px; background:transparent; color:var(--text-soft); font:inherit; font-weight:700; padding:10px; cursor:pointer; }
 .social-hub-nav button.active,.social-hub-profile-tabs button.active,.social-hub-feed-tabs button.active { background:var(--accent); color:white; }
 .social-hub-nav small { margin-left:6px; font-size:.75rem; }
@@ -91,3 +91,5 @@
 }
 .social-clean .public-profile-badges .badge-card:hover { transform: none; }
 .social-clean .public-profile-badges .badge-name { overflow-wrap: anywhere; }
+
+@media(max-width:440px){.social-hub-nav{grid-template-columns:repeat(2,minmax(0,1fr))}}

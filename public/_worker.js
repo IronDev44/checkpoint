@@ -63,6 +63,16 @@ const IGDB_GAME_FIELDS = [
 
 const IGDB_GAME_DETAIL_FIELDS = [
   IGDB_GAME_FIELDS,
+  "game_modes.name",
+  "multiplayer_modes.onlinecoop",
+  "multiplayer_modes.offlinecoop",
+  "multiplayer_modes.lancoop",
+  "multiplayer_modes.campaigncoop",
+  "multiplayer_modes.onlinecoopmax",
+  "multiplayer_modes.offlinecoopmax",
+  "multiplayer_modes.onlinemax",
+  "multiplayer_modes.offlinemax",
+  "multiplayer_modes.splitscreen",
   "videos.video_id",
   "videos.name",
   "category",

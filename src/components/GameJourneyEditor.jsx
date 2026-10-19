@@ -1,0 +1,8 @@
+import React,{useState} from 'react';
+import {JOURNEY_STATES,isStoppedGame} from '../services/gameJourney';
+import './PersonalCollection.css';
+export default function GameJourneyEditor({game,onSave}){
+ const current=game.completed?'completed':game.progressStatus==='playing'||game.progressStatus==='deep_play'?'in_progress':game.progressStatus||'not_started';
+ const [state,setState]=useState(current),[note,setNote]=useState(game.progressNote||''),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
+ return <section className="game-journey-editor"><h3>Suivi de ta partie</h3><label>Ma progression<select value={state} disabled={busy} onChange={e=>{setState(e.target.value);setMessage('');}}>{Object.entries({...JOURNEY_STATES,tried:'Juste essayé'}).map(([id,label])=><option key={id} value={id}>{label}</option>)}</select></label>{isStoppedGame({progressStatus:state})&&<label>Pourquoi tu t’arrêtes ? (facultatif)<textarea maxLength={500} value={note} onChange={e=>setNote(e.target.value)} placeholder="Pas le bon moment, difficulté, envie d’autre chose…"/><small>Cette note reste privée.</small></label>}<button type="button" className="option-pill" disabled={busy} onClick={async()=>{setBusy(true);try{const saved=await onSave(game.id,state,note);setMessage(saved===false?'Modification non enregistrée. Réessaie.':saved?.queued?'Conservé sur cet appareil · synchronisation en attente':'Progression enregistrée.');}catch{setMessage('Modification non enregistrée. Réessaie.');}finally{setBusy(false);}}}>{busy?'Enregistrement…':'Enregistrer ma progression'}</button>{message&&<p role="status">{message}</p>}</section>;
+}

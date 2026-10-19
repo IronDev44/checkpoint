@@ -6,8 +6,8 @@ export function sameSocialGame(a,b){
  const year=g=>String(g.released||g.releaseDate||'').slice(0,4);
  return !year(a)||!year(b)||year(a)===year(b);
 }
-export function compareFriendGames(ownGames,profile){
- if(profile.visibility&&profile.visibility!=='public')return {common:[],discover:[]};
+export function compareFriendGames(ownGames,profile,ratingGetter=game=>Number(game.rating)||0){
+ if(profile.visibility&&profile.visibility!=='public')return {common:[],discover:[],visibleCount:0};
  const sections=profile.publicSections||{};
  const visible=[
    ...(sections.identityGames!==false?profile.identityGames||[]:[]),
@@ -26,11 +26,11 @@ export function compareFriendGames(ownGames,profile){
  }
  const common=[],discover=[];
  for(const game of games){
-   const own=ownGames.find(g=>sameSocialGame(g,game));
+   const own=ownGames.find(g=>g.status!=="wishlist"&&sameSocialGame(g,game));
    if(own){
-     const ownRating=Number(own.rating)||0,friendRating=Number(game.rating)||0;
-     common.push({game,ownRating,friendRating,agreement:ownRating>0&&friendRating>0&&Math.abs(ownRating-friendRating)<=1});
-   }else if(game.favorite||Number(game.rating)>=8)discover.push(game);
+     const ownRating=ratingGetter(own),friendRating=Number(game.rating)||0;
+     common.push({game,ownGame:own,ownRating,friendRating,gap:ownRating>0&&friendRating>0?Math.abs(ownRating-friendRating):null,agreement:ownRating>0&&friendRating>0&&Math.abs(ownRating-friendRating)<=1});
+   }else if(game.favorite||Number(game.rating)>=8)discover.push({...game,inWishlist:ownGames.some(g=>g.status==="wishlist"&&sameSocialGame(g,game))});
  }
- return {common,discover:discover.sort((a,b)=>(Number(b.rating)||0)-(Number(a.rating)||0)).slice(0,3)};
+ return {common,visibleCount:games.length,discover:discover.sort((a,b)=>(Number(b.rating)||0)-(Number(a.rating)||0)).slice(0,3)};
 }

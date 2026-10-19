@@ -1,0 +1,9 @@
+import React,{useState} from 'react';
+import {normalizePersonalLists} from '../services/personalLists';
+import './CollectionTools.css';
+export default function GameListMembership({game,value,onChange}){
+ const [query,setQuery]=useState(''),[name,setName]=useState('');const lists=normalizePersonalLists(value);
+ const contains=list=>list.gameIds.some(id=>String(id)===String(game.id));
+ const change=(list,checked)=>onChange(lists.map(item=>item.id===list.id?{...item,gameIds:checked?[...item.gameIds,game.id]:item.gameIds.filter(id=>String(id)!==String(game.id))}:item));
+ return <details className="game-list-membership"><summary>Mes listes · {lists.filter(contains).length}</summary><p>Choisis où ranger ce jeu. Tes listes restent privées.</p>{lists.length>6&&<label>Rechercher une liste<input value={query} onChange={e=>setQuery(e.target.value)}/></label>}<div className="game-list-membership-choices">{lists.filter(list=>list.name.toLocaleLowerCase('fr').includes(query.toLocaleLowerCase('fr'))).map(list=><label key={list.id}><input type="checkbox" checked={contains(list)} disabled={!contains(list)&&list.gameIds.length>=3000} onChange={e=>change(list,e.target.checked)}/><span>{list.name}</span></label>)}</div>{!lists.length&&<p>Crée une liste pour commencer.</p>}<form onSubmit={e=>{e.preventDefault();if(!name.trim()||lists.length>=100)return;const id=window.crypto?.randomUUID?.()||`list-${Date.now()}-${Math.random().toString(36).slice(2)}`;onChange([...lists,{id,name:name.trim(),gameIds:[game.id],coverId:game.id}]);setName('');}}><label>Nouvelle liste pour ce jeu<input value={name} maxLength={80} onChange={e=>setName(e.target.value)} placeholder="À jouer ensemble"/></label><button type="submit" className="option-pill" disabled={!name.trim()||lists.length>=100}>Créer et ajouter ce jeu</button></form></details>;
+}

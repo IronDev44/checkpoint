@@ -1,0 +1,4 @@
+export function normalizePersonalLists(value){
+ const seen=new Set();return (Array.isArray(value)?value:[]).filter(item=>item&&typeof item.id==='string'&&item.id.length<=100&&!seen.has(item.id)&&seen.add(item.id)).slice(0,100).map(item=>({id:item.id,name:String(item.name||'Ma liste').trim().slice(0,80)||'Ma liste',gameIds:[...new Set((Array.isArray(item.gameIds)?item.gameIds:[]).filter(id=>typeof id==='string'||typeof id==='number'))].slice(0,3000),coverId:typeof item.coverId==='string'||typeof item.coverId==='number'?item.coverId:null}));
+}
+export function moveListGame(ids,id,direction){const result=[...ids],index=result.findIndex(value=>String(value)===String(id)),target=index+direction;if(index<0||target<0||target>=result.length)return result;[result[index],result[target]]=[result[target],result[index]];return result;}

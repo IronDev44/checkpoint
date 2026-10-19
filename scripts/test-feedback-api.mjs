@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
-const accountSource = await readFile(new URL("../public/account-api.js",import.meta.url),"utf8");
+const privacyUrl="data:text/javascript;base64,"+Buffer.from(await readFile(new URL("../src/services/publicProfilePrivacy.js",import.meta.url),"utf8")).toString("base64");
+const accountSource = (await readFile(new URL("../public/account-api.js",import.meta.url),"utf8")).replace('"./profile-privacy.js"',JSON.stringify(privacyUrl));
 const accountUrl = "data:text/javascript;base64,"+Buffer.from(accountSource).toString("base64");
 const source = (await readFile(new URL("../public/_worker.js",import.meta.url),"utf8")).replace('"./account-api.js"',JSON.stringify(accountUrl));
 const {default:worker,handleTesterFeedback}=await import("data:text/javascript;base64,"+Buffer.from(source).toString("base64"));

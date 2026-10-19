@@ -1,7 +1,7 @@
 import {TAB_TUTORIALS} from './data/tabTutorials';
 import { render, waitFor, screen, fireEvent, within } from "@testing-library/react";
 import App from "./App";
-import { setDoc } from "./services/d1Data";
+import { setDoc, updateDoc } from "./services/d1Data";
 import { getWeeklyQuiz, getWeeklyQuizKey, getQuizAnswerKey } from "./services/weeklyQuiz";
 
 const mockStore = new Map();
@@ -20,6 +20,7 @@ jest.mock("./services/accountData",()=>({
 }));
 jest.mock("./services/d1Data",()=>({
   d1Enabled:true,
+  offlineState:async()=>({jobs:[],enabled:true}),
   collection:(_,collection)=>({collection}),doc:(_,collection,id)=>({collection,id}),
   onSnapshot:(ref,callback)=>{let active=true;Promise.resolve().then(()=>{if(active)callback(ref.id?{exists:()=>false,data:()=>({})}:{docs:[]});});return()=>{active=false;};},
   getDoc:async ref=>ref.collection==="playerPrivateSettings" ? {exists:()=>true,data:()=>mockSettings} : {exists:()=>true,data:()=>({completed:mockTrialCompleted})},
@@ -45,7 +46,7 @@ test("an existing level-50+ account earns the reward and saves it in private set
   mockStore.set("checkpoint-weekly-quiz",JSON.stringify({totalXP:125000}));
   render(<App/>);
   await waitFor(()=>expect(JSON.parse(mockStore.get("checkpoint-theme-unlocks")||"[]")).toContain("theme-checkpointpremium"));
-  await waitFor(()=>expect(setDoc.mock.calls.some(([ref,data])=>ref.collection==="playerPrivateSettings"&&data.unlockedThemes?.includes("theme-checkpointpremium"))).toBe(true),{timeout:2000});
+  await waitFor(()=>expect([...setDoc.mock.calls,...updateDoc.mock.calls].some(([ref,data])=>ref.collection==="playerPrivateSettings"&&data.unlockedThemes?.includes("theme-checkpointpremium"))).toBe(true),{timeout:2000});
   expect(document.body.dataset.theme).toBe("theme-checkpoint");
 });
 
@@ -87,7 +88,7 @@ test("a level-100 account earns ultimate and saves it without changing its theme
   mockStore.set("checkpoint-weekly-quiz",JSON.stringify({totalXP:5000000}));
   render(<App/>);
   await waitFor(()=>expect(JSON.parse(mockStore.get("checkpoint-theme-unlocks")||"[]")).toContain("theme-checkpointultimate"));
-  await waitFor(()=>expect(setDoc.mock.calls.some(([ref,data])=>ref.collection==="playerPrivateSettings"&&data.unlockedThemes?.includes("theme-checkpointultimate"))).toBe(true),{timeout:2000});
+  await waitFor(()=>expect([...setDoc.mock.calls,...updateDoc.mock.calls].some(([ref,data])=>ref.collection==="playerPrivateSettings"&&data.unlockedThemes?.includes("theme-checkpointultimate"))).toBe(true),{timeout:2000});
   expect(document.body.dataset.theme).toBe("theme-checkpoint");
 });
 
@@ -98,7 +99,7 @@ test("the authenticated owner earns ultimate early and syncs it to private setti
   try {
     render(<App/>);
     await waitFor(()=>expect(JSON.parse(mockStore.get("checkpoint-theme-unlocks")||"[]")).toContain("theme-checkpointultimate"));
-    await waitFor(()=>expect(setDoc.mock.calls.some(([ref,data])=>ref.collection==="playerPrivateSettings"&&data.unlockedThemes?.includes("theme-checkpointultimate"))).toBe(true),{timeout:2000});
+    await waitFor(()=>expect([...setDoc.mock.calls,...updateDoc.mock.calls].some(([ref,data])=>ref.collection==="playerPrivateSettings"&&data.unlockedThemes?.includes("theme-checkpointultimate"))).toBe(true),{timeout:2000});
     expect(document.body.dataset.theme).toBe("theme-checkpoint");
   } finally {auth.currentUser=previous;}
 });
@@ -137,16 +138,16 @@ test("other players can send feedback but cannot see developer tools or the inbo
  expect(document.querySelector('.developer-tools')).toBeNull();
 });
 
-test("the introduction follows the active tab and home starts with level, collection, next level and session",async()=>{
+test("the introduction follows the active tab and an empty home starts with level and guided first steps",async()=>{
  render(<App/>);
  await screen.findByText('Options',{selector:'#tab-introduction-title'});
  fireEvent.click(screen.getByRole('button',{name:'Accueil',exact:true}));
  expect(await screen.findByText('Accueil',{selector:'#tab-introduction-title'})).toBeVisible();
  const blocks=[...document.querySelector('.home-page').children];
  expect(blocks[0]).toHaveClass('xp-card');
- expect(blocks[1]).toHaveClass('home-overview-card');
- expect(blocks[2]).toHaveClass('home-next-level');
- expect(blocks[3]).toHaveClass('home-hero');
+ expect(blocks[1]).toHaveClass('first-steps');
+ expect(screen.getByRole('button',{name:'Ajouter mon premier jeu'})).toBeVisible();
+ expect(document.querySelector('.home-next-level')).toBeNull();
  expect(document.querySelector('.app-tab-label')).toBeNull();
  for (const name of ['Top 5','Sanctuaire','Options']) {
   fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name,exact:true}));
@@ -162,6 +163,7 @@ test("the home quiz records XP once and restores the next unanswered question af
  const view=render(<App/>);
  await screen.findByText('Options',{selector:'#tab-introduction-title'});
  fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name:'Accueil',exact:true}));
+ fireEvent.click(await screen.findByRole('button',{name:/Quiz de la semaine.*Ouvrir/}));
  await screen.findByRole('heading',{name:'Le quiz de la semaine'});
  const region=screen.getByRole('region',{name:'Le quiz de la semaine'});
  fireEvent.click(within(region).getByRole('button',{name:new RegExp(q.answers[q.correctIndex].replace(/[.*+?^${}()|[\]\\]/g,'\\$&'))}));
@@ -174,6 +176,7 @@ test("the home quiz records XP once and restores the next unanswered question af
  expect(JSON.parse(mockStore.get('checkpoint-weekly-quiz')).totalXP).toBe(120);
  view.unmount();
  render(<App/>);
+ fireEvent.click(await screen.findByRole('button',{name:/Quiz de la semaine.*Ouvrir/}));
  await screen.findByRole('heading',{name:'Le quiz de la semaine'});
  expect(screen.getByText(quiz.questions[1].question)).toBeVisible();
  expect(screen.getByRole('progressbar',{name:'Questions terminées'})).toHaveAttribute('aria-valuenow','1');

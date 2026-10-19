@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
-const {handleAccountApi,mergeDocument,verifyFirebaseToken}=await import('data:text/javascript;base64,'+fs.readFileSync('public/account-api.js').toString('base64'));
+const {handleAccountApi,mergeDocument,verifyFirebaseToken}=await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync('public/account-api.js','utf8').replace('"./profile-privacy.js"',JSON.stringify('data:text/javascript;base64,'+fs.readFileSync('src/services/publicProfilePrivacy.js').toString('base64')))).toString('base64'));
 const sqlite=new DatabaseSync(':memory:');sqlite.exec(fs.readFileSync('migrations/0001_documents.sql','utf8'));
 const env={
   ACCOUNT_OWNER_UID:'owner',
@@ -62,3 +62,88 @@ async function token(overrides={}){const now=Math.floor(Date.now()/1000);const e
 assert.equal(await verifyFirebaseToken(await token()),'alice');await assert.rejects(()=>token({aud:'other'}).then(verifyFirebaseToken));await assert.rejects(()=>token({exp:1}).then(verifyFirebaseToken));
 globalThis.fetch=originalFetch;
 console.log('D1: isolation, droits administrateur, profils publics, mises à jour et jetons signés vérifiés.');
+
+// Recovery is private, hidden from normal lists, and expires after 30 days.
+await call('alice','POST','hardware','trash-test',{mode:'replace',data:{name:'Console',rating:5}});
+await call('alice','DELETE','hardware','trash-test');
+assert.equal((await (await call('alice','GET','hardware','trash-test')).json()).exists,false);
+let trashResponse=await handleAccountApi(new Request('https://checkpoint.test/api/account-data?collection=hardware&trash=1',{headers:{Authorization:'Bearer alice'}}),env,async t=>t);
+assert.equal((await trashResponse.json()).documents.length,1);
+assert.equal((await call('bob','POST','hardware','trash-test',{mode:'restore',data:{}})).status,410);
+assert.equal((await call('alice','POST','hardware','trash-test',{mode:'restore',data:{}})).status,200);
+assert.equal((await (await call('alice','GET','hardware','trash-test')).json()).data.rating,5);
+await call('alice','POST','games','conflict',{mode:'replace',data:{name:'Portal',rating:5,review:'Old'}});
+assert.equal((await call('alice','POST','games','conflict',{mode:'update',base:{rating:4},data:{rating:8}})).status,409);
+assert.equal((await call('alice','POST','games','conflict',{mode:'update',base:{rating:5},data:{rating:8}})).status,200);
+// A lost acknowledgement can be replayed safely.
+assert.equal((await call('alice','POST','games','conflict',{mode:'update',base:{rating:5},data:{rating:8}})).status,200);
+assert.equal((await call('alice','POST','games','conflict',{mode:'update',base:{review:'Old'},data:{review:'New'}})).status,200);
+assert.equal((await (await call('alice','GET','games','conflict')).json()).data.rating,8);
+const current=(await (await call('alice','GET','games','conflict')).json()).data;
+assert.equal((await call('alice','DELETE','games','conflict',{expected:{name:'wrong'}})).status,409);
+assert.equal((await call('alice','DELETE','games','conflict',{expected:current})).status,200);
+assert.equal((await call('alice','DELETE','games','conflict',{expected:current})).status,200);
+assert.equal((await call('alice','POST','games','conflict',{mode:'update',data:{rating:2}})).status,410);
+// Backups explicitly restore records, including trashed ones.
+assert.equal((await call('alice','POST','games','conflict',{mode:'recovery',data:{name:'Portal',rating:5}})).status,200);
+assert.equal((await (await call('alice','GET','games','conflict')).json()).data.rating,5);
+await call('alice','DELETE','hardware','trash-test');
+sqlite.prepare('UPDATE documents SET data=? WHERE owner=? AND collection=? AND id=?').run(JSON.stringify({name:'Console',_deletedAt:'2000-01-01T00:00:00Z'}),'alice','hardware','trash-test');
+assert.equal((await call('alice','POST','hardware','trash-test',{mode:'restore',data:{}})).status,410);
+console.log('D1: corbeille, restauration, expiration, conflits et reprises idempotentes vérifiés.');
+
+// Private friend polls: immutable audience, validated library entries, one vote per UID.
+await call('alice','POST','playerPrivateSettings','main',{data:{socialProfile:{displayName:'Alice'},socialFriends:[{handle:'bob'},{handle:'charlie'}]}});
+await call('bob','POST','publicProfiles','bob',{data:{visibility:'public'}});
+await call('charlie','POST','publicProfiles','charlie',{data:{visibility:'public'}});
+await call('alice','POST','games','poll-a',{data:{name:'Portal'}});await call('alice','POST','games','poll-b',{data:{name:'Halo'}});
+const createPoll={action:'create',gameIds:['poll-a','poll-b'],handles:['bob','charlie']};
+assert.equal((await call('alice','POST','friendPolls','poll-one',{...createPoll,handles:['stranger']})).status,403);
+assert.equal((await call('alice','POST','friendPolls','poll-one',{...createPoll,gameIds:['poll-a']})).status,400);
+assert.equal((await call('alice','POST','friendPolls','poll-one',createPoll)).status,200);
+assert.equal((await (await call('outsider','GET','friendPolls')).json()).polls.length,0);
+assert.equal((await call('outsider','POST','friendPolls','poll-one',{action:'vote',choice:0})).status,403);
+assert.equal((await call('alice','POST','friendPolls','poll-one',{action:'vote',choice:0})).status,403);
+assert.equal((await call('bob','POST','friendPolls','poll-one',{action:'vote',choice:4})).status,400);
+assert.equal((await call('bob','POST','friendPolls','poll-one',{action:'vote',choice:0})).status,200);
+let poll=(await (await call('bob','POST','friendPolls','poll-one',{action:'vote',choice:1})).json()).poll;
+assert.equal(poll.total,1);assert.deepEqual(poll.counts,[0,1]);assert.equal(poll.myVote,1);assert.equal(poll.votes,undefined);assert.equal(poll.audience,undefined);assert.equal(poll.ownerUid,undefined);
+assert.equal((await call('charlie','POST','friendPolls','poll-one',{action:'vote',choice:0})).status,200);
+poll=(await (await call('alice','GET','friendPolls')).json()).polls[0];assert.equal(poll.total,2);assert.deepEqual(poll.counts,[1,1]);
+assert.equal((await call('bob','POST','friendPolls','poll-one',{action:'close'})).status,403);
+assert.equal((await call('alice','POST','friendPolls','poll-one',{action:'close'})).status,200);
+assert.equal((await call('bob','POST','friendPolls','poll-one',{action:'vote',choice:0})).status,410);
+assert.equal((await call('bob','DELETE','friendPolls','poll-one')).status,403);
+assert.equal((await call('alice','DELETE','friendPolls','poll-one')).status,200);
+assert.equal((await (await call('bob','GET','friendPolls')).json()).polls.length,0);
+console.log('Sondages : invités, confidentialité, choix validés, changement de vote et fermeture vérifiés.');
+
+await call('alice','POST','friendPolls','poll-expired',createPoll);
+assert.equal((await call('alice','POST','friendPolls','poll-expired',createPoll)).status,200);
+let expired=JSON.parse(sqlite.prepare("SELECT data FROM documents WHERE collection='friendPolls' AND id='poll-expired'").get().data);expired.endsAt='2000-01-01T00:00:00Z';
+sqlite.prepare("UPDATE documents SET data=? WHERE collection='friendPolls' AND id='poll-expired'").run(JSON.stringify(expired));
+assert.equal((await call('bob','POST','friendPolls','poll-expired',{action:'vote',choice:0})).status,410);
+assert.equal((await call('alice','POST','friendPolls','poll-expired',[])).status,400);
+await call('alice','DELETE','friendPolls','poll-expired');
+console.log('Sondages : expiration serveur et reprise de création sans doublon vérifiées.');
+
+// Privacy is enforced at read time, including legacy rows and stale public copies.
+await call('privacy-owner','POST','publicProfiles','privacy-user',{data:{displayName:'Privacy user',visibility:'public',publicSections:{photos:false,essential:false,hardware:false,identityGames:false,activity:false},setupPhotos:[{src:'HIDDEN_PHOTO'}],identityGames:[{name:'HIDDEN_FOUNDER'}],favoriteGames:[{favoriteReason:'HIDDEN_REASON'}],currentHardware:[{name:'HIDDEN_SETUP'}],recentActivity:[{text:'HIDDEN_ACTIVITY'}],privateToken:'NEVER_PUBLIC'}});
+let publicData=(await (await call('reader','GET','publicProfiles','privacy-user')).json()).data;
+assert.ok(!JSON.stringify(publicData).includes('HIDDEN'));assert.ok(!JSON.stringify(publicData).includes('NEVER_PUBLIC'));
+const legacyPrivacy={ownerUid:'privacy-owner',displayName:'Privacy user',visibility:'public',publicSections:{},setupPhotos:[{src:'HIDDEN_PHOTO'}],identityGames:[{name:'HIDDEN_FOUNDER'}],favoriteGames:[{favoriteReason:'HIDDEN_REASON'}],currentHardware:[{name:'HIDDEN_SETUP'}],recentActivity:[{text:'HIDDEN_ACTIVITY'}],privateToken:'NEVER_PUBLIC'};
+sqlite.prepare("UPDATE documents SET data=? WHERE collection='publicProfiles' AND id='privacy-user'").run(JSON.stringify(legacyPrivacy));
+await call('privacy-owner','POST','playerPrivateSettings','main',{data:{socialProfile:{visibility:'public',publicSections:{photos:false,essential:false,hardware:false,identityGames:false,activity:false}}}});
+publicData=(await (await call('reader','GET','publicProfiles','privacy-user')).json()).data;
+assert.ok(!JSON.stringify(publicData).includes('HIDDEN'));assert.ok(!JSON.stringify(publicData).includes('NEVER_PUBLIC'));
+await call('privacy-owner','POST','playerPrivateSettings','main',{mode:'update',data:{'socialProfile.visibility':'prive'}});
+assert.equal((await (await call('reader','GET','publicProfiles','privacy-user')).json()).exists,false);
+assert.equal((await (await call('privacy-owner','GET','publicProfiles','privacy-user')).json()).exists,true);
+assert.ok(!(await (await call('reader','GET','publicProfiles')).json()).documents.some(d=>d.id==='privacy-user'));
+// Device A and B save different settings without replacing the other device's choices.
+await call('settings-owner','POST','playerPrivateSettings','main',{data:{appOptions:{notifications:{polls:true,monthly:true}},socialFriends:[{handle:'friend'}]}});
+assert.equal((await call('settings-owner','POST','playerPrivateSettings','main',{mode:'update',base:{'appOptions.notifications.polls':true},data:{'appOptions.notifications.polls':false}})).status,200);
+assert.equal((await call('settings-owner','POST','playerPrivateSettings','main',{mode:'update',base:{'appOptions.notifications.monthly':true},data:{'appOptions.notifications.monthly':false}})).status,200);
+const savedSettings=(await (await call('settings-owner','GET','playerPrivateSettings','main')).json()).data;assert.deepEqual(savedSettings.appOptions.notifications,{polls:false,monthly:false});assert.equal(savedSettings.socialFriends.length,1);
+assert.equal((await call('settings-owner','POST','playerPrivateSettings','main',{mode:'update',base:{'appOptions.notifications.polls':true},data:{'appOptions.notifications.polls':true}})).status,409);
+console.log('Audit : rubriques masquées retirées des réponses, profils privés inaccessibles et réglages entre appareils vérifiés.');

@@ -34,7 +34,7 @@ test("a private profile shows an actionable error and permits retry", async () =
 test("identity and showcase share one top-level profile destination", () => {
   const onChange = jest.fn();
   render(<SocialNavigation view="showcase" onChange={onChange} profile={{ displayName: "Alex" }} friendCount={2} />);
-  expect(screen.getByRole("button", { name: "Mon profil" })).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("button", { name: "Profil public" })).toHaveAttribute("aria-pressed", "true");
   fireEvent.click(screen.getByRole("button", { name: /Amis/ }));
   expect(onChange).toHaveBeenCalledWith("friends");
 });
@@ -46,4 +46,9 @@ test("loads friends' public activity and opens its author", async () => {
   expect(loadProfile).toHaveBeenCalledWith("alex");
   fireEvent.click(screen.getByRole("button", { name: /Alex.*Voir le profil/ }));
   await waitFor(() => expect(onOpen).toHaveBeenCalledWith("alex"));
+});
+
+
+test('a friend review does not reveal its spoilers in the public feed',async()=>{
+ const loadProfile=jest.fn().mockResolvedValue({handle:'alex',recentActivity:[{id:'r',title:'Halo',date:'2026-10-19',reviewText:'Début [spoiler]Secret du jeu[/spoiler]',reviewSpoiler:false}]});render(<FriendsActivityFeed friends={[friends[0]]} loadProfile={loadProfile} onOpen={jest.fn()}/>);await screen.findByText('Halo');expect(screen.queryByText('Secret du jeu')).not.toBeInTheDocument();fireEvent.click(screen.getByText('Révéler le spoiler'));expect(screen.getByText('Secret du jeu')).toBeInTheDocument();
 });

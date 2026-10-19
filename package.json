@@ -20,7 +20,8 @@
     "deploy:cloudflare": "wrangler pages deploy build",
     "preview:cloudflare": "wrangler pages dev build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "prebuild": "node scripts/sync-server-modules.cjs"
   },
   "eslintConfig": {
     "extends": [

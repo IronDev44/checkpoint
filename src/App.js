@@ -31,7 +31,46 @@ import { compareLatestLibraryAdditions } from "./services/libraryOrder";
 import { getWishlistOriginLabel, getDealAlertLabel } from "./services/wishlistLabels";
 import ProgressSync, { useProgressSync } from "./components/ProgressSync";
 import LibraryBulkEditor from "./components/LibraryBulkEditor";
+import {useUsefulUpdates,NotificationPreferences} from "./components/UsefulUpdates";
+import {normalizeNotificationPreferences,notificationAllowed} from "./services/usefulUpdates";
+import {diffPrivateSettings} from "./services/privateSettings";
+import {publicProfileView} from "./services/publicProfilePrivacy";
+import Rediscover from "./components/Rediscover";
+import {FavoriteReasonEditor,FavoriteReasonPicker,FavoriteReasons} from "./components/FavoriteReasons";
+import {favoriteReason,publicFavoriteGames,rediscoveryCandidates} from "./services/rediscovery";
+import SoloDuel from "./components/SoloDuel";
+import SpoilerText from "./components/SpoilerText";
+import {spoilerSummary,wrapSpoilerSelection,reviewActivityFields} from "./services/spoilers";
+import MonthlyRecap from "./components/MonthlyRecap";
+import FriendPolls from "./components/FriendPolls";
+import {stampGameMilestones} from "./services/monthlyRecap";
+import CheckpointExperiences from './components/CheckpointExperiences';
+import CouchMode from './components/CouchMode';
+import './components/CheckpointExperiences.css';
+import {normalizeExperiences,dueCapsules} from './services/experiences';
+import GameHistory from './components/GameHistory';
+import GameListMembership from './components/GameListMembership';
+import HardwareFilters from './components/HardwareFilters';
+import {stampGameHistory} from './services/gameHistory';
+import {EMPTY_HARDWARE_FILTERS,matchesHardwareFilters} from './services/hardwareFilters';
+import ContentPreferences from './components/ContentPreferences';
+import PersonalLists from './components/PersonalLists';
+import GameJourneyEditor from './components/GameJourneyEditor';
+import {normalizeHiddenTabs} from './services/contentPreferences';
+import {normalizePersonalLists} from './services/personalLists';
+import {journeyPatch,isStoppedGame} from './services/gameJourney';
+import HomeLayout, {HomeBlock} from "./components/HomeLayout";
+import QuickGameActions from "./components/QuickGameActions";
+import ImportReview from "./components/ImportReview";
+import PersonalSearch from "./components/PersonalSearch";
+import {normalizeHomeLayout} from "./services/homeLayout";
+import {planGameImport} from "./services/importPlan";
 import FriendComparison from "./components/FriendComparison";
+import DataProtection, {AutomaticBackup, ConnectionStatus} from "./components/DataProtection";
+import SessionPicker from "./components/SessionPicker";
+import {captureBackup} from "./services/deviceStore";
+import SaveFeedback, { useSaveFeedback } from "./components/SaveFeedback";
+import { FirstSteps, ProfileSection } from "./components/EverydayExperience";
 import { TabTutorialEntry, TutorialLibrary } from "./components/TabTutorials";
 import { buildBulkGamePatch } from "./services/libraryBulk";
 import "./components/CollectionImprovements.css";
@@ -326,6 +365,11 @@ function normalizeAppOptions(options = {}) {
     ...DEFAULT_APP_OPTIONS,
     ...source,
     searchIncludeFanGames: source.searchIncludeFanGames === true,
+    homeLayout:normalizeHomeLayout(source.homeLayout),
+    hiddenTabs:normalizeHiddenTabs(source.hiddenTabs),
+    personalLists:normalizePersonalLists(source.personalLists),
+    experiences:normalizeExperiences(source.experiences),
+    notifications:normalizeNotificationPreferences(source.notifications),
     schemaVersion: APP_OPTIONS_SCHEMA_VERSION,
     sound: normalizeSoundSettings(source.sound, readLegacySoundSettings(localStorage)),
     startTab,
@@ -2068,7 +2112,10 @@ const BASE_XP = 100;
 const PROGRESS_OPTIONS = [
   { id: "not_started", label: "Non commencé", icon: "⬜", xp: 0 },
   { id: "tried", label: "Juste essayé", icon: "🎮", xp: 25 },
+  { id: "in_progress", label: "En cours", icon: "▶️", xp: 60 },
   { id: "playing", label: "En cours", icon: "▶️", xp: 60 },
+  { id: "paused", label: "En pause", icon: "⏸", xp: 25 },
+  { id: "abandoned", label: "Abandonné", icon: "⏹", xp: 25 },
   { id: "deep_play", label: "Bien avancé", icon: "🔥", xp: 100 },
   { id: "completed", label: "Terminé", icon: "🏆", xp: 150 },
 ];
@@ -2557,27 +2604,27 @@ export function TabIntroduction({activeTab, tutorialsReady = true}) {
   </section>;
 }
 
-function BottomTabs({ activeTab, setActiveTab, soundStyle }) {
+function BottomTabs({ activeTab, setActiveTab, soundStyle, hiddenTabs=[] }) {
   const tabs = [
   { id: "home", Icon: Home, label: APP_TAB_LABELS.home },
-  { id: "news", Icon: Newspaper, label: APP_TAB_LABELS.news },
-  { id: "search", Icon: Search, label: APP_TAB_LABELS.search },
-  { id: "upcoming", Icon: CalendarDays, label: APP_TAB_LABELS.upcoming },
-  { id: "deals", Icon: Sparkles, label: APP_TAB_LABELS.deals },
-  { id: "live", Icon: Radio, label: APP_TAB_LABELS.live },
-  { id: "social", Icon: Users, label: APP_TAB_LABELS.social },
   { id: "library", Icon: Library, label: APP_TAB_LABELS.library },
-  { id: "series", Icon: Puzzle, label: APP_TAB_LABELS.series },
+  { id: "search", Icon: Search, label: APP_TAB_LABELS.search },
+  { id: "profile", Icon: Medal, label: APP_TAB_LABELS.profile },
   { id: "hardware", Icon: Joystick, label: APP_TAB_LABELS.hardware },
+  { id: "social", Icon: Users, label: APP_TAB_LABELS.social },
+  { id: "series", Icon: Puzzle, label: APP_TAB_LABELS.series },
   { id: "favorites", Icon: Landmark, label: APP_TAB_LABELS.favorites },
   { id: "top5", Icon: Trophy, label: APP_TAB_LABELS.top5 },
-  { id: "profile", Icon: Medal, label: APP_TAB_LABELS.profile },
+  { id: "upcoming", Icon: CalendarDays, label: APP_TAB_LABELS.upcoming },
+  { id: "deals", Icon: Sparkles, label: APP_TAB_LABELS.deals },
+  { id: "news", Icon: Newspaper, label: APP_TAB_LABELS.news },
+  { id: "live", Icon: Radio, label: APP_TAB_LABELS.live },
   { id: "options", Icon: Settings, label: APP_TAB_LABELS.options },
   ];
 
   return (
     <div className="bottom-tabs">
-      {tabs.map((tab, index) => (
+      {tabs.filter(tab=>!hiddenTabs.includes(tab.id)).map((tab, index) => (
         <button
           key={tab.id}
           className={`tab-btn ${activeTab === tab.id ? "active" : ""}`}
@@ -2665,7 +2712,7 @@ function StatsBarCompact({ total, finished, favorites }) {
 /* ==================== RECHERCHE ==================== */
 
 function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearchDetail }) {
-  
+
   const [startX, setStartX] = useState(0);
   const [translateX, setTranslateX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -2867,7 +2914,7 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
         </div>
       </div>
     </div>
-        
+
   );
 }
 
@@ -3476,7 +3523,7 @@ function getNormalizedGameProgressPatch(game = {}) {
       ? { status: "en cours", progressStatus: "in_progress", completed: false }
       : isWishlist
         ? { status: "wishlist", progressStatus: "not_started", completed: false }
-        : { status: "collection", progressStatus: "not_started", completed: false };
+        : { status: "collection", progressStatus: isStoppedGame(game)?game.progressStatus:"not_started", completed: false };
 
   const patch = {};
   if (game.status !== nextState.status) patch.status = nextState.status;
@@ -3493,6 +3540,7 @@ function getNormalizedGameProgressPatch(game = {}) {
 function getGameProgressState(game = {}) {
   const status = getNormalizedStatus(game.status || "");
   if (isGameFinishedStatus(game)) return "finished";
+  if(isStoppedGame(game))return game.progressStatus;
   if (status.includes("cours") || game.progressStatus === "in_progress") return "inProgress";
   if (status === "wishlist") return "wishlist";
   return "collection";
@@ -3501,6 +3549,8 @@ function getGameProgressState(game = {}) {
 function getGameProgressStateLabel(state) {
   return (
     {
+      paused: "En pause",
+      abandoned: "Abandonné",
       finished: "Terminé",
       inProgress: "En cours",
       wishlist: "Wishlist",
@@ -4767,6 +4817,8 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
 /* ==================== MODAL DÉTAIL JEU ==================== */
 
 function GameDetailModal({
+  personalLists=[],
+  onPersonalListsChange,
   game,
   onSetExperienceInfo,
   onClose,
@@ -4779,6 +4831,7 @@ function GameDetailModal({
   onSetSanctuaryFigures,
   onSetDifficulty,
   onSetReview,
+  onSetFavoriteReason,
   onSetOstInfo,
   onSetDetailedRating,
   onToggleCompleted,
@@ -4793,6 +4846,11 @@ function GameDetailModal({
   closeAfterRating = false,
 }) {
   const [localReview, setLocalReview] = useState("");
+  const [savingReview, setSavingReview] = useState(false);
+  const [localReviewSpoiler,setLocalReviewSpoiler]=useState(false);
+  const [localReviewShared,setLocalReviewShared]=useState(false);
+  const [reviewSelection,setReviewSelection]=useState({start:0,end:0});
+  const reviewTextareaRef=useRef(null);
   const [localOstRating, setLocalOstRating] = useState(0);
   const [dlcs, setDlcs] = useState([]);
   const [loadingDlcs, setLoadingDlcs] = useState(false);
@@ -4800,8 +4858,13 @@ function GameDetailModal({
 
   useEffect(() => {
     setLocalReview(game?.review || "");
+    setLocalReviewSpoiler(Boolean(game?.reviewSpoiler));
+    setLocalReviewShared(game?.reviewShared===true||(game?.reviewShared!==false&&getGameRating(game)<=0));
+    setReviewSelection({start:0,end:0});
+  }, [game?.id]);
+  useEffect(() => {
     setLocalOstRating(clampRating(game?.ostRating));
-  }, [game]);
+  }, [game?.id, game?.ostRating]);
 
   useEffect(() => {
     if (!game) return;
@@ -5187,28 +5250,37 @@ function GameDetailModal({
 
           }
 
+          {game.favorite&&<div className="game-detail-section"><FavoriteReasonEditor key={game.id} game={game} onSave={onSetFavoriteReason}/></div>}
+
           <div className="game-detail-section">
             <div className="modal-block-title">{experience === "tried" ? "Un petit mot sur ton expérience ?" : "Avis personnel"}</div>
 
             <textarea
               className="review-textarea"
+              ref={reviewTextareaRef}
+              aria-label="Ton avis personnel"
               value={localReview}
-              onChange={(e) => setLocalReview(e.target.value)}
+              onSelect={e=>setReviewSelection({start:e.target.selectionStart,end:e.target.selectionEnd})}
+              onChange={e=>{setLocalReview(e.target.value);setReviewSelection({start:e.target.selectionStart,end:e.target.selectionEnd});}}
               placeholder={experience === "tried" ? "Une impression, un souvenir… si tu en as envie." : "Ton avis sur ce jeu..."}
             />
 
+            <div className="review-spoiler-tools"><button type="button" className="option-pill" disabled={savingReview||reviewSelection.start===reviewSelection.end} onClick={()=>{setLocalReview(text=>wrapSpoilerSelection(text,reviewSelection.start,reviewSelection.end));setReviewSelection({start:0,end:0});reviewTextareaRef.current?.focus();}}>Masquer la sélection</button><label><input type="checkbox" checked={localReviewSpoiler} disabled={savingReview} onChange={e=>setLocalReviewSpoiler(e.target.checked)}/>Tout mon avis contient des spoilers</label><label><input type="checkbox" checked={localReviewShared} disabled={savingReview} onChange={e=>setLocalReviewShared(e.target.checked)}/>Afficher cet avis dans mon activité publique</label></div>
+            <p className="option-value">Sélectionne un passage puis masque-le, ou protège l’avis entier. Les lecteurs devront choisir de le révéler. Le partage dépend aussi de la visibilité de ton profil et de sa rubrique Activité.</p>
+            {localReview&&<div className="review-spoiler-preview"><small>Aperçu pour les lecteurs</small><p><SpoilerText text={localReview} whole={localReviewSpoiler}/></p></div>}
             <button
               className="save-review-btn"
               type="button"
-              onClick={() => {
-                onSetReview(game.id, localReview);
-
-                setTimeout(() => {
-                  onClose();
-                }, 150);
+              disabled={savingReview}
+              onClick={async () => {
+                setSavingReview(true);
+                try {
+                  const saved = await onSetReview(game.id, localReview, {reviewSpoiler:localReviewSpoiler,reviewShared:localReviewShared});
+                  if (saved !== false) onClose();
+                } finally { setSavingReview(false); }
               }}
             >
-              Enregistrer
+              {savingReview ? "Enregistrement…" : "Enregistrer"}
             </button>
           </div>
 
@@ -5336,6 +5408,9 @@ function GameDetailModal({
             <summary>Dans ta bibliothèque</summary>
             <div className="game-detail-group-content">
           <div className="game-detail-section">
+            {onPersonalListsChange&&games.some(item=>String(item.id)===String(game.id))&&<GameListMembership key={game.id} game={game} value={personalLists} onChange={onPersonalListsChange}/>}
+            <GameHistory key={`history-${game.id}`} game={game}/>
+            <GameJourneyEditor key={`${game.id}-${game.progressStatus}`} game={game} onSave={onSetProgressStatus}/>
             <div className="modal-block-title">Rangement</div>
 
             <div className="status-row">
@@ -6642,6 +6717,7 @@ export function LibrarySection({
   onDelete,
   onSetStatus,
   onSetRating,
+  onQuickProgress,
   onToggleFavorite,
   onOpenDetail,
   libraryCardMode,
@@ -6649,8 +6725,11 @@ export function LibrarySection({
 }) {
   const [bulkMode,setBulkMode]=useState(false);
   const [sortBy, setSortBy] = useState("recent");
+  const [visibleLimit,setVisibleLimit]=useState(48);
+  const gameIdentity=games.map(game=>game.id).join("|");
+  useEffect(()=>setVisibleLimit(48),[sortBy,title,libraryCardMode,gameIdentity]);
 
-  const sortedGames = [...games].sort((a, b) => {
+  const sortedGames = useMemo(()=>[...games].sort((a, b) => {
     if (sortBy === "alphabetical") {
       return (a.name || "").localeCompare(b.name || "", "fr", {
         numeric: true,
@@ -6680,9 +6759,10 @@ export function LibrarySection({
     }
 
     return compareLatestLibraryAdditions(a, b);
-  });
+  }),[games,sortBy]);
+  const visibleGames=sortedGames.slice(0,visibleLimit);
 
-  const groupedGames = sortedGames.reduce((acc, game) => {
+  const groupedGames = visibleGames.reduce((acc, game) => {
     let group = "Autres";
 
     if (sortBy === "year") {
@@ -6723,11 +6803,13 @@ export function LibrarySection({
           className="game-grid-item"
           onClick={() => onOpenDetail(game)}
         >
-          <img src={gameVisual} alt={game.name} />
+          <img loading="lazy" decoding="async" src={gameVisual} alt={game.name} />
 
+          {onQuickProgress&&<QuickGameActions game={game} rating={getGameRating(game)} onProgress={onQuickProgress} onRate={onSetRating}/>}
           <div className="grid-top-actions">
             <button
               className={`heart-btn grid-heart ${game.favorite ? "active" : ""}`}
+              aria-label={game.favorite ? `Retirer ${game.name} des favoris` : `Ajouter ${game.name} aux favoris`}
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleFavorite(game.id, game.favorite);
@@ -6753,6 +6835,8 @@ export function LibrarySection({
             <div className={`grid-status ${game.status.replace(" ", "-")}`}>
               {game.status === "wishlist"
                 ? "Wishlist"
+                : isStoppedGame(game)
+                ? getProgressLabel(game.progressStatus)
                 : game.status === "en cours"
                 ? "En cours"
                 : "Collection"}
@@ -6775,7 +6859,8 @@ export function LibrarySection({
           className="game-item clickable library-simple-card"
           onClick={() => onOpenDetail(game)}
         >
-          <img src={gameVisual} alt={game.name} className="library-game-cover" />
+          {onQuickProgress&&<QuickGameActions game={game} rating={getGameRating(game)} onProgress={onQuickProgress} onRate={onSetRating}/>}
+          <img loading="lazy" decoding="async" src={gameVisual} alt={game.name} className="library-game-cover" />
 
           <div className="game-item-content">
             <div className="game-name">{game.name}</div>
@@ -6814,6 +6899,7 @@ export function LibrarySection({
         className="game-item clickable detailed-card"
         onClick={() => onOpenDetail(game)}
       >
+        {onQuickProgress&&<QuickGameActions game={game} rating={getGameRating(game)} onProgress={onQuickProgress} onRate={onSetRating}/>}
         <div className={`status-badge ${game.status.replace(" ", "-")}`}>
           {game.status === "wishlist" ? (
             <List size={14} />
@@ -6826,7 +6912,7 @@ export function LibrarySection({
 
         <div className="game-card-head">
           <div className="game-item-left">
-            <img src={gameVisual} alt={game.name} className="game-thumb" />
+            <img loading="lazy" decoding="async" src={gameVisual} alt={game.name} className="game-thumb" />
           </div>
 
           <div className="game-head-main">
@@ -7042,7 +7128,7 @@ export function LibrarySection({
           }
         >
           {sortBy === "recent"
-            ? sortedGames.map((game) => renderGameCard(game))
+            ? visibleGames.map((game) => renderGameCard(game))
             : Object.entries(groupedGames).map(([groupName, groupGames]) => (
                 <div key={groupName} className="library-group">
                   <div className="library-group-title">
@@ -7063,6 +7149,7 @@ export function LibrarySection({
               ))}
         </div>
       )}
+      {libraryCardMode!=="shelf"&&sortedGames.length>48&&<div className="library-pagination"><span>{visibleGames.length} / {sortedGames.length} jeux affichés</span>{visibleGames.length<sortedGames.length&&<button type="button" className="option-pill" onClick={()=>setVisibleLimit(count=>count+48)}>Afficher les jeux suivants</button>}</div>}
       </>}
     </div>
   );
@@ -7082,7 +7169,7 @@ function LibrarySmartPanel({
     .filter((game) => game.checkpointRating > 0)
     .sort((a, b) => b.checkpointRating - a.checkpointRating);
   const unfinishedCollection = collectionGames.filter(
-    (game) => !isGameFinishedStatus(game)
+    (game) => !isGameFinishedStatus(game)&&!isStoppedGame(game)
   );
   const continueGame = [...inProgressGames]
     .map((game) => ({ ...game, checkpointRating: getGameRating(game) }))
@@ -7098,7 +7185,7 @@ function LibrarySmartPanel({
         const ratingGap = b.checkpointRating - a.checkpointRating;
         if (ratingGap !== 0) return ratingGap;
         return String(b.released || "").localeCompare(String(a.released || ""));
-      })[0] || ratedCollection[0];
+      })[0] || ratedCollection.find(game=>!isStoppedGame(game));
   const unratedCandidate =
     collectionGames.find((game) => getGameRating(game) <= 0) ||
     games.find((game) => getGameRating(game) <= 0 && game.status !== "wishlist");
@@ -7557,6 +7644,7 @@ function getSocialActivityFeed(games = [], hardware = [], badges = []) {
       sortTime: date?.getTime() || 0,
       priority: 20 - index,
       source: "games",
+      ...reviewActivityFields(game,getGameRating(game)),
     };
 
     if (getGameRating(game) > 0) {
@@ -7575,7 +7663,7 @@ function getSocialActivityFeed(games = [], hardware = [], badges = []) {
         ...base,
         type: "Avis",
         text: `a publié un avis sur ${game.name}`,
-        detail: game.review.trim().slice(0, 90),
+        detail: "",
         priority: base.priority + 45,
       });
       return;
@@ -7864,7 +7952,8 @@ function ActivityFeed({
                 <div className="social-feed-author">@{activity.author}</div>
               )}
               <strong>{activity.text}</strong>
-              {activity.detail && <p>{activity.detail}</p>}
+              {activity.detail && <p><SpoilerText text={activity.detail}/></p>}
+              {activity.reviewText&&<p><SpoilerText text={activity.reviewText} whole={activity.reviewSpoiler}/></p>}
 
               {(canLike || canComment || likeCount > 0 || comments.length > 0) && (
                 <div className="social-feed-actions">
@@ -8009,7 +8098,7 @@ function GamingTimeline({ timeline = [], compact = false }) {
   );
 }
 
-function PublicProfilePreview({
+export function PublicProfilePreview({
   profile,
   title = "Profil public",
   actionLabel,
@@ -8020,6 +8109,7 @@ function PublicProfilePreview({
   const [selectedHardware, setSelectedHardware] = useState(null);
 
   if (!profile) return null;
+  profile=publicProfileView(profile);
   const publicSections = {
     ...DEFAULT_PUBLIC_SECTIONS,
     ...(profile.publicSections || {}),
@@ -8222,6 +8312,8 @@ function PublicProfilePreview({
           </div>
         </div>
       )}
+
+      {publicSections.essential&&<FavoriteReasons games={profile.favoriteGames||[]}/>}
 
       {publicSections.essential &&
         (profileShowcase.topScores?.length > 0 ||
@@ -8526,12 +8618,17 @@ export function SocialTab({
   onAddFriend,
   onRemoveFriend,
   onOpenFriend,
+  initialView = "feed",
+  targetPollId,
+  onSetFavoriteReason,
+  onOpenComparisonGame,
+  onDiscoverGame,
   loadFriendProfile = loadCheckpointSocialProfile,
 }) {
   const [friendHandle, setFriendHandle] = useState("");
   const [socialMessage, setSocialMessage] = useState("");
   const [showPublicPreview, setShowPublicPreview] = useState(false);
-  const [socialView, setSocialView] = useState("feed");
+  const [socialView, setSocialView] = useState(initialView);
   const [socialFeedSource, setSocialFeedSource] = useState("friends");
   const [socialFeedFilter, setSocialFeedFilter] = useState("all");
   const [postDraft, setPostDraft] = useState("");
@@ -8721,16 +8818,13 @@ export function SocialTab({
           id: game.id,
           name: game.name,
           image: game.image || "",
+          sourceIds:toPublicFounderGame(game).sourceIds,
+          released:game.released||"",
           score: getGameScore(game, section.key),
         },
       };
     }),
-    favoriteGames: favorites.map((game) => ({
-      id: game.id,
-      name: game.name,
-      image: game.image || "",
-      rating: getGameRating(game),
-    })),
+    favoriteGames: publicFavoriteGames(games,getGameRating,socialProfile.publicSections?.essential!==false),
     currentHardware: currentHardware.slice(0, 6).map((item) => ({
       id: item.id,
       name: item.name,
@@ -8901,12 +8995,13 @@ export function SocialTab({
         setSocialView(view);
         setShowPublicPreview(false);
       }} />
+      {socialView === "polls" && !sharedProfile && <FriendPolls games={games} friends={socialFriends} targetId={targetPollId}/>}
       {socialMessage && <p role="status" className="social-hub-notice">{socialMessage}</p>}
       {socialView === "feed" && <div className="social-hub-feed-tabs" role="group" aria-label="Choisir le fil">
         <button type="button" className={socialFeedSource === "friends" ? "active" : ""} aria-pressed={socialFeedSource === "friends"} onClick={() => setSocialFeedSource("friends")}>Mes amis</button>
         <button type="button" className={socialFeedSource === "mine" ? "active" : ""} aria-pressed={socialFeedSource === "mine"} onClick={() => setSocialFeedSource("mine")}>Mon activité</button>
       </div>}
-      {sharedProfile && <FriendComparison games={games} profile={sharedProfile}/>}
+      {sharedProfile && <FriendComparison games={games} profile={sharedProfile} onOpenGame={onOpenComparisonGame} onDiscover={onDiscoverGame} ratingGetter={getGameRating}/>}
       {sharedProfile && (
         <PublicProfilePreview
           profile={sharedProfile}
@@ -8950,6 +9045,8 @@ export function SocialTab({
           }
         />
       )}
+
+      {socialView === "showcase"&&<div className="search-panel"><FavoriteReasonPicker games={games} onSave={onSetFavoriteReason}/></div>}
 
       {socialView === "showcase" && (
         <div className="search-panel social-badge-picker-panel">
@@ -9353,6 +9450,9 @@ export function SocialTab({
 }
 
 export function HomeTab({
+  socialProfile={},
+  socialFriends=[],
+  onExperiencesChange,
   theme,
   games,
   hardware = [],
@@ -9362,6 +9462,9 @@ export function HomeTab({
   progress,
   dealPreferences = DEFAULT_APP_OPTIONS,
   setActiveTab,
+  onHomeLayoutChange,
+  onRediscoverPin,
+  detectedSeries,
   onOpenDetail,
   gamingEvents = [],
   socialActivities = [],
@@ -9371,9 +9474,11 @@ export function HomeTab({
   checkpointGoalProgress = DEFAULT_CHECKPOINT_GOAL_PROGRESS,
   onClaimCheckpointGoal,
 }) {
+  const dueCapsuleCount=dueCapsules(dealPreferences.experiences).length;
   const [recommendations, setRecommendations] = useState([]);
   const [suggestionOffset, setSuggestionOffset] = useState(0);
   const [loadingRecommendations, setLoadingRecommendations] = useState(false);
+  const homeSeries=useMemo(()=>detectedSeries||getDetectedGameSeries(games),[games,detectedSeries]);
 
   const profile = getPlayerProfile(games);
   const playerAnalysis = getPlayerAnalysis(games, hardware, badges);
@@ -9402,7 +9507,7 @@ export function HomeTab({
 
   const backlogCandidates = games
     .filter((game) => game.status === "collection" || game.status === "wishlist")
-    .filter((game) => game.progressStatus !== "completed")
+    .filter((game) => game.progressStatus !== "completed"&&!isStoppedGame(game))
     .sort((a, b) => {
       const ratingGap = getGameRating(b) - getGameRating(a);
       if (ratingGap !== 0) return ratingGap;
@@ -10000,12 +10105,18 @@ export function HomeTab({
   </section>);
 
   return (
-    <div className="home-page">
-      {levelSection}{collectionSection}{nextLevelSection}{sessionSection}
-      <WeeklyQuiz quiz={weeklyQuiz} progress={weeklyQuizProgress} onAnswer={onAnswerWeeklyQuiz}/>
+    <HomeLayout value={dealPreferences.homeLayout} onChange={onHomeLayoutChange}>
+      {levelSection}
+      <FirstSteps games={games} onSearch={() => setActiveTab("search")} onOpenGame={onOpenDetail} onHardware={() => setActiveTab("hardware")}/>
+      {games.length > 0 && <><HomeBlock id="collection">{collectionSection}</HomeBlock><HomeBlock id="nextLevel">{nextLevelSection}</HomeBlock><HomeBlock id="session">{sessionSection}</HomeBlock><HomeBlock id="picker"><SessionPicker games={games} onOpen={onOpenDetail}/></HomeBlock></>}
+      <HomeBlock id="rediscover"><Rediscover games={games} ratingGetter={getGameRating} onOpen={onOpenDetail} onPin={onRediscoverPin}/></HomeBlock>
+      <HomeBlock id="duel"><SoloDuel games={games} series={homeSeries} onOpenGame={onOpenDetail}/></HomeBlock>
+      <HomeBlock id="monthly"><MonthlyRecap games={games}/></HomeBlock>
+      <HomeBlock id="experiences" notice={dueCapsuleCount?`${dueCapsuleCount} capsule${dueCapsuleCount>1?'s':''} à ouvrir`:null}><CheckpointExperiences games={games} profile={socialProfile} friends={socialFriends} lists={dealPreferences.personalLists} level={level} value={dealPreferences.experiences} onChange={onExperiencesChange} loadProfile={loadCheckpointSocialProfile} onOpenGame={onOpenDetail}/></HomeBlock>
+      <HomeBlock id="quiz"><WeeklyQuiz quiz={weeklyQuiz} progress={weeklyQuizProgress} onAnswer={onAnswerWeeklyQuiz}/></HomeBlock>
 
 
-      {libraryPreviewGames.length > 0 && <section className="home-library-preview home-library-card" aria-labelledby="home-library-preview-title">
+      {libraryPreviewGames.length > 0 && <HomeBlock id="library"><section className="home-library-preview home-library-card" aria-labelledby="home-library-preview-title">
         <div className="home-library-heading">
           <div><p className="home-section-eyebrow">Ta bibliothèque</p><h2 id="home-library-preview-title">À retrouver</h2></div>
           <button type="button" className="home-library-open" onClick={()=>setActiveTab("library")}>Tout voir<ArrowLeft className="home-forward-arrow" size={16} aria-hidden="true"/></button>
@@ -10015,17 +10126,17 @@ export function HomeTab({
           <span className="home-library-game-copy"><strong>{game.name}</strong><span className="home-library-game-meta"><span className={`home-library-status${game.status === "en cours" ? " is-playing" : ""}`}>{game.status === "en cours" ? "En cours" : "À découvrir"}</span><span aria-hidden="true">·</span><span>{formatRating10(getGameRating(game), "Pas encore noté")}</span></span></span>
           <ArrowLeft className="home-forward-arrow" size={16} aria-hidden="true"/>
         </button>)}</div>
-      </section>}
+      </section></HomeBlock>}
 
 
-      <HomeDealsPreview
+      <HomeBlock id="deals"><HomeDealsPreview
         dealPreferences={dealPreferences}
         games={games}
         onOpenDeals={() => setActiveTab("deals")}
-      />
+      /></HomeBlock>
 
       {homeActionCards.length > 0 && (
-        <div className="home-card home-command-center">
+        <HomeBlock id="actions"><div className="home-card home-command-center">
           <div className="home-section-head">
             <div>
               <div className="home-card-title">A faire maintenant</div>
@@ -10055,10 +10166,10 @@ export function HomeTab({
               </button>
             ))}
           </div>
-        </div>
+        </div></HomeBlock>
       )}
 
-      <div className="home-card home-activity-card home-pulse-panel">
+      <HomeBlock id="activity"><div className="home-card home-activity-card home-pulse-panel">
         <div className="home-section-head">
           <div>
             <div className="home-card-title">Activité récente</div>
@@ -10100,7 +10211,7 @@ export function HomeTab({
                 <span>{featuredActivity.type}</span>
                 <strong>{featuredActivity.text}</strong>
                 <small>
-                  {featuredActivity.detail} · {formatActivityTime(featuredActivity.date)}
+                  {spoilerSummary(featuredActivity.detail)} · {formatActivityTime(featuredActivity.date)}
                 </small>
               </div>
             </button>
@@ -10135,10 +10246,10 @@ export function HomeTab({
             subtitle="Ajoute des jeux, des notes ou du matériel pour alimenter ton activité."
           />
         )}
-      </div>
+      </div></HomeBlock>
 
 
-      <div className="search-panel home-recommendations-panel home-radar-panel">
+      <HomeBlock id="radar"><div className="search-panel home-recommendations-panel home-radar-panel">
         <div className="home-section-head home-radar-head">
           <div>
             <div className="home-card-title">Radar découverte</div>
@@ -10231,8 +10342,8 @@ export function HomeTab({
             </div>
           </div>
         )}
-      </div>
-      <div className="search-panel live-event-card home-agenda-card">
+      </div></HomeBlock>
+      <HomeBlock id="agenda"><div className="search-panel live-event-card home-agenda-card">
         <div className="home-section-head home-agenda-head">
           <div>
             <div className="home-card-title">Agenda Checkpoint</div>
@@ -10290,9 +10401,9 @@ export function HomeTab({
             <span>Les prochains lives seront ajoutés ici.</span>
           </div>
         )}
-      </div>
+      </div></HomeBlock>
 
-      <div className="home-card home-reward-panel">
+      <HomeBlock id="rewards"><div className="home-card home-reward-panel">
         <div className="home-section-head home-reward-head">
           <div>
             <div className="home-card-title">Récompenses à portée</div>
@@ -10359,8 +10470,8 @@ export function HomeTab({
             <span>Continue à jouer, noter et compléter ton profil pour ouvrir de nouveaux gains.</span>
           </div>
         )}
-      </div>
-    </div>
+      </div></HomeBlock>
+    </HomeLayout>
   );
 }
 
@@ -10694,6 +10805,7 @@ export function ProfileTab({
   checkpointTrialProgress = DEFAULT_CHECKPOINT_TRIAL_PROGRESS,
   pendingCheckpointLevel = null,
   onOpenTrial,
+  onOpenPublicProfile,
 }) {
   const unlockedBadges = badges.filter((b) => b.unlocked);
   const lockedBadges = badges.filter((b) => !b.unlocked && !b.hiddenWhenLocked);
@@ -10847,12 +10959,13 @@ export function ProfileTab({
         </div>
       </div>
 
+      {onOpenPublicProfile && <section className="search-panel profile-public-link"><div><strong>Mon profil public</strong><p>Photo, présentation et vitrine visibles par les autres joueurs.</p></div><button type="button" className="experience-secondary" onClick={onOpenPublicProfile}>Modifier mon profil public</button></section>}
       <div className="search-panel profile-living-panel">
         <div className="profile-living-main">
           <span>Ta signature de joueur</span>
           <strong>{founderSignature.title}</strong>
           <p>{founderSignature.subtitle}</p>
-          {!founderGames.length && <small>Tu peux les choisir dans Social → Mon profil → Ma vitrine.</small>}
+          {!founderGames.length && <small>Tu peux les choisir dans Social → Profil public → Ma vitrine.</small>}
 
 
         </div>
@@ -10876,9 +10989,10 @@ export function ProfileTab({
         </div>
       </div>
 
-      <section className="search-panel player-notes-panel" aria-label="Tes habitudes de jeu">
+      <ProfileSection title="Tes habitudes de jeu" summary={playerAnalysis.title}>
+<section className="search-panel player-notes-panel" aria-label="Tes habitudes de jeu">
         <div className="profile-section-header">
-          <h2 className="panel-title">Tes habitudes de jeu</h2>
+
         </div>
         <div className="player-notes-summary">
           <strong>{playerAnalysis.title}</strong>
@@ -10893,10 +11007,13 @@ export function ProfileTab({
         )}
       </section>
 
-      <div className="search-panel profile-trials-panel">
+            </ProfileSection>
+
+      <ProfileSection defaultOpen={Boolean(pendingCheckpoint)} title="Salle des Epreuves" summary={`${completedCheckpoints.length} paliers validés · ${pendingCheckpoint ? "Une épreuve disponible" : "Tes prochains paliers"}`}>
+<div className="search-panel profile-trials-panel">
         <div className="profile-section-header">
           <div>
-            <h2 className="panel-title">Salle des Epreuves</h2>
+
             <div className="option-value">
               Les grands rangs se valident par checkpoint, pas seulement par XP.
             </div>
@@ -11041,7 +11158,10 @@ export function ProfileTab({
         </div>
       </div>
 
-      <div className="profile-stats-grid">
+            </ProfileSection>
+
+      <ProfileSection title="Mes statistiques" summary={`${completedCount} jeux terminés · ${completionRate}% de complétion`}>
+<div className="profile-stats-grid">
         <div className="stat-card">
           <div className="stat-value">{stats.totalPlaytime}h</div>
           <div className="stat-label">Temps total</div>
@@ -11066,9 +11186,12 @@ export function ProfileTab({
       </div>
 
       <ConsoleXPSection games={games} compact />
+      <GenreStatsChart games={games} />
+
+            </ProfileSection>
 
       {hasProfileShowcase && (
-        <div className="search-panel profile-showcase-panel">
+        <ProfileSection title="Mes sélections" summary="Tops, jeux de l’année et matériel préféré"><div className="search-panel profile-showcase-panel">
           <div className="profile-section-header">
             <div>
               <h2 className="panel-title">Vitrine Checkpoint</h2>
@@ -11079,13 +11202,14 @@ export function ProfileTab({
           </div>
 
           <ProfileShowcase showcase={profileShowcase} />
-        </div>
+        </div></ProfileSection>
       )}
 
-      <div className="search-panel profile-timeline-panel">
+      <ProfileSection title="Ton histoire gaming" summary={"Consoles, jeux fondateurs et jeux de l’année"}>
+<div className="search-panel profile-timeline-panel">
         <div className="profile-section-header">
           <div>
-            <h2 className="panel-title">Ton histoire gaming</h2>
+
             <div className="option-value">
               Tes consoles, jeux fondateurs, GOTY perso et moments marquants.
             </div>
@@ -11095,10 +11219,13 @@ export function ProfileTab({
         <GamingTimeline timeline={gamingTimeline} />
       </div>
 
-      <div className="search-panel profile-growth-panel">
+            </ProfileSection>
+
+      <ProfileSection title="Progression" summary={nextRank ? `Prochain rang : ${nextRank.title} au niveau ${nextRank.min}` : "Tes rangs et objectifs"}>
+<div className="search-panel profile-growth-panel">
         <div className="profile-section-header">
           <div>
-            <h2 className="panel-title">Progression</h2>
+
             <div className="option-value">
               Rang actuel, prochain cap et objectifs utiles à court terme.
             </div>
@@ -11169,12 +11296,14 @@ export function ProfileTab({
         </div>
       </div>
 
-      <GenreStatsChart games={games} />
 
-      <div className="search-panel">
+
+      </ProfileSection>
+
+            <ProfileSection title="Badges" summary={`${unlockedBadges.length} débloqués sur ${badges.length}`}>      <div className="search-panel">
         <div className="profile-section-header">
           <div>
-            <h2 className="panel-title">Badges</h2>
+
             <div className="option-value">
               {unlockedBadges.length} débloqués / {badges.length}
               {featuredBadge ? ` • Mis en avant : ${featuredBadge.name}` : ""}
@@ -11273,6 +11402,7 @@ export function ProfileTab({
             })}
         </div>
       </div>
+      </ProfileSection>
     </div>
   );
 }
@@ -11745,7 +11875,7 @@ function getDetectedGameSeries(games) {
     .filter(series => series.total >= 2);
 }
 
-export function GameSeriesTab({ games, onAddGameToLibrary }) {
+export function GameSeriesTab({ games, onAddGameToLibrary, initialSeriesName }) {
   const [seriesDisplayMode, setSeriesDisplayMode] = useState("compact");
   const [enrichedSeries, setEnrichedSeries] = useState([]);
   const [selectedSeries, setSelectedSeries] = useState(null);
@@ -11765,6 +11895,8 @@ export function GameSeriesTab({ games, onAddGameToLibrary }) {
     setSeriesView("owned");
     setSeriesSuggestions([]);
   };
+
+  useEffect(()=>{if(initialSeriesName){const match=getDetectedGameSeries(games).find(item=>item.name===initialSeriesName);if(match)openSeries(match);}},[initialSeriesName]);
 
   const closeSeries = () => {
     suggestionsRequest.current?.abort();
@@ -12447,7 +12579,7 @@ function HardwareDetailModal({
 
   useEffect(() => {
     setLocalReview(item?.review || "");
-  }, [item]);
+  }, [item?.id]);
 
   if (!item) return null;
 
@@ -12760,6 +12892,7 @@ function HardwareDetailModal({
 
 export function HardwareTab({
   hardware,
+  initialHardwareRequest,
   games,
   onAddHardware,
   onDeleteHardware,
@@ -12784,8 +12917,11 @@ export function HardwareTab({
   const [hardwareCategory, setHardwareCategory] = useState("console");
   const [zoomedHardwareImage, setZoomedHardwareImage] = useState(null);
   const [selectedHardwareDetail, setSelectedHardwareDetail] = useState(null);
+  useEffect(()=>{if(initialHardwareRequest){const item=hardware.find(item=>item.id===initialHardwareRequest.id);if(item){setHardwareCategory(item.type||"console");setSelectedHardwareDetail({...item,instanceKey:`search-${item.id}`});}}},[initialHardwareRequest]);
   const [showHardwareCatalog, setShowHardwareCatalog] = useState(false);
   const [hardwareCollectionFilter, setHardwareCollectionFilter] = useState("all");
+  const [collectionFilters,setCollectionFilters]=useState({...EMPTY_HARDWARE_FILTERS});
+  useEffect(()=>setCollectionFilters({...EMPTY_HARDWARE_FILTERS}),[hardwareCategory]);
 
   const autoControllerSyncRef = useRef(new Set());
   const hardwareTopRef = useRef(null);
@@ -13574,7 +13710,7 @@ export function HardwareTab({
   const visibleCollectionGroups = collectionGroups
     .map((group) => ({
       ...group,
-      items: group.items.filter(matchesHardwareCollectionFilter),
+      items: group.items.filter(matchesHardwareCollectionFilter).filter(item=>matchesHardwareFilters(item,collectionFilters,HARDWARE_CATALOG)),
     }))
     .filter((group) => group.items.length > 0);
 
@@ -13652,6 +13788,16 @@ export function HardwareTab({
 
   return (
     <div className="progression-stack">
+      {selectedHardwareDetail?.instanceKey?.startsWith('search-')&&hardware.some(item=>item.id===selectedHardwareDetail.id)&&<HardwareDetailModal
+        item={{...hardware.find(item=>item.id===selectedHardwareDetail.id),instanceKey:selectedHardwareDetail.instanceKey}}
+        detailRef={hardwareDetailRef} onClose={()=>setSelectedHardwareDetail(null)} onDeleteHardware={onDeleteHardware}
+        openedDropdown={openedDropdown} setOpenedDropdown={setOpenedDropdown} statusOptions={HARDWARE_STATUS_OPTIONS}
+        conditionOptions={CONDITION_OPTIONS} displaySizeOptions={DISPLAY_SIZE_OPTIONS}
+        onUpdateHardwareStatus={onUpdateHardwareStatus} onUpdateHardwareSanctuary={onUpdateHardwareSanctuary}
+        onUpdateHardwareCondition={onUpdateHardwareCondition} onUpdateHardwareAcquiredYear={onUpdateHardwareAcquiredYear}
+        onUpdateHardwareDisplaySize={onUpdateHardwareDisplaySize} onUpdateHardwareComponent={onUpdateHardwareComponent}
+        onUpdateHardwareRating={onUpdateHardwareRating} onUpdateHardwareReview={onUpdateHardwareReview}
+        onToggleHardwareFavorite={onToggleHardwareFavorite} consoleGameStats={getConsoleGameStats(selectedHardwareDetail)} getHardwareStatusLabel={getHardwareStatusLabel}/>}
       {hardwareCategory === "console" && (
         <div className="search-panel">
           <h2 className="panel-title">Complétion matériel</h2>
@@ -14300,8 +14446,9 @@ export function HardwareTab({
           </div>
         </div>
 
+        <HardwareFilters items={hardware.filter(item=>item.type===hardwareCategory)} catalog={HARDWARE_CATALOG} value={collectionFilters} onChange={setCollectionFilters} count={new Set(visibleCollectionGroups.flatMap(group=>group.items.map(item=>item.id))).size}/>
         {!hasVisibleHardware ? (
-          <EmptyState title={emptyTitle} subtitle={emptySubtitle} />
+          <EmptyState title={Object.keys(EMPTY_HARDWARE_FILTERS).some(key=>collectionFilters[key]!==EMPTY_HARDWARE_FILTERS[key])?'Aucun matériel ne correspond aux filtres':emptyTitle} subtitle={emptySubtitle} />
         ) : (
           <div className="hardware-collection-sections">
             {visibleCollectionGroups.map((group) => (
@@ -14441,9 +14588,9 @@ export function HardwareTab({
         )}
       </div>
 
-      
 
-      
+
+
 
       {zoomedHardwareImage && createPortal(
         <div
@@ -14528,6 +14675,8 @@ function OptionsTab({
   onProfileVisibilityChange,
   onExportBackup,
   onImportBackup,
+  onCaptureBackup,
+  onRestoreVersion,
   onResetOptions,
   games = [],
   onRepairGameData,
@@ -14539,6 +14688,7 @@ function OptionsTab({
   onImportNews,
 }) {
   const [helpTopic, setHelpTopic] = useState(null);
+  const [importReview,setImportReview]=useState(null);
   const [isRepairingGameData, setIsRepairingGameData] = useState(false);
   const [showIntegrityDetails, setShowIntegrityDetails] = useState(false);
   const [steamInput, setSteamInput] = useState(
@@ -14629,55 +14779,16 @@ function OptionsTab({
     ...(appOptions.xboxProfile || {}),
   };
   const steamExistingStats = useMemo(() => {
-    const steamIds = new Set(games.map(getSteamGameKey).filter(Boolean));
-    const names = new Set(
-      games.map((game) => normalizeSearchText(game.name || "")).filter(Boolean)
-    );
-    const libraryGames = steamLibrary?.games || [];
-    const alreadyPresent = libraryGames.filter((game) => {
-      const steamKey = getSteamGameKey(game);
-      const nameKey = normalizeSearchText(game.name || "");
-      return (steamKey && steamIds.has(steamKey)) || (nameKey && names.has(nameKey));
-    }).length;
-
-    return {
-      alreadyPresent,
-      missing: Math.max(0, libraryGames.length - alreadyPresent),
-    };
+    const plan=planGameImport(games,steamLibrary?.games||[],"steam");
+    return {alreadyPresent:plan.filter(row=>row.type==="update").length,missing:plan.filter(row=>row.type==="add").length};
   }, [games, steamLibrary]);
   const steamWishlistExistingStats = useMemo(() => {
-    const steamIds = new Set(games.map(getSteamGameKey).filter(Boolean));
-    const names = new Set(
-      games.map((game) => normalizeSearchText(game.name || "")).filter(Boolean)
-    );
-    const wishlistGames = steamWishlist?.games || [];
-    const alreadyPresent = wishlistGames.filter((game) => {
-      const steamKey = getSteamGameKey(game);
-      const nameKey = normalizeSearchText(game.name || "");
-      return (steamKey && steamIds.has(steamKey)) || (nameKey && names.has(nameKey));
-    }).length;
-
-    return {
-      alreadyPresent,
-      missing: Math.max(0, wishlistGames.length - alreadyPresent),
-    };
+    const plan=planGameImport(games,steamWishlist?.games||[],"steam");
+    return {alreadyPresent:plan.filter(row=>row.type==="update").length,missing:plan.filter(row=>row.type==="add").length};
   }, [games, steamWishlist]);
   const xboxExistingStats = useMemo(() => {
-    const xboxIds = new Set(games.map(getXboxGameKey).filter(Boolean));
-    const names = new Set(
-      games.map((game) => normalizeSearchText(game.name || "")).filter(Boolean)
-    );
-    const libraryGames = xboxLibrary?.games || [];
-    const alreadyPresent = libraryGames.filter((game) => {
-      const xboxKey = getXboxGameKey(game);
-      const nameKey = normalizeSearchText(game.name || "");
-      return (xboxKey && xboxIds.has(xboxKey)) || (nameKey && names.has(nameKey));
-    }).length;
-
-    return {
-      alreadyPresent,
-      missing: Math.max(0, libraryGames.length - alreadyPresent),
-    };
+    const plan=planGameImport(games,xboxLibrary?.games||[],"xbox");
+    return {alreadyPresent:plan.filter(row=>row.type==="update").length,missing:plan.filter(row=>row.type==="add").length};
   }, [games, xboxLibrary]);
   const gameIntegrityIssues = useMemo(
     () => getGameDataIntegrityIssues(games),
@@ -14759,14 +14870,14 @@ function OptionsTab({
       setIsSteamLoading(false);
     }
   };
-  const importSteamLibrary = async () => {
+  const importSteamLibrary = async (selectedGames=steamLibrary?.games) => {
     if (!steamLibrary?.games?.length || !onImportSteamGames) return;
 
     setIsSteamImporting(true);
     setSteamError("");
 
     try {
-      const result = await onImportSteamGames(steamLibrary.games, {
+      const result = await onImportSteamGames(selectedGames, {
         steamId: steamLibrary.steamId,
       });
       updateSteamProfile({
@@ -14778,6 +14889,7 @@ function OptionsTab({
       });
     } catch (error) {
       setSteamError(String(error?.message || error));
+      return false;
     } finally {
       setIsSteamImporting(false);
     }
@@ -14825,14 +14937,14 @@ function OptionsTab({
       setIsSteamWishlistLoading(false);
     }
   };
-  const importSteamWishlist = async () => {
+  const importSteamWishlist = async (selectedGames=steamWishlist?.games) => {
     if (!steamWishlist?.games?.length || !onImportSteamGames) return;
 
     setIsSteamWishlistImporting(true);
     setSteamWishlistError("");
 
     try {
-      const result = await onImportSteamGames(steamWishlist.games, {
+      const result = await onImportSteamGames(selectedGames, {
         steamId: steamWishlist.steamId,
         status: "wishlist",
         source: "steam-wishlist",
@@ -14846,6 +14958,7 @@ function OptionsTab({
       });
     } catch (error) {
       setSteamWishlistError(String(error?.message || error));
+      return false;
     } finally {
       setIsSteamWishlistImporting(false);
     }
@@ -14948,14 +15061,14 @@ function OptionsTab({
       setIsXboxSyncing(false);
     }
   };
-  const importXboxLibrary = async () => {
+  const importXboxLibrary = async (selectedGames=xboxLibrary?.games) => {
     if (!xboxLibrary?.games?.length || !onImportXboxGames) return;
 
     setIsXboxImporting(true);
     setXboxError("");
 
     try {
-      const result = await onImportXboxGames(xboxLibrary.games, {
+      const result = await onImportXboxGames(selectedGames, {
         xuid: xboxLibrary.profile?.xuid || xboxProfile.xuid,
       });
       updateXboxProfile({
@@ -14969,6 +15082,7 @@ function OptionsTab({
       });
     } catch (error) {
       setXboxError(String(error?.message || error));
+      return false;
     } finally {
       setIsXboxImporting(false);
     }
@@ -15152,6 +15266,9 @@ function OptionsTab({
           title="Aide et tutoriels" description="Un guide pour chaque onglet, à revoir quand tu veux." summary="14 guides">
           <TutorialLibrary/>
         </OptionGroup>
+        <OptionGroup id="notifications" isOpen={!!openOptionGroups.notifications} onToggle={()=>setOpenOptionGroups(current=>({...current,notifications:!current.notifications}))} title="Notifications" description="Choisis les informations affichées dans la cloche." summary="Dans l’appli">
+          <NotificationPreferences value={appOptions.notifications} onChange={value=>onOptionChange("notifications",value)}/>
+        </OptionGroup>
         <OptionGroup id="interface" isOpen={!!openOptionGroups.interface} onToggle={() => setOpenOptionGroups((current) => ({ ...current, interface: !current.interface }))}
           title="Interface"
           description="Ce qui change l'identité visuelle et les retours de l'app."
@@ -15216,6 +15333,8 @@ function OptionsTab({
           </div>
         </OptionGroup>
 
+        <ContentPreferences value={appOptions} onChange={onOptionChange}/>
+
         <OptionGroup id="behavior" isOpen={!!openOptionGroups.behavior} onToggle={() => setOpenOptionGroups((current) => ({ ...current, behavior: !current.behavior }))}
           title="Comportement"
           description="Les choix qui évitent des gestes inutiles ou des erreurs."
@@ -15250,7 +15369,7 @@ function OptionsTab({
 
             {!appOptions.rememberLastTab && (
               <div className="option-pill-grid compact option-subgrid startup-target-grid">
-                {startTabs.map((tab) => (
+                {startTabs.filter(tab=>!appOptions.hiddenTabs?.includes(tab.id)).map((tab) => (
                   <button
                     key={tab.id}
                     type="button"
@@ -15602,8 +15721,8 @@ function OptionsTab({
               {steamLibrary?.games?.length > 0 && (
                 <>
                   <div className="steam-preview-list">
-                    {steamLibrary.games.slice(0, 5).map((game) => (
-                      <div key={game.steamAppId} className="steam-preview-row">
+                    {planGameImport(games,steamLibrary.games,"steam").filter(row=>row.type!=="skip").slice(0,5).map(({item:game,index}) => (
+                      <div key={`steamLibrary-${game.steamAppId}-${index}`} className="steam-preview-row">
                         <img src={game.image} alt="" loading="lazy" />
                         <div>
                           <strong>{game.name}</strong>
@@ -15616,14 +15735,14 @@ function OptionsTab({
                   <button
                     type="button"
                     className="option-pill steam-import-action"
-                    onClick={importSteamLibrary}
-                    disabled={isSteamImporting || !steamExistingStats.missing}
+                    onClick={()=>setImportReview({kind:"steam",provider:"steam",items:steamLibrary.games,title:"Vérifier l’import Steam"})}
+                    disabled={isSteamImporting}
                   >
                     {isSteamImporting
                       ? "Import en cours..."
                       : steamExistingStats.missing
                         ? `Importer ${steamExistingStats.missing} jeu${steamExistingStats.missing > 1 ? "x" : ""}`
-                        : "Bibliotheque deja synchronisee"}
+                        : "Vérifier et synchroniser"}
                   </button>
                 </>
               )}
@@ -15675,8 +15794,8 @@ function OptionsTab({
               {steamWishlist?.games?.length > 0 && (
                 <>
                   <div className="steam-preview-list">
-                    {steamWishlist.games.slice(0, 5).map((game) => (
-                      <div key={game.steamAppId} className="steam-preview-row">
+                    {planGameImport(games,steamWishlist.games,"steam").filter(row=>row.type!=="skip").slice(0,5).map(({item:game,index}) => (
+                      <div key={`steamWishlist-${game.steamAppId}-${index}`} className="steam-preview-row">
                         <img src={game.image} alt="" loading="lazy" />
                         <div>
                           <strong>{game.name}</strong>
@@ -15693,14 +15812,14 @@ function OptionsTab({
                   <button
                     type="button"
                     className="option-pill steam-import-action"
-                    onClick={importSteamWishlist}
-                    disabled={isSteamWishlistImporting || !steamWishlistExistingStats.missing}
+                    onClick={()=>setImportReview({kind:"wishlist",provider:"steam",items:steamWishlist.games,title:"Vérifier la wishlist Steam"})}
+                    disabled={isSteamWishlistImporting}
                   >
                     {isSteamWishlistImporting
                       ? "Import en cours..."
                       : steamWishlistExistingStats.missing
                         ? `Importer ${steamWishlistExistingStats.missing} souhait${steamWishlistExistingStats.missing > 1 ? "s" : ""}`
-                        : "Wishlist deja synchronisee"}
+                        : "Vérifier et synchroniser"}
                   </button>
                 </>
               )}
@@ -15777,8 +15896,8 @@ function OptionsTab({
 
               {xboxLibrary?.games?.length > 0 && (
                 <div className="steam-preview-list">
-                  {xboxLibrary.games.slice(0, 5).map((game) => (
-                    <div key={game.xboxTitleId} className="steam-preview-row">
+                  {planGameImport(games,xboxLibrary.games,"xbox").filter(row=>row.type!=="skip").slice(0,5).map(({item:game,index}) => (
+                    <div key={`xboxLibrary-${game.xboxTitleId}-${index}`} className="steam-preview-row">
                       {game.image ? (
                         <img src={game.image} alt="" loading="lazy" />
                       ) : (
@@ -15838,14 +15957,14 @@ function OptionsTab({
                       <button
                         type="button"
                         className="option-pill steam-import-action"
-                        onClick={importXboxLibrary}
-                        disabled={isXboxImporting || !xboxExistingStats.missing}
+                        onClick={()=>setImportReview({kind:"xbox",provider:"xbox",items:xboxLibrary.games,title:"Vérifier l’import Xbox"})}
+                        disabled={isXboxImporting}
                       >
                         {isXboxImporting
                           ? "Import en cours..."
                           : xboxExistingStats.missing
                             ? `Importer ${xboxExistingStats.missing} titre${xboxExistingStats.missing > 1 ? "s" : ""}`
-                            : "Titres deja synchronises"}
+                            : "Vérifier et synchroniser"}
                       </button>
                     )}
                   </>
@@ -15917,12 +16036,13 @@ function OptionsTab({
         </OptionGroup>}
 
         <OptionGroup id="data" isOpen={!!openOptionGroups.data} onToggle={() => setOpenOptionGroups((current) => ({ ...current, data: !current.data }))}
-          title="Données"
-          description="Sauvegarde, import et contrôle de cohérence de ta bibliothèque."
+          title="Données et sauvegardes"
+          description="Corbeille, copies de sécurité, mode hors ligne et import."
           summary={gameIntegrityIssues.length ? `${gameIntegrityIssues.length} à vérifier` : "OK"}
         >
 
           <div className="option-section">
+            <DataProtection onCapture={onCaptureBackup} onRestore={onRestoreVersion}/>
             <div className="option-setting-card option-setting-card-featured data-options-card">
               <div>
                 <SectionTitle title="Données" help="data" />
@@ -16042,6 +16162,7 @@ function OptionsTab({
         </OptionGroup>
       </div>
 
+      {importReview&&<ImportReview games={games} incoming={importReview.items} provider={importReview.provider} title={importReview.title} onClose={()=>setImportReview(null)} onConfirm={items=>importReview.kind==="steam"?importSteamLibrary(items):importReview.kind==="wishlist"?importSteamWishlist(items):importXboxLibrary(items)}/>}
       {helpModal}
     </div>
   );
@@ -17217,7 +17338,7 @@ export default function App({ startupVisible = false, onStartupProgress, tutoria
       ? savedOptions.startTab
       : "home";
   })
-  
+
   const [theme, setTheme] = useState(
     localStorage.getItem("checkpoint-theme") || "theme-checkpoint"
   );
@@ -17254,10 +17375,66 @@ export default function App({ startupVisible = false, onStartupProgress, tutoria
   const [seenBadgeIds, setSeenBadgeIds] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [librarySearch, setLibrarySearch] = useState("");
+  const [hardware, setHardware] = useState([]);
+  const saveFeedback = useSaveFeedback();
+  const documentStateRef = useRef({games, hardware});
+  documentStateRef.current = {games, hardware};
+  const draftFieldsRef = useRef(new Map());
+  const editVersionRef = useRef(0);
+  const fieldVersionsRef = useRef({});
+  const scheduledEditsRef = useRef(new Map());
+  const applyDocumentPatch = (kind, id, patch) => {
+    const values = documentStateRef.current[kind].map(item => item.id === id ? {...item,...patch} : item);
+    documentStateRef.current = {...documentStateRef.current, [kind]:values};
+    if (kind === "games") { setGames(values); setSelectedGame(previous => applySelectedGamePatch(previous,id,patch)); }
+    else setHardware(values);
+  };
+  const overlayDrafts = (kind, items) => items.map(item => {
+    const draft = draftFieldsRef.current.get(`${kind}:${item.id}`);
+    return draft ? {...item,...Object.fromEntries(Object.entries(draft).map(([field,edit])=>[field,edit.value]))} : item;
+  });
+  const persistPatch = (kind,id,patch,{success="Enregistré",undoable=false}={}) => {
+    const owner=auth.currentUser?.uid;
+    const key=`${kind}:${id}`;
+    const scheduled=scheduledEditsRef.current.get(key);
+    if(scheduled){clearTimeout(scheduled.timer);scheduledEditsRef.current.delete(key);patch={...scheduled.patch,...patch};}
+    const before=documentStateRef.current[kind].find(item=>item.id===id);
+    if(!before)return Promise.resolve(false);
+    if(kind==="games")patch=stampGameHistory(before,stampGameMilestones(before,patch));
+    const previous=Object.fromEntries(Object.keys(patch).map(field=>[field,before[field]??null]));
+    const version=++editVersionRef.current;
+    const currentDraft=draftFieldsRef.current.get(key)||{};
+    Object.entries(patch).forEach(([field,value])=>{currentDraft[field]={value,version};});
+    draftFieldsRef.current.set(key,currentDraft);
+    applyDocumentPatch(kind,id,patch);
+    const activeFields=()=>Object.keys(patch).filter(field=>draftFieldsRef.current.get(key)?.[field]?.version===version);
+    // Versions survive successful writes for safe retry/undo checks.
+    const versionKey = field => `${key}:${field}`;
+    // Keep this separate from documentStateRef, which is refreshed every render.
+    const registry=fieldVersionsRef.current;
+    Object.keys(patch).forEach(field=>{registry[versionKey(field)]=version;});
+    const isCurrent=()=>auth.currentUser?.uid===owner && Object.keys(patch).some(field=>registry[versionKey(field)]===version);
+    return saveFeedback.run({key,isCurrent,success,
+      write:async()=>{
+        const payload=Object.fromEntries(Object.entries(patch).filter(([field])=>registry[versionKey(field)]===version));
+        if(!Object.keys(payload).length)return;
+        const acknowledgement=await updateDoc(doc(db,kind,id),payload);
+        const draft=draftFieldsRef.current.get(key);
+        if(draft){activeFields().forEach(field=>delete draft[field]);if(!Object.keys(draft).length)draftFieldsRef.current.delete(key);}
+        return acknowledgement;
+      },
+      undo:undoable?()=>{
+        const item=documentStateRef.current[kind].find(value=>value.id===id);
+        const unchanged=item&&Object.keys(patch).every(field=>registry[versionKey(field)]===version&&JSON.stringify(item[field]??null)===JSON.stringify(patch[field]??null));
+        if(!unchanged){setToast("Cette fiche a changé depuis. L’annulation n’a pas été appliquée.");return Promise.resolve(false);}
+        return persistPatch(kind,id,previous,{success:"Modification annulée"});
+      }:null,
+    });
+  };
+  const [socialEntryView, setSocialEntryView] = useState("feed");
   const [selectedGame, setSelectedGame] = useState(null);
   const [detailGameList, setDetailGameList] = useState([]);
   const detailCloseTimerRef = useRef(null);
-  const [hardware, setHardware] = useState([]);
   const [socialProfile, setSocialProfile] = useState(() => {
     try {
       const storedProfile = JSON.parse(
@@ -17279,20 +17456,30 @@ export default function App({ startupVisible = false, onStartupProgress, tutoria
     }
   });
   const [privateSettingsReady, setPrivateSettingsReady] = useState(false);
+  const privateSettingsBaseRef=useRef(null);
+  const privateSettingsExistsRef=useRef(false);
+  const privateSettingsVersionRef=useRef(0);
+  const publicProfileVersionRef=useRef(0);
+  const profileVisibilityBusyRef=useRef(false);
   const [sharedProfile, setSharedProfile] = useState(null);
+  const [searchDestination,setSearchDestination]=useState(null);
+  const personalSeries=useMemo(()=>getDetectedGameSeries(games),[games]);
   const [miniPlayerLive, setMiniPlayerLive] = useState(null);
   const [miniPlayerCollapsed, setMiniPlayerCollapsed] = useState(false);
   const upcomingReleases = useUpcomingReleases(!showSplash);
   const { games: upcomingGames, status: upcomingSourceStatus } = upcomingReleases;
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [monthlyNotification,setMonthlyNotification]=useState(null);
+  const extraNotifications=useUsefulUpdates({games,preferences:appOptions.notifications,enabled:!showSplash&&privateSettingsReady});
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem("checkpoint-dismissed-notifications") || "[]");
+      const ids=JSON.parse(localStorage.getItem("checkpoint-dismissed-notifications-v2") || "[]");return Array.isArray(ids)?ids.filter(id=>typeof id==="string"):[];
     } catch (error) {
       return [];
     }
   });
   const [libraryView, setLibraryView] = useState("collection");
+  const [couchOpen,setCouchOpen]=useState(false);
   const [nextPage, setNextPage] = useState(null);
   const [gamingEvents, setGamingEvents] = useState(FALLBACK_GAMING_EVENTS);
   const [pixelTransition, setPixelTransition] = useState(null);
@@ -17325,7 +17512,10 @@ useEffect(() => {
         doc(db, PRIVATE_SETTINGS_COLLECTION, PRIVATE_SETTINGS_DOC_ID)
       );
 
-      if (cancelled || !snap.exists()) return;
+      if(cancelled)return;
+      privateSettingsExistsRef.current=snap.exists();
+      privateSettingsBaseRef.current=snap.exists()?snap.data()||{}:{};
+      if(!snap.exists())return;
 
       const remote = snap.data() || {};
       setUnlockedThemes(current => mergeThemeUnlocks(current, remote.unlockedThemes));
@@ -17357,6 +17547,7 @@ useEffect(() => {
       }
     } catch (error) {
       console.error("Erreur chargement préférences privées :", error);
+      setToast("Tes réglages distants n’ont pas pu être chargés. Ils ne seront pas remplacés automatiquement. Rouvre l’app avec une connexion pour les synchroniser.");
     } finally {
       if (!cancelled) {
         setPrivateSettingsReady(true);
@@ -17365,41 +17556,41 @@ useEffect(() => {
   };
 
   loadPrivateSettings();
-
+  const retryInitial=()=>{if(privateSettingsBaseRef.current===null)loadPrivateSettings();};
+  window.addEventListener('online',retryInitial);
+  window.addEventListener('checkpoint-settings-resolved',loadPrivateSettings);
   return () => {
     cancelled = true;
+    window.removeEventListener('online',retryInitial);
+    window.removeEventListener('checkpoint-settings-resolved',loadPrivateSettings);
   };
 }, []);
 
 useEffect(() => {
-  if (!privateSettingsReady) return;
-
-  const timeoutId = window.setTimeout(() => {
-    setDoc(
-      doc(db, PRIVATE_SETTINGS_COLLECTION, PRIVATE_SETTINGS_DOC_ID),
-      {
-        theme,
-        unlockedThemes,
-        uiMode,
-        appOptions: normalizeAppOptions(appOptions),
-        socialProfile: getCloudSafeSocialProfile(socialProfile),
-        socialFriends: normalizeSocialFriends(socialFriends),
-        updatedAt: serverTimestamp(),
-      },
-      { merge: true }
-    ).catch((error) => {
-      console.error("Erreur sauvegarde préférences privées :", error);
-    });
-  }, 800);
-
-  return () => window.clearTimeout(timeoutId);
-}, [privateSettingsReady, theme, unlockedThemes, uiMode, appOptions, socialProfile, socialFriends]);
+  if(!privateSettingsReady||privateSettingsBaseRef.current===null)return;
+  const owner=auth.currentUser?.uid;
+  const payload={theme,unlockedThemes,uiMode,appOptions:normalizeAppOptions(appOptions),socialProfile:getCloudSafeSocialProfile(socialProfile),socialFriends:normalizeSocialFriends(socialFriends)};
+  const patch=diffPrivateSettings(privateSettingsBaseRef.current,payload);
+  if(!Object.keys(patch).length)return;
+  const version=++privateSettingsVersionRef.current;
+  const timer=window.setTimeout(()=>{
+    const isCurrent=()=>auth.currentUser?.uid===owner&&privateSettingsVersionRef.current===version;
+    saveFeedback.run({key:'private-settings',quiet:true,isCurrent,success:'Réglages enregistrés',write:async()=>{
+      const ref=doc(db,PRIVATE_SETTINGS_COLLECTION,PRIVATE_SETTINGS_DOC_ID);
+      const result=privateSettingsExistsRef.current?await updateDoc(ref,{...patch,updatedAt:serverTimestamp()}):await setDoc(ref,{...payload,updatedAt:serverTimestamp()},{merge:true});
+      privateSettingsExistsRef.current=true;
+      privateSettingsBaseRef.current=payload;
+      return result;
+    }});
+  },800);
+  return()=>window.clearTimeout(timer);
+},[privateSettingsReady,theme,unlockedThemes,uiMode,appOptions,socialProfile,socialFriends]);
 
 useEffect(() => {
-  localStorage.setItem(
-    "checkpoint-dismissed-notifications",
-    JSON.stringify(dismissedNotificationIds.slice(-80))
-  );
+  try{localStorage.setItem(
+    "checkpoint-dismissed-notifications-v2",
+    JSON.stringify(dismissedNotificationIds.slice(-150))
+  );}catch{/* Device storage can be unavailable. */}
 }, [dismissedNotificationIds]);
 
 const updateAppOption = (key, value) => {
@@ -17413,11 +17604,26 @@ const updateAppOption = (key, value) => {
   });
 };
 
+useEffect(()=>{
+ if(appOptions.hiddenTabs?.includes(activeTab))setActiveTab('home');
+},[appOptions.hiddenTabs,activeTab]);
+
 const resetAppOptions = () => {
   setAppOptions(storeAppOptions(DEFAULT_APP_OPTIONS));
   showToast("Options remises au propre.");
 };
 
+const backupPayload = useMemo(()=>({version:1,exportedAt:new Date().toISOString(),options:appOptions,socialProfile,socialFriends,games,hardware}),[appOptions,socialProfile,socialFriends,games,hardware]);
+const captureCurrentBackup = (reason="Manuelle") => captureBackup(auth.currentUser?.uid,backupPayload,reason,true);
+const restoreBackupVersion = async (payload) => {
+  if(!payload || !Array.isArray(payload.games) || !Array.isArray(payload.hardware))throw new Error("Sauvegarde incomplète : jeux et matériel requis.");
+  for(const item of [...payload.games,...payload.hardware])if(!item||typeof item.id!=="string"||!item.id||item.id.includes("/")||item.id.length>250)throw new Error("Une fiche de cette sauvegarde a un identifiant invalide.");
+  await captureCurrentBackup("Avant restauration");
+  for(const kind of ["games","hardware"])for(const item of payload[kind]){const {id,_deletedAt,...data}=item;await setDoc(doc(db,kind,id),data,{recovery:true});}
+  if(payload.options){const next=storeAppOptions(payload.options);setAppOptions(next);}
+  if(payload.socialProfile){const next=storeSocialProfile(payload.socialProfile);setSocialProfile(next);await syncPublicProfileIfNeeded(next);}
+  if(Array.isArray(payload.socialFriends))setSocialFriends(storeSocialFriends(payload.socialFriends));
+};
 const exportCheckpointBackup = () => {
   const payload = {
     version: 1,
@@ -17452,6 +17658,12 @@ const importCheckpointBackup = async (event) => {
   try {
     const text = await file.text();
     const payload = JSON.parse(text);
+    if(Array.isArray(payload.games)&&Array.isArray(payload.hardware)){
+      if(!window.confirm(`Restaurer ${payload.games.length} jeux et ${payload.hardware.length} matériels ? Les fiches correspondantes seront remplacées ; les ajouts plus récents seront conservés.`))return;
+      await restoreBackupVersion(payload);
+      showToast("Restauration préparée. Vérifie la synchronisation dans les Options.");return;
+    }
+    await captureCurrentBackup("Avant import des préférences");
 
     if (payload.options) {
       const nextOptions = storeAppOptions(payload.options);
@@ -17475,24 +17687,7 @@ const importCheckpointBackup = async (event) => {
   }
 };
 
-const updateHardwareRank = async (id, rank) => {
-  setHardware((prev) =>
-    prev.map((item) =>
-      item.id === id
-        ? { ...item, controllerRank: rank }
-        : item
-    )
-  );
-
-  try {
-    await updateDoc(doc(db, "hardware", id), {
-      controllerRank: rank,
-    });
-  } catch (error) {
-    if (isAbortError(error)) return;
-    console.error(error);
-  }
-};
+const updateHardwareRank = (id,rank) => persistPatch("hardware",id,{controllerRank:rank},{success:"Classement du matériel enregistré"});
 
 const importNewsFromRSS = async ({ silent = false, force = false } = {}) => {
   try {
@@ -17556,7 +17751,7 @@ const importNewsFromRSS = async ({ silent = false, force = false } = {}) => {
 };
 
 useEffect(() => {
-  if (showSplash) return;
+  if (showSplash || (accountsEnabled && auth.currentUser?.uid !== ownerUid)) return;
 
   importNewsFromRSS({ silent: true }).catch((error) => {
     console.error("Erreur actualisation automatique des actus :", error);
@@ -17590,8 +17785,9 @@ const deleteHardware = async (id) => {
   }
 
   try {
+    await captureCurrentBackup("Avant suppression de matériel");
     await deleteDoc(doc(db, "hardware", id));
-    showToast("Matériel retiré du setup.");
+    showToast("Matériel placé dans la corbeille (30 jours après synchronisation).");
     playSound("delete", soundStyle);
   } catch (error) {
     if (isAbortError(error)) return;
@@ -17600,21 +17796,7 @@ const deleteHardware = async (id) => {
   }
 };
 
-const toggleHardwareFavorite = async (id, currentFavorite) => {
-  try {
-    setHardware((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, favorite: !currentFavorite } : item
-      )
-    );
-    await updateDoc(doc(db, "hardware", id), {
-      favorite: !currentFavorite,
-    });
-  } catch (error) {
-    if (isAbortError(error)) return;
-    console.error("Erreur favori matériel :", error);
-  }
-};
+const toggleHardwareFavorite = (id,currentFavorite) => persistPatch("hardware",id,{favorite:!currentFavorite},{success:"Favori du matériel enregistré",undoable:true});
 
 const showToast = (message, duration = 2000) => {
   setToast(message);
@@ -17835,9 +18017,9 @@ const updateSocialProfile = (field, value) => {
 
   setSocialProfile(nextProfile);
 
-  syncPublicProfileIfNeeded(nextProfile).catch((error) => {
-    console.error("Erreur synchronisation profil public :", error);
-  });
+  if(!profileVisibilityBusyRef.current&&nextProfile.visibility==='public'&&normalizeHandle(nextProfile.handle)){
+    syncPublicProfileIfNeeded(nextProfile);
+  }
 };
 
 const syncPublicProfileIfNeeded = async (profile) => {
@@ -17845,11 +18027,14 @@ const syncPublicProfileIfNeeded = async (profile) => {
 
   if (profile.visibility !== "public" || !handle) return;
 
-  await setDoc(
-    doc(db, "publicProfiles", handle),
-    { ...buildPublicSocialProfile(profile), visibility: "public", ...(auth.currentUser ? { ownerUid: auth.currentUser.uid } : {}) },
-    { merge: true }
-  );
+  if(profileVisibilityBusyRef.current)return false;
+  const owner=auth.currentUser?.uid,version=++publicProfileVersionRef.current;
+  return saveFeedback.run({
+    key:'public-profile',
+    isCurrent:()=>auth.currentUser?.uid===owner&&publicProfileVersionRef.current===version,
+    success:'Profil public mis à jour',
+    write:()=>setDoc(doc(db,'publicProfiles',handle),{...buildPublicSocialProfile(profile),visibility:'public',...(owner?{ownerUid:owner}:{})},{merge:true})
+  });
 };
 
 const addSocialProfilePhotos = async (field, fileList) => {
@@ -17961,7 +18146,7 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
     .map((id) => unlockedBadges.find((badge) => String(badge.id) === id))
     .filter(Boolean);
 
-  return {
+  return publicProfileView({
     displayName: profileOverride.displayName || DEFAULT_SOCIAL_PROFILE.displayName,
     photoURL: profileOverride.photoURL || "",
     handle,
@@ -18001,19 +18186,13 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
           id: game.id,
           name: game.name,
           image: game.image || "",
+          sourceIds:toPublicFounderGame(game).sourceIds,
+          released:game.released||"",
           score: getGameScore(game, section.key),
         },
       };
     }),
-    favoriteGames: games
-      .filter((game) => game.favorite)
-      .slice(0, 3)
-      .map((game) => ({
-        id: game.id,
-        name: game.name,
-        image: game.image || "",
-        rating: getGameRating(game),
-      })),
+    favoriteGames: publicFavoriteGames(games,getGameRating,profileOverride.publicSections?.essential!==false),
     currentHardware: currentHardware.slice(0, 6).map((item) => ({
       id: item.id,
       name: item.name,
@@ -18030,6 +18209,9 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
       title: activity.title,
       text: activity.text,
       detail: activity.detail || "",
+      source:activity.source||"",
+      reviewText:activity.reviewText||"",
+      reviewSpoiler:Boolean(activity.reviewSpoiler),
       image: activity.image || "",
       date: activity.date || null,
       author: activity.author || "",
@@ -18037,47 +18219,24 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
       comments: activityComments[activity.id] || [],
     })),
     updatedAt: serverTimestamp(),
-  };
+  });
 };
 
 const setSocialProfileVisibility = async (visibility) => {
-  const handle = normalizeHandle(socialProfile.handle);
-
-  if (!handle) {
-    return { ok: false, message: "Choisis d'abord un identifiant public." };
-  }
-
-  try {
-    const nextProfile = {
-      ...socialProfile,
-      handle,
-      visibility,
-    };
-
-    const normalizedProfile = storeSocialProfile(nextProfile);
-    setSocialProfile(normalizedProfile);
-
-    if (visibility === "public") {
-      await setDoc(
-        doc(db, "publicProfiles", handle),
-        { ...buildPublicSocialProfile(normalizedProfile), visibility: "public", ...(auth.currentUser ? { ownerUid: auth.currentUser.uid } : {}) },
-        { merge: true }
-      );
-
-    showToast("Profil public activé.");
-      return { ok: true, message: "Profil public. Tes amis peuvent te trouver." };
-    }
-
-    await deleteDoc(doc(db, "publicProfiles", handle));
-    showToast("Profil repassé en privé.");
-    return { ok: true, message: "Profil privé. Il n'est plus trouvable." };
-  } catch (error) {
-    console.error("Erreur visibilité profil :", error);
-    return {
-      ok: false,
-      message: "Impossible de changer la visibilité pour le moment.",
-    };
-  }
+  const handle=normalizeHandle(socialProfile.handle);
+  if(!handle)return {ok:false,message:"Choisis d'abord un identifiant public."};
+  if(profileVisibilityBusyRef.current)return {ok:false,message:'Le changement de visibilité est déjà en cours.'};
+  profileVisibilityBusyRef.current=true;
+  const owner=auth.currentUser?.uid,version=++publicProfileVersionRef.current;
+  const normalizedProfile=normalizeSocialProfile({...socialProfile,handle,visibility});
+  try{
+    const saved=await saveFeedback.run({key:'public-profile',isCurrent:()=>auth.currentUser?.uid===owner&&publicProfileVersionRef.current===version,success:visibility==='public'?'Profil public activé':'Profil privé appliqué',write:async()=>{
+      if(visibility==='public')await setDoc(doc(db,'publicProfiles',handle),{...buildPublicSocialProfile(normalizedProfile),visibility:'public',ownerUid:owner},{merge:true});
+      else await deleteDoc(doc(db,'publicProfiles',handle));
+      if(auth.currentUser?.uid===owner){setSocialProfile(current=>storeSocialProfile({...current,handle,visibility}));showToast(visibility==='public'?'Profil public activé.':'Profil repassé en privé.');}
+    }});
+    return saved===false?{ok:false,message:'Impossible de changer la visibilité pour le moment.'}:{ok:true,message:visibility==='public'?'Profil public. Tes amis peuvent te trouver.':"Profil privé. Il n’est plus trouvable."};
+  }finally{profileVisibilityBusyRef.current=false;}
 };
 
 const copySocialProfileLink = async () => {
@@ -18095,11 +18254,7 @@ const copySocialProfileLink = async () => {
   }
 
   try {
-    await setDoc(
-      doc(db, "publicProfiles", handle),
-      { ...buildPublicSocialProfile(), visibility: "public", ...(auth.currentUser ? { ownerUid: auth.currentUser.uid } : {}) },
-      { merge: true }
-    );
+    if(await syncPublicProfileIfNeeded(socialProfile)===false)return {ok:false,message:'Attends la fin de l’enregistrement du profil avant de partager le lien.'};
 
     const shareUrl = getProfileShareUrl(handle);
     await navigator.clipboard.writeText(shareUrl);
@@ -18243,76 +18398,24 @@ useEffect(() => {
       })
     );
 
-    setHardware(hardwareData);
+    setHardware(overlayDrafts("hardware",hardwareData));
     setBootReady((ready) => ({ ...ready, hardware: true }));
   });
 
   return () => unsubscribe();
 }, []);
 
-const updateHardwareStatus = async (id, status) => {
-  try {
-    await updateDoc(doc(db, "hardware", id), { status });
-    setToast("Statut du matériel enregistré.");
-  } catch (error) {
-    if (isAbortError(error)) return;
-    console.error("Erreur statut matériel :", error);
-    setToast("Impossible de mettre à jour pour le moment.");
-  }
+const updateHardwareStatus = (id,status) => persistPatch("hardware",id,{status},{success:"Statut du matériel enregistré",undoable:true});
+const updateHardwareSanctuary = (id,sanctuary) => persistPatch("hardware",id,{sanctuary},{success:sanctuary?"Matériel ajouté au Sanctuaire":"Matériel retiré du Sanctuaire",undoable:true});
+const updateHardwareCondition = (id,condition) => persistPatch("hardware",id,{condition},{success:"État du matériel enregistré"});
+const updateHardwareAcquiredYear = (id,value) => {
+ const acquiredYear=value===""?null:Number(value);
+ if(acquiredYear!==null&&(!Number.isInteger(acquiredYear)||acquiredYear<1950||acquiredYear>new Date().getFullYear()))return;
+ return persistPatch("hardware",id,{acquiredYear},{success:"Année d’obtention enregistrée"});
 };
+const updateHardwareDisplaySize = (id,displaySize) => persistPatch("hardware",id,{displaySize},{success:"Taille d’écran enregistrée"});
 
-const updateHardwareSanctuary = async (id, sanctuary) => {
-  try {
-    setHardware((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, sanctuary } : item))
-    );
-    await updateDoc(doc(db, "hardware", id), { sanctuary });
-    setToast(
-      sanctuary
-        ? "Matériel ajouté au Sanctuaire."
-        : "Matériel retiré du Sanctuaire."
-    );
-  } catch (error) {
-    if (isAbortError(error)) return;
-    console.error("Erreur Sanctuaire matériel :", error);
-    setToast("Impossible de mettre à jour le Sanctuaire.");
-  }
-};
 
-const updateHardwareCondition = async (id, condition) => {
-  try {
-    await updateDoc(doc(db, "hardware", id), { condition });
-    setToast("État du matériel enregistré.");
-  } catch (error) {
-    if (isAbortError(error)) return;
-    console.error("Erreur état matériel :", error);
-    setToast("Impossible de mettre à jour pour le moment.");
-  }
-};
-
-const updateHardwareAcquiredYear = async (id, value) => {
-  const acquiredYear = value === "" ? null : Number(value);
-  if (acquiredYear !== null && (!Number.isInteger(acquiredYear) || acquiredYear < 1950 || acquiredYear > new Date().getFullYear())) return;
-  try {
-    await updateDoc(doc(db, "hardware", id), { acquiredYear });
-    setToast(acquiredYear ? "Année d’obtention enregistrée." : "Année d’obtention retirée.");
-  } catch (error) {
-    if (isAbortError(error)) return;
-    console.error("Erreur année matériel :", error);
-    setToast("Impossible d’enregistrer l’année pour le moment.");
-  }
-};
-
-const updateHardwareDisplaySize = async (id, displaySize) => {
-  try {
-    await updateDoc(doc(db, "hardware", id), { displaySize });
-    setToast("Taille d’écran enregistrée.");
-  } catch (error) {
-    if (isAbortError(error)) return;
-    console.error("Erreur taille ecran :", error);
-    setToast("Impossible de mettre à jour la taille.");
-  }
-};
 
 useEffect(() => {
   applySoundSettings(appOptions.sound);
@@ -18465,7 +18568,7 @@ useEffect(() => {
         })
       );
 
-      setGames(gamesData);
+      setGames(overlayDrafts("games",gamesData));
       setBootReady((ready) => ({ ...ready, games: true }));
     });
 
@@ -18554,10 +18657,10 @@ useEffect(() => {
   );
   const visibleNotifications = useMemo(
     () =>
-      usefulNotifications.filter(
-        (notification) => !dismissedNotificationIds.includes(notification.id)
-      ),
-    [usefulNotifications, dismissedNotificationIds]
+      [...extraNotifications,...usefulNotifications].filter(
+        (notification) => notificationAllowed(notification,appOptions.notifications)&&!dismissedNotificationIds.includes(notification.id)
+      ).sort((a,b)=>b.priority-a.priority).slice(0,20),
+    [usefulNotifications,extraNotifications,dismissedNotificationIds,appOptions.notifications]
   );
 
   const [prevLevel, setPrevLevel] = useState(1);
@@ -18805,6 +18908,8 @@ useEffect(() => {
         playtime: game.playtime || null,
         difficulty: game.difficulty || "normal",
         review: game.review || "",
+        reviewSpoiler:Boolean(game.reviewSpoiler),
+        reviewShared:Boolean(game.reviewShared),
         ostRating: clampRating(game.ostRating),
         ostTrack: game.ostTrack || "",
         ostLink: game.ostLink || "",
@@ -18839,30 +18944,23 @@ useEffect(() => {
   };
 
   const importSteamGamesToLibrary = async (steamGames = [], meta = {}) => {
-    const existingBySteamId = new Map(
-      games
-        .filter((game) => getSteamGameKey(game))
-        .map((game) => [getSteamGameKey(game), game])
-    );
-    const existingByName = new Map(
-      games.map((game) => [normalizeSearchText(game.name || ""), game])
-    );
+    const importOwner=auth.currentUser?.uid;
+    await captureCurrentBackup("Avant import Steam");
+    const importPlan=planGameImport(documentStateRef.current.games,steamGames,"steam");
     let imported = 0;
     let updated = 0;
-    let skipped = 0;
+    let skipped = importPlan.filter(row=>row.type==="skip").length;
     const importingWishlist = meta.status === "wishlist";
 
-    for (const steamGame of steamGames) {
-      const steamKey = getSteamGameKey(steamGame);
-      const nameKey = normalizeSearchText(steamGame.name || "");
-      const existingGame =
-        (steamKey && existingBySteamId.get(steamKey)) ||
-        (nameKey && existingByName.get(nameKey));
+    for (const row of importPlan.filter(row=>row.type!=="skip")) {
+      if(auth.currentUser?.uid!==importOwner)throw new Error("Import interrompu : le compte a changé.");
+      const steamGame=row.item;
+      const existingGame=row.existing?documentStateRef.current.games.find(game=>game.id===row.existing.id):null;
       const steamSource = meta.source || steamGame.source || "steam";
       const steamStatus = meta.status || steamGame.status || "";
 
       const steamPatch = {
-        steamAppId: steamGame.steamAppId,
+        steamAppId: steamGame.steamAppId ?? steamGame.appid,
         steamProfileId: meta.steamId || "",
         steamPlaytimeForever: steamGame.playtimeForever || 0,
         steamLastSyncedAt: new Date(),
@@ -18916,8 +19014,6 @@ useEffect(() => {
       };
 
       await addDoc(collection(db, "games"), newGame);
-      existingBySteamId.set(steamKey, newGame);
-      existingByName.set(nameKey, newGame);
       imported++;
     }
 
@@ -18929,24 +19025,17 @@ useEffect(() => {
   };
 
   const importXboxGamesToLibrary = async (xboxGames = [], meta = {}) => {
-    const existingByXboxId = new Map(
-      games
-        .filter((game) => getXboxGameKey(game))
-        .map((game) => [getXboxGameKey(game), game])
-    );
-    const existingByName = new Map(
-      games.map((game) => [normalizeSearchText(game.name || ""), game])
-    );
+    const importOwner=auth.currentUser?.uid;
+    await captureCurrentBackup("Avant import Xbox");
+    const importPlan=planGameImport(documentStateRef.current.games,xboxGames,"xbox");
     let imported = 0;
     let updated = 0;
-    let skipped = 0;
+    let skipped = importPlan.filter(row=>row.type==="skip").length;
 
-    for (const xboxGame of xboxGames) {
-      const xboxKey = getXboxGameKey(xboxGame);
-      const nameKey = normalizeSearchText(xboxGame.name || "");
-      const existingGame =
-        (xboxKey && existingByXboxId.get(xboxKey)) ||
-        (nameKey && existingByName.get(nameKey));
+    for (const row of importPlan.filter(row=>row.type!=="skip")) {
+      if(auth.currentUser?.uid!==importOwner)throw new Error("Import interrompu : le compte a changé.");
+      const xboxGame=row.item;
+      const existingGame=row.existing?documentStateRef.current.games.find(game=>game.id===row.existing.id):null;
       const importedPlatforms = inferMicrosoftImportPlatforms(xboxGame);
       const importedImage =
         getGameVisual(existingGame || {}) ||
@@ -18954,7 +19043,7 @@ useEffect(() => {
         createFallbackPoster(xboxGame.name || existingGame?.name || "Jeu Microsoft", "#16a34a", "#60a5fa");
 
       const xboxPatch = {
-        xboxTitleId: xboxGame.xboxTitleId,
+        xboxTitleId: xboxGame.xboxTitleId ?? xboxGame.titleId,
         xboxProfileId: meta.xuid || "",
         xboxLastPlayedAt: xboxGame.xboxLastPlayedAt || "",
         xboxCurrentGamerscore: xboxGame.xboxCurrentGamerscore || 0,
@@ -19014,8 +19103,6 @@ useEffect(() => {
       };
 
       await addDoc(collection(db, "games"), newGame);
-      existingByXboxId.set(xboxKey, newGame);
-      existingByName.set(nameKey, newGame);
       imported++;
     }
 
@@ -19315,11 +19402,12 @@ useEffect(() => {
   }
 
   try {
+    await captureCurrentBackup("Avant suppression de jeu");
     await deleteDoc(doc(db, "games", id));
 
     playSound("delete", soundStyle); // 🔊 AJOUT
 
-    setToast("Jeu retiré de ta bibliothèque.");
+    setToast("Jeu placé dans la corbeille (30 jours après synchronisation).");
 
     if (selectedGame?.id === id) {
       setSelectedGame(null);
@@ -19330,139 +19418,32 @@ useEffect(() => {
   }
 };
 
-  const ratingUpdateTimeoutRef = useRef(null);
-
-const hardwareUpdateTimersRef = useRef({});
-
-const updateHardwareFieldDebounced = (hardwareId, payload) => {
-  clearTimeout(hardwareUpdateTimersRef.current[hardwareId]);
-
-  hardwareUpdateTimersRef.current[hardwareId] = setTimeout(async () => {
-    try {
-      await updateDoc(doc(db, "hardware", hardwareId), payload);
-    } catch (e) {
-      console.error("Erreur mise à jour matériel :", e);
-    }
-  }, 350);
-};
-
-const updateHardwareRating = (hardwareId, key, value, type) => {
-  const nextValue = clampRating(value);
-  const currentItem = hardware.find((item) => item.id === hardwareId);
-  const currentRatings = currentItem?.ratings || {};
-  const nextRatings = {
-    ...currentRatings,
-    [key]: nextValue,
+  const schedulePatch = (kind,id,patch,success) => {
+    const key=`${kind}:${id}`;
+    const pending=scheduledEditsRef.current.get(key);
+    if(pending)clearTimeout(pending.timer);
+    const payload={...(pending?.patch||{}),...patch};
+    applyDocumentPatch(kind,id,patch);
+    const timer=setTimeout(()=>{scheduledEditsRef.current.delete(key);persistPatch(kind,id,payload,{success});},350);
+    scheduledEditsRef.current.set(key,{timer,patch:payload});
   };
-
-  const fields = getHardwareRatingFields(type);
-  const values = fields
-    .map((field) => clampRating(nextRatings[field.key]))
-    .filter((ratingValue) => ratingValue > 0);
-
-  const nextAverage = values.length
-    ? Math.round((values.reduce((sum, ratingValue) => sum + ratingValue, 0) / values.length) * 10) / 10
-    : 0;
-
-  updateHardwareFieldDebounced(hardwareId, {
-    ratings: nextRatings,
-    rating: nextAverage,
-  });
-};
-
-const updateHardwareReview = async (hardwareId, review) => {
-  try {
-    await updateDoc(doc(db, "hardware", hardwareId), { review });
-  } catch (e) {
-    console.error("Erreur mise à jour avis matériel :", e);
-  }
-};
-
-const updateHardwareComponent = (hardwareId, key, value) => {
-  const currentItem = hardware.find((item) => item.id === hardwareId);
-  const nextConfig = {
-    ...(currentItem?.pcConfig || {}),
-    [key]: value,
+  useEffect(()=>()=>{for(const edit of scheduledEditsRef.current.values())clearTimeout(edit.timer);},[]);
+  const updateHardwareRating = (id,key,value,type) => {
+    const item=documentStateRef.current.hardware.find(item=>item.id===id);
+    const ratings={...(item?.ratings||{}),[key]:clampRating(value)};
+    const values=getHardwareRatingFields(type).map(field=>clampRating(ratings[field.key])).filter(value=>value>0);
+    const rating=values.length?Math.round(values.reduce((sum,value)=>sum+value,0)/values.length*10)/10:0;
+    schedulePatch("hardware",id,{ratings,rating},"Notes du matériel enregistrées");
   };
-
-  updateHardwareFieldDebounced(hardwareId, { pcConfig: nextConfig });
-};
-
-const setRating = (id, rating) => {
-    const nextRating = clampRating(rating);
-
-    setGames((prev) =>
-      prev.map((game) =>
-        game.id === id ? { ...game, rating: nextRating } : game
-      )
-    );
-
-    if (selectedGame?.id === id) {
-      setSelectedGame((prev) => applySelectedGamePatch(prev, id, { rating: nextRating }));
-    }
-
-    clearTimeout(ratingUpdateTimeoutRef.current);
-
-    ratingUpdateTimeoutRef.current = setTimeout(async () => {
-      try {
-        await updateDoc(doc(db, "games", id), { rating: nextRating });
-      } catch (e) {
-        console.error("Erreur mise à jour note :", e);
-      }
-    }, 450);
+  const updateHardwareReview = (id,review) => persistPatch("hardware",id,{review},{success:"Avis sur le matériel enregistré"});
+  const updateHardwareComponent = (id,key,value) => {
+    const item=documentStateRef.current.hardware.find(item=>item.id===id);
+    schedulePatch("hardware",id,{pcConfig:{...(item?.pcConfig||{}),[key]:value}},"Configuration enregistrée");
   };
-
-  const setDetailedRating = async (id, key, value) => {
-    const nextRating = clampRating(value);
-
-    try {
-      await updateDoc(doc(db, "games", id), { [key]: nextRating });
-      setGames((prev) =>
-        prev.map((game) =>
-          game.id === id ? { ...game, [key]: nextRating } : game
-        )
-      );
-      if (selectedGame?.id === id) {
-        setSelectedGame((prev) => applySelectedGamePatch(prev, id, { [key]: nextRating }));
-      }
-    } catch (e) {
-      console.error("Erreur note détaillée :", e);
-    }
-  };
-
-  const toggleFavorite = async (id, currentValue) => {
-    try {
-      await updateDoc(doc(db, "games", id), { favorite: !currentValue });
-      setGames((prev) =>
-        prev.map((game) =>
-          game.id === id ? { ...game, favorite: !currentValue } : game
-        )
-      );
-      if (selectedGame?.id === id) {
-        setSelectedGame((prev) => applySelectedGamePatch(prev, id, { favorite: !currentValue }));
-      }
-    } catch (e) {
-      console.error("Erreur mise à jour favori :", e);
-    }
-  };
-
-  const setGameSanctuary = async (id, sanctuary) => {
-    try {
-      await updateDoc(doc(db, "games", id), { sanctuary });
-      setGames((prev) =>
-        prev.map((game) => (game.id === id ? { ...game, sanctuary } : game))
-      );
-      if (selectedGame?.id === id) {
-        setSelectedGame((prev) => applySelectedGamePatch(prev, id, { sanctuary }));
-      }
-      setToast(
-        sanctuary ? "Jeu ajouté au Sanctuaire." : "Jeu retiré du Sanctuaire."
-      );
-    } catch (e) {
-      console.error("Erreur Sanctuaire jeu :", e);
-      setToast("Impossible de mettre à jour le Sanctuaire.");
-    }
-  };
+  const setRating = (id,value) => schedulePatch("games",id,{rating:clampRating(value)},"Note enregistrée");
+  const setDetailedRating = (id,key,value) => schedulePatch("games",id,{[key]:clampRating(value)},"Notes enregistrées");
+  const toggleFavorite = (id,currentValue) => persistPatch("games",id,{favorite:!currentValue},{success:currentValue?"Favori retiré":"Favori ajouté",undoable:true});
+  const setGameSanctuary = (id,sanctuary) => persistPatch("games",id,{sanctuary},{success:sanctuary?"Jeu ajouté au Sanctuaire":"Jeu retiré du Sanctuaire",undoable:true});
 
   const setSanctuaryFigures = async (id, sanctuaryFigureIds) => {
     const nextFigureIds = Array.isArray(sanctuaryFigureIds)
@@ -19491,13 +19472,14 @@ const setRating = (id, rating) => {
   };
 
   const bulkUpdateGames = async (ids,changes) => {
+    await captureCurrentBackup("Avant modification groupée");
     const ownerUid=auth.currentUser?.uid;
     const selected=games.filter(game=>ids.includes(String(game.id)));
     const failedIds=[];let updated=0;
     for(let index=0;index<selected.length;index+=4){
       if(auth.currentUser?.uid!==ownerUid){failedIds.push(...selected.slice(index).map(game=>game.id));break;}
       const results=await Promise.allSettled(selected.slice(index,index+4).map(async game=>{
-        const patch=buildBulkGamePatch(game,changes);
+        const patch=stampGameHistory(game,stampGameMilestones(game,buildBulkGamePatch(game,changes)));
         await updateDoc(doc(db,"games",game.id),patch);
         setGames(current=>current.map(item=>item.id===game.id?{...item,...patch}:item));
         return game.id;
@@ -19507,66 +19489,19 @@ const setRating = (id, rating) => {
     return {updated,failedIds};
   };
 
-  const setStatus = async (id, status) => {
-    try {
-      const progressStatus =
-        status === "en cours"
-          ? "in_progress"
-          : isGameFinishedStatus({ status })
-            ? "completed"
-            : "not_started";
-      const completed = progressStatus === "completed";
-
-      await updateDoc(doc(db, "games", id), { status, progressStatus, completed, ratingExperience: completed ? "completed" : status === "en cours" ? "partial" : status === "collection" ? (getGameExperience(games.find((game) => game.id === id)) || "") : "" });
-      if (selectedGame?.id === id) {
-        setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
-          status,
-          progressStatus,
-          completed,
-          ratingExperience: completed ? "completed" : status === "en cours" ? "partial" : status === "collection" ? (getGameExperience(prev) || "") : "",
-        }));
-      }
-      if (["wishlist", "en cours", "collection"].includes(status)) {
-        setLibraryView(status);
-      }
-    } catch (e) {
-      console.error("Erreur mise à jour statut :", e);
-    }
+  const setStatus = async (id,status) => {
+    const progressStatus=status==="en cours"?"in_progress":isGameFinishedStatus({status})?"completed":"not_started";
+    const completed=progressStatus==="completed";
+    const current=documentStateRef.current.games.find(game=>game.id===id);
+    const ratingExperience=completed?"completed":status==="en cours"?"partial":status==="collection"?(getGameExperience(current)||""):"";
+    const saved=await persistPatch("games",id,{status,progressStatus,completed,ratingExperience},{success:"Statut enregistré",undoable:true});
+    if(saved&&["wishlist","en cours","collection"].includes(status))setLibraryView(status);
   };
-
-  const setProgressStatus = async (id, progressStatus) => {
-  try {
-    const ratingExperience = progressStatus === "completed" ? "completed" : progressStatus === "tried" ? "tried" : progressStatus === "not_started" ? "" : "partial";
-    const completed = progressStatus === "completed";
-    const currentGame = games.find((game) => game.id === id);
-    const status = completed
-      ? "collection"
-      : progressStatus === "in_progress"
-        ? "en cours"
-        : currentGame?.status === "wishlist"
-          ? "wishlist"
-          : "collection";
-
-    await updateDoc(doc(db, "games", id), {
-      progressStatus,
-      completed,
-      status,
-      ratingExperience,
-    });
-
-    if (selectedGame?.id === id) {
-      setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
-        progressStatus,
-        completed,
-        status,
-        ratingExperience,
-      }));
-    }
-
-    setToast(`Progression mise à jour : ${getProgressLabel(progressStatus)}`);
-  } catch (e) {
-    console.error("Erreur progression :", e);
-    }
+  const setProgressStatus = (id,progressStatus,note) => {
+    const current=documentStateRef.current.games.find(game=>game.id===id);
+    const patch=journeyPatch(current,progressStatus,note);
+    if(!patch)return false;
+    return persistPatch("games",id,patch,{success:"Progression enregistrée",undoable:true});
   };
 
   const setGameOfYear = async (year, gameId) => {
@@ -19612,44 +19547,11 @@ const setRating = (id, rating) => {
     }
   };
 
-  const setPlaytimeRange = async (id, playtimeRange) => {
-  try {
-    await updateDoc(doc(db, "games", id), {
-      playtimeRange,
-    });
-
-    if (selectedGame?.id === id) {
-      setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
-        playtimeRange,
-      }));
-    }
-
-    setToast(`Temps de jeu noté : ${getPlaytimeRangeLabel(playtimeRange)}`);
-  } catch (e) {
-    console.error("Erreur temps joué :", e);
-  }
-};
-
-const setPlayedPlatforms = async (id, platforms) => {
-  try {
-    await updateDoc(doc(db, "games", id), {
-      playedPlatforms: platforms,
-    });
-
-    if (selectedGame?.id === id) {
-      setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
-        playedPlatforms: platforms,
-      }));
-    }
-
-    setToast("Plateforme utilisée enregistrée.");
-  } catch (error) {
-    if (isAbortError(error)) return;
-    console.error("Erreur plateformes jouées :", error);
-  }
-};
+  const setPlaytimeRange = (id,playtimeRange) => persistPatch("games",id,{playtimeRange},{success:"Temps de jeu enregistré"});
+  const setPlayedPlatforms = (id,playedPlatforms) => persistPatch("games",id,{playedPlatforms},{success:"Plateformes enregistrées"});
 
   const repairGameDataIntegrity = async (providedIssues = null) => {
+    await captureCurrentBackup("Avant réparation des fiches");
     const issues = providedIssues || getGameDataIntegrityIssues(games);
 
     if (!issues.length) {
@@ -19682,72 +19584,26 @@ const setPlayedPlatforms = async (id, platforms) => {
     }
   };
 
-  const toggleCompleted = async (id, currentValue) => {
-    try {
-      const completed = !currentValue;
-      const currentGame = games.find((game) => game.id === id);
-      const status =
-        completed || currentGame?.status === "terminé"
-          ? "collection"
-          : currentGame?.status || "collection";
-      const progressStatus = completed ? "completed" : "not_started";
-      const ratingExperience = completed ? "completed" : "";
-
-      await updateDoc(doc(db, "games", id), {
-        completed,
-        progressStatus,
-        status,
-        ratingExperience,
-      });
-
-      if (selectedGame?.id === id) {
-        setSelectedGame((prev) => applySelectedGamePatch(prev, id, {
-          completed,
-          progressStatus,
-          status,
-          ratingExperience,
-        }));
-      }
-
-      setToast(!currentValue ? "Une aventure terminée, un souvenir de plus." : "La suite reste à découvrir, à ton rythme.");
-    } catch (e) {
-      console.error("Erreur mise à jour terminé :", e);
-    }
+  const toggleCompleted = (id,currentValue) => {
+    const current=documentStateRef.current.games.find(game=>game.id===id);
+    const completed=!currentValue;
+    const status=completed||current?.status==="terminé"?"collection":current?.status||"collection";
+    return persistPatch("games",id,{completed,status,progressStatus:completed?"completed":"not_started",ratingExperience:completed?"completed":""},{success:completed?"Jeu terminé":"Progression réinitialisée",undoable:true});
   };
-
-  const setDifficulty = async (id, difficulty) => {
-    try {
-      await updateDoc(doc(db, "games", id), { difficulty });
-      if (selectedGame?.id === id) {
-        setSelectedGame((prev) => applySelectedGamePatch(prev, id, { difficulty }));
-      }
-      setToast("Difficulté enregistrée.");
-    } catch (e) {
-      console.error("Erreur mise à jour difficulté :", e);
-    }
+  const setDifficulty = (id,difficulty) => persistPatch("games",id,{difficulty},{success:"Difficulté enregistrée"});
+  const setExperienceInfo = (id,payload) => persistPatch("games",id,payload,{success:"Expérience enregistrée"});
+  const setFavoriteReason = (id,values) => {
+    const game=documentStateRef.current.games.find(g=>g.id===id);
+    if(!game?.favorite||game.status==="wishlist"){setToast("Ce jeu doit être dans tes coups de cœur pour enregistrer sa phrase.");return Promise.resolve(false);}
+    return persistPatch("games",id,{favoriteReason:favoriteReason(values.favoriteReason),favoriteReasonShared:values.favoriteReasonShared===true,favoriteReasonUpdatedAt:new Date().toISOString()},{success:"Phrase du coup de cœur enregistrée"});
   };
-
-  const setExperienceInfo = async (id, payload) => {
-    setGames((prev) => prev.map((game) => game.id === id ? { ...game, ...payload } : game));
-    setSelectedGame((prev) => applySelectedGamePatch(prev, id, payload));
-    try { await updateDoc(doc(db, "games", id), payload); }
-    catch (error) {
-      console.error("Erreur sauvegarde expérience :", error);
-      setToast("Ton expérience n’a pas pu être enregistrée. Réessaie dans un instant.");
-    }
+  const setRediscoverPin = (id,pinned) => {
+    const gamesNow=documentStateRef.current.games,candidates=rediscoveryCandidates(gamesNow,getGameRating);
+    if(!candidates.some(c=>c.game.id===id))return Promise.resolve(false);
+    if(pinned&&candidates.filter(c=>c.game.rediscoverPinned&&c.game.id!==id).length>=3){setToast("Retire un jeu de ta sélection avant d’en garder un autre.");return Promise.resolve(false);}
+    return persistPatch("games",id,{rediscoverPinned:pinned},{success:pinned?"Jeu gardé pour rejouer":"Jeu retiré de ta sélection",undoable:true});
   };
-
-  const setReview = async (id, review) => {
-    try {
-      await updateDoc(doc(db, "games", id), { review });
-      if (selectedGame?.id === id) {
-        setSelectedGame((prev) => applySelectedGamePatch(prev, id, { review }));
-      }
-      setToast("Avis enregistré dans ta fiche.");
-    } catch (e) {
-      console.error("Erreur mise à jour avis :", e);
-    }
-  };
+  const setReview = (id,review,options={}) => persistPatch("games",id,{review,reviewSpoiler:options.reviewSpoiler===true,reviewShared:options.reviewShared===true},{success:"Avis enregistré"});
 
   const updatePhysicalGame = async (id, patch) => {
     const payload = {
@@ -19808,6 +19664,9 @@ const setPlayedPlatforms = async (id, platforms) => {
   };
 
   const changeTab = (nextTab) => {
+    if(appOptions.hiddenTabs?.includes(nextTab)){showToast("Cet onglet est masqué. Réactive-le dans Options → Préférences de contenu.");return;}
+    setSearchDestination(null);
+    if (nextTab === "social") setSocialEntryView("feed");
     window.clearTimeout(tabSwitchTimerRef.current);
     window.clearTimeout(tabTransitionTimerRef.current);
     if (nextTab === activeTab) {
@@ -19844,6 +19703,8 @@ const setPlayedPlatforms = async (id, platforms) => {
 
   const openNotification = (notification) => {
     setNotificationPanelOpen(false);
+    if(notification?.type==="monthly"){setMonthlyNotification({month:notification.month,token:Date.now()});return;}
+    if(notification?.type==="poll"){changeTab("social");setSharedProfile(null);setSocialEntryView("polls");setSearchDestination({kind:"poll",id:notification.pollId,token:Date.now()});return;}
     if (notification?.type === "trial" && pendingCheckpointLevel) {
       openTrialRoom(pendingCheckpointLevel);
       return;
@@ -19917,6 +19778,9 @@ const setPlayedPlatforms = async (id, platforms) => {
 <>
     </>
 
+          <AutomaticBackup ready={bootReady.games&&bootReady.hardware} payload={backupPayload}/>
+          <ConnectionStatus/>
+          <SaveFeedback state={saveFeedback}/>
           <Toast message={toast} />
           <BadgeUnlockToast badge={newUnlockedBadge} />
 
@@ -19942,6 +19806,7 @@ const setPlayedPlatforms = async (id, platforms) => {
         <div className="container">
           <div className="app-title-row">
             <AppHeaderBrand theme={theme}/>
+            {monthlyNotification&&<MonthlyRecap key={monthlyNotification.token} games={games} initialMonth={monthlyNotification.month} dialogOnly onCloseDialog={()=>setMonthlyNotification(null)}/>}
             <NotificationCenter
               notifications={visibleNotifications}
               open={notificationPanelOpen}
@@ -19951,6 +19816,15 @@ const setPlayedPlatforms = async (id, platforms) => {
             />
           </div>
 
+          <div className="personal-search-bar">
+            <PersonalSearch games={games} hardware={hardware} series={personalSeries} friends={socialFriends}
+              onCatalog={value=>{changeTab("search");setSearch(value);}}
+              onSelect={async entry=>{
+                if(entry.kind==="games"){openGameDetail(entry.item,games);return;}
+                if(entry.kind==="friends"){await openSocialFriendProfile(entry.item.handle);changeTab("social");return;}
+                const tab=entry.kind==="series"?"series":"hardware";changeTab(tab);setSearchDestination({kind:tab,id:entry.item.id,name:entry.item.name,token:Date.now()});
+              }}/>
+          </div>
           <TabIntroduction activeTab={activeTab} tutorialsReady={tutorialsReady && !showSplash}/>
           {["home","profile"].includes(activeTab) && <ProgressSync {...progressSync}/>}
 
@@ -19986,6 +19860,9 @@ const setPlayedPlatforms = async (id, platforms) => {
 
 {activeTab === "home" && (
   <HomeTab
+  socialProfile={socialProfile}
+  socialFriends={socialFriends}
+  onExperiencesChange={value=>updateAppOption('experiences',value)}
   theme={theme}
   games={games}
   hardware={hardware}
@@ -19995,6 +19872,9 @@ const setPlayedPlatforms = async (id, platforms) => {
   progress={progress}
   dealPreferences={appOptions}
   setActiveTab={changeTab}
+  onHomeLayoutChange={value=>updateAppOption("homeLayout",value)}
+  onRediscoverPin={setRediscoverPin}
+  detectedSeries={personalSeries}
   onOpenDetail={(game) => openGameDetail(game, games)}
   gamingEvents={gamingEvents}
   socialActivities={socialActivities}
@@ -20259,6 +20139,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
           {activeTab === "library" && (
   <>
+  {games.length === 0 && <FirstSteps games={games} onSearch={() => changeTab("search")} onOpenGame={openGameDetail}/>}
     <div className="search-panel">
       <div className="input-container">
         <input
@@ -20321,7 +20202,12 @@ const setPlayedPlatforms = async (id, platforms) => {
     Physique
   </button>
 
+  {[['paused','En pause'],['abandoned','Abandonnés'],['lists','Mes listes']].map(([id,label])=><button key={id} type="button" className={`library-switch-btn ${libraryView===id?'active':''}`} onClick={()=>setLibraryView(id)}>{label}</button>)}
 </div>
+
+<button type="button" className="option-pill" onClick={()=>setCouchOpen(true)}>Ouvrir le mode canapé</button>
+{libraryView==='lists'&&<PersonalLists value={appOptions.personalLists} games={games} onChange={value=>updateAppOption('personalLists',value)} onOpen={game=>openGameDetail(game)}/>}
+{['paused','abandoned'].includes(libraryView)&&<LibrarySection title={libraryView==='paused'?'Jeux en pause':'Jeux abandonnés'} games={filteredLibraryGames.filter(game=>game.progressStatus===libraryView)} onBulkUpdate={bulkUpdateGames} onDelete={deleteGame} onSetStatus={setStatus} onSetRating={setRating} onToggleFavorite={toggleFavorite} onQuickProgress={setProgressStatus} onOpenDetail={game=>openGameDetail(game,filteredLibraryGames.filter(item=>item.progressStatus===libraryView))} libraryCardMode={libraryCardMode} setLibraryCardMode={setLibraryCardMode}/>}
 
 {libraryView === "collection" && (
   <LibrarySection
@@ -20332,6 +20218,7 @@ const setPlayedPlatforms = async (id, platforms) => {
   onSetStatus={setStatus}
   onSetRating={setRating}
   onToggleFavorite={toggleFavorite}
+  onQuickProgress={setProgressStatus}
   onOpenDetail={(game) => openGameDetail(game, collectionGames)}
   libraryCardMode={libraryCardMode}
   setLibraryCardMode={setLibraryCardMode}
@@ -20347,6 +20234,7 @@ const setPlayedPlatforms = async (id, platforms) => {
     onSetStatus={setStatus}
     onSetRating={setRating}
     onToggleFavorite={toggleFavorite}
+  onQuickProgress={setProgressStatus}
     onOpenDetail={(game) => openGameDetail(game, inProgressGames)}
     libraryCardMode={libraryCardMode}
     setLibraryCardMode={setLibraryCardMode}
@@ -20362,6 +20250,7 @@ const setPlayedPlatforms = async (id, platforms) => {
     onSetStatus={setStatus}
     onSetRating={setRating}
     onToggleFavorite={toggleFavorite}
+  onQuickProgress={setProgressStatus}
     onOpenDetail={(game) => openGameDetail(game, wishlistGames)}
     libraryCardMode={libraryCardMode}
     setLibraryCardMode={setLibraryCardMode}
@@ -20381,6 +20270,8 @@ const setPlayedPlatforms = async (id, platforms) => {
 
 {activeTab === "series" && (
   <GameSeriesTab
+  key={searchDestination?.kind==="series"?searchDestination.token:"series"}
+  initialSeriesName={searchDestination?.kind==="series"?searchDestination.name:null}
   games={games}
   onAddGameToLibrary={addGameToFirebase}
   onAddGameToSeries={addGameToSeries}
@@ -20389,6 +20280,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
 {activeTab === "hardware" && (
   <HardwareTab
+    initialHardwareRequest={searchDestination?.kind==="hardware"?searchDestination:null}
     hardware={hardware}
     onAddHardware={addHardware}
     onDeleteHardware={deleteHardware}
@@ -20427,6 +20319,12 @@ const setPlayedPlatforms = async (id, platforms) => {
 
           {activeTab === "social" && (
             <SocialTab
+              key={searchDestination?.kind==="poll"?searchDestination.token:"social"}
+              targetPollId={searchDestination?.kind==="poll"?searchDestination.id:null}
+              onSetFavoriteReason={setFavoriteReason}
+              onOpenComparisonGame={game=>openGameDetail(game,games)}
+              onDiscoverGame={game=>{changeTab("search");setSearch(game.name);}}
+              initialView={socialEntryView}
               games={games}
               hardware={hardware}
               badges={badges}
@@ -20456,6 +20354,7 @@ const setPlayedPlatforms = async (id, platforms) => {
 
           {activeTab === "profile" && (
             <ProfileTab
+              onOpenPublicProfile={() => { changeTab("social"); setSocialEntryView("profile"); }}
               badges={badges}
               level={level}
               totalXP={totalXP}
@@ -20493,6 +20392,8 @@ const setPlayedPlatforms = async (id, platforms) => {
                 }}
                 onExportBackup={exportCheckpointBackup}
                 onImportBackup={importCheckpointBackup}
+                onCaptureBackup={captureCurrentBackup}
+                onRestoreVersion={restoreBackupVersion}
                 onResetOptions={resetAppOptions}
                 games={games}
                 onRepairGameData={repairGameDataIntegrity}
@@ -20507,7 +20408,7 @@ const setPlayedPlatforms = async (id, platforms) => {
             </>
           )}
 
-          
+
         </div>
         <SearchGameDetailModal
           game={selectedSearchGame}
@@ -20522,20 +20423,24 @@ const setPlayedPlatforms = async (id, platforms) => {
           collapsed={miniPlayerCollapsed}
           setCollapsed={setMiniPlayerCollapsed}
           onClose={() => setMiniPlayerLive(null)}
-        /> 
+        />
 
         {pixelTransition && <ThemeTransition key={pixelTransition.id} theme={theme} direction={pixelTransition.direction} effects={appOptions.transitionMotion === "light" ? "calm" : appOptions.visualEffects} fullMotion light={appOptions.transitionMotion === "light"} />}
 
       {!showSplash && (
 
-        <BottomTabs 
-        activeTab={activeTab} 
+        <BottomTabs
+        activeTab={activeTab}
         setActiveTab={changeTab}
         soundStyle={soundStyle}
+        hiddenTabs={appOptions.hiddenTabs}
       />
       )}
 
+      {couchOpen&&<CouchMode games={games} lists={appOptions.personalLists} onClose={()=>setCouchOpen(false)} onOpenGame={game=>openGameDetail(game,games)}/>}
       <GameDetailModal
+        personalLists={appOptions.personalLists}
+        onPersonalListsChange={value=>updateAppOption('personalLists',value)}
         game={selectedGame}
         onSetExperienceInfo={setExperienceInfo}
         onClose={closeGameDetail}
@@ -20548,6 +20453,7 @@ const setPlayedPlatforms = async (id, platforms) => {
         onSetSanctuaryFigures={setSanctuaryFigures}
         onSetDifficulty={setDifficulty}
         onSetReview={setReview}
+        onSetFavoriteReason={setFavoriteReason}
         onSetOstInfo={setOstInfo}
         onSetDetailedRating={setDetailedRating}
         onToggleCompleted={toggleCompleted}
