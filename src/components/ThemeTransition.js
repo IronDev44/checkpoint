@@ -1,3 +1,4 @@
+import {ULTIMATE_VAULT_DURATION} from "./UltimateVaultTransition";
 import { useEffect, useState } from "react";
 import { createPortal as renderPortal } from "react-dom";
 import "./ThemeTransition.css";
@@ -34,6 +35,7 @@ import { getGameUniverseTheme } from "../data/gameUniverseThemes";
 
 // Each theme has its own motif; motion stays short enough to finish before cleanup.
 export const THEME_TRANSITION_DURATION = 840;
+export const getThemeTransitionDuration=(theme,light=false)=>theme==="theme-matrix"?1320:theme==="theme-checkpointultimate"&&!light?ULTIMATE_VAULT_DURATION:THEME_TRANSITION_DURATION;
 
 const identities = {
   "theme-indigo": ["aurora", "#a78bfa", "M2 18 Q7 2 12 12 T22 6 M2 22 Q7 6 12 16 T22 10"],

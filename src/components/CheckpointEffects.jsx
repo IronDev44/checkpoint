@@ -1,7 +1,9 @@
+import UltimateVaultTransition from "./UltimateVaultTransition";
 import { useId } from "react";
 import "./CheckpointTheme.css";
 import "./CheckpointPremium.css";
 import "./CheckpointUltimate.css";
+import "./UltimateVaultTransition.css";
 
 // A gateway and its save point: one original mark shared by the app and boot.
 export function CheckpointMark({ className = "", variant = "gold" }) {
@@ -83,13 +85,8 @@ export function CheckpointPremiumIntro({ progress = 0, light = false, onRequestC
   </div>;
 }
 
-export function CheckpointPremiumTransition({ light = false, direction = "right" }) {
-  return <div className={`checkpoint-premium-transition direction-${direction}${light ? " is-light" : ""}`} aria-hidden="true">
-    <div className="checkpoint-premium-shutter shutter-left"/><div className="checkpoint-premium-shutter shutter-right"/>
-    <div className="checkpoint-premium-seam"/>
-    <div className="checkpoint-premium-transition-seal"><CheckpointMark variant="platinum"/><span>PREMIUM</span></div>
-    {!light && <div className="checkpoint-premium-transition-facets">{Array.from({length:6},(_,i)=><i key={i} style={{"--plane":i}}/>)}</div>}
-  </div>;
+export function CheckpointPremiumTransition({light=false,direction="right"}) {
+  return <CheckpointCrownTransition light={light} direction={direction}/>;
 }
 
 // Original cut-crystal geometry. Dark tables and narrow illuminated bevels
@@ -163,10 +160,12 @@ function UltimateCrownLighting(){
   </div>;
 }
 
-export function CheckpointUltimateTransition({light=false,direction='right'}) {
-  return <div className={`checkpoint-ultimate-transition direction-${direction}${light?' is-light':''}`} aria-hidden="true">
+function CheckpointCrownTransition({light=false,direction='right'}) {
+  return <div className={`checkpoint-ultimate-transition checkpoint-premium-transition checkpoint-crown-transition direction-${direction}${light?' is-light':''}`} aria-hidden="true">
     <div className="checkpoint-ultimate-veil"/>
     {!light&&<><UltimateCrownLighting/><UltimatePrestigeSetting transition/></>}
-    <div className="checkpoint-ultimate-seal"><CheckpointMark variant="diamond"/></div>
+    <div className="checkpoint-ultimate-seal"><CheckpointMark variant="platinum"/></div>
   </div>;
 }
+
+export function CheckpointUltimateTransition(props){return <UltimateVaultTransition {...props} Mark={CheckpointMark}/>;}

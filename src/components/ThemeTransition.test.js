@@ -76,3 +76,9 @@ test.each([
   view.unmount();
   expect(document.querySelector(selector)).toBeNull();
 });
+
+
+test('Ultimate has time for the obsidian reveal while reduced and Premium keep their short duration',()=>{
+ const {getThemeTransitionDuration}=require('./ThemeTransition');
+ expect(getThemeTransitionDuration('theme-checkpointultimate')).toBe(1280);expect(getThemeTransitionDuration('theme-checkpointultimate',true)).toBe(840);expect(getThemeTransitionDuration('theme-checkpointpremium')).toBe(840);expect(getThemeTransitionDuration('theme-matrix')).toBe(1320);
+});

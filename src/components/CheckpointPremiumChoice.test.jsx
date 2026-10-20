@@ -30,8 +30,8 @@ test("premium startup remembers only appearance and renders the platinum intro",
 });
 test("premium transitions differ from gold, reduce facets and clean up their portal", () => {
   const view=render(<ThemeTransition theme={premium} direction="right" effects="balanced" fullMotion/>);
-  expect(document.querySelectorAll(".checkpoint-premium-shutter")).toHaveLength(2);
-  expect(document.querySelectorAll(".checkpoint-premium-transition-facets i")).toHaveLength(6);
+  expect(document.querySelectorAll(".ultimate-crown-rail")).toHaveLength(2);
+  expect(document.querySelector(".checkpoint-crown-transition .checkpoint-mark-platinum")).not.toBeNull();
   expect(document.querySelector(".checkpoint-gold-transition")).toBeNull();
   view.rerender(<ThemeTransition theme={premium} direction="left" light effects="calm" fullMotion/>);
   expect(document.querySelector(".checkpoint-premium-transition.is-light.direction-left")).not.toBeNull();
@@ -63,8 +63,8 @@ test("ultimate startup and portal have distinct compositions and reduce geometry
   expect(document.querySelector(".checkpoint-ultimate-reflection")).not.toBeNull();
   view.rerender(<ThemeTransition theme={ultimate} fullMotion effects="balanced"/>);
   expect(document.querySelector(".checkpoint-ultimate-intro")).toBeNull();
-  expect(document.querySelectorAll(".ultimate-crown-rail")).toHaveLength(2);
-  expect(document.querySelector(".checkpoint-premium-shutter")).toBeNull();
+  expect(document.querySelectorAll(".ultimate-vault-facet")).toHaveLength(8);
+  expect(document.querySelector(".ultimate-crown-light")).toBeNull();
   view.rerender(<ThemeTransition theme={ultimate} fullMotion light direction="left" effects="calm"/>);
   expect(document.querySelector(".checkpoint-ultimate-transition.is-light.direction-left")).not.toBeNull();
   expect(document.querySelector(".ultimate-cut-lighting")).toBeNull();

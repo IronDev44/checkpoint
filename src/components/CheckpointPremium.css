@@ -71,7 +71,7 @@ html body[data-theme] button.checkpoint-premium-choice.option-pill.active { back
 @keyframes checkpoint-premium-facet { from { translate:-4vw 3vh; opacity:0; } 50% { opacity:1; } to { translate:4vw -3vh; opacity:0; } }
 @media(max-width:380px) { html body[data-theme] button.checkpoint-premium-choice.option-pill { grid-template-columns:34px minmax(0,1fr); gap:10px; padding:14px !important; } .checkpoint-premium-choice .checkpoint-mark { width:34px; } .checkpoint-premium-choice-status { grid-column:2; } .checkpoint-premium-choice-progress { grid-column:2; } }
 @media(max-height:500px) { .checkpoint-premium-intro .checkpoint-gold-intro-content { padding-bottom:28px; } .checkpoint-premium-intro .checkpoint-gold-emblem { width:75px; margin-bottom:12px; } .checkpoint-premium-edition { margin-bottom:12px; } .checkpoint-premium-intro .checkpoint-premium-caption { margin-top:12px; } .checkpoint-premium-intro .checkpoint-premium-wordmark { font-size:10px; } }
-@media(prefers-reduced-motion:reduce) { .checkpoint-premium-transition,.checkpoint-premium-transition * { animation:none !important; } .checkpoint-full-tab-motion .checkpoint-premium-transition { animation:checkpoint-premium-veil 840ms ease both !important; } }
+@media(prefers-reduced-motion:reduce) { .checkpoint-premium-transition:not(:where(.checkpoint-full-tab-motion *)),.checkpoint-premium-transition:not(:where(.checkpoint-full-tab-motion *)) * { animation:none !important; } .checkpoint-full-tab-motion .checkpoint-premium-transition { animation:checkpoint-premium-veil 840ms ease both !important; } }
 
 /* Sustained specular movement: darker pearl metal makes the light sweep visible.
    Main controls use transforms; card-edge strips repaint only a single pixel. */

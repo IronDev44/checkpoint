@@ -92,7 +92,7 @@ import GameExperiencePanel from "./components/GameExperiencePanel";
 import { getGameExperience, getExperienceRatingFields } from "./services/gameExperience";
 import RatingSliderControl from "./components/RatingSlider";
 import { saveStartupAppearance } from "./services/startupAppearance";
-import ThemeTransition, { THEME_TRANSITION_DURATION } from "./components/ThemeTransition";
+import ThemeTransition, { getThemeTransitionDuration } from "./components/ThemeTransition";
 import TransitionSettings from "./components/TransitionSettings";
 import SoundSettings from "./components/SoundSettings";
 import { DEFAULT_SOUND_SETTINGS, normalizeSoundSettings, readLegacySoundSettings, playSound, applySoundSettings, stopAllSounds } from "./services/soundEffects";
@@ -19673,7 +19673,7 @@ useEffect(() => {
     }, 90);
     tabTransitionTimerRef.current = window.setTimeout(() => {
       setPixelTransition(null);
-    }, theme === "theme-matrix" ? 1320 : THEME_TRANSITION_DURATION);
+    }, getThemeTransitionDuration(theme, appOptions.transitionMotion === "light"));
   };
 
   const openNotification = (notification) => {

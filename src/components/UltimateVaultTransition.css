@@ -1,0 +1,33 @@
+/* Premium inherits the previous crown; Ultime gets a separate obsidian reveal. */
+.checkpoint-crown-transition::before{display:none}
+.checkpoint-ultimate-transition.checkpoint-vault-transition{background:#030609;animation:ultimateVaultVeil var(--vault-duration) linear both}
+.ultimate-vault-black{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,#11212e,#020407 65%)}
+.ultimate-vault-halo{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 49%,#b4e5ff40, #89c0eb12 25%,transparent 58%);animation:ultimateVaultHalo var(--vault-duration) ease both}
+.ultimate-vault-facets{position:absolute;inset:0;width:100%;height:100%;overflow:hidden}
+.ultimate-vault-facet{animation:ultimateVaultOpen var(--vault-duration) cubic-bezier(.2,.65,.2,1) both}
+.ultimate-vault-setting{position:absolute;left:50%;top:50%;width:clamp(310px,78vmin,650px);aspect-ratio:1;transform:translate(-50%,-50%);animation:ultimateVaultSetting var(--vault-duration) ease both}
+.ultimate-vault-setting>svg{display:block;width:100%;height:100%;overflow:visible}
+.ultimate-vault-ring{stroke:#cce8f2;stroke-width:.8}.ultimate-vault-ring-light{stroke:#f1fcff;stroke-width:1.8;stroke-dasharray:.11 .89;stroke-linecap:round;animation:ultimateVaultCut var(--vault-duration) ease both}
+.ultimate-vault-spark{fill:#effaff;stroke:#effaff;stroke-width:.8;opacity:0;animation:ultimateVaultSpark 900ms ease var(--spark-delay) both;transform-box:fill-box;transform-origin:center}
+.ultimate-vault-jewel{position:absolute;left:50%;top:50%;width:clamp(140px,35vmin,230px);transform:translate(-50%,-50%);animation:ultimateVaultJewel var(--vault-duration) ease both}
+.ultimate-vault-jewel>.checkpoint-mark{display:block;width:100%;height:auto;filter:drop-shadow(0 0 16px #acddff26)}
+.ultimate-vault-jewel .checkpoint-crystal-scan{animation:ultimateVaultPolish var(--vault-duration) ease both}
+.ultimate-vault-reflection{position:absolute;left:0;right:0;top:calc(100% + 5px);height:32%;overflow:hidden;opacity:.3;mask-image:linear-gradient(#000b,transparent 90%)}
+.ultimate-vault-reflection .checkpoint-mark{width:100%;transform:scaleY(-1);filter:blur(.5px)}.ultimate-vault-reflection *{animation:none!important}
+.ultimate-vault-rays{position:absolute;inset:0;overflow:hidden;animation:ultimateVaultSetting var(--vault-duration) ease both}
+.ultimate-vault-rays>i{position:absolute;left:50%;top:50%;height:160vmax;width:10vmin;transform:translate(-50%,-50%) rotate(35deg);background:linear-gradient(90deg,transparent,#d9f2ff0a 45%,#e5f7ff20 50%,transparent 55%);mask-image:radial-gradient(ellipse,#000,transparent 65%)}
+.ultimate-vault-rays>i:nth-child(2){transform:translate(-50%,-50%) rotate(-35deg)}.ultimate-vault-rays>i:nth-child(3){transform:translate(-50%,-50%) rotate(73deg);opacity:.4}.ultimate-vault-rays>i:nth-child(4){transform:translate(-50%,-50%) rotate(-73deg);opacity:.4}
+.ultimate-vault-dust{position:absolute;inset:0}.ultimate-vault-dust>i{position:absolute;left:var(--dust-x);top:var(--dust-y);width:2px;height:2px;background:#e8f8ff;box-shadow:0 0 6px #afdfff;opacity:0;animation:ultimateVaultDust 1050ms ease var(--dust-delay) both}
+.ultimate-vault-final-light{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,#d2efff2b,transparent 58%);opacity:0;animation:ultimateVaultFinal var(--vault-duration) ease both}
+.checkpoint-vault-transition.is-light .ultimate-vault-jewel{width:110px}.checkpoint-vault-transition.is-light .ultimate-vault-ring{stroke-width:1}.checkpoint-vault-transition.is-light .ultimate-vault-setting{width:280px}
+@keyframes ultimateVaultVeil{0%,100%{opacity:0}12%,84%{opacity:1}}
+@keyframes ultimateVaultOpen{0%,10%{transform:translate(0,0);opacity:1}54%,80%{transform:translate(var(--facet-x),var(--facet-y));opacity:.7}100%{transform:translate(var(--facet-x),var(--facet-y));opacity:0}}
+@keyframes ultimateVaultHalo{0%{opacity:0}40%,72%{opacity:1}100%{opacity:0}}
+@keyframes ultimateVaultSetting{0%,16%,100%{opacity:0}38%,77%{opacity:1}}
+@keyframes ultimateVaultJewel{0%,18%,100%{opacity:0}42%,80%{opacity:1}}
+@keyframes ultimateVaultCut{0%{stroke-dashoffset:.8;opacity:0}35%,70%{opacity:.8}100%{stroke-dashoffset:-.8;opacity:0}}
+@keyframes ultimateVaultSpark{0%,25%,100%{opacity:0;scale:.4}56%{opacity:.9;scale:1.3}78%{opacity:.3;scale:.8}}
+@keyframes ultimateVaultPolish{0%,15%{opacity:0;transform:translateX(-80px)}40%,55%{opacity:1}80%,100%{opacity:0;transform:translateX(180px)}}
+@keyframes ultimateVaultDust{0%,20%,100%{opacity:0;translate:0 10px}55%{opacity:.65;translate:0 -10px}}
+@keyframes ultimateVaultFinal{0%,50%,100%{opacity:0}75%{opacity:.7}}
+@media(prefers-reduced-motion:reduce){.checkpoint-vault-transition:not(:where(.checkpoint-full-tab-motion *)) *{animation:none!important}.ultimate-vault-facets:not(:where(.checkpoint-full-tab-motion *)),.ultimate-vault-dust:not(:where(.checkpoint-full-tab-motion *)),.ultimate-vault-rays:not(:where(.checkpoint-full-tab-motion *)),.ultimate-vault-ring-light:not(:where(.checkpoint-full-tab-motion *)),.ultimate-vault-spark:not(:where(.checkpoint-full-tab-motion *)){display:none}.ultimate-vault-final-light:not(:where(.checkpoint-full-tab-motion *)){display:none}.checkpoint-full-tab-motion .checkpoint-vault-transition{animation:ultimateVaultVeil var(--vault-duration) linear both!important}}

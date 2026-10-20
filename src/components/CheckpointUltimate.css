@@ -100,7 +100,7 @@ html:has(.checkpoint-ultimate-intro),body:has(.checkpoint-ultimate-intro) {overf
 @keyframes ultimateSeal {0%,18%{opacity:0;scale:.98}38%,65%{opacity:1;scale:1}100%{opacity:0;scale:1.015}}
 @media(max-height:620px){.checkpoint-ultimate-edition{margin-bottom:22px}.checkpoint-ultimate-object{width:140px}.checkpoint-ultimate-lockup{margin-top:36px}.checkpoint-ultimate-stage{transform:translateY(-3vh)}.checkpoint-ultimate-lockup h1{font-size:24px}.checkpoint-ultimate-lockup .checkpoint-ultimate-wordmark{margin-top:12px}.checkpoint-ultimate-intro .checkpoint-gold-loading{bottom:24px}}
 @media(max-height:420px){.checkpoint-ultimate-object{width:95px}.checkpoint-ultimate-edition{margin-bottom:12px;font-size:8px}.checkpoint-ultimate-lockup{margin-top:18px}.checkpoint-ultimate-lockup h1{font-size:21px}.checkpoint-ultimate-lockup .checkpoint-ultimate-wordmark{font-size:8px;margin-top:7px}.checkpoint-ultimate-intro .checkpoint-gold-loading{bottom:12px;width:52%}.checkpoint-ultimate-stage{transform:translateY(-10px)}}
-@media(prefers-reduced-motion:reduce){.checkpoint-ultimate-intro *,.checkpoint-ultimate-intro *::before,.checkpoint-ultimate-transition *{animation:none!important}.checkpoint-ultimate-intro .checkpoint-crystal-caustic{display:none}.checkpoint-ultimate-transition{animation:none!important}.checkpoint-full-tab-motion .checkpoint-ultimate-transition{animation:ultimateVeilOpacity 840ms ease both!important}}
+@media(prefers-reduced-motion:reduce){.checkpoint-ultimate-intro *,.checkpoint-ultimate-intro *::before,.checkpoint-ultimate-transition:not(:where(.checkpoint-full-tab-motion *)) *{animation:none!important}.checkpoint-ultimate-intro .checkpoint-crystal-caustic{display:none}.checkpoint-ultimate-transition:not(:where(.checkpoint-full-tab-motion *)){animation:none!important}.checkpoint-full-tab-motion .checkpoint-ultimate-transition{animation:ultimateVeilOpacity 840ms ease both!important}}
 
 /* Slightly brighter progress metal, independent from dark action surfaces. */
 html body[data-theme="theme-checkpointultimate"] :is(.xp-fill,.completion-fill,.progress-fill,.badge-progress-fill,.console-xp-fill) {
@@ -143,7 +143,7 @@ html body[data-theme="theme-checkpointultimate"] :is(.xp-bar,.progress-bar,.badg
 @keyframes ultimatePrestigePortal{0%,10%,100%{opacity:0}38%,60%{opacity:.9}}
 @keyframes ultimatePrestigeSealCut{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 @media(max-height:420px){.checkpoint-ultimate-transition .ultimate-prestige-setting{width:205px}.ultimate-studio-caustics{top:64%}}
-@media(prefers-reduced-motion:reduce){.checkpoint-ultimate-intro .ultimate-prestige-trace,.checkpoint-ultimate-intro .ultimate-prestige-glint,.checkpoint-ultimate-intro .ultimate-studio-beams{display:none}.checkpoint-ultimate-intro .ultimate-prestige-outline{stroke-dashoffset:0}.checkpoint-ultimate-transition .ultimate-prestige-glint{display:none}}
+@media(prefers-reduced-motion:reduce){.checkpoint-ultimate-intro .ultimate-prestige-trace,.checkpoint-ultimate-intro .ultimate-prestige-glint,.checkpoint-ultimate-intro .ultimate-studio-beams{display:none}.checkpoint-ultimate-intro .ultimate-prestige-outline{stroke-dashoffset:0}.checkpoint-ultimate-transition .ultimate-prestige-glint:not(:where(.checkpoint-full-tab-motion *)){display:none}}
 
 /* Polished black glass carries the emblem's reflection beneath the setting. */
 .checkpoint-ultimate-reflection{height:46%;mask-image:linear-gradient(#000d 0%,#0008 35%,transparent 95%);animation:ultimateMirrorReveal 1.6s ease 1.1s both}
@@ -182,4 +182,4 @@ html body[data-theme="theme-checkpointultimate"] :is(.xp-bar,.progress-bar,.badg
 .ultimate-diamond-aura{background:radial-gradient(ellipse at 50% 46%,#b6dffb24, #a6d9f00b 26%,transparent 58%)}
 @keyframes ultimateCrownCaustic{0%{stroke-dashoffset:.62;opacity:0}25%,62%{opacity:.85}100%{stroke-dashoffset:-.5;opacity:0}}
 @keyframes ultimateApexFlash{0%,12%,100%{opacity:0}38%{opacity:.9}65%{opacity:.4}}
-@media(prefers-reduced-motion:reduce){.ultimate-crown-caustic,.ultimate-crown-bloom,.ultimate-apex-flare{display:none}.ultimate-crown-edge{opacity:.3}}
+@media(prefers-reduced-motion:reduce){.ultimate-crown-caustic:not(:where(.checkpoint-full-tab-motion *)),.ultimate-crown-bloom:not(:where(.checkpoint-full-tab-motion *)),.ultimate-apex-flare:not(:where(.checkpoint-full-tab-motion *)){display:none}.ultimate-crown-edge{opacity:.3}}

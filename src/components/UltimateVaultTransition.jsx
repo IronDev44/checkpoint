@@ -1,0 +1,15 @@
+import {useId} from 'react';
+export const ULTIMATE_VAULT_DURATION=1280;
+function point(radius,angle){return [400+radius*Math.cos(angle),400+radius*Math.sin(angle)];}
+const polygon=(radius,count=8)=>Array.from({length:count},(_,i)=>point(radius,-Math.PI/2+i*Math.PI*2/count).join(',')).join(' ');
+export default function UltimateVaultTransition({light=false,direction='right',Mark}){
+ const paint=`vault-${useId().replace(/[^a-zA-Z0-9_-]/g,'')}`;
+ return <div className={`checkpoint-ultimate-transition checkpoint-vault-transition direction-${direction}${light?' is-light':''}`} style={{'--vault-duration':`${light?840:ULTIMATE_VAULT_DURATION}ms`}} aria-hidden="true">
+  <div className="ultimate-vault-black"/><div className="ultimate-vault-halo"/>
+  {!light&&<><div className="ultimate-vault-rays"><i/><i/><i/><i/></div><svg className="ultimate-vault-facets" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid slice" fill="none"><defs><linearGradient id={`${paint}-obsidian`} x1="0" y1="0" x2="1" y2="1"><stop stopColor="#0b111b"/><stop offset=".48" stopColor="#14222e"/><stop offset=".52" stopColor="#263a49"/><stop offset="1" stopColor="#060a10"/></linearGradient><linearGradient id={`${paint}-edge`}><stop stopColor="#9ec3d5" stopOpacity=".08"/><stop offset=".5" stopColor="#e4f7ff" stopOpacity=".8"/><stop offset="1" stopColor="#7396ae" stopOpacity=".15"/></linearGradient></defs>{Array.from({length:8},(_,i)=>{const a=-Math.PI/2+i*Math.PI/4,b=a+Math.PI/4,m=(a+b)/2,points=[point(620,a),point(620,b),point(162,b),point(162,a)];return <g className="ultimate-vault-facet" key={i} style={{'--facet-x':`${Math.cos(m)*230}px`,'--facet-y':`${Math.sin(m)*230}px`}}><polygon points={points.map(p=>p.join(',')).join(' ')} fill={`url(#${paint}-obsidian)`} stroke={`url(#${paint}-edge)`} strokeWidth=".8"/><polygon points={[points[0],points[2],points[3]].map(p=>p.join(',')).join(' ')} fill={i%2?'#b5d9ee08':'#e9f7ff0b'}/><path d={`M${points[3].join(' ')}L${points[2].join(' ')}`} stroke="#e4f6ff" strokeOpacity=".5" strokeWidth="1.2"/></g>})}</svg></>}
+  <div className="ultimate-vault-setting"><svg viewBox="0 0 800 800" fill="none">{[light?237:285,light?205:237,...(light?[]:[205])].map((radius,i)=><g key={radius}><polygon className="ultimate-vault-ring" points={polygon(radius)} style={{opacity:.45-i*.1}}/>{!light&&<polygon className="ultimate-vault-ring-light" points={polygon(radius)} pathLength="1" style={{animationDelay:`${i*.05}s`}}/>}</g>)}{!light&&Array.from({length:8},(_,i)=>{const [x,y]=point(237,-Math.PI/2+i*Math.PI/4);return <g className="ultimate-vault-spark" key={i} style={{'--spark-delay':`${i%4*.06}s`}}><path d={`M${x-9} ${y}H${x+9}M${x} ${y-9}V${y+9}`}/><circle cx={x} cy={y} r="2"/></g>})}</svg></div>
+  {!light&&<div className="ultimate-vault-dust">{Array.from({length:16},(_,i)=><i key={i} style={{'--dust-x':`${50+(i%2?1:-1)*(12+Math.floor(i/2)*4)}%`,'--dust-y':`${22+i*37%58}%`,'--dust-delay':`${i%4*.05}s`}}/>)}</div>}
+  <div className="ultimate-vault-jewel"><Mark variant="diamond"/>{!light&&<div className="ultimate-vault-reflection"><Mark variant="diamond"/></div>}</div>
+  <div className="ultimate-vault-final-light"/>
+ </div>;
+}
