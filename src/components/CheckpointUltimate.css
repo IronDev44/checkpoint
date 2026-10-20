@@ -152,7 +152,7 @@ html body[data-theme="theme-checkpointultimate"] :is(.xp-bar,.progress-bar,.badg
 @keyframes ultimatePrestigeTrace{0%{stroke-dashoffset:.45;opacity:0}22%,62%{opacity:.8}100%{stroke-dashoffset:-.8;opacity:0}}
 @keyframes ultimatePrestigeGlint{0%,100%{opacity:0;scale:.5}40%{opacity:.85;scale:1}65%{opacity:.4;scale:.8}}
 @keyframes ultimatePrestigeLetterLight{from{background-position:100% 0}to{background-position:0 0}}
-@keyframes ultimatePrestigePortal{0%,10%{opacity:0;scale:.83;rotate:-7deg}38%,60%{opacity:.9;scale:1;rotate:0deg}100%{opacity:0;scale:1.16;rotate:2deg}}
+@keyframes ultimatePrestigePortal{0%,10%,100%{opacity:0}38%,60%{opacity:.9}}
 @keyframes ultimatePrestigeRefraction{from{translate:-70% 0}to{translate:70% 0}}
 @keyframes ultimatePrestigeSealCut{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 @media(max-height:420px){.checkpoint-ultimate-transition .ultimate-prestige-setting{width:205px}.ultimate-studio-caustics{top:64%}}
@@ -167,14 +167,10 @@ html body[data-theme="theme-checkpointultimate"] :is(.xp-bar,.progress-bar,.badg
 .checkpoint-ultimate-intro:not(.is-light) .checkpoint-ultimate-object>.checkpoint-mark .checkpoint-crystal-scan{animation:ultimatePolishedSweep 4.6s cubic-bezier(.3,.2,.2,1) .15s infinite}
 .checkpoint-ultimate-intro .ultimate-prestige-outline{stroke:#cee8f05c}
 .checkpoint-ultimate-intro .ultimate-studio-light{background:radial-gradient(ellipse at 50% 43%,#cce8fc21,transparent 49%)}
-.checkpoint-ultimate-transition{--setting-travel:30px}
-.checkpoint-ultimate-transition.direction-left{--setting-travel:-30px}
-.checkpoint-ultimate-transition .ultimate-prestige-setting{animation-name:ultimateSettingGlide}
 .checkpoint-ultimate-glass i{box-shadow:2px 0 10px #d2f1ff12}
 .ultimate-transition-refraction{background:linear-gradient(115deg,transparent 44%,#b9dce30a 47%,#e5f6ff50 49%,#afcbe326 49.3%,transparent 50%,#d0cce319 51%,transparent 54%)}
 @keyframes ultimateMirrorReveal{from{opacity:0}to{opacity:.42}}
 @keyframes ultimatePolishedSweep{0%,8%{opacity:0;transform:translateX(-80px)}18%,48%{opacity:1}66%,100%{opacity:0;transform:translateX(180px)}}
-@keyframes ultimateSettingGlide{0%,10%{opacity:0;scale:.88;translate:calc(var(--setting-travel)*-.7) 0;rotate:-3deg}36%,57%{opacity:.9;scale:1;translate:0 0;rotate:0deg}100%{opacity:0;scale:1.07;translate:var(--setting-travel) 0;rotate:1deg}}
 @media(max-height:620px){.checkpoint-ultimate-lockup{margin-top:88px}}
 @media(max-height:420px){.checkpoint-ultimate-lockup{margin-top:52px}.checkpoint-ultimate-reflection{height:38%}}
 .checkpoint-ultimate-intro.is-light .checkpoint-ultimate-object::after{animation:none;opacity:.25}
