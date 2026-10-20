@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import SplashScreen from "./SplashScreen";
 import ThemeTransition from "./ThemeTransition";
-import { CheckpointIntro, CheckpointMark, CheckpointUltimateIntro } from "./CheckpointEffects";
+import { CheckpointIntro, CheckpointMark, CheckpointUltimateIntro, CheckpointUltimateTransition } from "./CheckpointEffects";
 import { readStartupAppearance, saveStartupAppearance } from "../services/startupAppearance";
 
 test("new visitors get Checkpoint while existing choices survive", () => {
@@ -74,4 +74,15 @@ test("cut-crystal marks use independent paint references in the header, intro an
  view.rerender(<CheckpointUltimateIntro light progress={42}/>);
  expect(document.querySelector('.checkpoint-ultimate-reflection')).toBeNull();
  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow','42');
+});
+
+
+test('ultimate prestige uses an engraved setting for the intro and refracted light for the transition, without heavy elements in light mode',()=>{
+ const view=render(<CheckpointUltimateIntro progress={72}/>);
+ expect(document.querySelector('.ultimate-prestige-frame')).not.toBeNull();expect(document.querySelectorAll('.ultimate-prestige-glint')).toHaveLength(6);
+ expect(document.querySelector('.ultimate-studio-beams')).not.toBeNull();expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow','72');
+ view.rerender(<CheckpointUltimateTransition direction="left"/>);
+ expect(document.querySelector('.ultimate-prestige-setting.is-transition')).not.toBeNull();expect(document.querySelector('.ultimate-transition-refraction')).not.toBeNull();expect(document.querySelector('.checkpoint-ultimate-transition')).toHaveClass('direction-left');
+ view.rerender(<CheckpointUltimateTransition light/>);expect(document.querySelector('.ultimate-prestige-setting')).toBeNull();expect(document.querySelector('.ultimate-transition-refraction')).toBeNull();
+ view.rerender(<CheckpointUltimateIntro light progress={30}/>);expect(document.querySelector('.ultimate-prestige-setting')).toBeNull();expect(document.querySelector('.ultimate-studio-beams')).toBeNull();expect(document.querySelector('.checkpoint-mark-diamond')).not.toBeNull();
 });

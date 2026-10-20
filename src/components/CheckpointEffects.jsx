@@ -125,14 +125,26 @@ function DiamondMark({id,className}) {
   </svg>;
 }
 
+function UltimatePrestigeSetting({transition=false}) {
+  return <div className={`ultimate-prestige-setting${transition?' is-transition':''}`} aria-hidden="true">
+    <svg className="ultimate-prestige-frame" viewBox="0 0 420 440" fill="none">
+      <path className="ultimate-prestige-outline" pathLength="1" d="M210 18L383 118V322L210 422L37 322V118Z"/>
+      <path className="ultimate-prestige-inner" d="M210 38L366 128V312L210 402L54 312V128Z"/>
+      <path className="ultimate-prestige-cuts" d="M210 18V38M383 118L366 128M383 322L366 312M210 422V402M37 322L54 312M37 118L54 128"/>
+      <path className="ultimate-prestige-trace" pathLength="1" d="M210 18L383 118V322L210 422L37 322V118Z"/>
+    </svg>
+    {[[50,4],[91,27],[91,73],[50,96],[9,73],[9,27]].map(([x,y],i)=><i className="ultimate-prestige-glint" key={i} style={{left:`${x}%`,top:`${y}%`,'--glint-delay':`${transition?i*.055:.65+i*.28}s`}}/>)}
+  </div>;
+}
+
 export function CheckpointUltimateIntro({progress=0,light=false,onRequestClose}) {
   const value=Math.max(0,Math.min(100,Math.round(progress)));
   return <div className={`checkpoint-ultimate-intro${light?' is-light':''}`}>
-    <div className="checkpoint-ultimate-studio" aria-hidden="true"><div className="ultimate-studio-light"/><div className="ultimate-studio-floor"/></div>
+    <div className="checkpoint-ultimate-studio" aria-hidden="true"><div className="ultimate-studio-light"/>{!light&&<><div className="ultimate-studio-beams"><i/><i/></div><div className="ultimate-studio-caustics"/></>}<div className="ultimate-studio-floor"/></div>
     {onRequestClose&&<button className="checkpoint-gold-skip" onClick={onRequestClose}>Passer</button>}
     <main className="checkpoint-ultimate-stage">
       <span className="checkpoint-ultimate-edition">LA SIGNATURE CHECKPOINT</span>
-      <div className="checkpoint-ultimate-object"><CheckpointMark variant="diamond"/>{!light&&<div className="checkpoint-ultimate-reflection" aria-hidden="true"><CheckpointMark variant="diamond"/></div>}</div>
+      <div className="checkpoint-ultimate-object">{!light&&<UltimatePrestigeSetting/>}<CheckpointMark variant="diamond"/>{!light&&<div className="checkpoint-ultimate-reflection" aria-hidden="true"><CheckpointMark variant="diamond"/></div>}</div>
       <div className="checkpoint-ultimate-lockup"><h1>CHECKPOINT</h1><p className="checkpoint-ultimate-wordmark"><span/>ULTIME<span/></p></div>
     </main>
     <div className="checkpoint-gold-loading"><div><span>Ton espace se prépare</span><strong>{value}%</strong></div><div className="checkpoint-gold-progress" role="progressbar" aria-label="Chargement de Checkpoint Ultime" aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><span style={{width:`${value}%`}}/></div></div>
@@ -144,6 +156,7 @@ export function CheckpointUltimateTransition({light=false,direction='right'}) {
     <div className="checkpoint-ultimate-veil"/>
     {!light&&<div className="checkpoint-ultimate-glass" aria-hidden="true"><i/><i/><i/></div>}
     <div className="checkpoint-ultimate-seam"/>
+    {!light&&<><div className="ultimate-transition-refraction"/><UltimatePrestigeSetting transition/></>}
     <div className="checkpoint-ultimate-seal"><CheckpointMark variant="diamond"/><span>ULTIME</span></div>
   </div>;
 }

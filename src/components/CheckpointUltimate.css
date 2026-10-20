@@ -118,3 +118,42 @@ html body[data-theme="theme-checkpointultimate"] :is(.xp-fill,.completion-fill,.
  box-shadow:inset 0 1px #e4f7ff70,0 0 8px #b7ddeb20;
 }
 html body[data-theme="theme-checkpointultimate"] :is(.xp-bar,.progress-bar,.badge-progress-bar,.console-xp-bar) {background:#b7d4e113!important;border-color:#bfd9e52e!important}
+
+/* A cut-crystal setting, lit once as the signature comes into view. */
+.ultimate-studio-beams{position:absolute;inset:0;overflow:hidden;opacity:.65;animation:ultimatePrestigeAtmosphere 3s ease both}
+.ultimate-studio-beams i{position:absolute;top:-30%;left:19%;width:20%;height:130%;background:linear-gradient(90deg,transparent,#c5e6f00b 48%,#e5faff12 50%,transparent 55%);transform:rotate(24deg);transform-origin:50% 0;animation:ultimatePrestigeBeam 5s ease-in-out both}
+.ultimate-studio-beams i:last-child{left:72%;width:13%;transform:rotate(-25deg);opacity:.55;animation-direction:reverse}
+.ultimate-studio-caustics{position:absolute;left:5%;right:5%;top:65%;height:19%;background:repeating-conic-gradient(from 15deg at 50% 0%,transparent 0deg 21deg,#b1d8e50b 22deg 23deg,transparent 24deg 47deg);mask-image:radial-gradient(ellipse at 50% 0%,#000,transparent 65%);animation:ultimatePrestigeAtmosphere 3s ease 1s both;pointer-events:none}
+.ultimate-prestige-setting{position:absolute;inset:-26% -30% -20%;z-index:0;pointer-events:none;color:#bddce9}
+.ultimate-prestige-frame{display:block;width:100%;height:100%;overflow:visible}
+.ultimate-prestige-outline{stroke:#b8d7e53d;stroke-width:.9;stroke-dasharray:1;animation:ultimatePrestigeEngrave 2.1s cubic-bezier(.3,.1,.2,1) .25s both}
+.ultimate-prestige-inner{stroke:#aac9df17;stroke-width:.65}.ultimate-prestige-cuts{stroke:#e1f6ff57;stroke-width:1}
+.ultimate-prestige-trace{stroke:#e8faff;stroke-width:1.8;stroke-dasharray:.07 .93;stroke-linecap:round;animation:ultimatePrestigeTrace 3s cubic-bezier(.15,.55,.2,1) .35s both}
+.ultimate-prestige-glint{position:absolute;width:4px;height:4px;border-radius:50%;background:#f2fcff;box-shadow:0 0 10px #c1e8ff99;transform:translate(-50%,-50%);opacity:0;animation:ultimatePrestigeGlint 1.05s ease var(--glint-delay) both}
+.ultimate-prestige-glint::before,.ultimate-prestige-glint::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:linear-gradient(90deg,transparent,#ebfaff,transparent);height:1px;width:23px}
+.ultimate-prestige-glint::after{transform:translate(-50%,-50%) rotate(90deg);width:15px}
+.checkpoint-ultimate-intro .ultimate-studio-light{background:radial-gradient(ellipse at 50% 40%,#b9dff11c,transparent 48%)}
+.checkpoint-ultimate-object::before{height:42px;bottom:-25px;background:radial-gradient(ellipse,#c9e8f020,transparent 65%)}
+.checkpoint-ultimate-reflection{height:34%;mask-image:linear-gradient(#000a,transparent 94%)}
+.checkpoint-ultimate-lockup h1{background:linear-gradient(115deg,#9fb8c6 10%,#f2fbff 42%,#b3d0dd 56%,#eef5ff 75%,#b4c7d4);background-size:220% 100%;background-clip:text;-webkit-background-clip:text;color:transparent;animation:ultimatePrestigeLetterLight 3.1s ease .9s both}
+.checkpoint-ultimate-wordmark span{width:36px;background:linear-gradient(90deg,transparent,#c6e4f194)}
+.checkpoint-ultimate-transition .ultimate-prestige-setting{inset:auto;left:50%;top:50%;width:clamp(230px,38vmin,330px);height:auto;aspect-ratio:420/440;transform:translate(-50%,-50%);animation:ultimatePrestigePortal 840ms cubic-bezier(.2,.6,.2,1) both}
+.checkpoint-ultimate-transition .ultimate-prestige-outline,.checkpoint-ultimate-transition .ultimate-prestige-trace{animation:none;stroke-dasharray:none}
+.checkpoint-ultimate-transition .ultimate-prestige-trace{opacity:.22;stroke-width:2}
+.checkpoint-ultimate-transition .ultimate-prestige-glint{animation-duration:460ms}
+.ultimate-transition-refraction{position:absolute;inset:-30%;background:linear-gradient(115deg,transparent 46%,#b9dce311 48%,#e5f6ff40 49%,#afcbe318 49.3%,transparent 50%,#d0cce311 51%,transparent 53%);animation:ultimatePrestigeRefraction 840ms cubic-bezier(.2,.6,.2,1) both}
+.checkpoint-ultimate-transition.direction-left .ultimate-transition-refraction{animation-direction:reverse}
+.checkpoint-ultimate-seal .checkpoint-mark{width:clamp(110px,20vmin,138px)}
+.checkpoint-ultimate-transition .checkpoint-crystal-rim{stroke:#e1f6ff;stroke-width:1;stroke-dasharray:1;animation:ultimatePrestigeSealCut 700ms ease both}
+.checkpoint-ultimate-transition.is-light .checkpoint-mark{width:100px}
+@keyframes ultimatePrestigeAtmosphere{from{opacity:0}to{opacity:1}}
+@keyframes ultimatePrestigeBeam{from{translate:-30px 0;opacity:.2}to{translate:30px 0;opacity:1}}
+@keyframes ultimatePrestigeEngrave{from{stroke-dashoffset:1;opacity:0}to{stroke-dashoffset:0;opacity:1}}
+@keyframes ultimatePrestigeTrace{0%{stroke-dashoffset:.45;opacity:0}22%,62%{opacity:.8}100%{stroke-dashoffset:-.8;opacity:0}}
+@keyframes ultimatePrestigeGlint{0%,100%{opacity:0;scale:.5}40%{opacity:.85;scale:1}65%{opacity:.4;scale:.8}}
+@keyframes ultimatePrestigeLetterLight{from{background-position:100% 0}to{background-position:0 0}}
+@keyframes ultimatePrestigePortal{0%,10%{opacity:0;scale:.83;rotate:-7deg}38%,60%{opacity:.9;scale:1;rotate:0deg}100%{opacity:0;scale:1.16;rotate:2deg}}
+@keyframes ultimatePrestigeRefraction{from{translate:-70% 0}to{translate:70% 0}}
+@keyframes ultimatePrestigeSealCut{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+@media(max-height:420px){.checkpoint-ultimate-transition .ultimate-prestige-setting{width:205px}.ultimate-studio-caustics{top:64%}}
+@media(prefers-reduced-motion:reduce){.checkpoint-ultimate-intro .ultimate-prestige-trace,.checkpoint-ultimate-intro .ultimate-prestige-glint,.checkpoint-ultimate-intro .ultimate-studio-beams{display:none}.checkpoint-ultimate-intro .ultimate-prestige-outline{stroke-dashoffset:0}.checkpoint-ultimate-transition .ultimate-prestige-glint,.checkpoint-ultimate-transition .ultimate-transition-refraction{display:none}}
