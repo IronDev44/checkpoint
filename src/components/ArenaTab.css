@@ -49,3 +49,5 @@ html body .arena-fan-cover img{height:100%!important;width:100%!important;object
 
 .arena-hub .duel-choice-hint{font-size:.78rem;color:var(--text-muted,#a29b8c);margin:0 0 -8px}
 @supports(grid-template-rows:subgrid){html body .arena-hub .duel-contender{display:grid;grid-template-rows:subgrid;grid-row:span 2;row-gap:0}.arena-hub .duel-pair{row-gap:0}}
+
+.arena-fan-cover>.arena-cover-unavailable{padding:0;color:#eee1c1}.arena-fan-cover .arena-fan-fallback{width:100%;box-sizing:border-box}

@@ -1,12 +1,13 @@
 import {ArrowRight,Crown,ShieldCheck,Swords} from 'lucide-react';
 import {getKnownGameCover} from '../services/gameCovers';
+import ArenaGameCover from './ArenaGameCover';
 
 export function ArenaCrest({small=false}){
  return <span className={`arena-crest ${small?'arena-crest-small':''}`} aria-hidden="true"><svg viewBox="0 0 160 160" fill="none"><path d="M80 5 145 42v76l-65 37-65-37V42Z"/><path d="M80 16 135 48v64l-55 32-55-32V48Z"/><path d="M8 80h22m100 0h22M80 0v25m0 110v25"/></svg><Crown strokeWidth={1.25}/></span>;
 }
 export function ArenaCoverFan({games=[]}){
  const selected=[...games.filter(g=>getKnownGameCover(g)),...games.filter(g=>!getKnownGameCover(g))].slice(0,5);
- return <div className="arena-cover-fan" aria-hidden="true"><div className="arena-cover-orbit"/>{selected.map((game,index)=>{const cover=getKnownGameCover(game);return <span className="arena-fan-cover" key={game.id} style={{'--cover-position':index-(selected.length-1)/2,'--cover-depth':Math.abs(index-(selected.length-1)/2),zIndex:10-Math.round(Math.abs(index-(selected.length-1)/2)*2)}}><span className="arena-fan-fallback"><Swords size={24} strokeWidth={1}/><span>{game.name}</span></span>{cover&&<img src={cover} alt="" loading="lazy" onError={e=>{e.currentTarget.hidden=true;}}/>}</span>;})}<span className="arena-fan-medallion"><Crown size={21} strokeWidth={1.4}/></span></div>;
+ return <div className="arena-cover-fan" aria-hidden="true"><div className="arena-cover-orbit"/>{selected.map((game,index)=>{return <span className="arena-fan-cover" key={game.id} style={{'--cover-position':index-(selected.length-1)/2,'--cover-depth':Math.abs(index-(selected.length-1)/2),zIndex:10-Math.round(Math.abs(index-(selected.length-1)/2)*2)}}><ArenaGameCover game={game} fallback={<span className="arena-fan-fallback"><Swords size={24} strokeWidth={1}/><span>{game.name}</span></span>}/></span>;})}<span className="arena-fan-medallion"><Crown size={21} strokeWidth={1.4}/></span></div>;
 }
 export function ArenaGrandInvitation({games,onStart}){
  const count=new Set(games.map(game=>String(game.id))).size;

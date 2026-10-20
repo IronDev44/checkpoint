@@ -1,3 +1,4 @@
+jest.mock('../services/gameCovers',()=>({...jest.requireActual('../services/gameCovers'),resolveGameCover:jest.fn(()=>new Promise(()=>{}))}));
 import React from 'react';
 import {render,screen,fireEvent,waitFor,within,act} from '@testing-library/react';
 import '@testing-library/jest-dom';

@@ -1,3 +1,4 @@
+jest.mock('../services/gameCovers',()=>({...jest.requireActual('../services/gameCovers'),resolveGameCover:jest.fn(()=>new Promise(()=>{}))}));
 import {render,screen,fireEvent} from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ArenaTab,{ArenaShortcut} from './ArenaTab';

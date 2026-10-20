@@ -47,3 +47,6 @@ Onglet sélectionnable au démarrage, mémorisable comme dernier onglet et masqu
 
 ### Présentation de L’Arène
 Navigation à trois entrées avec pictogrammes, invitation avec éventail des jaquettes connues (sans image de gameplay), compteurs participants/duels/vainqueur et règles repliables. Face-à-face centré avec progression compacte et jaquettes entières en portrait comme en paysage ; écran de victoire avec couronne et palmarès allégé. Couleurs issues du thème sélectionné, pas d’animation continue ajoutée. Le tableau et les sauvegardes gardent le même fonctionnement.
+
+### Jaquettes de L’Arène
+Toutes les images de jeu de L’Arène passent par ArenaGameCover : duel, victoire, palmarès et éventail. Aucune image de gameplay générique ne sert de remplacement. En l’absence de jaquette connue, recherche via le résolveur IGDB partagé (ID explicite ou titre exact, puis année/plateformes pour départager les homonymes), avec son cache de requêtes. Recherche limitée aux éléments proches de la zone visible ; une réponse tardive du duel précédent est ignorée. Une image cassée ou une jaquette introuvable donne un emplacement neutre. Les instantanés des nouveaux tournois conservent aussi les métadonnées de recherche pour les jeux retirés de la collection, sans garder leur image de gameplay.
