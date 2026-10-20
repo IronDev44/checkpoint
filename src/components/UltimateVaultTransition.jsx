@@ -1,5 +1,5 @@
 import {useId} from 'react';
-export const ULTIMATE_VAULT_DURATION=1280;
+export const ULTIMATE_VAULT_DURATION=1600;
 function point(radius,angle){return [400+radius*Math.cos(angle),400+radius*Math.sin(angle)];}
 const polygon=(radius,count=8)=>Array.from({length:count},(_,i)=>point(radius,-Math.PI/2+i*Math.PI*2/count).join(',')).join(' ');
 export default function UltimateVaultTransition({light=false,direction='right',Mark}){
