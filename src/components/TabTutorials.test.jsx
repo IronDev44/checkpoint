@@ -42,7 +42,7 @@ test('the help library opens every tab guide and marks completed guides for repl
  mockStore.set('checkpoint-tab-tutorials-v1',JSON.stringify({home:'completed'}));
  render(<TutorialLibrary/>);
  const buttons=[...document.querySelectorAll('.tab-tutorial-choice')];
- expect(buttons).toHaveLength(14);
+ expect(buttons).toHaveLength(Object.keys(TAB_TUTORIALS).length);
  expect(buttons[0]).toHaveTextContent('Revoir le guide');
  for(const [index,guide] of Object.values(TAB_TUTORIALS).entries()){
   fireEvent.click(buttons[index]);

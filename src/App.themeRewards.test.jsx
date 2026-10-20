@@ -192,3 +192,10 @@ test("account progression is restored without a duplicate player sharing card in
  expect(await screen.findByText('Progression synchronisée')).toBeVisible();
  expect(screen.queryByRole('heading',{name:'Ta carte de joueur'})).toBeNull();
 });
+
+test("the dedicated Arena is a valid starting tab, has its own introduction and is reachable from navigation",async()=>{
+ mockStore.set('checkpoint-app-options',JSON.stringify({startTab:'arena',sound:{enabled:false},transitionMotion:'off'}));
+ render(<App/>);expect(await screen.findByRole('heading',{name:'L’Arène',exact:true})).toBeVisible();expect(screen.getByRole('button',{name:'Grand Tournoi',exact:true})).toBeVisible();expect(screen.getByRole('button',{name:'Commencer le grand tournoi'})).toBeDisabled();
+ fireEvent.click(screen.getByRole('button',{name:'Bibliothèque',exact:true}));await screen.findByRole('heading',{name:'Bibliothèque',exact:true});
+ fireEvent.click(screen.getByRole('button',{name:'L’Arène',exact:true}));await screen.findByRole('button',{name:'Grand Tournoi',exact:true});expect(screen.queryByText('Lancer le grand tournoi')).toBeNull();
+});

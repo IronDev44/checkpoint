@@ -1,3 +1,4 @@
+import {normalizeDuelHistory} from "./services/soloDuel";
 import {THEME_CATALOG} from "./data/themeCatalog";
 import { Fragment, useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
@@ -39,7 +40,7 @@ import {publicProfileView} from "./services/publicProfilePrivacy";
 import Rediscover from "./components/Rediscover";
 import {FavoriteReasonEditor,FavoriteReasonPicker,FavoriteReasons} from "./components/FavoriteReasons";
 import {favoriteReason,publicFavoriteGames,rediscoveryCandidates} from "./services/rediscovery";
-import SoloDuel from "./components/SoloDuel";
+import ArenaTab, {ArenaShortcut} from "./components/ArenaTab";
 import SpoilerText from "./components/SpoilerText";
 import {spoilerSummary,wrapSpoilerSelection,reviewActivityFields} from "./services/spoilers";
 import MonthlyRecap from "./components/MonthlyRecap";
@@ -139,6 +140,7 @@ import {
   Library,
   Heart,
   Trophy,
+  Swords,
   Medal,
   Moon,
   Settings,
@@ -263,11 +265,12 @@ function isAbortError(error) {
 
 const APP_RATING_MAX = 10;
 const APP_TAB_LABELS = {
-  home:"Accueil",news:"Actu",search:"Recherche",upcoming:"Sorties",deals:"Promos",live:"Live",social:"Social",
+  home:"Accueil",arena:"L’Arène",news:"Actu",search:"Recherche",upcoming:"Sorties",deals:"Promos",live:"Live",social:"Social",
   library:"Bibliothèque",series:"Séries",hardware:"Matériel",favorites:"Sanctuaire",top5:"Top 5",profile:"Profil",options:"Options",
 };
 const APP_TAB_IDS = [
   "home",
+  "arena",
   "news",
   "search",
   "upcoming",
@@ -371,6 +374,7 @@ function normalizeAppOptions(options = {}) {
     hiddenTabs:normalizeHiddenTabs(source.hiddenTabs),
     personalLists:normalizePersonalLists(source.personalLists),
     experiences:normalizeExperiences(source.experiences),
+    duelPalmares:normalizeDuelHistory(source.duelPalmares),
     notifications:normalizeNotificationPreferences(source.notifications),
     schemaVersion: APP_OPTIONS_SCHEMA_VERSION,
     sound: normalizeSoundSettings(source.sound, readLegacySoundSettings(localStorage)),
@@ -2576,6 +2580,7 @@ const playClick = () => {
 
 const APP_TAB_DESCRIPTIONS = {
   home: "Retrouve ta progression, ta collection et tes prochaines parties.",
+  arena: "Fais s’affronter tes jeux, reprends ton Grand Tournoi et retrouve tes champions.",
   news: "Les dernières nouvelles du jeu vidéo, à lire quand tu veux.",
   search: "Trouve un jeu et ajoute-le à ta collection ou à ta wishlist.",
   upcoming: "Repère les prochaines sorties selon tes plateformes et tes envies.",
@@ -2606,11 +2611,12 @@ export function TabIntroduction({activeTab, tutorialsReady = true}) {
   </section>;
 }
 
-function BottomTabs({ activeTab, setActiveTab, soundStyle, hiddenTabs=[] }) {
+export function BottomTabs({ activeTab, setActiveTab, soundStyle, hiddenTabs=[] }) {
   const tabs = [
   { id: "home", Icon: Home, label: APP_TAB_LABELS.home },
   { id: "library", Icon: Library, label: APP_TAB_LABELS.library },
   { id: "search", Icon: Search, label: APP_TAB_LABELS.search },
+  { id: "arena", Icon: Swords, label: APP_TAB_LABELS.arena },
   { id: "profile", Icon: Medal, label: APP_TAB_LABELS.profile },
   { id: "hardware", Icon: Joystick, label: APP_TAB_LABELS.hardware },
   { id: "social", Icon: Users, label: APP_TAB_LABELS.social },
@@ -10112,7 +10118,7 @@ export function HomeTab({
       <FirstSteps games={games} onSearch={() => setActiveTab("search")} onOpenGame={onOpenDetail} onHardware={() => setActiveTab("hardware")}/>
       {games.length > 0 && <><HomeBlock id="collection">{collectionSection}</HomeBlock><HomeBlock id="nextLevel">{nextLevelSection}</HomeBlock><HomeBlock id="session">{sessionSection}</HomeBlock><HomeBlock id="picker"><SessionPicker games={games} onOpen={onOpenDetail}/></HomeBlock></>}
       <HomeBlock id="rediscover"><Rediscover games={games} ratingGetter={getGameRating} onOpen={onOpenDetail} onPin={onRediscoverPin}/></HomeBlock>
-      <HomeBlock id="duel"><SoloDuel games={games} series={homeSeries} onOpenGame={onOpenDetail}/></HomeBlock>
+      <HomeBlock id="duel"><ArenaShortcut onOpen={()=>setActiveTab("arena")}/></HomeBlock>
       <HomeBlock id="monthly"><MonthlyRecap games={games}/></HomeBlock>
       <HomeBlock id="experiences" notice={dueCapsuleCount?`${dueCapsuleCount} capsule${dueCapsuleCount>1?'s':''} à ouvrir`:null}><CheckpointExperiences games={games} profile={socialProfile} friends={socialFriends} lists={dealPreferences.personalLists} level={level} value={dealPreferences.experiences} onChange={onExperiencesChange} loadProfile={loadCheckpointSocialProfile} onOpenGame={onOpenDetail}/></HomeBlock>
       <HomeBlock id="quiz"><WeeklyQuiz quiz={weeklyQuiz} progress={weeklyQuizProgress} onAnswer={onAnswerWeeklyQuiz}/></HomeBlock>
@@ -14724,6 +14730,7 @@ function OptionsTab({
   const startTabs = [
     { id: "home", label: "Accueil" },
     { id: "library", label: "Bibliothèque" },
+    { id: "arena", label: "L’Arène" },
     { id: "social", label: "Social" },
     { id: "top5", label: "Top 5" },
     { id: "hardware", label: "Matériel" },
@@ -17463,6 +17470,7 @@ export default function App({ startupVisible = false, onStartupProgress, tutoria
   const tabTransitionTimerRef = useRef(null);
 const tabOrder = [
   "home",
+  "arena",
   "news",
   "search",
   "upcoming",
@@ -19746,7 +19754,7 @@ useEffect(() => {
 
   const showFullHeader = activeTab === "library" && appOptions.headerMode === "standard";
 
-  const showCompactHeader = appOptions.headerMode !== "minimal" && !["home", "hardware", "profile", "options"].includes(activeTab) && !showFullHeader;
+  const showCompactHeader = appOptions.headerMode !== "minimal" && !["home", "arena", "hardware", "profile", "options"].includes(activeTab) && !showFullHeader;
   return (
 
      <>
@@ -19860,6 +19868,8 @@ useEffect(() => {
   onClaimCheckpointGoal={handleClaimCheckpointGoal}
 />
 )}
+
+{activeTab === "arena" && <ArenaTab games={games} series={personalSeries} onOpenGame={game=>openGameDetail(game,games)} palmares={appOptions.duelPalmares} onPalmaresChange={value=>updateAppOption('duelPalmares',value)}/>}
 
 {activeTab === "news" && (
   <NewsTab newsItems={newsItems} />
