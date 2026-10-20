@@ -63,7 +63,7 @@ test("ultimate startup and portal have distinct compositions and reduce geometry
   expect(document.querySelector(".checkpoint-ultimate-reflection")).not.toBeNull();
   view.rerender(<ThemeTransition theme={ultimate} fullMotion effects="balanced"/>);
   expect(document.querySelector(".checkpoint-ultimate-intro")).toBeNull();
-  expect(document.querySelectorAll(".ultimate-light-side > i,.ultimate-light-side > b")).toHaveLength(4);
+  expect(document.querySelectorAll(".ultimate-crown-rail")).toHaveLength(2);
   expect(document.querySelector(".checkpoint-premium-shutter")).toBeNull();
   view.rerender(<ThemeTransition theme={ultimate} fullMotion light direction="left" effects="calm"/>);
   expect(document.querySelector(".checkpoint-ultimate-transition.is-light.direction-left")).not.toBeNull();

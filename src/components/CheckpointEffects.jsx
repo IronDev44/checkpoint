@@ -151,10 +151,22 @@ export function CheckpointUltimateIntro({progress=0,light=false,onRequestClose})
   </div>;
 }
 
+function UltimateCrownLighting(){
+  const paint=`ultimate-crown-${useId().replace(/[^a-zA-Z0-9_-]/g,'')}`;
+  const rails=['M-120 1100L500 90L1120 1100','M80 1100L500 90L920 1100'];
+  return <div className="ultimate-cut-lighting" aria-hidden="true">
+    <svg className="ultimate-crown-light" viewBox="0 0 1000 1000" preserveAspectRatio="none" fill="none">
+      <defs><linearGradient id={paint} x1="0" y1="0" x2="0" y2="1"><stop stopColor="#f1fcff"/><stop offset=".4" stopColor="#c3e6fc"/><stop offset="1" stopColor="#8daccb" stopOpacity=".2"/></linearGradient></defs>
+      {rails.map((path,i)=><g key={path} className="ultimate-crown-rail"><path className="ultimate-crown-bloom" d={path}/><path className="ultimate-crown-edge" d={path} stroke={`url(#${paint})`} vectorEffect="non-scaling-stroke"/><path className="ultimate-crown-caustic" d={path} pathLength="1" vectorEffect="non-scaling-stroke" style={{animationDelay:`${i*.06}s`}}/></g>)}
+    </svg>
+    <div className="ultimate-apex-flare"/><div className="ultimate-diamond-aura"/>
+  </div>;
+}
+
 export function CheckpointUltimateTransition({light=false,direction='right'}) {
   return <div className={`checkpoint-ultimate-transition direction-${direction}${light?' is-light':''}`} aria-hidden="true">
     <div className="checkpoint-ultimate-veil"/>
-    {!light&&<><div className="ultimate-cut-lighting" aria-hidden="true"><div className="ultimate-light-side is-left"><i/><b/></div><div className="ultimate-light-side is-right"><i/><b/></div><div className="ultimate-diamond-aura"/></div><UltimatePrestigeSetting transition/></>}
+    {!light&&<><UltimateCrownLighting/><UltimatePrestigeSetting transition/></>}
     <div className="checkpoint-ultimate-seal"><CheckpointMark variant="diamond"/></div>
   </div>;
 }

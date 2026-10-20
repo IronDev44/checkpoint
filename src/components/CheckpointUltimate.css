@@ -164,15 +164,22 @@ html body[data-theme="theme-checkpointultimate"] :is(.xp-bar,.progress-bar,.badg
 /* Matched facets on both sides of an immobile, precisely centred seal. */
 .checkpoint-ultimate-seal{gap:0;animation:ultimateCentredSeal 840ms ease both}
 .ultimate-cut-lighting{position:absolute;inset:0;overflow:hidden;pointer-events:none}
-.ultimate-light-side{position:absolute;top:-15%;bottom:-15%;width:50%;overflow:hidden}
-.ultimate-light-side.is-left{left:0}.ultimate-light-side.is-right{right:0;transform:scaleX(-1)}
-.ultimate-light-side>i,.ultimate-light-side>b{position:absolute;inset:0;display:block;animation:ultimateFacetIllumination 840ms cubic-bezier(.2,.6,.2,1) both}
-.ultimate-light-side>i{background:linear-gradient(112deg,transparent 38%,#8ebbd408 43%,#d2ecff18 46%,#edfaff66 46.3%,#b6d9ec26 46.7%,transparent 49%);clip-path:polygon(0 0,100% 0,85% 100%,0 100%)}
-.ultimate-light-side>b{background:linear-gradient(112deg,transparent 53%,#bed2ea0d 55%,#e9f9ff3d 55.25%,#bbd8ec12 55.7%,transparent 59%);opacity:.7}
 .ultimate-diamond-aura{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,#9cc8db17 0%,#a6d9f006 24%,transparent 53%);animation:ultimateAuraLight 840ms ease both}
 .checkpoint-ultimate-transition .ultimate-prestige-outline{stroke:#d7edf45c}
 .checkpoint-ultimate-transition .ultimate-prestige-inner{stroke:#b4d4e52b}
 @keyframes ultimateCentredSeal{0%,15%,100%{opacity:0}36%,65%{opacity:1}}
-@keyframes ultimateFacetIllumination{0%{opacity:0;translate:-22px 0}30%,65%{opacity:1;translate:0 0}100%{opacity:0;translate:22px 0}}
 @keyframes ultimateAuraLight{0%,100%{opacity:0}35%,65%{opacity:1}}
-@media(prefers-reduced-motion:reduce){.ultimate-light-side{display:none}}
+
+/* Both facets share the same apex, so no seam opens above the crystal. */
+.ultimate-crown-light{position:absolute;inset:0;width:100%;height:100%;overflow:visible;animation:ultimateAuraLight 840ms ease both}
+.ultimate-crown-bloom{stroke:#c1e5ff;stroke-width:16;opacity:.09;filter:blur(5px)}
+.ultimate-crown-edge{stroke-width:1.2;stroke-linejoin:round;opacity:.65}
+.ultimate-crown-rail:last-child .ultimate-crown-edge{stroke-width:.75;opacity:.38}
+.ultimate-crown-caustic{stroke:#f3fcff;stroke-width:2;stroke-linejoin:round;stroke-linecap:round;stroke-dasharray:.12 .88;opacity:0;animation:ultimateCrownCaustic 840ms cubic-bezier(.2,.6,.2,1) both}
+.ultimate-apex-flare{position:absolute;left:50%;top:9%;width:clamp(65px,14vmin,115px);aspect-ratio:1;transform:translate(-50%,-50%);background:radial-gradient(ellipse,#f2fcff9c 0%,#bdeaff2b 10%,#a3d9f20c 35%,transparent 69%);animation:ultimateApexFlash 840ms ease both}
+.ultimate-apex-flare::before,.ultimate-apex-flare::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:100%;height:1px;background:linear-gradient(90deg,transparent,#edfbffb3,transparent)}
+.ultimate-apex-flare::after{width:65%;transform:translate(-50%,-50%) rotate(90deg)}
+.ultimate-diamond-aura{background:radial-gradient(ellipse at 50% 46%,#b6dffb24, #a6d9f00b 26%,transparent 58%)}
+@keyframes ultimateCrownCaustic{0%{stroke-dashoffset:.62;opacity:0}25%,62%{opacity:.85}100%{stroke-dashoffset:-.5;opacity:0}}
+@keyframes ultimateApexFlash{0%,12%,100%{opacity:0}38%{opacity:.9}65%{opacity:.4}}
+@media(prefers-reduced-motion:reduce){.ultimate-crown-caustic,.ultimate-crown-bloom,.ultimate-apex-flare{display:none}.ultimate-crown-edge{opacity:.3}}
