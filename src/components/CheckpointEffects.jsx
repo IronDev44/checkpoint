@@ -154,9 +154,7 @@ export function CheckpointUltimateIntro({progress=0,light=false,onRequestClose})
 export function CheckpointUltimateTransition({light=false,direction='right'}) {
   return <div className={`checkpoint-ultimate-transition direction-${direction}${light?' is-light':''}`} aria-hidden="true">
     <div className="checkpoint-ultimate-veil"/>
-    {!light&&<div className="checkpoint-ultimate-glass" aria-hidden="true"><i/><i/><i/></div>}
-    <div className="checkpoint-ultimate-seam"/>
-    {!light&&<><div className="ultimate-transition-refraction"/><UltimatePrestigeSetting transition/></>}
-    <div className="checkpoint-ultimate-seal"><CheckpointMark variant="diamond"/><span>ULTIME</span></div>
+    {!light&&<><div className="ultimate-cut-lighting" aria-hidden="true"><div className="ultimate-light-side is-left"><i/><b/></div><div className="ultimate-light-side is-right"><i/><b/></div><div className="ultimate-diamond-aura"/></div><UltimatePrestigeSetting transition/></>}
+    <div className="checkpoint-ultimate-seal"><CheckpointMark variant="diamond"/></div>
   </div>;
 }
