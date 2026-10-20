@@ -8,3 +8,7 @@
 .duel-throne-offer{background:radial-gradient(ellipse at 50% 0,#c9dcec20,transparent 75%),linear-gradient(140deg,#171b2280,#06080b80)}.duel-reigning{display:grid;gap:6px;padding:12px 0;border-top:1px solid var(--panel-border,#b9c4ce28)}.duel-reigning strong{overflow-wrap:anywhere}.solo-duel .duel-ladder{font-size:.83rem;line-height:1.8;color:var(--text-soft,#c9c4b6)}
 
 .duel-collection-progress{display:grid;gap:8px}.duel-collection-progress progress{width:100%;height:10px;accent-color:var(--accent,#d8be82)}.duel-collection-progress p,.duel-collection-progress small{font-size:.83rem;line-height:1.5}.duel-collection-progress small{opacity:.75}
+
+.solo-duel .duel-choice-hint{font-size:.82rem;line-height:1.5;color:var(--text-soft,#d1d5db)}
+.duel-contender strong{display:flex;align-items:center;justify-content:center;min-height:4.2em;line-height:1.4;padding:12px 4px;margin-top:auto}
+@supports(grid-template-rows:subgrid){.duel-pair{grid-template-rows:auto auto;row-gap:0}.duel-contender{display:grid;grid-template-rows:subgrid;grid-row:span 2;row-gap:0}.duel-contender strong{margin-top:0}}

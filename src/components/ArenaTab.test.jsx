@@ -24,5 +24,5 @@ test('the invitation uses box covers and keeps the rules available without repea
  const images=container.querySelectorAll('.arena-cover-fan img');expect(images).toHaveLength(1);expect(images[0]).toHaveAttribute('src','https://example.test/cover.jpg');
  fireEvent.error(images[0]);expect(images[0]).not.toBeVisible();expect(screen.getByText('Gameplay only')).toBeInTheDocument();
  fireEvent.click(screen.getByText('Les règles du tournoi'));expect(screen.getByText(/Tous les jeux de ta collection au lancement participent/)).toBeVisible();
- fireEvent.click(screen.getByText('Commencer le grand tournoi'));expect(screen.queryByText(/Tous les jeux de ta collection au départ, un seul vainqueur/)).toBeNull();expect(screen.getAllByRole('button',{name:/Je préfère/})).toHaveLength(2);
+ fireEvent.click(screen.getByText('Commencer le grand tournoi'));expect(screen.queryByText(/Tous les jeux de ta collection au départ, un seul vainqueur/)).toBeNull();expect(screen.getAllByRole('button',{name:/Je préfère/})).toHaveLength(2);expect(screen.queryByText('Je préfère ce jeu')).toBeNull();screen.getAllByRole('button',{name:/Je préfère/}).forEach(button=>expect(button).toHaveAccessibleDescription('Appuie sur le jeu que tu préfères pour le faire avancer.'));
 });
