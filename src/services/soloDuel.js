@@ -85,6 +85,12 @@ export function duelChampions(history,games=[]){
  }
  return [...champions.values()].sort((a,b)=>b.wins-a.wins||(Date.parse(b.lastWon)||0)-(Date.parse(a.lastWon)||0)||a.name.localeCompare(b.name,'fr'));
 }
-export function championCandidates(history,games){return duelChampions(history,games).filter(entry=>entry.game).map(entry=>entry.game);}
+export function championCandidates(history,games){return duelChampions(duelHistoryForGroup(history,'quick'),games).filter(entry=>entry.game).map(entry=>entry.game);}
 
-export function ultimateCandidates(history,games){return duelChampions(history,games).filter(entry=>entry.game&&entry.crowns>0).map(entry=>entry.game);}
+export function ultimateCandidates(history,games){return duelChampions(duelHistoryForGroup(history,'quick'),games).filter(entry=>entry.game&&entry.crowns>0).map(entry=>entry.game);}
+
+export function duelPalmaresGroup(kind){return kind==='collection'?'collection':'quick';}
+export function duelHistoryForGroup(history,group){return normalizeDuelHistory(history).filter(entry=>duelPalmaresGroup(entry.kind)===group);}
+export function removeDuelChampion(history,winner,group,date=new Date().toISOString()){
+ return normalizeDuelHistory(history).map(entry=>!entry.revoked&&entry.winner===String(winner)&&duelPalmaresGroup(entry.kind)===group?{...entry,revoked:true,updatedAt:nextDuelRevision(history,entry.id,date)}:entry);
+}

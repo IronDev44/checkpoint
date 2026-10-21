@@ -50,3 +50,8 @@ Navigation à trois entrées avec pictogrammes, invitation avec éventail des ja
 
 ### Jaquettes de L’Arène
 Toutes les images de jeu de L’Arène passent par ArenaGameCover : duel, victoire, palmarès et éventail. Aucune image de gameplay générique ne sert de remplacement. En l’absence de jaquette connue, recherche via le résolveur IGDB partagé (ID explicite ou titre exact, puis année/plateformes pour départager les homonymes), avec son cache de requêtes. Recherche limitée aux éléments proches de la zone visible ; une réponse tardive du duel précédent est ignorée. Une image cassée ou une jaquette introuvable donne un emplacement neutre. Les instantanés des nouveaux tournois conservent aussi les métadonnées de recherche pour les jeux retirés de la collection, sans garder leur image de gameplay.
+
+### Palmarès séparés et retrait de jeux
+Le Grand Tournoi (`collection`) possède son propre palmarès. Les duels rapides et leurs paliers (`classic`, `champions`, ancien `ultimate`) partagent un second palmarès. Le même jeu peut figurer dans les deux avec des compteurs distincts ; chaque historique est séparé et paginé. Les victoires du Grand Tournoi ne qualifient plus un jeu pour les tournois de champions des duels rapides.
+
+Retirer un jeu demande une confirmation indiquant le nombre de victoires concernées. Seules ses entrées du format choisi sont révoquées ; bibliothèque, notes, autre palmarès et tableau en cours sont conservés. Les révisions des entrées retirées restent synchronisées pour qu’une ancienne copie locale/cloud ne les réintroduise pas. Un résultat final retiré reste visible comme résultat du tournoi terminé, avec une mention précisant qu’il n’est plus dans le palmarès ; il n’est pas recréé au rechargement.

@@ -61,3 +61,19 @@ test('every participant including a first-round bye can become the collection ch
  const ids=['a','b','c','d','e'];for(const desired of ids){let state=startDuel(ids,'collection');while(!state.winner){const pair=state.round.slice(state.index,state.index+2);state=chooseDuel(state,pair.includes(desired)?desired:pair[0]);}expect(state.winner).toBe(desired);}
  const state=startDuel(ids,'collection');expect(validDuel({...state,choices:2},ids)).toBeNull();expect(validDuel({...state,next:['a','a','e']},ids)).toBeNull();
 });
+
+const {duelHistoryForGroup,removeDuelChampion}=require('./soloDuel');
+test('Grand Tournament wins never qualify games for the quick-duel championships',()=>{
+ const grand=games.slice(0,4).map(g=>result(`grand-${g.id}`,g.id,{kind:'collection'}));
+ expect(championCandidates(grand,games)).toEqual([]);expect(ultimateCandidates(grand,games)).toEqual([]);
+ const quick=[result('quick','0'),result('crown','1',{kind:'champions'}),result('ultimate','2',{kind:'ultimate'})];
+ expect(duelHistoryForGroup([...grand,...quick],'collection')).toHaveLength(4);expect(duelHistoryForGroup([...grand,...quick],'quick')).toHaveLength(3);
+ expect(championCandidates([...grand,...quick],games).map(g=>g.id).sort()).toEqual(['0','1','2']);
+});
+test('removing a champion revokes all its titles only in that group and stale cloud wins cannot restore them',()=>{
+ const old=[result('grand','0',{kind:'collection'}),result('duel','0'),result('crown','0',{kind:'champions'}),result('other','1')];
+ const removed=removeDuelChampion(old,'0','quick','2026-10-21T12:00:00Z');expect(old.every(e=>!e.revoked)).toBe(true);
+ const merged=mergeDuelHistory(old,removed);expect(merged.filter(e=>!e.revoked).map(e=>e.id).sort()).toEqual(['grand','other']);
+ expect(duelChampions(duelHistoryForGroup(merged,'collection'),games)[0]).toMatchObject({id:'0',wins:1});expect(championCandidates(merged,games).map(g=>g.id)).toEqual(['1']);
+ const allRemoved=removeDuelChampion(merged,'0','collection');expect(allRemoved.filter(e=>!e.revoked).map(e=>e.id)).toEqual(['other']);
+});
