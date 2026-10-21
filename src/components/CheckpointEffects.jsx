@@ -129,8 +129,8 @@ function UltimatePrestigeSetting({transition=false}) {
       <path className="ultimate-prestige-inner" d="M210 38L366 128V312L210 402L54 312V128Z"/>
       <path className="ultimate-prestige-cuts" d="M210 18V38M383 118L366 128M383 322L366 312M210 422V402M37 322L54 312M37 118L54 128"/>
       <path className="ultimate-prestige-trace" pathLength="1" d="M210 18L383 118V322L210 422L37 322V118Z"/>
+      {[[210,18],[383,118],[383,322],[210,422],[37,322],[37,118]].map(([x,y],i)=><g key={i} transform={`translate(${x} ${y})`}><g className="ultimate-prestige-glint" style={{'--glint-delay':`${transition?i*.055:.65+i*.28}s`}}><circle className="ultimate-glint-halo" r="7"/><circle className="ultimate-glint-core" r="2"/><path d="M-11.5 0H11.5M0-7.5V7.5"/></g></g>)}
     </svg>
-    {[[50,4],[91,27],[91,73],[50,96],[9,73],[9,27]].map(([x,y],i)=><i className="ultimate-prestige-glint" key={i} style={{left:`${x}%`,top:`${y}%`,'--glint-delay':`${transition?i*.055:.65+i*.28}s`}}/>)}
   </div>;
 }
 

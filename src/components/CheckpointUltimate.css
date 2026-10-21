@@ -119,9 +119,8 @@ html body[data-theme="theme-checkpointultimate"] :is(.xp-bar,.progress-bar,.badg
 .ultimate-prestige-outline{stroke:#b8d7e53d;stroke-width:.9;stroke-dasharray:1;animation:ultimatePrestigeEngrave 2.1s cubic-bezier(.3,.1,.2,1) .25s both}
 .ultimate-prestige-inner{stroke:#aac9df17;stroke-width:.65}.ultimate-prestige-cuts{stroke:#e1f6ff57;stroke-width:1}
 .ultimate-prestige-trace{stroke:#e8faff;stroke-width:1.8;stroke-dasharray:.07 .93;stroke-linecap:round;animation:ultimatePrestigeTrace 3s cubic-bezier(.15,.55,.2,1) .35s both}
-.ultimate-prestige-glint{position:absolute;width:4px;height:4px;border-radius:50%;background:#f2fcff;box-shadow:0 0 10px #c1e8ff99;transform:translate(-50%,-50%);opacity:0;animation:ultimatePrestigeGlint 1.05s ease var(--glint-delay) both}
-.ultimate-prestige-glint::before,.ultimate-prestige-glint::after{content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:linear-gradient(90deg,transparent,#ebfaff,transparent);height:1px;width:23px}
-.ultimate-prestige-glint::after{transform:translate(-50%,-50%) rotate(90deg);width:15px}
+.ultimate-prestige-glint{transform-box:fill-box;transform-origin:center;opacity:0;animation:ultimatePrestigeGlint 1.05s ease var(--glint-delay) both}
+.ultimate-prestige-glint .ultimate-glint-halo{fill:#c1e8ff;opacity:.14}.ultimate-prestige-glint .ultimate-glint-core{fill:#f2fcff}.ultimate-prestige-glint path{stroke:#ebfaff;stroke-width:.8;stroke-linecap:round;opacity:.9}
 .checkpoint-ultimate-intro .ultimate-studio-light{background:radial-gradient(ellipse at 50% 40%,#b9dff11c,transparent 48%)}
 .checkpoint-ultimate-object::before{height:42px;bottom:-25px;background:radial-gradient(ellipse,#c9e8f020,transparent 65%)}
 .checkpoint-ultimate-reflection{height:34%;mask-image:linear-gradient(#000a,transparent 94%)}
