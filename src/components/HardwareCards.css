@@ -1,0 +1,88 @@
+/* One surface per device. Headings and dividers structure the open fiche. */
+html body[data-theme] .hardware-collection-panel.search-panel {
+  padding: 8px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+html body[data-theme] .hardware-collection-panel.search-panel::before,
+html body[data-theme] .hardware-collection-panel.search-panel::after {
+  content: none !important;
+}
+
+html body[data-theme] .hardware-collection-panel .hardware-group-title {
+  margin: 24px 0 16px;
+}
+
+html body[data-theme] .hardware-inline-detail-panel .modal-content {
+  gap: 0 !important;
+}
+
+html body[data-theme] .hardware-inline-detail-panel :is(.hardware-detail-score, .hardware-detail-profile, .hardware-detail-insight, .modal-block) {
+  margin: 0 !important;
+  padding: 22px 0 !important;
+  border: 0 !important;
+  border-top: 1px solid var(--surface-border, #ffffff20) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body[data-theme] .hardware-inline-detail-panel .hardware-detail-facts {
+  gap: 18px 20px;
+}
+
+html body[data-theme] .hardware-inline-detail-panel .hardware-detail-fact {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+html body[data-theme] .hardware-inline-detail-panel .hardware-detail-focus {
+  margin-top: 8px;
+}
+
+html body[data-theme] .hardware-inline-detail-panel .hardware-detail-focus small {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+html body[data-theme] .hardware-inline-detail-panel .hardware-detail-console-stats {
+  gap: 0 !important;
+  padding: 20px 0;
+  border-top: 1px solid var(--surface-border, #ffffff20);
+}
+
+html body[data-theme] .hardware-inline-detail-panel .hardware-detail-console-stats > div {
+  min-width: 0;
+  padding: 4px 10px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body[data-theme] .hardware-inline-detail-panel .hardware-detail-console-stats > div + div {
+  border-left: 1px solid var(--surface-border, #ffffff20) !important;
+}
+
+html body[data-theme] .hardware-inline-detail-panel .hardware-rating-row {
+  padding: 16px 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body[data-theme] .hardware-inline-detail-panel .hardware-rating-row + .hardware-rating-row {
+  border-top: 1px solid var(--surface-border, #ffffff20) !important;
+}
+
+html body[data-theme] .hardware-inline-detail-panel .hardware-rating-list {
+  gap: 0;
+}

@@ -8,7 +8,7 @@ afterEach(()=>jest.restoreAllMocks());
 test('a catalog photo selection creates the matching edition with its image, without changing model IDs',async()=>{
  const add=jest.fn(async()=>true);
  render(<HardwareTab hardware={[item]} games={[]} initialHardwareRequest={request} onAddHardware={add}/>);
- fireEvent.click(await screen.findByRole('button',{name:'Ajouter une autre édition'}));
+ fireEvent.click(await screen.findByRole('button',{name:'Couleur et éditions'}));
  const dialog=within(screen.getByRole('dialog'));
  fireEvent.click(dialog.getByText(/Couleurs et éditions/));
  fireEvent.click(dialog.getByRole('button',{name:/Cosmic Red Rouge/}));
@@ -23,13 +23,30 @@ test('wishlist and historical controller editions remain visible',async()=>{
  expect(screen.getAllByText('Édition limitée · À retrouver · Rose').some(node=>node.classList.contains('hardware-edition-badge'))).toBe(true);
 });
 test('an existing item can be described as collector without overwriting ratings, status or model IDs',async()=>{
- const update=jest.fn(async()=>true);render(<HardwareTab hardware={[item]} games={[]} initialHardwareRequest={request} onAddHardware={jest.fn()} onUpdateHardwareEdition={update}/>);fireEvent.click(await screen.findByRole('button',{name:'Modifier la couleur / l’édition'}));fireEvent.change(within(screen.getByRole('dialog')).getByLabelText('Type d’édition'),{target:{value:'collector'}});fireEvent.change(screen.getByLabelText(/Couleur \/ coloris/),{target:{value:'Rouge'}});fireEvent.click(screen.getByText('Enregistrer l’édition'));await waitFor(()=>expect(update).toHaveBeenCalledWith('one',{kind:'collector',name:'',color:'Rouge'}));expect(item.review).toBe('Mon avis');expect(item.rating).toBe(8);
+ const update=jest.fn(async()=>true);render(<HardwareTab hardware={[item]} games={[]} initialHardwareRequest={request} onAddHardware={jest.fn()} onUpdateHardwareEdition={update}/>);fireEvent.click(await screen.findByRole('button',{name:'Couleur et éditions'}));fireEvent.change(within(screen.getByRole('dialog')).getByLabelText('Type d’édition'),{target:{value:'collector'}});fireEvent.change(screen.getByLabelText(/Couleur \/ coloris/),{target:{value:'Rouge'}});fireEvent.click(screen.getByText('Enregistrer l’édition'));await waitFor(()=>expect(update).toHaveBeenCalledWith('one',{kind:'collector',name:'',color:'Rouge'}));expect(item.review).toBe('Mon avis');expect(item.rating).toBe(8);
 });
 test('another color creates a distinct item while preserving the technical version and resetting personal ratings',async()=>{
- const add=jest.fn(async()=>true);render(<HardwareTab hardware={[item]} games={[]} initialHardwareRequest={request} onAddHardware={add}/>);fireEvent.click(await screen.findByRole('button',{name:'Ajouter une autre édition'}));fireEvent.change(screen.getByLabelText(/Couleur \/ coloris/),{target:{value:'Bleu'}});fireEvent.click(screen.getByText('Ajouter cette édition'));await waitFor(()=>expect(add).toHaveBeenCalledTimes(1));expect(add.mock.calls[0][0]).toMatchObject({versionId:'dualsense',catalogId:'sony-controllers',edition:{kind:'standard',name:'',color:'Bleu'},ratings:{},rating:0,review:'',favorite:false});expect(add.mock.calls[0][0].id).toBeUndefined();
+ const add=jest.fn(async()=>true);render(<HardwareTab hardware={[item]} games={[]} initialHardwareRequest={request} onAddHardware={add}/>);fireEvent.click(await screen.findByRole('button',{name:'Couleur et éditions'}));fireEvent.change(screen.getByLabelText(/Couleur \/ coloris/),{target:{value:'Bleu'}});fireEvent.click(screen.getByText('Ajouter cette édition'));await waitFor(()=>expect(add).toHaveBeenCalledTimes(1));expect(add.mock.calls[0][0]).toMatchObject({versionId:'dualsense',catalogId:'sony-controllers',edition:{kind:'standard',name:'',color:'Bleu'},ratings:{},rating:0,review:'',favorite:false});expect(add.mock.calls[0][0].id).toBeUndefined();
+});
+
+test('one edition entry can update the current item or create another without overwriting it',async()=>{
+ const add=jest.fn(async()=>true),update=jest.fn(async()=>true);
+ render(<HardwareTab hardware={[item]} games={[]} initialHardwareRequest={request} onAddHardware={add} onUpdateHardwareEdition={update}/>);
+ expect(await screen.findByRole('button',{name:'Couleur et éditions'})).toBeVisible();
+ expect(screen.queryByRole('button',{name:'Ajouter une autre édition'})).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'Couleur et éditions'}));
+ expect(screen.getByRole('radio',{name:'Modifier cet exemplaire'})).toBeChecked();
+ expect(screen.queryByLabelText('Statut')).toBeNull();
+ fireEvent.click(screen.getByRole('radio',{name:'Ajouter un autre exemplaire'}));
+ fireEvent.change(screen.getByLabelText(/Couleur \/ coloris/),{target:{value:'Rouge'}});
+ fireEvent.change(screen.getByLabelText('Statut'),{target:{value:'wishlist'}});
+ fireEvent.click(screen.getByRole('button',{name:'Ajouter cette édition'}));
+ await waitFor(()=>expect(add).toHaveBeenCalledTimes(1));
+ expect(add.mock.calls[0][0]).toMatchObject({versionId:'dualsense',status:'wishlist',edition:{color:'Rouge'},ratings:{},review:''});
+ expect(update).not.toHaveBeenCalled();
 });
 test('adding an identical edition is blocked, while a different color is accepted',async()=>{
- const add=jest.fn(async()=>true);render(<HardwareTab hardware={[{...item,edition:{kind:'standard',color:'Bleu'}}]} games={[]} initialHardwareRequest={request} onAddHardware={add}/>);fireEvent.click(await screen.findByRole('button',{name:'Ajouter une autre édition'}));fireEvent.change(screen.getByLabelText(/Couleur \/ coloris/),{target:{value:' bleu '}});fireEvent.click(screen.getByText('Ajouter cette édition'));expect(await screen.findByRole('alert')).toHaveTextContent('déjà dans ta collection');expect(add).not.toHaveBeenCalled();fireEvent.change(screen.getByLabelText(/Couleur \/ coloris/),{target:{value:'Rouge'}});fireEvent.click(screen.getByText('Ajouter cette édition'));await waitFor(()=>expect(add).toHaveBeenCalledTimes(1));
+ const add=jest.fn(async()=>true);render(<HardwareTab hardware={[{...item,edition:{kind:'standard',color:'Bleu'}}]} games={[]} initialHardwareRequest={request} onAddHardware={add}/>);fireEvent.click(await screen.findByRole('button',{name:'Couleur et éditions'}));fireEvent.change(screen.getByLabelText(/Couleur \/ coloris/),{target:{value:' bleu '}});fireEvent.click(screen.getByText('Ajouter cette édition'));expect(await screen.findByRole('alert')).toHaveTextContent('déjà dans ta collection');expect(add).not.toHaveBeenCalled();fireEvent.change(screen.getByLabelText(/Couleur \/ coloris/),{target:{value:'Rouge'}});fireEvent.click(screen.getByText('Ajouter cette édition'));await waitFor(()=>expect(add).toHaveBeenCalledTimes(1));
 });
 test('multiple colors do not inflate model completion and edition descriptions are visible on cards',()=>{
  render(<HardwareTab hardware={[{...item,id:'console-one',type:'console',catalogId:'ps5',variantId:'ps5-standard',versionId:'ps5-standard-disc',edition:{kind:'collector',name:'Test',color:'Blanc'}},{...item,id:'console-two',type:'console',catalogId:'ps5',variantId:'ps5-standard',versionId:'ps5-standard-disc',edition:{kind:'standard',color:'Noir'}}]} games={[]} onAddHardware={jest.fn()}/>);

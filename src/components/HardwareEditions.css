@@ -15,3 +15,52 @@
 .hardware-edition-search input{width:100%;min-width:0;box-sizing:border-box;min-height:44px;padding:10px 12px;border:1px solid var(--panel-border,#ffffff25);border-radius:10px;background:var(--input-bg,#10141a);color:var(--text-main,#fff);font:inherit}
 .hardware-documented-editions{display:grid;gap:12px;max-height:320px;overflow-y:auto;overscroll-behavior:contain;padding:3px}
 .hardware-documented-editions .hardware-photo-choice button{min-height:66px;justify-content:center;padding:12px}
+
+/* Keep the title and close control below the device safe area, outside the scrolling form. */
+.hardware-edition-dialog-backdrop {
+  box-sizing: border-box;
+  padding: calc(16px + env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+}
+html body[data-theme] .tool-dialog.hardware-edition-dialog {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: min(100%, 560px);
+  max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  padding: 0;
+  overflow: hidden;
+}
+html body[data-theme] .hardware-edition-dialog > header {
+  flex: 0 0 auto;
+  margin: 0;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--surface-border, #ffffff25);
+}
+html body[data-theme] .hardware-edition-dialog > header button {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  margin: 0;
+  position: static;
+}
+.hardware-edition-dialog .tool-dialog-content {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px;
+}
+.hardware-edition-operation {
+  display: grid;
+  gap: 12px;
+  padding: 16px 0;
+  margin: 0;
+  border: 0;
+  border-block: 1px solid var(--surface-border, #ffffff25);
+}
+.hardware-edition-operation legend {font-size: .85rem; font-weight: 650; padding: 0 0 8px}
+.hardware-edition-editor .hardware-edition-operation label {display: flex; align-items: center; gap: 12px; min-height: 44px}
+.hardware-edition-editor .hardware-edition-operation input {width: 20px; height: 20px; min-height: 0; padding: 0; flex: 0 0 auto; accent-color: var(--accent-solid, #d6b66f)}

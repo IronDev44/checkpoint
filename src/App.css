@@ -40468,16 +40468,6 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
   isolation: isolate !important;
 }
 
-.hardware-inline-detail::before {
-  content: "";
-  position: absolute;
-  inset: -10px -6px;
-  z-index: -1;
-  border-radius: 28px;
-  background: rgba(2, 6, 16, 0.92);
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.58);
-}
-
 .hardware-inline-detail-panel {
   isolation: isolate !important;
   overflow: hidden !important;
@@ -40504,15 +40494,6 @@ body[data-theme="theme-matrix"] .checkpoint-splash.matrix-splash.complete .splas
 .hardware-inline-detail-panel > * {
   position: relative;
   z-index: 1;
-}
-
-.hardware-inline-detail-panel .modal-block,
-.hardware-inline-detail-panel .hardware-rating-row,
-.hardware-detail-profile,
-.hardware-detail-score,
-.hardware-detail-insight,
-.hardware-detail-console-stats div {
-  background-color: rgba(18, 27, 44, 0.98) !important;
 }
 
 .top5-dashboard {

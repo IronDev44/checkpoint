@@ -1,4 +1,3 @@
-import HardwareEditionGallery from './components/HardwareEditionGallery';
 import {hardwareImageForEdition,hardwareBaseImage,hardwareDisplayImage,hardwarePhotoUrl,hardwareEditionChoices} from './services/hardwareEditionPhotos';
 import HardwareEditionEditor from './components/HardwareEditionEditor';
 import {hardwareEditionLabel,normalizeHardwareEdition,hasHardwareEdition,duplicateHardwareEdition} from './services/hardwareEditions';
@@ -83,6 +82,7 @@ import { TAB_TUTORIALS } from "./data/tabTutorials";
 import { buildBulkGamePatch } from "./services/libraryBulk";
 import "./components/CollectionImprovements.css";
 import "./components/LandscapeLayout.css";
+import "./components/HardwareCards.css";
 import SeriesCatalogProgress from "./components/SeriesCatalogProgress";
 import { loadSeriesCatalog, dedupeSeriesGames, findSeriesLibraryMatch, isSeriesLibraryEpisode, seriesCatalogTitle } from "./services/seriesCatalog";
 import "./components/SeriesCatalogProgress.css";
@@ -12676,8 +12676,7 @@ function HardwareDetailModal({
           </div>
 
           {hardwareEditionLabel(item)&&<p className="hardware-edition-badge">{hardwareEditionLabel(item)}</p>}
-          <div className="hardware-edition-tools">{onEditHardwareEdition&&<button type="button" className="option-pill" onClick={()=>onEditHardwareEdition(item)}>Modifier la couleur / l’édition</button>}{onAddHardwareEdition&&<button type="button" className="option-pill" onClick={()=>onAddHardwareEdition(item)}>Ajouter une autre édition</button>}</div>
-          {onEditHardwareEdition&&<HardwareEditionGallery item={item} onChoose={edition=>onEditHardwareEdition(item,edition)}/>}
+          <div className="hardware-edition-tools">{(onEditHardwareEdition||onAddHardwareEdition)&&<button type="button" className="option-pill" onClick={()=>onEditHardwareEdition?onEditHardwareEdition(item):onAddHardwareEdition(item)}>Couleur et éditions</button>}</div>
           <div className="hardware-detail-score">
             <div className="hardware-detail-score-main">
               <span>⭐ {formatRating10(averageRating, "Non noté")}</span>
@@ -13506,24 +13505,26 @@ export function HardwareTab({
     });}finally{editionAdds.current.delete(pendingKey);}
   };
 
-  const openEditionFromItem=item=>{
+  const editionContextFromItem=item=>{
     const model=HARDWARE_CATALOG.find(model=>model.id===item.catalogId)||{id:item.catalogId||'',name:item.parentName||item.name,brand:item.brand,type:item.type};
     const variant=model.variants?.find(variant=>variant.id===item.variantId)||{id:item.variantId||'',name:item.variantName||item.name};
     const version=variant.versions?.find(version=>version.id===item.versionId)||{...item,id:item.versionId||'',name:item.name};
-    setHardwareEditionDraft({mode:'add',catalogItem:model,variant,version});
+    return {catalogItem:model,variant,version};
   };
+  const openEditionFromItem=item=>setHardwareEditionDraft({mode:'add',...editionContextFromItem(item)});
   const editionButton=(catalogItem,variant,version)=>{
     const count=hardwareEditionChoices({type:catalogItem.type,catalogId:catalogItem.id,versionId:version.id}).length;
     return <button type="button" className="option-pill hardware-edition-add" aria-label={`Ajouter une couleur ou une édition de ${version.name}`} onClick={event=>{event.stopPropagation();setHardwareEditionDraft({mode:'add',catalogItem,variant,version});}}>{count?`Couleurs et éditions · ${count}`:'Préciser la couleur / l’édition'}</button>;
   };
-  const saveHardwareEdition=async(edition,status)=>{
-    if(hardwareEditionDraft.mode==='edit'){
+  const saveHardwareEdition=async(edition,status,mode=hardwareEditionDraft.mode)=>{
+    if(mode==='edit'){
       const item=hardware.find(item=>item.id===hardwareEditionDraft.item.id);
       if(!item)throw new Error('Ce matériel n’est plus disponible.');
       if(duplicateHardwareEdition(hardware,{...item,edition},item.id))throw new Error('Cette édition avec ce coloris et ce statut existe déjà. Les fiches restent séparées.');
       return onUpdateHardwareEdition?.(item.id,edition)??false;
     }
-    return addFromCatalog(hardwareEditionDraft.catalogItem,hardwareEditionDraft.variant,hardwareEditionDraft.version,status,edition);
+    const context=hardwareEditionDraft.mode==='edit'?editionContextFromItem(hardwareEditionDraft.item):hardwareEditionDraft;
+    return addFromCatalog(context.catalogItem,context.variant,context.version,status,edition);
   };
 
   const getHardwareCompletion = () => {
@@ -13844,7 +13845,7 @@ export function HardwareTab({
 
   return (
     <div className="progression-stack">
-      {hardwareEditionDraft&&<HardwareEditionEditor item={hardwareEditionDraft.mode==='edit'?{...hardwareEditionDraft.item,edition:hardwareEditionDraft.edition||hardwareEditionDraft.item.edition}:{name:hardwareEditionDraft.version.name,versionId:hardwareEditionDraft.version.id,catalogId:hardwareEditionDraft.catalogItem.id,type:hardwareEditionDraft.catalogItem.type,image:hardwareEditionDraft.version.image,status:'possédé',edition:hardwareEditionDraft.edition}} editing={hardwareEditionDraft.mode==='edit'} onSave={saveHardwareEdition} onClose={()=>setHardwareEditionDraft(null)}/>}
+      {hardwareEditionDraft&&<HardwareEditionEditor item={hardwareEditionDraft.mode==='edit'?{...hardwareEditionDraft.item,edition:hardwareEditionDraft.edition||hardwareEditionDraft.item.edition}:{name:hardwareEditionDraft.version.name,versionId:hardwareEditionDraft.version.id,catalogId:hardwareEditionDraft.catalogItem.id,type:hardwareEditionDraft.catalogItem.type,image:hardwareEditionDraft.version.image,status:'possédé',edition:hardwareEditionDraft.edition}} editing={hardwareEditionDraft.mode==='edit'} allowCreate={hardwareEditionDraft.mode==='edit'&&Boolean(onAddHardware)} onSave={saveHardwareEdition} onClose={()=>setHardwareEditionDraft(null)}/>}
       {selectedHardwareDetail?.instanceKey?.startsWith('search-')&&hardware.some(item=>item.id===selectedHardwareDetail.id)&&<HardwareDetailModal
         item={{...hardware.find(item=>item.id===selectedHardwareDetail.id),instanceKey:selectedHardwareDetail.instanceKey}}
         detailRef={hardwareDetailRef} onClose={()=>setSelectedHardwareDetail(null)} onDeleteHardware={onDeleteHardware}
@@ -14491,7 +14492,7 @@ export function HardwareTab({
 
 
 
-      <div className="search-panel">
+      <div className="search-panel hardware-collection-panel">
         <div className="hardware-collection-head">
           <h2 className="panel-title">{hardwareTitle}</h2>
 
