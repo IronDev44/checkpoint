@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
-const {handleAccountApi,mergeDocument,verifyFirebaseToken}=await import('data:text/javascript;base64,'+Buffer.from(fs.readFileSync('public/account-api.js','utf8').replace('"./profile-privacy.js"',JSON.stringify('data:text/javascript;base64,'+fs.readFileSync('src/services/publicProfilePrivacy.js').toString('base64')))).toString('base64'));
+import {pathToFileURL} from 'node:url';
+const {handleAccountApi,mergeDocument,verifyFirebaseToken}=await import(pathToFileURL(process.cwd()+'/public/account-api.js'));
 const sqlite=new DatabaseSync(':memory:');sqlite.exec(fs.readFileSync('migrations/0001_documents.sql','utf8'));
 const env={
   ACCOUNT_OWNER_UID:'owner',
@@ -147,3 +148,32 @@ assert.equal((await call('settings-owner','POST','playerPrivateSettings','main',
 const savedSettings=(await (await call('settings-owner','GET','playerPrivateSettings','main')).json()).data;assert.deepEqual(savedSettings.appOptions.notifications,{polls:false,monthly:false});assert.equal(savedSettings.socialFriends.length,1);
 assert.equal((await call('settings-owner','POST','playerPrivateSettings','main',{mode:'update',base:{'appOptions.notifications.polls':true},data:{'appOptions.notifications.polls':true}})).status,409);
 console.log('Audit : rubriques masquées retirées des réponses, profils privés inaccessibles et réglages entre appareils vérifiés.');
+
+// Arena state is private and competing brackets require explicit revision selection.
+const arenaSeed={id:'table-1',kind:'collection',roster:['a','b','c','d'],round:['a','b','c','d'],next:[],index:0,roundNumber:1,winner:null,choices:0,matches:[],participants:[]};
+const arenaOne={revision:'revision-one',tournament:arenaSeed};
+assert.equal((await call(null,'GET','playerProgress','arena')).status,401);
+assert.equal((await call('arena-owner','POST','playerProgress','arena',{mode:'arena',baseRevision:null,data:arenaOne})).status,200);
+assert.equal((await (await call('arena-other','GET','playerProgress','arena')).json()).exists,false);
+assert.equal((await call('arena-owner','POST','games','arena',{mode:'arena',baseRevision:null,data:arenaOne})).status,400);
+assert.equal((await call('arena-owner','POST','playerProgress','arena',{mode:'arena',baseRevision:'revision-one',data:{revision:'bad',tournament:{...arenaSeed,round:['a','a']}}})).status,400);
+const arenaTwo={revision:'revision-two',tournament:{...arenaSeed,next:['a'],index:2,choices:1,matches:[{choice:1,round:1,winner:'a',loser:'b'}]}};
+assert.equal((await call('arena-owner','POST','playerProgress','arena',{mode:'arena',baseRevision:'revision-one',data:arenaTwo})).status,200);
+const staleArena=await call('arena-owner','POST','playerProgress','arena',{mode:'arena',baseRevision:'revision-one',data:{revision:'other-device',tournament:arenaSeed}});
+assert.equal(staleArena.status,409);assert.equal((await staleArena.json()).data.revision,'revision-two');
+assert.equal((await call('arena-owner','POST','playerProgress','arena',{mode:'arena',baseRevision:'revision-two',data:{revision:'reset',tournament:null}})).status,200);
+assert.equal((await (await call('arena-owner','GET','playerProgress','arena')).json()).data.tournament,null);
+console.log('Arena: account isolation, revision conflicts, invalid brackets and explicit reset verified.');
+
+const variantEnvelope={revision:'variant-one',tournament:{...arenaSeed,variant:'soundtrack'}};
+assert.equal((await call('variant-owner','POST','playerProgress','arena',{mode:'arena',baseRevision:null,data:variantEnvelope})).status,200);
+assert.equal((await (await call('variant-owner','GET','playerProgress','arena')).json()).data.tournament.variant,'soundtrack');
+assert.equal((await call('variant-owner','POST','playerProgress','arena',{mode:'arena',baseRevision:'variant-one',data:{revision:'invalid-variant',tournament:{...arenaSeed,variant:'unknown'}}})).status,400);
+assert.equal((await call('variant-owner','POST','playerProgress','arena',{mode:'arena',baseRevision:'variant-one',data:{revision:'invalid-kind',tournament:{...arenaSeed,kind:'classic',variant:'visual'}}})).status,400);
+assert.equal((await call('variant-owner','POST','playerProgress','arena',{mode:'arena',baseRevision:null,data:{...variantEnvelope,revision:'stale'}})).status,409);
+console.log('Arena variants: category preserved, unknown variants rejected, competing writes protected.');
+
+const editionEnvelope={revision:'edition-one',tournament:{...arenaSeed,editionMode:'grouped'}};
+assert.equal((await call('edition-owner','POST','playerProgress','arena',{mode:'arena',baseRevision:null,data:editionEnvelope})).status,200);
+assert.equal((await (await call('edition-owner','GET','playerProgress','arena')).json()).data.tournament.editionMode,'grouped');
+console.log('Arena editions: frozen participant IDs and edition mode preserved in account sync.');

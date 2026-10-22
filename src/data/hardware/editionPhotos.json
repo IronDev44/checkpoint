@@ -1,0 +1,692 @@
+[
+  {
+    "id": "dualsense-midnight-black",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Midnight Black",
+    "color": "Noir",
+    "image": "/images/hardware/editions/dualsense-midnight-black.webp",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-midnight-black-screenshot-04-en-08dec21?wid=720&fmt=webp&qlt=85",
+    "credit": "Sony Interactive Entertainment"
+  },
+  {
+    "id": "dualsense-cosmic-red",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Cosmic Red",
+    "color": "Rouge",
+    "image": "/images/hardware/editions/dualsense-cosmic-red.webp",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-cosmic-red-screenshot-04-en-08dec21?wid=720&fmt=webp&qlt=85",
+    "credit": "Sony Interactive Entertainment"
+  },
+  {
+    "id": "dualsense-galactic-purple",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Galactic Purple",
+    "color": "Violet",
+    "image": "/images/hardware/editions/dualsense-galactic-purple.webp",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-galactic-purple-screenshot-01-en-30nov21?wid=720&fmt=webp&qlt=85",
+    "credit": "Sony Interactive Entertainment"
+  },
+  {
+    "id": "dualsense-starlight-blue",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Starlight Blue",
+    "color": "Bleu",
+    "image": "/images/hardware/editions/dualsense-starlight-blue.webp",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-starlight-blue-screenshot-01-en-30nov21?wid=720&fmt=webp&qlt=85",
+    "credit": "Sony Interactive Entertainment"
+  },
+  {
+    "id": "dualsense-cobalt-blue",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Cobalt Blue",
+    "color": "Bleu",
+    "image": "/images/hardware/editions/dualsense-cobalt-blue.webp",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-cobalt-blue-screenshot-01-en-04sep23?wid=720&fmt=webp&qlt=85",
+    "credit": "Sony Interactive Entertainment"
+  },
+  {
+    "id": "dualsense-sterling-silver",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Sterling Silver",
+    "color": "Argenté",
+    "image": "/images/hardware/editions/dualsense-sterling-silver.webp",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-sterling-silver-screenshot-01-en-04sep23?wid=720&fmt=webp&qlt=85",
+    "credit": "Sony Interactive Entertainment"
+  },
+  {
+    "id": "switch-oled-zelda",
+    "catalogId": "switch",
+    "type": "console",
+    "versionIds": [
+      "switch-oled-64"
+    ],
+    "kind": "limited",
+    "name": "The Legend of Zelda: Tears of the Kingdom",
+    "color": "Doré / blanc",
+    "image": "/images/hardware/editions/switch-oled-zelda.jpg",
+    "source": "https://www.nintendo.com/sg/hardware/switch/modal/lineup_oled_zelda.html?width=980",
+    "asset": "https://www.nintendo.com/sg/hardware/switch/modal/img/lineup/img-gallery--zelda_01.jpg",
+    "credit": "Nintendo"
+  },
+  {
+    "id": "switch-oled-pokemon",
+    "catalogId": "switch",
+    "type": "console",
+    "versionIds": [
+      "switch-oled-64"
+    ],
+    "kind": "limited",
+    "name": "Pokémon Écarlate et Violet",
+    "color": "Écarlate / violet",
+    "image": "/images/hardware/editions/switch-oled-pokemon.jpg",
+    "source": "https://www.nintendo.com/sg/hardware/switch/modal/lineup_oled_sv.html",
+    "asset": "https://www.nintendo.com/sg/hardware/switch/modal/img/lineup/img-gallery--sv_01.jpg",
+    "credit": "Nintendo"
+  },
+  {
+    "id": "dualshock4-midnight-blue",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualshock-4"
+    ],
+    "kind": "standard",
+    "name": "Midnight Blue",
+    "color": "Bleu",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/ps4-accessories-ds4-midnight-blue-screen-01-en-28oct20?wid=720&fmt=webp&qlt=85",
+    "source": "https://www.playstation.com/en-us/accessories/dualshock-4-wireless-controller/",
+    "credit": "Sony Interactive Entertainment",
+    "image": "/images/hardware/editions/dualshock4-midnight-blue.webp"
+  },
+  {
+    "id": "dualshock4-magma-red",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualshock-4"
+    ],
+    "kind": "standard",
+    "name": "Magma Red",
+    "color": "Rouge",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/ps4-accessories-ds4-magma-red-screen-01-en-28oct20?wid=720&fmt=webp&qlt=85",
+    "source": "https://www.playstation.com/en-us/accessories/dualshock-4-wireless-controller/",
+    "credit": "Sony Interactive Entertainment",
+    "image": "/images/hardware/editions/dualshock4-magma-red.webp"
+  },
+  {
+    "id": "dualshock4-glacier-white",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualshock-4"
+    ],
+    "kind": "standard",
+    "name": "Glacier White",
+    "color": "Blanc",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/ps4-accessories-ds4-glacier-white-screen-01-en-28oct20?wid=720&fmt=webp&qlt=85",
+    "source": "https://www.playstation.com/en-us/accessories/dualshock-4-wireless-controller/",
+    "credit": "Sony Interactive Entertainment",
+    "image": "/images/hardware/editions/dualshock4-glacier-white.webp"
+  },
+  {
+    "id": "dualshock4-jet-black",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualshock-4"
+    ],
+    "kind": "standard",
+    "name": "Jet Black",
+    "color": "Noir",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/ps4-accessories-ds4-jet-black-screen-01-en-28oct20?wid=720&fmt=webp&qlt=85",
+    "source": "https://www.playstation.com/en-us/accessories/dualshock-4-wireless-controller/",
+    "credit": "Sony Interactive Entertainment",
+    "image": "/images/hardware/editions/dualshock4-jet-black.webp"
+  },
+  {
+    "id": "dualsense-teal",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Chroma Teal",
+    "color": "Vert",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-teal-screenshot-01-en-23sep24?wid=720&fmt=webp&qlt=85",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "credit": "Sony Interactive Entertainment",
+    "image": "/images/hardware/editions/dualsense-teal.webp"
+  },
+  {
+    "id": "dualsense-pearl",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Chroma Pearl",
+    "color": "Blanc irisé",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-pearl-screenshot-01-en-23sep24?wid=720&fmt=webp&qlt=85",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "credit": "Sony Interactive Entertainment",
+    "image": "/images/hardware/editions/dualsense-pearl.webp"
+  },
+  {
+    "id": "dualsense-indigo",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Chroma Indigo",
+    "color": "Violet irisé",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-indigo-screenshot-01-en-23sep24?wid=720&fmt=webp&qlt=85",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "credit": "Sony Interactive Entertainment",
+    "image": "/images/hardware/editions/dualsense-indigo.webp"
+  },
+  {
+    "id": "dualsense-volcanic-red",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Volcanic Red",
+    "color": "Rouge",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-volcanic-red-screenshot-01-en-04sep23?wid=720&fmt=webp&qlt=85",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "credit": "Sony Interactive Entertainment",
+    "image": "/images/hardware/editions/dualsense-volcanic-red.webp"
+  },
+  {
+    "id": "dualsense-gray-camo",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Gray Camouflage",
+    "color": "Camouflage gris",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-gray-camo-screenshot-01-en-13sep22?wid=720&fmt=webp&qlt=85",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "credit": "Sony Interactive Entertainment",
+    "image": "/images/hardware/editions/dualsense-gray-camo.webp"
+  },
+  {
+    "id": "dualsense-techno-red",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Techno Red",
+    "color": "Rouge",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-techno-red-screenshot-01-en-07jan26?wid=720&fmt=webp&qlt=85",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "credit": "Sony Interactive Entertainment",
+    "image": "/images/hardware/editions/dualsense-techno-red.webp"
+  },
+  {
+    "id": "dualsense-remix-green",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Remix Green",
+    "color": "Vert",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-remix-green-screenshot-01-en-07jan26?wid=720&fmt=webp&qlt=85",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "credit": "Sony Interactive Entertainment",
+    "image": "/images/hardware/editions/dualsense-remix-green.webp"
+  },
+  {
+    "id": "dualsense-rhythm-blue",
+    "catalogId": "sony-controllers",
+    "type": "controller",
+    "versionIds": [
+      "dualsense"
+    ],
+    "kind": "standard",
+    "name": "Rhythm Blue",
+    "color": "Bleu",
+    "asset": "https://gmedia.playstation.com/is/image/SIEPDC/dualsense-rhythm-blue-screenshot-01-en-07jan26?wid=720&fmt=webp&qlt=85",
+    "source": "https://www.playstation.com/en-us/accessories/dualsense-wireless-controller/",
+    "credit": "Sony Interactive Entertainment",
+    "image": "/images/hardware/editions/dualsense-rhythm-blue.webp"
+  },
+  {
+    "id": "xbox-series-carbon-black",
+    "catalogId": "microsoft-controllers",
+    "type": "controller",
+    "versionIds": [
+      "xbox-series-controller"
+    ],
+    "kind": "standard",
+    "name": "Carbon Black",
+    "color": "Noir",
+    "asset": "https://assets.xboxservices.com/assets/fa/b8/fab86afd-63d6-45a9-862f-798e5e45cda2.jpg?n=111101_Gallery-0_4_1350x759.jpg",
+    "source": "https://www.xbox.com/en-US/accessories/controllers/xbox-wireless-controller",
+    "credit": "Microsoft",
+    "image": "/images/hardware/editions/xbox-series-carbon-black.jpg"
+  },
+  {
+    "id": "xbox-series-robot-white",
+    "catalogId": "microsoft-controllers",
+    "type": "controller",
+    "versionIds": [
+      "xbox-series-controller"
+    ],
+    "kind": "standard",
+    "name": "Robot White",
+    "color": "Blanc",
+    "asset": "https://assets.xboxservices.com/assets/31/58/31580571-d688-4255-92bb-80d89ebee0c6.jpg?n=111101_Gallery-0_10_1350x759.jpg",
+    "source": "https://www.xbox.com/en-US/accessories/controllers/xbox-wireless-controller",
+    "credit": "Microsoft",
+    "image": "/images/hardware/editions/xbox-series-robot-white.jpg"
+  },
+  {
+    "id": "xbox-series-shock-blue",
+    "catalogId": "microsoft-controllers",
+    "type": "controller",
+    "versionIds": [
+      "xbox-series-controller"
+    ],
+    "kind": "standard",
+    "name": "Shock Blue",
+    "color": "Bleu",
+    "asset": "https://assets.xboxservices.com/assets/ba/40/ba40e598-da1c-4034-9117-bcc1c1086f6d.jpg?n=111101_Gallery-0_18_1350x759.jpg",
+    "source": "https://www.xbox.com/en-US/accessories/controllers/xbox-wireless-controller",
+    "credit": "Microsoft",
+    "image": "/images/hardware/editions/xbox-series-shock-blue.jpg"
+  },
+  {
+    "id": "xbox-series-pulse-red",
+    "catalogId": "microsoft-controllers",
+    "type": "controller",
+    "versionIds": [
+      "xbox-series-controller"
+    ],
+    "kind": "standard",
+    "name": "Pulse Red",
+    "color": "Rouge",
+    "asset": "https://assets.xboxservices.com/assets/ed/bf/edbf1336-0b0c-4167-8824-570923137056.jpg?n=111101_Gallery-0_25_1350x759.jpg",
+    "source": "https://www.xbox.com/en-US/accessories/controllers/xbox-wireless-controller",
+    "credit": "Microsoft",
+    "image": "/images/hardware/editions/xbox-series-pulse-red.jpg"
+  },
+  {
+    "id": "xbox-series-electric-volt",
+    "catalogId": "microsoft-controllers",
+    "type": "controller",
+    "versionIds": [
+      "xbox-series-controller"
+    ],
+    "kind": "standard",
+    "name": "Electric Volt",
+    "color": "Jaune",
+    "asset": "https://assets.xboxservices.com/assets/1b/82/1b8254ab-e3cd-4443-8494-2478696632e7.jpg?n=111101_Gallery-0_31_1350x759.jpg",
+    "source": "https://www.xbox.com/en-US/accessories/controllers/xbox-wireless-controller",
+    "credit": "Microsoft",
+    "image": "/images/hardware/editions/xbox-series-electric-volt.jpg"
+  },
+  {
+    "id": "xbox-series-deep-pink",
+    "catalogId": "microsoft-controllers",
+    "type": "controller",
+    "versionIds": [
+      "xbox-series-controller"
+    ],
+    "kind": "standard",
+    "name": "Deep Pink",
+    "color": "Rose",
+    "asset": "https://assets.xboxservices.com/assets/44/7d/447d7ee5-c18b-4f9d-94a6-13659f339d0c.jpg?n=Xbox-Wireless-Controller_Gallery-0_Deep-Pink-3_1350x759.jpg",
+    "source": "https://www.xbox.com/en-US/accessories/controllers/xbox-wireless-controller",
+    "credit": "Microsoft",
+    "image": "/images/hardware/editions/xbox-series-deep-pink.jpg"
+  },
+  {
+    "id": "8bitdo-pro2-pro2-transparent-blue",
+    "catalogId": "8bitdo-controllers",
+    "type": "controller",
+    "versionIds": [
+      "8bitdo-pro-2"
+    ],
+    "kind": "standard",
+    "name": "Bleu transparent",
+    "color": "Bleu transparent",
+    "asset": "https://www.8bitdo.com/images/2021/pro2/pro2-transparent-blue.png",
+    "source": "https://www.8bitdo.com/pro2/",
+    "credit": "8BitDo",
+    "image": "/images/hardware/editions/8bitdo-pro2-pro2-transparent-blue.png"
+  },
+  {
+    "id": "8bitdo-pro2-pro2-transparent-green",
+    "catalogId": "8bitdo-controllers",
+    "type": "controller",
+    "versionIds": [
+      "8bitdo-pro-2"
+    ],
+    "kind": "standard",
+    "name": "Vert transparent",
+    "color": "Vert transparent",
+    "asset": "https://www.8bitdo.com/images/2021/pro2/pro2-transparent-green.png",
+    "source": "https://www.8bitdo.com/pro2/",
+    "credit": "8BitDo",
+    "image": "/images/hardware/editions/8bitdo-pro2-pro2-transparent-green.png"
+  },
+  {
+    "id": "8bitdo-pro2-pro2-transparent-purple",
+    "catalogId": "8bitdo-controllers",
+    "type": "controller",
+    "versionIds": [
+      "8bitdo-pro-2"
+    ],
+    "kind": "standard",
+    "name": "Violet transparent",
+    "color": "Violet transparent",
+    "asset": "https://www.8bitdo.com/images/2021/pro2/pro2-transparent-purple.png?00",
+    "source": "https://www.8bitdo.com/pro2/",
+    "credit": "8BitDo",
+    "image": "/images/hardware/editions/8bitdo-pro2-pro2-transparent-purple.png"
+  },
+  {
+    "id": "8bitdo-pro2-pro2-gray",
+    "catalogId": "8bitdo-controllers",
+    "type": "controller",
+    "versionIds": [
+      "8bitdo-pro-2"
+    ],
+    "kind": "standard",
+    "name": "Gris",
+    "color": "Gris",
+    "asset": "https://www.8bitdo.com/images/2021/pro2/pro2_gray.png",
+    "source": "https://www.8bitdo.com/pro2/",
+    "credit": "8BitDo",
+    "image": "/images/hardware/editions/8bitdo-pro2-pro2-gray.png"
+  },
+  {
+    "id": "8bitdo-pro2-pro2-gb",
+    "catalogId": "8bitdo-controllers",
+    "type": "controller",
+    "versionIds": [
+      "8bitdo-pro-2"
+    ],
+    "kind": "standard",
+    "name": "G Classic",
+    "color": "G Classic",
+    "asset": "https://www.8bitdo.com/images/2021/pro2/pro2_gb.png",
+    "source": "https://www.8bitdo.com/pro2/",
+    "credit": "8BitDo",
+    "image": "/images/hardware/editions/8bitdo-pro2-pro2-gb.png"
+  },
+  {
+    "id": "8bitdo-pro2-pro2-black",
+    "catalogId": "8bitdo-controllers",
+    "type": "controller",
+    "versionIds": [
+      "8bitdo-pro-2"
+    ],
+    "kind": "standard",
+    "name": "Noir",
+    "color": "Noir",
+    "asset": "https://www.8bitdo.com/images/2021/pro2/pro2_black.png",
+    "source": "https://www.8bitdo.com/pro2/",
+    "credit": "8BitDo",
+    "image": "/images/hardware/editions/8bitdo-pro2-pro2-black.png"
+  },
+  {
+    "id": "8bitdo-ultimate-ultimate-bluetooth-red",
+    "catalogId": "8bitdo-controllers",
+    "type": "controller",
+    "versionIds": [
+      "8bitdo-ultimate-bluetooth"
+    ],
+    "kind": "standard",
+    "name": "Rouge",
+    "color": "Rouge",
+    "asset": "https://www.8bitdo.com/images/2022/ultimate-bluetooth-controller/ultimate-bluetooth-red.png",
+    "source": "https://www.8bitdo.com/ultimate-bluetooth-controller/",
+    "credit": "8BitDo",
+    "image": "/images/hardware/editions/8bitdo-ultimate-ultimate-bluetooth-red.png"
+  },
+  {
+    "id": "8bitdo-ultimate-ultimate-bluetooth-blue",
+    "catalogId": "8bitdo-controllers",
+    "type": "controller",
+    "versionIds": [
+      "8bitdo-ultimate-bluetooth"
+    ],
+    "kind": "standard",
+    "name": "Bleu",
+    "color": "Bleu",
+    "asset": "https://www.8bitdo.com/images/2022/ultimate-bluetooth-controller/ultimate-bluetooth-blue.png",
+    "source": "https://www.8bitdo.com/ultimate-bluetooth-controller/",
+    "credit": "8BitDo",
+    "image": "/images/hardware/editions/8bitdo-ultimate-ultimate-bluetooth-blue.png"
+  },
+  {
+    "id": "8bitdo-ultimate-ultimate-bluetooth-black",
+    "catalogId": "8bitdo-controllers",
+    "type": "controller",
+    "versionIds": [
+      "8bitdo-ultimate-bluetooth"
+    ],
+    "kind": "standard",
+    "name": "Noir",
+    "color": "Noir",
+    "asset": "https://www.8bitdo.com/images/2022/ultimate-bluetooth-controller/ultimate-bluetooth-black.png",
+    "source": "https://www.8bitdo.com/ultimate-bluetooth-controller/",
+    "credit": "8BitDo",
+    "image": "/images/hardware/editions/8bitdo-ultimate-ultimate-bluetooth-black.png"
+  },
+  {
+    "id": "8bitdo-ultimate-ultimate-bluetooth-white",
+    "catalogId": "8bitdo-controllers",
+    "type": "controller",
+    "versionIds": [
+      "8bitdo-ultimate-bluetooth"
+    ],
+    "kind": "standard",
+    "name": "Blanc",
+    "color": "Blanc",
+    "asset": "https://www.8bitdo.com/images/2022/ultimate-bluetooth-controller/ultimate-bluetooth-white.png",
+    "source": "https://www.8bitdo.com/ultimate-bluetooth-controller/",
+    "credit": "8BitDo",
+    "image": "/images/hardware/editions/8bitdo-ultimate-ultimate-bluetooth-white.png"
+  },
+  {
+    "id": "switch-lite-blue",
+    "catalogId": "switch",
+    "type": "console",
+    "versionIds": [
+      "switch-lite-32"
+    ],
+    "kind": "standard",
+    "name": "Bleu",
+    "color": "Bleu",
+    "asset": "https://assets.nintendo.com/image/upload/f_webp,w_720,q_85/ncom/en_US/products/hardware/nintendo-switch-lite-blue-112385/112385-nintendo-switch-lite-blue-front-1200x675",
+    "source": "https://www.nintendo.com/us/gaming-systems/switch/lite/",
+    "credit": "Nintendo",
+    "image": "/images/hardware/editions/switch-lite-blue.webp"
+  },
+  {
+    "id": "switch-lite-yellow",
+    "catalogId": "switch",
+    "type": "console",
+    "versionIds": [
+      "switch-lite-32"
+    ],
+    "kind": "standard",
+    "name": "Jaune",
+    "color": "Jaune",
+    "asset": "https://assets.nintendo.com/image/upload/f_webp,w_720,q_85/ncom/en_US/products/hardware/nintendo-switch-lite-yellow/110678-nintendo-switch-lite-yellow-front-screen-on-1200x675",
+    "source": "https://www.nintendo.com/us/gaming-systems/switch/lite/",
+    "credit": "Nintendo",
+    "image": "/images/hardware/editions/switch-lite-yellow.webp"
+  },
+  {
+    "id": "switch-lite-turquoise",
+    "catalogId": "switch",
+    "type": "console",
+    "versionIds": [
+      "switch-lite-32"
+    ],
+    "kind": "standard",
+    "name": "Turquoise",
+    "color": "Turquoise",
+    "asset": "https://assets.nintendo.com/image/upload/f_webp,w_720,q_85/ncom/en_US/products/hardware/nintendo-switch-lite-turquoise/110663-nintendo-switch-lite-turquoise-front-screen-on-1200x675",
+    "source": "https://www.nintendo.com/us/gaming-systems/switch/lite/",
+    "credit": "Nintendo",
+    "image": "/images/hardware/editions/switch-lite-turquoise.webp"
+  },
+  {
+    "id": "switch-lite-coral",
+    "catalogId": "switch",
+    "type": "console",
+    "versionIds": [
+      "switch-lite-32"
+    ],
+    "kind": "standard",
+    "name": "Corail",
+    "color": "Corail",
+    "asset": "https://assets.nintendo.com/image/upload/f_webp,w_720,q_85/ncom/en_US/products/hardware/nintendo-switch-lite-coral/112175-nintendo-switch-lite-coral-front-screen-on-1200x675",
+    "source": "https://www.nintendo.com/us/gaming-systems/switch/lite/",
+    "credit": "Nintendo",
+    "image": "/images/hardware/editions/switch-lite-coral.webp"
+  },
+  {
+    "id": "switch-oled-white",
+    "catalogId": "switch",
+    "type": "console",
+    "versionIds": [
+      "switch-oled-64"
+    ],
+    "kind": "standard",
+    "name": "Blanc",
+    "color": "Blanc",
+    "asset": "https://www.nintendo.com/ph/hardware/detail/switch-oled/img/07-local-lineup/pic_overview_white.jpg",
+    "source": "https://www.nintendo.com/ph/hardware/detail/switch-oled/index.html",
+    "credit": "Nintendo",
+    "image": "/images/hardware/editions/switch-oled-white.jpg"
+  },
+  {
+    "id": "switch-oled-bluered",
+    "catalogId": "switch",
+    "type": "console",
+    "versionIds": [
+      "switch-oled-64"
+    ],
+    "kind": "standard",
+    "name": "Bleu néon / rouge néon",
+    "color": "Bleu / rouge",
+    "asset": "https://www.nintendo.com/ph/hardware/detail/switch-oled/img/07-local-lineup/pic_overview_blueRed.jpg",
+    "source": "https://www.nintendo.com/ph/hardware/detail/switch-oled/index.html",
+    "credit": "Nintendo",
+    "image": "/images/hardware/editions/switch-oled-bluered.jpg"
+  },
+  {
+    "id": "switch-oled-splatoon",
+    "catalogId": "switch",
+    "type": "console",
+    "versionIds": [
+      "switch-oled-64"
+    ],
+    "kind": "limited",
+    "name": "Splatoon 3",
+    "color": "Violet / jaune",
+    "source": "https://www.nintendo.com/ph/hardware/switch/modal/lineup_oled_splatoon.html?width=980",
+    "credit": "Nintendo",
+    "asset": "https://www.nintendo.com/ph/hardware/switch/modal/img/lineup/img-gallery--splatoon_02.jpg",
+    "image": "/images/hardware/editions/switch-oled-splatoon.jpg"
+  },
+  {
+    "id": "switch-oled-mariored",
+    "catalogId": "switch",
+    "type": "console",
+    "versionIds": [
+      "switch-oled-64"
+    ],
+    "kind": "limited",
+    "name": "Mario rouge",
+    "color": "Rouge",
+    "source": "https://www.nintendo.com/ph/hardware/switch/modal/lineup_oled_mariored.html?width=980",
+    "credit": "Nintendo",
+    "asset": "https://www.nintendo.com/ph/hardware/switch/modal/img/lineup/img-gallery--mariored_01.jpg",
+    "image": "/images/hardware/editions/switch-oled-mariored.jpg"
+  },
+  {
+    "id": "victrix-fs12-wh",
+    "catalogId": "victrix-controllers",
+    "type": "controller",
+    "versionIds": [
+      "victrix-pro-fs-12"
+    ],
+    "kind": "standard",
+    "name": "Blanc",
+    "color": "Blanc",
+    "image": "/images/hardware/editions/victrix-fs12-wh.png",
+    "source": "https://www.turtlebeach.com/products/victrix-pro-fs-12-arcade-fight-stick",
+    "asset": "https://cdn.shopify.com/s/files/1/0556/5795/5430/files/VictrixProFS-Fightstick-BTN-WH.png?width=720",
+    "credit": "Turtle Beach / Victrix"
+  },
+  {
+    "id": "victrix-fs12-pr",
+    "catalogId": "victrix-controllers",
+    "type": "controller",
+    "versionIds": [
+      "victrix-pro-fs-12"
+    ],
+    "kind": "standard",
+    "name": "Violet",
+    "color": "Violet",
+    "image": "/images/hardware/editions/victrix-fs12-pr.png",
+    "source": "https://www.turtlebeach.com/products/victrix-pro-fs-12-arcade-fight-stick",
+    "asset": "https://cdn.shopify.com/s/files/1/0556/5795/5430/files/VictrixProFS-Fightstick-BTN-PR.png?width=720",
+    "credit": "Turtle Beach / Victrix"
+  }
+]

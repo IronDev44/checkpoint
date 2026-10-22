@@ -1,3 +1,8 @@
+import HardwareEditionGallery from './components/HardwareEditionGallery';
+import {hardwareImageForEdition,hardwareBaseImage,hardwareDisplayImage} from './services/hardwareEditionPhotos';
+import HardwareEditionEditor from './components/HardwareEditionEditor';
+import {hardwareEditionLabel,normalizeHardwareEdition,hasHardwareEdition,duplicateHardwareEdition} from './services/hardwareEditions';
+import {normalizeEditionLinks} from './services/gameEditions';
 import {normalizeDuelHistory} from "./services/soloDuel";
 import {THEME_CATALOG} from "./data/themeCatalog";
 import { Fragment, useState, useEffect, useMemo, useRef, useCallback } from "react";
@@ -375,6 +380,7 @@ function normalizeAppOptions(options = {}) {
     personalLists:normalizePersonalLists(source.personalLists),
     experiences:normalizeExperiences(source.experiences),
     duelPalmares:normalizeDuelHistory(source.duelPalmares),
+    editionLinks:normalizeEditionLinks(source.editionLinks),
     notifications:normalizeNotificationPreferences(source.notifications),
     schemaVersion: APP_OPTIONS_SCHEMA_VERSION,
     sound: normalizeSoundSettings(source.sound, readLegacySoundSettings(localStorage)),
@@ -12577,6 +12583,8 @@ function HardwareDetailModal({
   onUpdateHardwareAcquiredYear,
   onUpdateHardwareDisplaySize,
   onUpdateHardwareComponent,
+  onEditHardwareEdition,
+  onAddHardwareEdition,
   onUpdateHardwareRating,
   onUpdateHardwareReview,
   onToggleHardwareFavorite,
@@ -12616,6 +12624,7 @@ function HardwareDetailModal({
     { label: "Marque", value: item.brand || "Marque inconnue" },
     item.variantName && { label: "Gamme", value: item.variantName },
     item.storage && { label: "Stockage", value: item.storage },
+    hardwareEditionLabel(item) && {label:"Édition / coloris",value:hardwareEditionLabel(item)},
     displaySizeLabel && { label: "Taille", value: displaySizeLabel },
     { label: "Statut", value: getHardwareStatusLabel(item.status) },
   ].filter(Boolean);
@@ -12639,9 +12648,9 @@ function HardwareDetailModal({
           ✕
         </button>
 
-        {item.image ? (
+        {hardwareDisplayImage(item) ? (
           <img
-            src={item.image}
+            src={hardwareDisplayImage(item)}
             alt={item.name}
             className="modal-image hardware-detail-image"
             onError={handleHardwareImageError}
@@ -12665,6 +12674,9 @@ function HardwareDetailModal({
             </button>
           </div>
 
+          {hardwareEditionLabel(item)&&<p className="hardware-edition-badge">{hardwareEditionLabel(item)}</p>}
+          <div className="hardware-edition-tools">{onEditHardwareEdition&&<button type="button" className="option-pill" onClick={()=>onEditHardwareEdition(item)}>Modifier la couleur / l’édition</button>}{onAddHardwareEdition&&<button type="button" className="option-pill" onClick={()=>onAddHardwareEdition(item)}>Ajouter une autre édition</button>}</div>
+          {onEditHardwareEdition&&<HardwareEditionGallery item={item} onChoose={edition=>onEditHardwareEdition(item,edition)}/>}
           <div className="hardware-detail-score">
             <div className="hardware-detail-score-main">
               <span>⭐ {formatRating10(averageRating, "Non noté")}</span>
@@ -12914,8 +12926,11 @@ export function HardwareTab({
   onUpdateHardwareRating,
   onUpdateHardwareReview,
   onUpdateHardwareComponent,
+  onUpdateHardwareEdition,
 }) {
   const [hardwareSearch, setHardwareSearch] = useState("");
+  const [hardwareEditionDraft,setHardwareEditionDraft]=useState(null);
+  const editionAdds=useRef(new Set());
   const [selectedHardwareId, setSelectedHardwareId] = useState(null);
   const [selectedHardwareBrandView, setSelectedHardwareBrandView] = useState(null);
   const [showAllHardwareByBrand, setShowAllHardwareByBrand] = useState(false);
@@ -13403,13 +13418,13 @@ export function HardwareTab({
         item.variantId === variant.id &&
         item.versionId === version.id &&
         item.type === catalogItem.type &&
-        item.status !== "ranked"
+        item.status !== "ranked" && !hasHardwareEdition(item)
     ) ||
     hardware.find(
       (item) =>
         item.versionId === version.id &&
         item.type === catalogItem.type &&
-        item.status !== "ranked"
+        item.status !== "ranked" && !hasHardwareEdition(item)
     );
 
   const selectedHardware = catalogByType.find(
@@ -13447,18 +13462,18 @@ export function HardwareTab({
     catalogItem,
     variant,
     version,
-    status = "possédé"
+    status = "possédé",
+    edition
   ) => {
-    const alreadyExists = hardware.some(
-      (item) =>
-        item.type === catalogItem.type &&
-        item.versionId === version.id &&
-        getHardwareStatusKey(item.status) === getHardwareStatusKey(status)
-    );
-
-    if (alreadyExists) return;
-
-    await onAddHardware({
+    const candidate={catalogId:catalogItem.id,variantId:variant.id,versionId:version.id,name:version.name,brand:catalogItem.brand,type:catalogItem.type,image:version.image||'',status,edition:normalizeHardwareEdition(edition)};
+    if(duplicateHardwareEdition(hardware,candidate)){
+      if(edition!==undefined)throw new Error('Cette édition avec ce coloris et ce statut est déjà dans ta collection.');
+      return false;
+    }
+    const pendingKey=JSON.stringify(candidate);
+    if(editionAdds.current.has(pendingKey))return false;
+    editionAdds.current.add(pendingKey);
+    try{return await onAddHardware({
       catalogId: catalogItem.id,
       variantId: variant.id,
       versionId: version.id,
@@ -13470,7 +13485,8 @@ export function HardwareTab({
       storage: version.storage || "",
       disc: version.disc ?? null,
       backwardCompatible: version.backwardCompatible ?? null,
-      image: version.image || "",
+      image: hardwareImageForEdition(candidate),
+      catalogImage: version.image || "",
       status,
       condition: catalogItem.type === "console" ? "bon" : "",
       displaySizes: catalogItem.type === "display" ? version.sizes || [] : [],
@@ -13484,8 +13500,26 @@ export function HardwareTab({
       favorite: false,
       sanctuary: false,
       source: "local-catalog",
+      edition: candidate.edition,
       createdAt: Date.now(),
-    });
+    });}finally{editionAdds.current.delete(pendingKey);}
+  };
+
+  const openEditionFromItem=item=>{
+    const model=HARDWARE_CATALOG.find(model=>model.id===item.catalogId)||{id:item.catalogId||'',name:item.parentName||item.name,brand:item.brand,type:item.type};
+    const variant=model.variants?.find(variant=>variant.id===item.variantId)||{id:item.variantId||'',name:item.variantName||item.name};
+    const version=variant.versions?.find(version=>version.id===item.versionId)||{...item,id:item.versionId||'',name:item.name};
+    setHardwareEditionDraft({mode:'add',catalogItem:model,variant,version});
+  };
+  const editionButton=(catalogItem,variant,version)=><button type="button" className="option-pill hardware-edition-add" aria-label={`Ajouter une couleur ou une édition de ${version.name}`} onClick={event=>{event.stopPropagation();setHardwareEditionDraft({mode:'add',catalogItem,variant,version});}}>Couleur / édition spéciale</button>;
+  const saveHardwareEdition=async(edition,status)=>{
+    if(hardwareEditionDraft.mode==='edit'){
+      const item=hardware.find(item=>item.id===hardwareEditionDraft.item.id);
+      if(!item)throw new Error('Ce matériel n’est plus disponible.');
+      if(duplicateHardwareEdition(hardware,{...item,edition},item.id))throw new Error('Cette édition avec ce coloris et ce statut existe déjà. Les fiches restent séparées.');
+      return onUpdateHardwareEdition?.(item.id,edition)??false;
+    }
+    return addFromCatalog(hardwareEditionDraft.catalogItem,hardwareEditionDraft.variant,hardwareEditionDraft.version,status,edition);
   };
 
   const getHardwareCompletion = () => {
@@ -13531,13 +13565,23 @@ export function HardwareTab({
             id: "controllers",
             title: "Manettes utilisées actuellement",
             items: hardware.filter(
-              (item) => item.type === "controller" && hasHardwareStatus(item, "possede")
+              (item) => item.type === "controller" && isCurrentHardware(item)
             ),
           },
           {
             id: "controller-ranking",
             title: "Classement automatique par note",
             items: rankedControllers,
+          },
+          {
+            id: "controller-history",
+            title: "Mes anciennes manettes",
+            items: hardware.filter((item) => item.type === "controller" && ["historique", "vendu"].includes(getHardwareStatusKey(item.status))),
+          },
+          {
+            id: "controller-wishlist",
+            title: "Wishlist manettes",
+            items: hardware.filter((item) => item.type === "controller" && hasHardwareStatus(item, "wishlist")),
           },
         ]
       : hardwareCategory === "audio"
@@ -13796,6 +13840,7 @@ export function HardwareTab({
 
   return (
     <div className="progression-stack">
+      {hardwareEditionDraft&&<HardwareEditionEditor item={hardwareEditionDraft.mode==='edit'?{...hardwareEditionDraft.item,edition:hardwareEditionDraft.edition||hardwareEditionDraft.item.edition}:{name:hardwareEditionDraft.version.name,versionId:hardwareEditionDraft.version.id,catalogId:hardwareEditionDraft.catalogItem.id,type:hardwareEditionDraft.catalogItem.type,image:hardwareEditionDraft.version.image,status:'possédé',edition:hardwareEditionDraft.edition}} editing={hardwareEditionDraft.mode==='edit'} onSave={saveHardwareEdition} onClose={()=>setHardwareEditionDraft(null)}/>}
       {selectedHardwareDetail?.instanceKey?.startsWith('search-')&&hardware.some(item=>item.id===selectedHardwareDetail.id)&&<HardwareDetailModal
         item={{...hardware.find(item=>item.id===selectedHardwareDetail.id),instanceKey:selectedHardwareDetail.instanceKey}}
         detailRef={hardwareDetailRef} onClose={()=>setSelectedHardwareDetail(null)} onDeleteHardware={onDeleteHardware}
@@ -13804,6 +13849,8 @@ export function HardwareTab({
         onUpdateHardwareStatus={onUpdateHardwareStatus} onUpdateHardwareSanctuary={onUpdateHardwareSanctuary}
         onUpdateHardwareCondition={onUpdateHardwareCondition} onUpdateHardwareAcquiredYear={onUpdateHardwareAcquiredYear}
         onUpdateHardwareDisplaySize={onUpdateHardwareDisplaySize} onUpdateHardwareComponent={onUpdateHardwareComponent}
+        onEditHardwareEdition={onUpdateHardwareEdition?(item,edition)=>setHardwareEditionDraft({mode:'edit',item,edition}):undefined}
+        onAddHardwareEdition={openEditionFromItem}
         onUpdateHardwareRating={onUpdateHardwareRating} onUpdateHardwareReview={onUpdateHardwareReview}
         onToggleHardwareFavorite={onToggleHardwareFavorite} consoleGameStats={getConsoleGameStats(selectedHardwareDetail)} getHardwareStatusLabel={getHardwareStatusLabel}/>}
       {hardwareCategory === "console" && (
@@ -14112,6 +14159,7 @@ export function HardwareTab({
                                           ))}
                                         </div>
                                       )}
+                                      {editionButton(catalogItem,variant,version)}
                                     </div>
 
                                   </div>
@@ -14136,6 +14184,8 @@ export function HardwareTab({
                           onUpdateHardwareAcquiredYear={onUpdateHardwareAcquiredYear}
                                         onUpdateHardwareDisplaySize={onUpdateHardwareDisplaySize}
                                         onUpdateHardwareComponent={onUpdateHardwareComponent}
+        onEditHardwareEdition={onUpdateHardwareEdition?(item,edition)=>setHardwareEditionDraft({mode:'edit',item,edition}):undefined}
+        onAddHardwareEdition={openEditionFromItem}
                                         onUpdateHardwareRating={onUpdateHardwareRating}
                                         onUpdateHardwareReview={onUpdateHardwareReview}
                                         onToggleHardwareFavorite={onToggleHardwareFavorite}
@@ -14421,6 +14471,7 @@ export function HardwareTab({
                                   </button>
                                 </div>
                               )}
+                              {editionButton(selectedHardware,variant,version)}
                             </div>
                           </div>
                         );
@@ -14486,6 +14537,8 @@ export function HardwareTab({
                           onUpdateHardwareAcquiredYear={onUpdateHardwareAcquiredYear}
                           onUpdateHardwareDisplaySize={onUpdateHardwareDisplaySize}
                           onUpdateHardwareComponent={onUpdateHardwareComponent}
+        onEditHardwareEdition={onUpdateHardwareEdition?(item,edition)=>setHardwareEditionDraft({mode:'edit',item,edition}):undefined}
+        onAddHardwareEdition={openEditionFromItem}
                           onUpdateHardwareRating={onUpdateHardwareRating}
                           onUpdateHardwareReview={onUpdateHardwareReview}
                           onToggleHardwareFavorite={onToggleHardwareFavorite}
@@ -14507,14 +14560,14 @@ export function HardwareTab({
                         }}
                       >
                         <div className="hardware-card-image-zone">
-                          {item.image ? (
+                          {hardwareDisplayImage(item) ? (
                             <button
                               type="button"
                               className="hardware-image-zoom-btn"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setZoomedHardwareImage({
-                                  image: item.image,
+                                  image: hardwareDisplayImage(item),
                                   name: item.name,
                                   x: e.clientX,
                                   y: e.clientY,
@@ -14522,7 +14575,7 @@ export function HardwareTab({
                               }}
                             >
                               <img
-                                src={item.image}
+                                src={hardwareDisplayImage(item)}
                                 alt={item.name}
                                 className="hardware-collection-image"
                                 onError={handleHardwareImageError}
@@ -14542,6 +14595,7 @@ export function HardwareTab({
                                 {group.id === "controller-ranking" ? `#${index + 1} ${item.name}` : item.name}
                               </div>
 
+                              {hardwareEditionLabel(item)&&<span className="hardware-edition-badge">{hardwareEditionLabel(item)}</span>}
                               <div className="hardware-brand-rating">
                                 <span>{item.brand || "Marque inconnue"}</span>
                                 <span className="hardware-card-rating">
@@ -17751,10 +17805,12 @@ const addHardware = async (item) => {
     await addDoc(collection(db, "hardware"), item);
     showToast("Belle prise ajoutée à ton setup.");
     playSound("success", soundStyle);
+    return true;
   } catch (error) {
-    if (isAbortError(error)) return;
+    if (isAbortError(error)) return false;
     console.error("Erreur ajout matériel :", error);
     showToast("Impossible d’ajouter ce matériel pour le moment.");
+    return false;
   }
 };
 
@@ -19418,6 +19474,12 @@ useEffect(() => {
     const rating=values.length?Math.round(values.reduce((sum,value)=>sum+value,0)/values.length*10)/10:0;
     schedulePatch("hardware",id,{ratings,rating},"Notes du matériel enregistrées");
   };
+  const updateHardwareEdition=(id,edition)=>{
+    const item=documentStateRef.current.hardware.find(item=>item.id===id);
+    if(!item)return false;
+    const normalized=normalizeHardwareEdition(edition);
+    return persistPatch("hardware",id,{edition:normalized,image:hardwareImageForEdition(item,normalized),catalogImage:hardwareBaseImage(item)},{success:"Couleur, édition et photo enregistrées",undoable:true});
+  };
   const updateHardwareReview = (id,review) => persistPatch("hardware",id,{review},{success:"Avis sur le matériel enregistré"});
   const updateHardwareComponent = (id,key,value) => {
     const item=documentStateRef.current.hardware.find(item=>item.id===id);
@@ -19869,7 +19931,7 @@ useEffect(() => {
 />
 )}
 
-{activeTab === "arena" && <ArenaTab games={games} series={personalSeries} onOpenGame={game=>openGameDetail(game,games)} palmares={appOptions.duelPalmares} onPalmaresChange={value=>updateAppOption('duelPalmares',value)}/>}
+{activeTab === "arena" && <ArenaTab key={auth.currentUser?.uid||'local'} syncEnabled editionLinks={appOptions.editionLinks} onEditionLinksChange={value=>updateAppOption('editionLinks',value)} games={games} series={personalSeries} onOpenGame={game=>openGameDetail(game,games)} palmares={appOptions.duelPalmares} onPalmaresChange={value=>updateAppOption('duelPalmares',value)}/>}
 
 {activeTab === "news" && (
   <NewsTab newsItems={newsItems} />
@@ -20280,6 +20342,7 @@ useEffect(() => {
     onUpdateHardwareRating={updateHardwareRating}
     onUpdateHardwareReview={updateHardwareReview}
     onUpdateHardwareComponent={updateHardwareComponent}
+    onUpdateHardwareEdition={updateHardwareEdition}
   />
 )}
 

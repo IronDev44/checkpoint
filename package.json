@@ -20,6 +20,7 @@
     "deploy:cloudflare": "wrangler pages deploy build",
     "preview:cloudflare": "wrangler pages dev build",
     "test": "react-scripts test",
+    "audit:hardware": "node scripts/audit-hardware-catalog.cjs",
     "eject": "react-scripts eject",
     "prebuild": "node scripts/sync-server-modules.cjs"
   },

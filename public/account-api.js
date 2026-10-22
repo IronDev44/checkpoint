@@ -1,3 +1,4 @@
+import {normalizeArenaEnvelope} from './arena-state.js';
 import { publicProfileView } from "./profile-privacy.js";
 const PRIVATE = new Set(['games','hardware','gameCollections','playerProgress','playerPrivateSettings']);
 const SHARED = new Set(['news','events','publicProfiles']);
@@ -139,8 +140,13 @@ export async function handleAccountApi(request,env,verify=verifyFirebaseToken){
     if(guarded&&plainObject(body.base)){for(const [key,value] of Object.entries(body.base)){const current=key.split('.').reduce((v,k)=>v?.[k],previous)??null;const desired=transform(body.data[key],current);if(JSON.stringify(current)!==JSON.stringify(value)&&JSON.stringify(current)!==JSON.stringify(desired))return response({error:'Ce champ a changé sur un autre appareil. Ta modification reste sur cet appareil.'},409);}}
     if(Object.keys(body.data).some(key=>key.split('.')[0]==='_deletedAt'))return response({error:'Champ réservé à la corbeille.'},400);
     if(body.mode==='update'&&!previous)return response({error:'Document introuvable.'},404);
+    if(body.mode==='arena'){
+      if(name!=='playerProgress'||id!=='arena')return response({error:'Tournoi invalide.'},400);
+      if(!normalizeArenaEnvelope(body.data))return response({error:'Sauvegarde du tournoi invalide.'},400);
+      if(body.baseRevision!==(previous?.revision??null))return response({error:'Le tournoi a changé sur un autre appareil.',data:previous},409);
+    }
     if(body.mode==='progress'&&(name!=='playerProgress'||id!=='gaming'))return response({error:'Progression invalide.'},400);
-    let data=body.mode==='progress'?mergeGamingProgress(previous||{},transform(body.data)):['replace','recovery'].includes(body.mode)?transform(body.data):mergeDocument(previous,body.data,body.mode==='update');
+    let data=body.mode==='arena'?normalizeArenaEnvelope(body.data):body.mode==='progress'?mergeGamingProgress(previous||{},transform(body.data)):['replace','recovery'].includes(body.mode)?transform(body.data):mergeDocument(previous,body.data,body.mode==='update');
     if(name==='publicProfiles')data=publicProfileView({...data,ownerUid:uid});
     // Optimistic concurrency prevents silently overwriting another simultaneous change.
     if(row){const result=await db.prepare('UPDATE documents SET data=? WHERE owner=? AND collection=? AND id=? AND data=?').bind(JSON.stringify(data),owner,name,id,row.data).run();if(!result.meta.changes)return response({error:'Une modification simultanée a eu lieu. Réessaie.'},409);}

@@ -132,7 +132,7 @@ export const PC_HANDHELDS_HARDWARE = [
           name: "ROG Ally Z1 Extreme",
           storage: "512 Go",
           disc: false,
-          image: "/images/consoles/rog-ally-x.png",
+          image: "/images/consoles/rog-ally.png",
         },
       ],
     },
