@@ -41,7 +41,7 @@ test('a guide can be completed, replayed from the start, and closed without losi
 test('the help library opens every tab guide and marks completed guides for replay',()=>{
  mockStore.set('checkpoint-tab-tutorials-v1',JSON.stringify({home:'completed'}));
  render(<TutorialLibrary/>);
- const buttons=[...document.querySelectorAll('.tab-tutorial-choice')];
+ const buttons=screen.getAllByRole('button');
  expect(buttons).toHaveLength(Object.keys(TAB_TUTORIALS).length);
  expect(buttons[0]).toHaveTextContent('Revoir le guide');
  for(const [index,guide] of Object.values(TAB_TUTORIALS).entries()){
@@ -51,12 +51,45 @@ test('the help library opens every tab guide and marks completed guides for repl
  }
 });
 
+test('a short guide finishes directly and remains available in the help library',()=>{
+ render(<TabTutorialEntry tab="news"/>);
+ expect(screen.getByText('Étape 1 sur 1')).toBeVisible();
+ expect(screen.queryByRole('button',{name:'Précédent'})).toBeNull();
+ expect(screen.queryByRole('button',{name:'Suivant'})).toBeNull();
+ expect(screen.getByText(/Tu peux revoir ce tutoriel/)).toBeVisible();
+ fireEvent.click(screen.getByRole('button',{name:'J’ai compris'}));
+ expect(screen.queryByRole('dialog')).toBeNull();
+ render(<TutorialLibrary/>);
+ fireEvent.click(screen.getByRole('button',{name:/^Actu .*1 étape · Revoir le guide/}));
+ expect(screen.getByRole('dialog')).toHaveTextContent('Lire une actualité');
+});
+
+test('a longer guide reaches every topic, supports going back and completes normally',()=>{
+ render(<TabTutorialEntry tab="arena"/>);
+ const steps=TAB_TUTORIALS.arena.steps;
+ expect(steps.length).toBeGreaterThan(4);
+ for(const [index,step] of steps.entries()){
+  expect(screen.getByRole('heading',{name:step.title})).toHaveFocus();
+  expect(screen.getByText(`Étape ${index+1} sur ${steps.length}`)).toBeVisible();
+  expect(Boolean(screen.queryByText(/Tu peux revoir ce tutoriel/))).toBe(index===steps.length-1);
+  if(index<steps.length-1){
+   fireEvent.click(screen.getByRole('button',{name:'Suivant'}));
+  }
+ }
+ expect(screen.getByText(/Tu peux revoir ce tutoriel/)).toBeVisible();
+ fireEvent.click(screen.getByRole('button',{name:'Précédent'}));
+ expect(screen.getByRole('heading',{name:steps[steps.length-2].title})).toHaveFocus();
+ fireEvent.click(screen.getByRole('button',{name:'Suivant'}));
+ fireEvent.click(screen.getByRole('button',{name:'J’ai compris'}));
+ expect(JSON.parse(mockStore.get('checkpoint-tab-tutorials-v1')).arena).toBe('completed');
+});
+
 test('focus stays inside the guide and background scrolling is restored when it unmounts',()=>{
  const view=render(<TutorialDialog tab="series" onClose={()=>{}}/>);
  const last=screen.getByRole('button',{name:'Suivant'});last.focus();
  fireEvent.keyDown(last,{key:'Tab'});
  expect(screen.getByRole('button',{name:'Fermer le tutoriel'})).toHaveFocus();
- fireEvent.keyDown(document.activeElement,{key:'Tab',shiftKey:true});expect(last).toHaveFocus();
+ fireEvent.keyDown(screen.getByRole('button',{name:'Fermer le tutoriel'}),{key:'Tab',shiftKey:true});expect(last).toHaveFocus();
  view.unmount();expect(document.body.style.overflow).toBe('');
 });
 

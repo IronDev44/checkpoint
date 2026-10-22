@@ -65,8 +65,8 @@ export function TutorialDialog({tab, onClose}) {
       </div>
       <footer className="tab-tutorial-footer">
         <div className="tab-tutorial-dots" aria-hidden="true">{guide.steps.map((_, i) => <span key={i} className={i <= index ? 'active' : ''}/>)}</div>
-        <div className="tab-tutorial-actions">
-          <button type="button" className="back-btn" disabled={index === 0} onClick={() => setIndex(value => value - 1)}><ArrowLeft size={16}/> Précédent</button>
+        <div className={`tab-tutorial-actions${guide.steps.length === 1 ? ' tab-tutorial-actions-single' : ''}`}>
+          {guide.steps.length > 1 && <button type="button" className="back-btn" disabled={index === 0} onClick={() => setIndex(value => value - 1)}><ArrowLeft size={16}/> Précédent</button>}
           <button type="button" className="checkpoint-primary-action" onClick={() => index === guide.steps.length - 1 ? onClose(true) : setIndex(value => value + 1)}>
             {index === guide.steps.length - 1 ? 'J’ai compris' : 'Suivant'}<ArrowRight size={16}/>
           </button>
@@ -97,7 +97,7 @@ export function TutorialLibrary() {
       {Object.entries(TAB_TUTORIALS).map(([key, guide]) => <button type="button" className="tab-tutorial-choice" key={key} onClick={() => setTab(key)}>
         <span className="tab-tutorial-choice-head"><strong>{guide.label}</strong>{progress[key] === 'completed' ? <Check size={17} aria-label="Guide terminé"/> : <BookOpen size={17} aria-hidden="true"/>}</span>
         <span>{guide.summary}</span>
-        <small>{guide.steps.length} étapes · {progress[key] === 'completed' ? 'Revoir le guide' : 'Ouvrir le guide'}</small>
+        <small>{guide.steps.length} {guide.steps.length === 1 ? 'étape' : 'étapes'} · {progress[key] === 'completed' ? 'Revoir le guide' : 'Ouvrir le guide'}</small>
       </button>)}
     </div>
     {tab && <TutorialDialog key={tab} tab={tab} onClose={completed => {saveProgress(tab, completed || progress[tab] === 'completed'); setTab(null);}}/>}

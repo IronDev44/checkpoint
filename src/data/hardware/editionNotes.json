@@ -1,0 +1,130 @@
+{
+  "desktop-pc": {
+    "status": "generic",
+    "message": "Cette fiche représente les PC fixes en général. Renseigne la marque, le modèle et le coloris de ton ordinateur dans le formulaire."
+  },
+  "gaming-laptop": {
+    "status": "generic",
+    "message": "Cette fiche représente les PC portables gaming en général. Renseigne ton modèle exact et son coloris dans le formulaire."
+  },
+  "aya-neo": {
+    "status": "generic",
+    "message": "AYANEO désigne plusieurs générations de consoles. Indique ton modèle exact avant de préciser son édition."
+  },
+  "msi-claw": {
+    "status": "generic",
+    "message": "La famille MSI Claw regroupe plusieurs modèles. Indique la référence exacte de ton appareil ; leurs coloris ne sont pas interchangeables."
+  },
+  "steam-machine-original": {
+    "status": "generic",
+    "message": "Les anciennes Steam Machines existent chez plusieurs fabricants. Indique le fabricant et le modèle exact dans le formulaire."
+  },
+  "steam-machine-2026": {
+    "status": "generic",
+    "message": "Cette référence doit être précisée avant de lui rattacher une liste d’éditions. Tu peux renseigner ton appareil dans le formulaire."
+  },
+  "philips-cdi": {
+    "status": "generic",
+    "message": "La famille CD-i contient plusieurs lecteurs et châssis. Indique le numéro du modèle pour préciser son coloris."
+  },
+  "nvidia-shield": {
+    "status": "generic",
+    "message": "La famille NVIDIA Shield comprend plusieurs appareils et générations. Indique ton modèle exact avant de choisir une édition."
+  },
+  "google-stadia": {
+    "status": "generic",
+    "message": "Stadia est un service et un ensemble de packs. Précise le matériel que tu possèdes ; la couleur de la manette ne définit pas une console distincte."
+  },
+  "hori-fighting-commander-octa": {
+    "status": "generic",
+    "message": "L’OCTA existe sur plusieurs plateformes. Précise la version PlayStation, Xbox ou PC ; leurs éditions ne sont pas interchangeables."
+  },
+  "hori-fighting-stick-alpha": {
+    "status": "generic",
+    "message": "Ce stick existe sur plusieurs plateformes. Précise la version PlayStation ou Xbox avant de renseigner son édition."
+  },
+  "powera-enhanced-wired": {
+    "status": "generic",
+    "message": "Cette fiche regroupe des manettes filaires disponibles sur différentes plateformes. Indique ta version Xbox ou Switch pour identifier la bonne édition."
+  },
+  "pdp-rematch-wired": {
+    "status": "generic",
+    "message": "La gamme Rematch filaire existe sur différentes plateformes. Précise le modèle et la plateforme pour identifier son édition."
+  },
+  "pdp-afterglow-wave": {
+    "status": "generic",
+    "message": "Afterglow Wave existe en plusieurs versions. Précise la plateforme et la connexion filaire ou sans fil avant de renseigner son coloris."
+  },
+  "backbone-one-lightning": {
+    "status": "generic",
+    "message": "Plusieurs générations de Backbone One portent ce nom. Précise la génération et le connecteur pour identifier la bonne édition."
+  },
+  "backbone-one-usb-c": {
+    "status": "generic",
+    "message": "Plusieurs générations de Backbone One portent ce nom. Précise la génération et le connecteur pour identifier la bonne édition."
+  },
+  "backbone-one-playstation-lightning": {
+    "status": "generic",
+    "message": "Plusieurs générations de Backbone One portent ce nom. Précise la génération et le connecteur pour identifier la bonne édition."
+  },
+  "backbone-one-playstation-usb-c": {
+    "status": "generic",
+    "message": "Plusieurs générations de Backbone One portent ce nom. Précise la génération et le connecteur pour identifier la bonne édition."
+  },
+  "scuf-omega": {
+    "status": "configurable",
+    "message": "Cette gamme comprend des finitions personnalisables ou des séries créées sur commande. Tu peux renseigner le nom du design et les couleurs de ta manette ; une liste fermée ne couvrirait pas toutes les combinaisons."
+  },
+  "scuf-valor-pro": {
+    "status": "configurable",
+    "message": "Cette gamme comprend des finitions personnalisables ou des séries créées sur commande. Tu peux renseigner le nom du design et les couleurs de ta manette ; une liste fermée ne couvrirait pas toutes les combinaisons."
+  },
+  "scuf-valor-filaire": {
+    "status": "configurable",
+    "message": "Cette gamme comprend des finitions personnalisables ou des séries créées sur commande. Tu peux renseigner le nom du design et les couleurs de ta manette ; une liste fermée ne couvrirait pas toutes les combinaisons."
+  },
+  "scuf-reflex": {
+    "status": "configurable",
+    "message": "Cette gamme comprend des finitions personnalisables ou des séries créées sur commande. Tu peux renseigner le nom du design et les couleurs de ta manette ; une liste fermée ne couvrirait pas toutes les combinaisons."
+  },
+  "scuf-reflex-pro": {
+    "status": "configurable",
+    "message": "Cette gamme comprend des finitions personnalisables ou des séries créées sur commande. Tu peux renseigner le nom du design et les couleurs de ta manette ; une liste fermée ne couvrirait pas toutes les combinaisons."
+  },
+  "scuf-instinct-pro": {
+    "status": "configurable",
+    "message": "Cette gamme comprend des finitions personnalisables ou des séries créées sur commande. Tu peux renseigner le nom du design et les couleurs de ta manette ; une liste fermée ne couvrirait pas toutes les combinaisons."
+  },
+  "scuf-envision": {
+    "status": "configurable",
+    "message": "Cette gamme comprend des finitions personnalisables ou des séries créées sur commande. Tu peux renseigner le nom du design et les couleurs de ta manette ; une liste fermée ne couvrirait pas toutes les combinaisons."
+  },
+  "scuf-envision-pro": {
+    "status": "configurable",
+    "message": "Cette gamme comprend des finitions personnalisables ou des séries créées sur commande. Tu peux renseigner le nom du design et les couleurs de ta manette ; une liste fermée ne couvrirait pas toutes les combinaisons."
+  },
+  "scuf-impact": {
+    "status": "configurable",
+    "message": "Cette gamme comprend des finitions personnalisables ou des séries créées sur commande. Tu peux renseigner le nom du design et les couleurs de ta manette ; une liste fermée ne couvrirait pas toutes les combinaisons."
+  },
+  "thrustmaster-eswap-pro": {
+    "status": "configurable",
+    "message": "Les modules et packs de couleurs peuvent être remplacés séparément sur ce modèle. Décris ta configuration dans le formulaire ; un pack de modules ne constitue pas automatiquement une nouvelle édition de la manette."
+  },
+  "thrustmaster-eswap-x-pro": {
+    "status": "configurable",
+    "message": "Les modules et packs de couleurs peuvent être remplacés séparément sur ce modèle. Décris ta configuration dans le formulaire ; un pack de modules ne constitue pas automatiquement une nouvelle édition de la manette."
+  },
+  "thrustmaster-eswap-s-pro": {
+    "status": "configurable",
+    "message": "Les modules et packs de couleurs peuvent être remplacés séparément sur ce modèle. Décris ta configuration dans le formulaire ; un pack de modules ne constitue pas automatiquement une nouvelle édition de la manette."
+  },
+  "thrustmaster-eswap-x2": {
+    "status": "configurable",
+    "message": "Les modules et packs de couleurs peuvent être remplacés séparément sur ce modèle. Décris ta configuration dans le formulaire ; un pack de modules ne constitue pas automatiquement une nouvelle édition de la manette."
+  },
+  "thrustmaster-eswap-xr-pro": {
+    "status": "configurable",
+    "message": "Les modules et packs de couleurs peuvent être remplacés séparément sur ce modèle. Décris ta configuration dans le formulaire ; un pack de modules ne constitue pas automatiquement une nouvelle édition de la manette."
+  }
+}

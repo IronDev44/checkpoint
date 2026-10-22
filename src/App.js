@@ -1,5 +1,5 @@
 import HardwareEditionGallery from './components/HardwareEditionGallery';
-import {hardwareImageForEdition,hardwareBaseImage,hardwareDisplayImage} from './services/hardwareEditionPhotos';
+import {hardwareImageForEdition,hardwareBaseImage,hardwareDisplayImage,hardwarePhotoUrl,hardwareEditionChoices} from './services/hardwareEditionPhotos';
 import HardwareEditionEditor from './components/HardwareEditionEditor';
 import {hardwareEditionLabel,normalizeHardwareEdition,hasHardwareEdition,duplicateHardwareEdition} from './services/hardwareEditions';
 import {normalizeEditionLinks} from './services/gameEditions';
@@ -79,6 +79,7 @@ import {captureBackup} from "./services/deviceStore";
 import SaveFeedback, { useSaveFeedback } from "./components/SaveFeedback";
 import { FirstSteps, ProfileSection } from "./components/EverydayExperience";
 import { TabTutorialEntry, TutorialLibrary } from "./components/TabTutorials";
+import { TAB_TUTORIALS } from "./data/tabTutorials";
 import { buildBulkGamePatch } from "./services/libraryBulk";
 import "./components/CollectionImprovements.css";
 import "./components/LandscapeLayout.css";
@@ -4031,7 +4032,7 @@ function Top5OverviewPanel({ games = [], hardware = [] }) {
         {cards.map((card) => (
           <div key={card.label} className="top5-overview-card">
             {card.image ? (
-              <img src={card.image} alt={card.value} />
+              <img src={hardwarePhotoUrl(card.image)} alt={card.value} />
             ) : (
               <div className="top5-overview-placeholder">{card.label.slice(0, 3)}</div>
             )}
@@ -4178,7 +4179,7 @@ function Top5HardwarePanel({
             <div key={`${title}-${item.id}`} className="top5-item">
               <div className="top5-rank">{index + 1}</div>
               {item.image ? (
-                <img src={item.image} alt={item.name} className="top5-thumb" />
+                <img src={hardwarePhotoUrl(item.image)} alt={item.name} className="top5-thumb" />
               ) : (
                 <div className="top5-thumb placeholder">Mat</div>
               )}
@@ -6658,7 +6659,7 @@ function SanctuaryTab({
             {relics.map((item) => (
               <button type="button" key={item.id} onClick={item.onClick}>
                 <span className="sanctuary-relic-image">
-                  {item.image ? <img src={item.image} alt={item.title} /> : <span>CP</span>}
+                  {item.image ? <img src={hardwarePhotoUrl(item.image)} alt={item.title} /> : <span>CP</span>}
                 </span>
                 <span>{item.type}</span>
                 <strong>{item.title}</strong>
@@ -7940,7 +7941,7 @@ function ActivityFeed({
             {activity.image ? (
               <img
                 className="social-feed-media"
-                src={activity.image}
+                src={hardwarePhotoUrl(activity.image)}
                 alt={activity.title}
                 loading="lazy"
                 decoding="async"
@@ -8098,7 +8099,7 @@ function GamingTimeline({ timeline = [], compact = false }) {
           >
             <div className="gaming-timeline-year">{event.yearLabel}</div>
             <div className="gaming-timeline-node">
-              {event.image ? <img src={event.image} alt={event.title} /> : <span>{event.icon}</span>}
+              {event.image ? <img src={hardwarePhotoUrl(event.image)} alt={event.title} /> : <span>{event.icon}</span>}
             </div>
             <div className="gaming-timeline-card">
               <span>{event.kicker}</span>
@@ -8368,7 +8369,7 @@ export function PublicProfilePreview({
             ))}
             {sanctuaryHardware.map((item) => (
               <div key={`sanctuary-hardware-${item.id || item.name}`} className="public-sanctuary-item hardware">
-                {item.image ? <img src={item.image} alt={item.name} /> : <span>Set</span>}
+                {item.image ? <img src={hardwarePhotoUrl(item.image)} alt={item.name} /> : <span>Set</span>}
                 <div>
                   <strong>{item.name}</strong>
                   <small>{item.type || "Matériel culte"}</small>
@@ -8435,7 +8436,7 @@ export function PublicProfilePreview({
                         }
                       >
                         {item.image ? (
-                          <img src={item.image} alt={item.name} />
+                          <img src={hardwarePhotoUrl(item.image)} alt={item.name} />
                         ) : null}
                         <span>{item.name}</span>
                       </button>
@@ -8598,7 +8599,7 @@ function ProfileShowcase({ showcase, identityTitle = null }) {
                 key={item.id || item.name}
                 className={`profile-showcase-card hardware ${item.image ? "" : "no-image"}`}
               >
-                {item.image ? <img src={item.image} alt={item.name} /> : null}
+                {item.image ? <img src={hardwarePhotoUrl(item.image)} alt={item.name} /> : null}
                 <div>
                   <span>{item.label}</span>
                   <strong>{item.name}</strong>
@@ -10214,7 +10215,7 @@ export function HomeTab({
               onClick={() => setActiveTab("social")}
             >
               {featuredActivity.image ? (
-                <img src={featuredActivity.image} alt={featuredActivity.title} loading="lazy" />
+                <img src={hardwarePhotoUrl(featuredActivity.image)} alt={featuredActivity.title} loading="lazy" />
               ) : (
                 <div className={`social-feed-placeholder source-${featuredActivity.source || "generic"}`}>
                   {featuredActivity.type === "Badge" ? "B" : "C"}
@@ -10239,7 +10240,7 @@ export function HomeTab({
                   onClick={() => setActiveTab("social")}
                 >
                   {activity.image ? (
-                    <img src={activity.image} alt={activity.title} loading="lazy" />
+                    <img src={hardwarePhotoUrl(activity.image)} alt={activity.title} loading="lazy" />
                   ) : (
                     <div className={`social-feed-placeholder source-${activity.source || "generic"}`}>
                       {activity.type === "Badge" ? "B" : "C"}
@@ -13511,7 +13512,10 @@ export function HardwareTab({
     const version=variant.versions?.find(version=>version.id===item.versionId)||{...item,id:item.versionId||'',name:item.name};
     setHardwareEditionDraft({mode:'add',catalogItem:model,variant,version});
   };
-  const editionButton=(catalogItem,variant,version)=><button type="button" className="option-pill hardware-edition-add" aria-label={`Ajouter une couleur ou une édition de ${version.name}`} onClick={event=>{event.stopPropagation();setHardwareEditionDraft({mode:'add',catalogItem,variant,version});}}>Couleur / édition spéciale</button>;
+  const editionButton=(catalogItem,variant,version)=>{
+    const count=hardwareEditionChoices({type:catalogItem.type,catalogId:catalogItem.id,versionId:version.id}).length;
+    return <button type="button" className="option-pill hardware-edition-add" aria-label={`Ajouter une couleur ou une édition de ${version.name}`} onClick={event=>{event.stopPropagation();setHardwareEditionDraft({mode:'add',catalogItem,variant,version});}}>{count?`Couleurs et éditions · ${count}`:'Préciser la couleur / l’édition'}</button>;
+  };
   const saveHardwareEdition=async(edition,status)=>{
     if(hardwareEditionDraft.mode==='edit'){
       const item=hardware.find(item=>item.id===hardwareEditionDraft.item.id);
@@ -15295,7 +15299,7 @@ function OptionsTab({
       <TesterFeedback onSubmit={sendTesterFeedback} />
       <div className="search-panel options-panel">
         <OptionGroup id="help" isOpen={!!openOptionGroups.help} onToggle={() => setOpenOptionGroups(current => ({...current, help:!current.help}))}
-          title="Aide et tutoriels" description="Un guide pour chaque onglet, à revoir quand tu veux." summary="14 guides">
+          title="Aide et tutoriels" description="Un guide pour chaque onglet, à revoir quand tu veux." summary={`${Object.keys(TAB_TUTORIALS).length} guides`}>
           <TutorialLibrary/>
         </OptionGroup>
         <OptionGroup id="notifications" isOpen={!!openOptionGroups.notifications} onToggle={()=>setOpenOptionGroups(current=>({...current,notifications:!current.notifications}))} title="Notifications" description="Choisis les informations affichées dans la cloche." summary="Dans l’appli">

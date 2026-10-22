@@ -22,6 +22,7 @@ html body[data-theme] .tab-tutorial-head .back-btn {display:flex;align-items:cen
 .tab-tutorial-dots span {height:3px;flex:1;border-radius:4px;background:var(--surface-border,#ffffff20)}
 .tab-tutorial-dots .active {background:var(--accent-solid,#d6b66f)}
 .tab-tutorial-actions {display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px}
+.tab-tutorial-actions-single {grid-template-columns:minmax(0,1fr)}
 html body[data-theme] .tab-tutorial-actions button {display:flex;align-items:center;justify-content:center;gap:8px;width:100%!important;height:auto!important;margin:0;min-width:0;max-width:none;min-height:48px;padding:12px!important;border-radius:14px!important;border:1px solid var(--surface-border,#ffffff30);font:inherit;font-size:.9rem;font-weight:700;white-space:normal;box-sizing:border-box}
 .tab-tutorial-actions button:disabled {opacity:.35;cursor:default}
 .tab-tutorial-dialog button:focus-visible,.tab-tutorial-choice:focus-visible {outline:2px solid var(--accent-solid,#d6b66f);outline-offset:3px}
