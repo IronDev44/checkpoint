@@ -1,0 +1,17 @@
+.release-notes-entry {display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:18px 20px;margin:0 0 20px;border:1px solid var(--surface-border,#ffffff25);border-radius:18px;background:var(--surface-bg,#ffffff06);color:var(--text-main,#fff)}
+.release-notes-entry.has-new {border-color:var(--accent-solid,#d6b66f)}
+.release-notes-entry>div {flex:1;min-width:min(100%,220px)}
+.release-notes-entry p,.release-notes-list p,.release-notes-list li {color:var(--text-soft,#bfc5cc);line-height:1.65;font-size:.9rem}
+.release-notes-entry p {margin:6px 0 0}
+html body[data-theme] .release-notes-entry button,.release-note-guides button {min-height:44px;height:auto;width:auto;white-space:normal;font:inherit;font-size:.85rem}
+html body[data-theme] .release-notes-dismiss {padding:8px 0;background:transparent;border:0;box-shadow:none;color:var(--text-soft,#bfc5cc)}
+.release-note {padding:22px 0;border-top:1px solid var(--surface-border,#ffffff25)}
+.release-note h3 {font-size:1.3rem;line-height:1.4;margin:10px 0}
+.release-note h4 {font-size:1rem;margin:0 0 8px}
+.release-note section {margin:24px 0}
+.release-note small,.release-note time {color:var(--accent-solid,#d6b66f);font-size:.8rem;line-height:1.6}
+.release-note summary {min-height:44px;align-content:center;cursor:pointer}
+.release-note-guides {display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}
+.release-notes-list {min-width:0;overflow-wrap:anywhere}
+.release-notes-entry :focus-visible {outline:2px solid var(--accent-solid,#d6b66f);outline-offset:3px}
+@media(max-width:480px){.release-notes-entry{padding:16px}.release-note-guides{flex-direction:column}.release-note-guides button{width:100%}}

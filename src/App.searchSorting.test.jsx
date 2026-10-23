@@ -1,3 +1,4 @@
+import {FEATURE_TUTORIALS,RELEASE_NOTES} from './data/releaseNotes';
 import {TAB_TUTORIALS} from './data/tabTutorials';
 import { render, waitFor, screen, fireEvent, within, act } from "@testing-library/react";
 import App from "./App";
@@ -37,7 +38,7 @@ jest.mock("./services/d1Data",()=>({
 const mockOriginalFetch = global.fetch;
 beforeEach(()=>{
   mockGameDocuments=[];mockHardwareDocuments=[];updateDoc.mockResolvedValue(undefined);addDoc.mockResolvedValue({id:'fixture'});
-  mockStore.clear();mockStore.set('checkpoint-tab-tutorials-v1',JSON.stringify(Object.fromEntries(Object.keys(TAB_TUTORIALS).map(key=>[key,'completed']))));mockAccountStorage.setItem.mockImplementation((key,value)=>mockStore.set(key,value));setDoc.mockResolvedValue(undefined);
+  mockStore.clear();mockStore.set('checkpoint-release-progress-v1',JSON.stringify({read:[],guides:FEATURE_TUTORIALS.map(g=>g.id)}));mockStore.set('checkpoint-tab-tutorials-v1',JSON.stringify(Object.fromEntries(Object.keys(TAB_TUTORIALS).map(key=>[key,'completed']))));mockAccountStorage.setItem.mockImplementation((key,value)=>mockStore.set(key,value));setDoc.mockResolvedValue(undefined);
   mockStore.set("checkpoint-app-options",JSON.stringify({startTab:"options",sound:{enabled:false}}));
   mockStore.set("checkpoint-trial-progress",JSON.stringify({completed:{25:true,50:true}}));
   mockSettings={theme:"theme-checkpoint",unlockedThemes:[]};
@@ -353,4 +354,42 @@ test('the owner’s two startup paths share one news import and failed HTTP is n
   expect(mockStore.has('checkpoint-last-news-import')).toBe(false);
   expect(setDoc.mock.calls.some(([ref])=>ref.collection==='news')).toBe(false);
  }finally{auth.currentUser.uid=previous;quiet.mockRestore();}
+});
+
+
+test('release notes open from the bell, remember reading and remain available in Options',async()=>{
+ GameService.getUpcomingGames.mockResolvedValue({results:[]});GameService.rawg.mockResolvedValue({results:[]});
+ render(<App/>);
+ fireEvent.click(await screen.findByRole('button',{name:'Ouvrir les notifications utiles'}));
+ fireEvent.click(await screen.findByRole('button',{name:/Voir les nouveautés/}));
+ const notes=await screen.findByRole('dialog',{name:'Nouveautés de Checkpoint'});
+ expect(notes).toHaveTextContent('De nouveaux rendez-vous, et des jeux à partager');
+ fireEvent.click(within(notes).getByRole('button',{name:'J’ai lu les nouveautés'}));
+ expect(JSON.parse(mockStore.get('checkpoint-release-progress-v1')).read).toEqual(RELEASE_NOTES.map(r=>r.id));
+ fireEvent.click(screen.getByRole('button',{name:/^Nouveautés Les derniers ajouts/}));
+ fireEvent.click(screen.getByRole('button',{name:'Voir les nouveautés',exact:true}));
+ expect(await screen.findByRole('dialog',{name:'Nouveautés de Checkpoint'})).toBeVisible();
+});
+
+
+test('the physical scanner saves a confirmed box with its barcode and platform through the real app',async()=>{
+ await openSearch();
+ fireEvent.click(screen.getByRole('button',{name:'Scanner un jeu physique'}));
+ const codeInput=await screen.findByLabelText('Code-barres');const scanner=screen.getByRole('dialog',{name:'Scanner un jeu physique'});
+ fireEvent.change(codeInput,{target:{value:'045496590420'}});fireEvent.click(within(scanner).getByRole('button',{name:'Identifier la boîte'}));
+ await within(scanner).findByText('Ce code n’est pas répertorié. Tu peux rechercher le titre et associer cette boîte toi-même.');
+ GameService.rawg.mockResolvedValue({results:[{id:'zelda',name:'Zelda',image:'cover.png',platformNames:['Nintendo Switch']}]});
+ fireEvent.change(within(scanner).getByLabelText('Rechercher le jeu par son nom'),{target:{value:'Zelda'}});fireEvent.click(within(scanner).getByRole('button',{name:'Rechercher le jeu'}));fireEvent.click(await within(scanner).findByRole('button',{name:'Zelda Nintendo Switch'}));
+ expect(addDoc.mock.calls.filter(([ref])=>ref.collection==='games')).toHaveLength(0);
+ fireEvent.click(within(scanner).getByRole('button',{name:'Ajouter ce jeu physique'}));
+ await waitFor(()=>expect(addDoc).toHaveBeenCalledWith({collection:'games'},expect.objectContaining({name:'Zelda',physicalOwned:true,physicalBarcode:'045496590420',physicalPlatform:'Nintendo Switch',status:'collection',rating:0,completed:false})));
+});
+
+test('a platform snapshot is saved only after confirmation and keeps the actual player progression',async()=>{
+ mockGameDocuments=[{id:'portal-platform',name:'Portal',status:'collection',steamAppId:1,steamProfileId:'76561198000000001',steamPlaytimeForever:60,playtime:30,completed:true,rating:9,review:'Mon avis'}];
+ global.fetch.mockImplementation(async url=>({ok:true,headers:{get:()=> 'application/json'},json:async()=>String(url).includes('/api/platform/game-activity')?{provider:'steam',profileId:'76561198000000001',game:{steamAppId:1,playtimeForever:120,steamCurrentAchievements:3,steamTotalAchievements:10},updatedAt:'2026-10-23T12:00:00Z'}:{items:[],cursor:null}}));
+ await openSearch();fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name:'Bibliothèque',exact:true}));await waitFor(()=>expect(document.querySelector('.game-grid-item')).not.toBeNull());fireEvent.click(document.querySelector('.game-grid-item'));
+ fireEvent.click(await screen.findByText('Activité Steam et Xbox'));fireEvent.click(screen.getByRole('button',{name:'Actualiser les données Steam'}));expect(await screen.findByText('2 h')).toBeVisible();expect(updateDoc.mock.calls.filter(([ref])=>ref.collection==='games')).toHaveLength(0);
+ fireEvent.click(screen.getByRole('button',{name:'Enregistrer ces données'}));await waitFor(()=>expect(updateDoc.mock.calls.some(([ref])=>ref.collection==='games')).toBe(true));
+ const patch=updateDoc.mock.calls.find(([ref])=>ref.collection==='games')[1];expect(patch.steamPlaytimeForever).toBe(120);expect(patch.playtime).toBeUndefined();expect(patch.completed).toBeUndefined();expect(patch.rating).toBeUndefined();expect(patch.review).toBeUndefined();
 });

@@ -1,0 +1,10 @@
+.game-platform-activity>p,.game-platform-activity section>p {color:var(--text-soft);font-size:.85rem;line-height:1.6}
+.game-platform-activity section {padding:18px 0;border-top:1px solid var(--surface-border,#ffffff25);min-width:0}
+.game-platform-activity h3 {font-size:1rem;margin:0 0 14px}
+.game-platform-activity dl {display:grid;gap:10px;margin:0 0 14px}
+.game-platform-activity dl>div {display:flex;justify-content:space-between;gap:16px;align-items:baseline;font-size:.85rem;line-height:1.5}
+.game-platform-activity dt {color:var(--text-soft)}
+.game-platform-activity dd {text-align:right;margin:0;color:var(--text-main)}
+.game-platform-activity small {display:block;color:var(--text-muted);font-size:.75rem;line-height:1.5;margin:12px 0}
+.platform-activity-actions {display:flex;flex-wrap:wrap;gap:12px;margin-top:14px}
+.game-platform-activity button {min-height:44px;white-space:normal}

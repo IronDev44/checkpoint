@@ -1,5 +1,5 @@
 import {monthlyRecap,monthKey} from './monthlyRecap';
-export const NOTIFICATION_GROUPS={polls:'Sondages entre amis',rendezvous:'Sélections, pronostics, expéditions et souvenirs',recommendations:'Recommandations entre amis',challenges:'Défis entre amis',monthly:'Bilan mensuel',collection:'Jeux à noter',releases:'Sorties et wishlist',progression:'Épreuves et progression',service:'Disponibilité des sources'};
+export const NOTIFICATION_GROUPS={updates:'Nouveautés de Checkpoint',polls:'Sondages entre amis',rendezvous:'Sélections, pronostics, expéditions et souvenirs',recommendations:'Recommandations entre amis',challenges:'Défis entre amis',monthly:'Bilan mensuel',collection:'Jeux à noter',releases:'Sorties et wishlist',progression:'Épreuves et progression',service:'Disponibilité des sources'};
 export function normalizeNotificationPreferences(value={}){return Object.fromEntries(Object.keys(NOTIFICATION_GROUPS).map(key=>[key,value?.[key]!==false]));}
 export function notificationAllowed(item,preferences){const category=item.category||({trial:'progression',rating:'collection',release:'releases',wishlist:'releases',source:'service'}[item.type])||'service';return normalizeNotificationPreferences(preferences)[category];}
 export function buildUsefulUpdates({polls=[],games=[],preferences={},now=new Date()}={}){

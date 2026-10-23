@@ -3,6 +3,8 @@ import {createPortal} from 'react-dom';
 import {ArrowLeft, ArrowRight, BookOpen, Check, X} from 'lucide-react';
 import {accountStorage} from '../services/accountData';
 import {TAB_TUTORIALS} from '../data/tabTutorials';
+import {FEATURE_TUTORIALS} from '../data/releaseNotes';
+import {pendingFeatureGuides,markFeatureGuidesSeen} from '../services/releaseProgress';
 import './TabTutorials.css';
 
 const STORAGE_KEY = 'checkpoint-tab-tutorials-v1';
@@ -27,8 +29,8 @@ function useTutorialProgress() {
   return progress;
 }
 
-export function TutorialDialog({tab, onClose}) {
-  const guide = TAB_TUTORIALS[tab];
+export function TutorialDialog({tab, guide:providedGuide, onClose}) {
+  const guide = providedGuide || TAB_TUTORIALS[tab];
   const [index, setIndex] = useState(0);
   const root = useRef(null);
   const heading = useRef(null);
@@ -53,7 +55,7 @@ export function TutorialDialog({tab, onClose}) {
   return createPortal(<div className="tab-tutorial-overlay">
     <section className="tab-tutorial-dialog" ref={root} role="dialog" aria-modal="true" aria-labelledby={titleId} onKeyDown={keyboard}>
       <header className="tab-tutorial-head">
-        <span><BookOpen size={18} aria-hidden="true"/> Guide · {guide.label}</span>
+        <span><BookOpen size={18} aria-hidden="true"/> {guide.update?'Nouveautés':'Guide'} · {guide.label}</span>
         <button type="button" className="back-btn" aria-label="Fermer le tutoriel" onClick={() => onClose(false)}><X size={19}/></button>
       </header>
       <div className="tab-tutorial-body">
@@ -77,19 +79,30 @@ export function TutorialDialog({tab, onClose}) {
 }
 
 export function TabTutorialEntry({tab, enabled = true}) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(null);
   const shown = useRef(false);
   useEffect(() => {
-    if (!enabled || !TAB_TUTORIALS[tab] || shown.current || readProgress()[tab]) return;
+    if (!enabled || !TAB_TUTORIALS[tab] || shown.current) return;
+    const pending=pendingFeatureGuides(tab);
+    if(readProgress()[tab]){
+      if(!pending.length)return;
+      shown.current=true;
+      markFeatureGuidesSeen(pending.map(g=>g.id));
+      setOpen({label:TAB_TUTORIALS[tab].label,update:true,steps:pending.flatMap(g=>g.steps)});
+      return;
+    }
     shown.current = true;
     saveProgress(tab, false);
-    setOpen(true);
+    // First-time visitors get the full, current guide. No second update tour.
+    markFeatureGuidesSeen(FEATURE_TUTORIALS.filter(g=>g.tab===tab).map(g=>g.id));
+    setOpen(TAB_TUTORIALS[tab]);
   }, [tab, enabled]);
-  return open ? <TutorialDialog tab={tab} onClose={completed => {if (completed) saveProgress(tab, true); setOpen(false);}}/> : null;
+  return open ? <TutorialDialog guide={open} onClose={completed => {if (completed&&!open.update) saveProgress(tab, true); setOpen(null);}}/> : null;
 }
 
 export function TutorialLibrary() {
   const [tab, setTab] = useState(null);
+  const [feature,setFeature]=useState(null);
   const progress = useTutorialProgress();
   return <div className="tab-tutorial-library">
     <p>Choisis un onglet pour revoir ses fonctions, à ton rythme. Les guides sont toujours disponibles, même après les avoir terminés.</p>
@@ -100,6 +113,8 @@ export function TutorialLibrary() {
         <small>{guide.steps.length} {guide.steps.length === 1 ? 'étape' : 'étapes'} · {progress[key] === 'completed' ? 'Revoir le guide' : 'Ouvrir le guide'}</small>
       </button>)}
     </div>
-    {tab && <TutorialDialog key={tab} tab={tab} onClose={completed => {saveProgress(tab, completed || progress[tab] === 'completed'); setTab(null);}}/>}
+    <section className="tab-tutorial-feature-library" aria-label="Guides des nouveautés"><h3>Les nouvelles fonctionnalités</h3><p>Des guides courts pour découvrir seulement les ajouts récents.</p><div className="tab-tutorial-grid">{FEATURE_TUTORIALS.map(guide=><button key={guide.id} type="button" className="tab-tutorial-choice" onClick={()=>setFeature(guide)}><strong>{guide.label}</strong><span>{TAB_TUTORIALS[guide.tab].label}</span><small>{guide.steps.length} étapes · Revoir les nouveautés</small></button>)}</div></section>
+    {tab && <TutorialDialog key={tab} tab={tab} onClose={completed => {saveProgress(tab, completed || progress[tab] === 'completed'); markFeatureGuidesSeen(FEATURE_TUTORIALS.filter(g=>g.tab===tab).map(g=>g.id)); setTab(null);}}/>}
+    {feature&&<TutorialDialog key={feature.id} guide={{...feature,label:TAB_TUTORIALS[feature.tab].label,update:true}} onClose={()=>{markFeatureGuidesSeen([feature.id]);setFeature(null);}}/>}
   </div>;
 }

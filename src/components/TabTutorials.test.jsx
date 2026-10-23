@@ -1,5 +1,6 @@
 import {fireEvent, render, screen, within} from '@testing-library/react';
 import {TabTutorialEntry, TutorialLibrary, TutorialDialog} from './TabTutorials';
+import {FEATURE_TUTORIALS} from '../data/releaseNotes';
 import {TAB_TUTORIALS} from '../data/tabTutorials';
 
 const mockStore = new Map();
@@ -42,7 +43,7 @@ test('the help library opens every tab guide and marks completed guides for repl
  mockStore.set('checkpoint-tab-tutorials-v1',JSON.stringify({home:'completed'}));
  render(<TutorialLibrary/>);
  const buttons=screen.getAllByRole('button');
- expect(buttons).toHaveLength(Object.keys(TAB_TUTORIALS).length);
+ expect(buttons).toHaveLength(Object.keys(TAB_TUTORIALS).length+FEATURE_TUTORIALS.length);
  expect(buttons[0]).toHaveTextContent('Revoir le guide');
  for(const [index,guide] of Object.values(TAB_TUTORIALS).entries()){
   fireEvent.click(buttons[index]);

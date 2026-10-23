@@ -1,6 +1,7 @@
 import {normalizeArenaEnvelope} from './arena-state.js';
 import {handleSelections,handleChallenges} from './engagement-api.js';
 import {handleRecommendations,handlePredictions} from './social-moments-api.js';
+import {handleBarcodeLookup} from './barcode-api.js';
 import { publicProfileView } from "./profile-privacy.js";
 const PRIVATE = new Set(['games','hardware','gameCollections','playerProgress','playerPrivateSettings']);
 const SHARED = new Set(['news','events','publicProfiles']);
@@ -94,6 +95,7 @@ export async function handleAccountApi(request,env,verify=verifyFirebaseToken){
   if(name==='friendChallenges')return handleChallenges(request,env,uid,url);
   if(name==='gameRecommendations')return handleRecommendations(request,env,uid,url);
   if(name==='gamingPredictions')return handlePredictions(request,env,uid,url);
+  if(name==='barcodeLookup')return handleBarcodeLookup(request,env,uid,url);
   if(!PRIVATE.has(name)&&!SHARED.has(name))return response({error:'Collection inconnue.'},400);
   if(id!==null&&(!id||id.length>250||id.includes('/')))return response({error:'Identifiant invalide.'},400);
   const owner=PRIVATE.has(name)?uid:'__shared__';

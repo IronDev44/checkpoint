@@ -1184,10 +1184,10 @@ function normalizeXboxTitle(title = {}) {
       title.lastUnlock ||
       title.lastUnlockTime ||
       "",
-    xboxCurrentGamerscore: Number(achievement.currentGamerscore || title.currentGamerscore || 0),
-    xboxMaxGamerscore: Number(achievement.totalGamerscore || achievement.maxGamerscore || title.maxGamerscore || 0),
-    xboxCurrentAchievements: Number(achievement.currentAchievements || title.currentAchievements || 0),
-    xboxTotalAchievements: Number(achievement.totalAchievements || title.totalAchievements || 0),
+    xboxCurrentGamerscore: finiteMetric(achievement.currentGamerscore ?? title.currentGamerscore),
+    xboxMaxGamerscore: finiteMetric(achievement.totalGamerscore ?? achievement.maxGamerscore ?? title.maxGamerscore),
+    xboxCurrentAchievements: finiteMetric(achievement.currentAchievements ?? title.currentAchievements),
+    xboxTotalAchievements: finiteMetric(achievement.totalAchievements ?? title.totalAchievements),
     platformNames,
     sourcePlatform: platformNames.join(", "),
     sourceStore: "microsoft",
@@ -1387,6 +1387,8 @@ async function getXboxLibrary(request, env) {
   const xuid = session.profile.xuid || xboxTokens.xuid;
   const titleHistoryUrl = new URL(`https://achievements.xboxlive.com/users/xuid(${xuid})/history/titles`);
   titleHistoryUrl.searchParams.set("maxItems", "200");
+  const continuation=new URL(request.url).searchParams.get('continuation');
+  if(continuation){if(continuation.length>2048)return privateJsonResponse({error:'Pagination Xbox invalide.'},{status:400});titleHistoryUrl.searchParams.set('continuationToken',continuation);}
 
   const response = await fetch(titleHistoryUrl.toString(), {
     headers: {
@@ -1421,13 +1423,15 @@ async function getXboxLibrary(request, env) {
   return privateJsonResponse(
     {
       games,
+      continuationToken:data.pagingInfo?.continuationToken||null,
+      partial:Boolean(data.pagingInfo?.continuationToken),
       total: Number(data.pagingInfo?.totalItems || data.totalItems || games.length),
       connected: true,
       profile: nextSession.profile,
       libraryAvailable: true,
       source: "xbox-title-history",
       note:
-        "Xbox ne fournit pas forcement toute la bibliotheque achetee. Cette synchronisation importe les titres officiellement detectes dans ton historique Xbox.",
+        "Cette liste réunit les titres associés à une activité de succès Xbox. Elle ne représente ni tous tes achats ni tous les jeux que tu as lancés.",
       updatedAt: new Date().toISOString(),
     },
     {
@@ -1500,6 +1504,8 @@ async function resolveSteamId(profileInput, env) {
   return response.steamid;
 }
 
+function finiteMetric(value){return value!==null&&value!==undefined&&value!==''&&Number.isFinite(Number(value))&&Number(value)>=0?Number(value):null;}
+
 function normalizeSteamLibraryGame(game) {
   const appId = Number(game?.appid);
 
@@ -1513,10 +1519,11 @@ function normalizeSteamLibraryGame(game) {
       appId && game?.img_icon_url
         ? `https://media.steampowered.com/steamcommunity/public/images/apps/${appId}/${game.img_icon_url}.jpg`
         : "",
-    playtimeForever: Number(game?.playtime_forever || 0),
-    playtimeWindowsForever: Number(game?.playtime_windows_forever || 0),
-    playtimeMacForever: Number(game?.playtime_mac_forever || 0),
-    playtimeLinuxForever: Number(game?.playtime_linux_forever || 0),
+    playtimeForever: finiteMetric(game?.playtime_forever),
+    playtimeWindowsForever: finiteMetric(game?.playtime_windows_forever),
+    playtimeMacForever: finiteMetric(game?.playtime_mac_forever),
+    playtimeLinuxForever: finiteMetric(game?.playtime_linux_forever),
+    steamLastPlayedAt: Number(game?.rtime_last_played)>0?new Date(Number(game.rtime_last_played)*1000).toISOString():null,
   };
 }
 
@@ -1582,6 +1589,7 @@ async function getSteamOwnedGames(requestUrl, env) {
 
   const data = await fetchJson(ownedGamesUrl.toString(), 14000);
   const response = data?.response || {};
+  if(!Array.isArray(response.games)&&response.game_count!==0)throw new Error('Les jeux Steam ne sont pas accessibles. Vérifie la visibilité de tes détails de jeux dans Steam.');
   const games = (response.games || [])
     .map(normalizeSteamLibraryGame)
     .filter((game) => game.steamAppId && game.name)
@@ -1593,6 +1601,50 @@ async function getSteamOwnedGames(requestUrl, env) {
     games,
     updatedAt: new Date().toISOString(),
   });
+}
+
+async function getPlatformGameActivity(request,env){
+ const url=new URL(request.url),id=url.searchParams.get('id'),provider=url.searchParams.get('provider');
+ if(!id||id.length>250||!['steam','xbox'].includes(provider))return privateJsonResponse({error:'Jeu ou plateforme invalide.'},{status:400});
+ let uid;try{const token=request.headers.get('Authorization')?.match(/^Bearer (.+)$/)?.[1];if(!token)throw Error();uid=await verifyFirebaseToken(token);}catch{return privateJsonResponse({error:'Reconnecte-toi pour actualiser ce jeu.'},{status:401});}
+ if(!env.ACCOUNT_DB)return privateJsonResponse({error:'Stockage des comptes indisponible.'},{status:503});
+ const row=await env.ACCOUNT_DB.prepare("SELECT data FROM documents WHERE owner=? AND collection='games' AND id=?").bind(uid,id).first();
+ if(!row)return privateJsonResponse({error:'Ce jeu ne fait pas partie de ton compte.'},{status:404});
+ const game=JSON.parse(row.data);if(game._deletedAt)return privateJsonResponse({error:'Ce jeu est dans la corbeille.'},{status:404});
+ if(provider==='steam'){
+  const appid=Number(game.steamAppId),profileId=String(game.steamProfileId||'');
+  if(!Number.isSafeInteger(appid)||appid<=0||!/^7656119\d{10}$/.test(profileId))return privateJsonResponse({error:'Relie d’abord ce jeu à ton profil Steam depuis Options → Profil & services.'},{status:409});
+  if(!env.STEAM_API_KEY)return privateJsonResponse({error:'La connexion Steam reste à configurer sur le serveur.'},{status:501});
+  const owned=new URL('https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/');owned.searchParams.set('key',env.STEAM_API_KEY);owned.searchParams.set('steamid',profileId);owned.searchParams.set('include_played_free_games','true');owned.searchParams.set('format','json');
+  const achievements=new URL('https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v0001/');achievements.searchParams.set('key',env.STEAM_API_KEY);achievements.searchParams.set('steamid',profileId);achievements.searchParams.set('appid',String(appid));achievements.searchParams.set('l','french');
+  const [library,stats]=await Promise.allSettled([fetchJson(owned.toString(),10000),fetchJson(achievements.toString(),10000)]);
+  if(library.status!=='fulfilled'||!Array.isArray(library.value?.response?.games))return privateJsonResponse({error:'Steam ne permet pas de lire ces jeux. Vérifie la visibilité de tes détails de jeux et réessaie.'},{status:503});
+  const raw=library.value.response.games.find(g=>Number(g.appid)===appid);
+  if(!raw)return privateJsonResponse({error:'Ce jeu n’est pas présent dans les jeux accessibles de ce profil Steam.'},{status:404});
+  const snapshot=normalizeSteamLibraryGame(raw),list=stats.status==='fulfilled'&&stats.value?.playerstats?.success===true&&Array.isArray(stats.value.playerstats.achievements)?stats.value.playerstats.achievements:null;
+  if(list){snapshot.steamCurrentAchievements=list.filter(a=>Number(a.achieved)===1).length;snapshot.steamTotalAchievements=list.length;}
+  return privateJsonResponse({provider,profileId,game:snapshot,updatedAt:new Date().toISOString(),partial:!list,message:list?'Les succès n’indiquent pas si tu as terminé l’histoire du jeu.':'Steam ne communique pas les succès de ce jeu. Les anciens chiffres, s’il y en a, seront conservés.'});
+ }
+ const titleId=String(game.xboxTitleId||''),profileId=String(game.xboxProfileId||'');
+ if(!/^\d{1,20}$/.test(titleId)||!profileId)return privateJsonResponse({error:'Relie d’abord ce jeu à ton compte Xbox depuis Options → Profil & services.'},{status:409});
+ const session=await decryptXboxSession(getCookie(request,'checkpoint_xbox_session'),env);
+ if(!session?.refreshToken||session.profile?.xuid!==profileId)return privateJsonResponse({error:'Reconnecte le compte Xbox associé à ce jeu depuis Options → Profil & services.'},{status:409});
+ const tokenData=await refreshMicrosoftXboxToken(session,env),tokens=await getXboxTokensFromMicrosoftAccessToken(tokenData.access_token);
+ if(tokens.xuid&&tokens.xuid!==profileId)return privateJsonResponse({error:'Le compte Xbox connecté ne correspond pas à ce jeu.'},{status:409});
+ const all=[],seen=new Set();let continuation=null;
+ for(let page=0;page<5;page++){
+  const endpoint=new URL(`https://achievements.xboxlive.com/users/xuid(${profileId})/achievements`);endpoint.searchParams.set('titleId',titleId);endpoint.searchParams.set('maxItems','200');endpoint.searchParams.set('types','Persistent');if(continuation)endpoint.searchParams.set('continuationToken',continuation);
+  const response=await fetch(endpoint.toString(),{headers:{accept:'application/json',authorization:`XBL3.0 x=${tokens.uhs};${tokens.xstsToken}`,'x-xbl-contract-version':'2','Accept-Language':'fr-FR'},signal:AbortSignal.timeout(8000)});const data=await response.json();
+  if(!response.ok||!Array.isArray(data.achievements))return privateJsonResponse({error:'Xbox refuse ou ne fournit pas ces succès. Le relevé enregistré reste conservé.'},{status:503});
+  for(const achievement of data.achievements){if(achievement.titleAssociations?.length&&!achievement.titleAssociations.some(t=>String(t.id)===titleId))continue;const key=`${achievement.serviceConfigId||''}:${achievement.id}`;if(!seen.has(key)){seen.add(key);all.push(achievement);}}
+  const next=data.pagingInfo?.continuationToken||null;if(next&&next===continuation)return privateJsonResponse({error:'Xbox a renvoyé une pagination incohérente. Réessaie plus tard.'},{status:503});continuation=next;if(!continuation)break;
+ }
+ if(continuation)return privateJsonResponse({error:'Xbox renvoie une liste de succès trop longue pour ce relevé. Les données enregistrées sont conservées.'},{status:503});
+ const achieved=all.filter(a=>a.progressState==='Achieved'&&!a.isRevoked),score=list=>list.reduce((sum,a)=>sum+(a.rewards||[]).filter(r=>r.type==='Gamerscore').reduce((total,r)=>total+(finiteMetric(r.value)||0),0),0);
+ const snapshot={xboxTitleId:titleId,xboxCurrentAchievements:achieved.length,xboxTotalAchievements:all.length};
+ if(all.some(a=>(a.rewards||[]).some(r=>r.type==='Gamerscore'))){snapshot.xboxCurrentGamerscore=score(achieved);snapshot.xboxMaxGamerscore=score(all);}
+ const nextSession={...session,refreshToken:tokenData.refresh_token||session.refreshToken};
+ return privateJsonResponse({provider,profileId,game:snapshot,updatedAt:new Date().toISOString(),message:'Ces succès ne changent pas ton statut Terminé ni tes notes.'},{headers:{'set-cookie':buildCookie('checkpoint_xbox_session',await encryptXboxSession(nextSession,env),request.url,{maxAge:60*60*24*30})}});
 }
 
 async function getSteamWishlist(requestUrl, env) {
@@ -2091,6 +2143,11 @@ export default {
           { status: 502 }
         );
       }
+    }
+
+    if(url.pathname==='/api/platform/game-activity'){
+      if(request.method!=='GET')return privateJsonResponse({error:'Méthode non autorisée.'},{status:405});
+      try{return await getPlatformGameActivity(request,env);}catch{return privateJsonResponse({error:'La plateforme est momentanément indisponible. Les données enregistrées sont conservées.'},{status:503});}
     }
 
     if (url.pathname === "/api/xbox/auth/start") {

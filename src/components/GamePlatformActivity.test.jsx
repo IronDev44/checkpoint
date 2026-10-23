@@ -1,0 +1,9 @@
+import {render,screen,fireEvent,waitFor} from '@testing-library/react';
+import GamePlatformActivity from './GamePlatformActivity';
+test('a fetched platform snapshot is previewed but does not update the game until confirmed',async()=>{
+ const game={id:'one',name:'Halo',steamAppId:1,steamProfileId:'76561198000000001',steamPlaytimeForever:60,rating:8,completed:false},save=jest.fn().mockResolvedValue(true),request=jest.fn().mockResolvedValue({game:{steamAppId:1,playtimeForever:120,steamCurrentAchievements:3,steamTotalAchievements:10},profileId:game.steamProfileId,updatedAt:'2026-10-23T12:00:00Z'});
+ render(<GamePlatformActivity game={game} request={request} onSave={save}/>);fireEvent.click(screen.getByText('Activité Steam et Xbox'));fireEvent.click(screen.getByRole('button',{name:'Actualiser les données Steam'}));expect(await screen.findByText('2 h')).toBeVisible();expect(save).not.toHaveBeenCalled();fireEvent.click(screen.getByRole('button',{name:'Enregistrer ces données'}));await waitFor(()=>expect(save).toHaveBeenCalledWith('one',expect.objectContaining({steamPlaytimeForever:120,steamCurrentAchievements:3})));expect(save.mock.calls[0][1].rating).toBeUndefined();expect(save.mock.calls[0][1].completed).toBeUndefined();
+});
+test('a failed refresh retains the previous snapshot',async()=>{
+ render(<GamePlatformActivity game={{id:'one',steamAppId:1,steamProfileId:'76561198000000001',steamPlaytimeForever:60}} request={jest.fn().mockRejectedValue(Error('Steam indisponible'))} onSave={()=>{}}/>);fireEvent.click(screen.getByText('Activité Steam et Xbox'));fireEvent.click(screen.getByRole('button',{name:'Actualiser les données Steam'}));expect(await screen.findByRole('alert')).toHaveTextContent('Steam indisponible');expect(screen.getByText('1 h')).toBeVisible();expect(screen.queryByRole('button',{name:'Enregistrer ces données'})).toBeNull();
+});

@@ -1,0 +1,17 @@
+import {useEffect,useRef,useState} from 'react';
+import {platformSyncPatch,platformActivityRows} from '../services/platformActivity';
+import {requestPlatformActivity} from '../services/platformActivityRequest';
+import {activityDate} from '../services/monthlyRecap';
+import './GamePlatformActivity.css';
+export default function GamePlatformActivity({game,onSave,request=requestPlatformActivity}){
+ const [pending,setPending]=useState({}),[busy,setBusy]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState('');
+ const controller=useRef(null),active=useRef(true),lock=useRef(false);
+ useEffect(()=>{active.current=true;return()=>{active.current=false;controller.current?.abort();};},[]);
+ const providers=['steam','xbox'].filter(p=>game[p==='steam'?'steamAppId':'xboxTitleId']);if(!providers.length)return null;
+ const run=async(provider,task)=>{if(lock.current)return;lock.current=true;setBusy(provider);setError('');setNotice('');try{await task();}catch(e){if(active.current)setError(e.message);}finally{lock.current=false;if(active.current)setBusy('');}};
+ return <details className="game-detail-organized-group game-platform-activity"><summary>Activité Steam et Xbox</summary><p>Les relevés des plateformes restent séparés de tes notes, de ta durée renseignée et de ton statut « Terminé ».</p>{providers.map(provider=>{
+  const label=provider==='steam'?'Steam':'Xbox',snapshot=pending[provider],fresh=snapshot?{...game,...platformSyncPatch(provider,snapshot.game,{profileId:snapshot.profileId,now:new Date(snapshot.updatedAt)})}:game;
+  const date=activityDate(game[`${provider}LastSyncedAt`]);
+  return <section key={provider}><h3>{label}</h3><dl>{platformActivityRows(fresh,provider).map(row=><div key={row.label}><dt>{row.label}</dt><dd>{row.value}</dd></div>)}</dl><small>{snapshot?'Nouveau relevé · pas encore enregistré':date?`Dernier relevé enregistré le ${date.toLocaleDateString('fr-FR')}`:'Pas encore de relevé enregistré.'}</small>{snapshot?.message&&<p>{snapshot.message}</p>}{snapshot?<div className="platform-activity-actions"><button type="button" className="option-pill" disabled={Boolean(busy)||!onSave} onClick={()=>run(provider,async()=>{const saved=await onSave(game.id,platformSyncPatch(provider,snapshot.game,{profileId:snapshot.profileId,now:new Date(snapshot.updatedAt)}));if(saved===false)throw Error('Les données n’ont pas été enregistrées. Réessaie.');if(active.current){setPending(old=>({...old,[provider]:null}));setNotice(saved?.queued?'Conservé sur cet appareil · synchronisation en attente':'Relevé de plateforme enregistré.');}})}>Enregistrer ces données</button><button type="button" className="option-pill" disabled={Boolean(busy)} onClick={()=>setPending(old=>({...old,[provider]:null}))}>Garder les anciennes données</button></div>:onSave&&<button type="button" className="option-pill" disabled={Boolean(busy)||!game[`${provider}ProfileId`]} onClick={()=>run(provider,async()=>{controller.current=new AbortController();const data=await request(game.id,provider,{signal:controller.current.signal});if(active.current)setPending(old=>({...old,[provider]:data}));})}>{busy===provider?'Actualisation…':`Actualiser les données ${label}`}</button>}{!game[`${provider}ProfileId`]&&<p>Relie ce jeu à ton compte depuis Options → Profil & services, en vérifiant l’import {label}.</p>}</section>;
+ })}{error&&<p role="alert">{error}</p>}{notice&&<p role="status">{notice}</p>}</details>;
+}

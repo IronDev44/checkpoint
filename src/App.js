@@ -5,7 +5,7 @@ import {hardwareEditionLabel,normalizeHardwareEdition,hasHardwareEdition,duplica
 import {normalizeEditionLinks} from './services/gameEditions';
 import {normalizeDuelHistory} from "./services/soloDuel";
 import {THEME_CATALOG} from "./data/themeCatalog";
-import { Fragment, useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { Fragment, Suspense, lazy, useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import useRendezvousUpdates from './components/useRendezvousUpdates';
 import RendezvousHub from './components/RendezvousHub';
@@ -81,6 +81,8 @@ import ImportReview from "./components/ImportReview";
 import PersonalSearch from "./components/PersonalSearch";
 import {normalizeHomeLayout} from "./services/homeLayout";
 import {planGameImport} from "./services/importPlan";
+import {platformSyncPatch,mergeXboxPages} from './services/platformActivity';
+import GamePlatformActivity from './components/GamePlatformActivity';
 import FriendComparison from "./components/FriendComparison";
 import DataProtection, {AutomaticBackup, ConnectionStatus} from "./components/DataProtection";
 import SessionPicker from "./components/SessionPicker";
@@ -88,6 +90,8 @@ import {captureBackup} from "./services/deviceStore";
 import SaveFeedback, { useSaveFeedback } from "./components/SaveFeedback";
 import { FirstSteps, ProfileSection } from "./components/EverydayExperience";
 import { TabTutorialEntry, TutorialLibrary } from "./components/TabTutorials";
+import ReleaseNotes,{ReleaseNotesDialog,useReleaseProgress} from './components/ReleaseNotes';
+import {RELEASE_NOTES} from './data/releaseNotes';
 import { TAB_TUTORIALS } from "./data/tabTutorials";
 import { buildBulkGamePatch } from "./services/libraryBulk";
 import "./components/CollectionImprovements.css";
@@ -188,6 +192,8 @@ import {
   Timer,
   Wrench,
 } from "lucide-react";
+
+const PhysicalGameScanner=lazy(()=>import('./components/PhysicalGameScanner'));
 
 async function rawgApiRequest(path, params = {}, options = {}) {
   if (typeof path === "string" && path.startsWith("/api/igdb")) {
@@ -4818,6 +4824,7 @@ export function GameDetailModal({
   onPersonalListsChange,
   game,
   onSetExperienceInfo,
+  onSavePlatformActivity,
   onClose,
   onDelete,
   onSetStatus,
@@ -5210,6 +5217,8 @@ export function GameDetailModal({
             <button type="button" onClick={()=>onSetProgressStatus(game.id,'completed')}>Déjà terminé</button>
           </div>
           <p className="game-detail-essential-note">Ta progression et ta note sont indépendantes. Les détails ci-dessous sont facultatifs.</p>
+          {game.physicalOwned&&(game.physicalBarcode||game.physicalPlatform)&&<details className="game-detail-organized-group"><summary>Mon exemplaire physique</summary><p>{game.physicalPlatform||'Plateforme non renseignée'}{game.physicalEdition?` · ${game.physicalEdition}`:''}</p>{game.physicalBarcode&&<p>Code-barres : {game.physicalBarcode}</p>}</details>}
+          <GamePlatformActivity key={game.id} game={game} onSave={onSavePlatformActivity}/>
           <details className="game-detail-organized-group" open={!experience || undefined}>
             <summary>Ton expérience{experience ? ` : ${experience === 'completed' ? 'Terminé' : experience === 'partial' ? 'Joué, non terminé' : 'Essayé'}` : ' avec ce jeu'}</summary>
             <GameExperiencePanel key={game.id} game={game} onChange={onSetExperienceInfo} />
@@ -9461,6 +9470,7 @@ export function SocialTab({
 }
 
 export function HomeTab({
+  releaseBanner,
   onEngagementChange,
   onOpenChallenges,
   socialProfile={},
@@ -10123,6 +10133,7 @@ export function HomeTab({
       {levelSection}
       <HomeBlock id="rendezvous" notice="Vote de la semaine"><RendezvousHub key={auth.currentUser?.uid||'local'} games={games} value={dealPreferences.engagement} onChange={onEngagementChange} onOpenGame={onOpenDetail} onChallenges={onOpenChallenges}/></HomeBlock>
       <FirstSteps games={games} onSearch={() => setActiveTab("search")} onOpenGame={onOpenDetail} onHardware={() => setActiveTab("hardware")}/>
+      {releaseBanner}
       {games.some(game=>game.status!=='wishlist') && <><HomeBlock id="collection">{collectionSection}</HomeBlock><HomeBlock id="nextLevel">{nextLevelSection}</HomeBlock><HomeBlock id="session">{sessionSection}</HomeBlock><HomeBlock id="picker"><SessionPicker games={games} onOpen={onOpenDetail}/></HomeBlock></>}
       {games.some(game=>isGameFinishedStatus(game))&&<HomeBlock id="rediscover"><Rediscover games={games} ratingGetter={getGameRating} onOpen={onOpenDetail} onPin={onRediscoverPin}/></HomeBlock>}
       {games.filter(game=>game.status!=='wishlist').length>=2&&<HomeBlock id="duel"><ArenaShortcut onOpen={()=>setActiveTab("arena")}/></HomeBlock>}
@@ -15064,12 +15075,12 @@ function OptionsTab({
       setIsXboxLoading(false);
     }
   };
-  const fetchXboxLibrary = async () => {
+  const fetchXboxLibrary = async ({append=false}={}) => {
     setIsXboxSyncing(true);
     setXboxError("");
 
     try {
-      const response = await fetch("/api/xbox/library");
+      const response = await fetch(`/api/xbox/library${append&&xboxLibrary?.continuationToken?`?continuation=${encodeURIComponent(xboxLibrary.continuationToken)}`:""}`);
       const contentType = response.headers.get("content-type") || "";
 
       if (!contentType.includes("application/json")) {
@@ -15082,7 +15093,8 @@ function OptionsTab({
         throw new Error(data?.error || "Synchronisation Xbox indisponible.");
       }
 
-      setXboxLibrary(data);
+      const combined=append?mergeXboxPages(xboxLibrary,data):data;
+      setXboxLibrary(combined);
       updateXboxProfile({
         connected: true,
         gamertag: data.profile?.gamertag || xboxProfile.gamertag,
@@ -15092,7 +15104,7 @@ function OptionsTab({
         lastGameCount: data.total || data.games?.length || 0,
       });
     } catch (error) {
-      setXboxLibrary(null);
+      if(!append)setXboxLibrary(null);
       setXboxError(String(error?.message || error));
     } finally {
       setIsXboxSyncing(false);
@@ -15303,6 +15315,7 @@ function OptionsTab({
           title="Aide et tutoriels" description="Un guide pour chaque onglet, à revoir quand tu veux." summary={`${Object.keys(TAB_TUTORIALS).length} guides`}>
           <TutorialLibrary/>
         </OptionGroup>
+        <OptionGroup id="releaseNotes" isOpen={!!openOptionGroups.releaseNotes} onToggle={()=>setOpenOptionGroups(current=>({...current,releaseNotes:!current.releaseNotes}))} title="Nouveautés" description="Les derniers ajouts, les améliorations et leurs guides." summary="Historique des mises à jour"><ReleaseNotes/></OptionGroup>
         <OptionGroup id="notifications" isOpen={!!openOptionGroups.notifications} onToggle={()=>setOpenOptionGroups(current=>({...current,notifications:!current.notifications}))} title="Notifications" description="Choisis les informations affichées dans la cloche." summary="Dans l’appli">
           <NotificationPreferences value={appOptions.notifications} onChange={value=>onOptionChange("notifications",value)}/>
         </OptionGroup>
@@ -15767,7 +15780,7 @@ function OptionsTab({
                         <img src={game.image} alt="" loading="lazy" />
                         <div>
                           <strong>{game.name}</strong>
-                          <span>{formatSteamPlaytime(game.playtimeForever)} sur Steam</span>
+                          <span>{game.playtimeForever==null?"Temps non communiqué":`${formatSteamPlaytime(game.playtimeForever)} sur Steam`}</span>
                         </div>
                       </div>
                     ))}
@@ -15928,6 +15941,7 @@ function OptionsTab({
                 </div>
               )}
 
+              {xboxLibrary?.continuationToken&&<div className="steam-sync-note"><p>{xboxLibrary.games.length} titres chargés. Il reste une partie de l’historique à consulter.</p><button type="button" className="option-pill" disabled={isXboxSyncing||isXboxImporting} onClick={()=>fetchXboxLibrary({append:true})}>{isXboxSyncing?'Chargement…':'Charger la suite des titres Xbox'}</button></div>}
               {xboxLibrary?.note && (
                 <div className="xbox-status-note subtle">
                   <strong>Source Xbox</strong>
@@ -17411,6 +17425,7 @@ export default function App({ startupVisible = false, onStartupProgress, tutoria
   const [genres, setGenres] = useState([]);
   const [toast, setToast] = useState("");
   const [collectionAddDraft,setCollectionAddDraft]=useState(null);
+  const [physicalScannerOpen,setPhysicalScannerOpen]=useState(false);
   const startCollectionAdd=game=>setCollectionAddDraft(game);
   const [seenBadgeIds, setSeenBadgeIds] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -17513,7 +17528,11 @@ export default function App({ startupVisible = false, onStartupProgress, tutoria
   const [monthlyNotification,setMonthlyNotification]=useState(null);
   const existingExtraNotifications=useUsefulUpdates({games,preferences:appOptions.notifications,enabled:!showSplash&&privateSettingsReady});
   const rendezvousNotifications=useRendezvousUpdates({accountUid:auth.currentUser?.uid,games,value:appOptions.engagement,preferences:appOptions.notifications,enabled:!showSplash&&privateSettingsReady});
-  const extraNotifications=[...existingExtraNotifications,...rendezvousNotifications];
+  const releaseProgress=useReleaseProgress();
+  const [releaseNotesOpen,setReleaseNotesOpen]=useState(false);
+  const unreadReleases=RELEASE_NOTES.filter(r=>!releaseProgress.read.includes(r.id));
+  const releaseNotifications=unreadReleases.length?[{id:`release-${unreadReleases[0].id}`,category:'updates',type:'release-notes',priority:88,title:'Du nouveau dans Checkpoint',message:unreadReleases[0].summary,cta:'Voir les nouveautés',tone:'focus'}]:[];
+  const extraNotifications=[...existingExtraNotifications,...rendezvousNotifications,...releaseNotifications];
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState(() => {
     try {
       const ids=JSON.parse(localStorage.getItem("checkpoint-dismissed-notifications-v2") || "[]");return Array.isArray(ids)?ids.filter(id=>typeof id==="string"):[];
@@ -18976,6 +18995,7 @@ useEffect(() => {
         ratingStory: clampRating(game.ratingStory),
         ratingSound: clampRating(game.ratingSound),
         ratingLongevity: clampRating(game.ratingLongevity),
+        ...(game.physicalOwned?{physicalOwned:true,physicalBarcode:game.physicalBarcode||'',physicalPlatform:game.physicalPlatform||'',physicalEdition:game.physicalEdition||'',physicalUpdatedAt:game.physicalUpdatedAt||new Date().toISOString()}:{}),
         createdAt: new Date(),
       };
 
@@ -19019,12 +19039,7 @@ useEffect(() => {
       const steamStatus = meta.status || steamGame.status || "";
 
       const steamPatch = {
-        steamAppId: steamGame.steamAppId ?? steamGame.appid,
-        steamProfileId: meta.steamId || "",
-        steamPlaytimeForever: steamGame.playtimeForever || 0,
-        steamLastSyncedAt: new Date(),
-        steamWishlistPriority: steamGame.steamWishlistPriority || null,
-        steamWishlistAddedAt: steamGame.steamWishlistAddedAt || "",
+        ...platformSyncPatch('steam',steamGame,{profileId:meta.steamId,wishlist:importingWishlist||steamStatus==='wishlist'}),
         source: existingGame?.source || steamSource,
       };
 
@@ -19057,7 +19072,7 @@ useEffect(() => {
         released: "",
         platformNames: ["PC"],
         genreNames: [],
-        playtime: importingWishlist ? null : steamGame.playtimeForever || null,
+        playtime: null,
         difficulty: "normal",
         review: "",
         ostRating: 0,
@@ -19102,14 +19117,7 @@ useEffect(() => {
         createFallbackPoster(xboxGame.name || existingGame?.name || "Jeu Microsoft", "#16a34a", "#60a5fa");
 
       const xboxPatch = {
-        xboxTitleId: xboxGame.xboxTitleId ?? xboxGame.titleId,
-        xboxProfileId: meta.xuid || "",
-        xboxLastPlayedAt: xboxGame.xboxLastPlayedAt || "",
-        xboxCurrentGamerscore: xboxGame.xboxCurrentGamerscore || 0,
-        xboxMaxGamerscore: xboxGame.xboxMaxGamerscore || 0,
-        xboxCurrentAchievements: xboxGame.xboxCurrentAchievements || 0,
-        xboxTotalAchievements: xboxGame.xboxTotalAchievements || 0,
-        xboxLastSyncedAt: new Date(),
+        ...platformSyncPatch('xbox',xboxGame,{profileId:meta.xuid}),
         source: existingGame?.source || "xbox",
       };
 
@@ -19768,6 +19776,7 @@ useEffect(() => {
 
   const openNotification = (notification) => {
     setNotificationPanelOpen(false);
+    if(notification?.type==='release-notes'){setReleaseNotesOpen(true);return;}
     if(notification?.type==='rendezvous'){setRendezvousNotice({view:notification.view,token:Date.now()});return;}
     if(notification?.type==='challenge'){changeTab('social');setSharedProfile(null);setSocialEntryView('challenges');setSearchDestination({kind:'challenge',id:notification.challengeId,token:Date.now()});return;}
     if(notification?.type==='recommendation'){changeTab('social');setSharedProfile(null);setSocialEntryView('recommendations');setSearchDestination({kind:'recommendation',id:notification.recommendationId,token:Date.now()});return;}
@@ -19928,6 +19937,7 @@ useEffect(() => {
 
 {activeTab === "home" && (
   <HomeTab
+  releaseBanner={unreadReleases.length>0?<ReleaseNotes/>:null}
   socialProfile={socialProfile}
   socialFriends={socialFriends}
   onExperiencesChange={value=>updateAppOption('experiences',value)}
@@ -19968,6 +19978,7 @@ useEffect(() => {
 
           {activeTab === "search" && (
             <>
+              <div className="toolbar-row"><button type="button" className="option-pill" onClick={()=>setPhysicalScannerOpen(true)}>Scanner un jeu physique</button></div>
               <div className="search-panel">
                 <div className="input-container">
                   <input
@@ -20231,6 +20242,7 @@ useEffect(() => {
       </div>
     </div>
 
+    <div className="toolbar-row"><button type="button" className="option-pill" onClick={()=>setPhysicalScannerOpen(true)}>Scanner un jeu physique</button></div>
     <LibrarySmartPanel
       games={filteredLibraryGames}
       collectionGames={collectionGames}
@@ -20513,13 +20525,19 @@ useEffect(() => {
       )}
 
       {couchOpen&&<CouchMode games={games} lists={appOptions.personalLists} onClose={()=>setCouchOpen(false)} onOpenGame={game=>openGameDetail(game,games)}/>}
+      {releaseNotesOpen&&<ReleaseNotesDialog onClose={()=>setReleaseNotesOpen(false)}/>}
       {rendezvousNotice&&<ToolDialog title="Les rendez-vous Checkpoint" wide onClose={()=>setRendezvousNotice(null)}><RendezvousHub key={rendezvousNotice.token} initialView={rendezvousNotice.view} games={games} value={appOptions.engagement} onChange={value=>updateAppOption('engagement',value)} onOpenGame={game=>{setRendezvousNotice(null);openGameDetail(game,games);}} onChallenges={()=>{setRendezvousNotice(null);changeTab('social');setSharedProfile(null);setSocialEntryView('challenges');}}/></ToolDialog>}
+      {physicalScannerOpen&&<Suspense fallback={<ToolDialog title="Scanner un jeu physique" onClose={()=>setPhysicalScannerOpen(false)}><p role="status">Chargement du scanner…</p></ToolDialog>}><PhysicalGameScanner games={games} onClose={()=>setPhysicalScannerOpen(false)} onOpenGame={game=>{setPhysicalScannerOpen(false);openGameDetail(game,games);}} onSave={async({game,physical,targetId})=>{
+        if(targetId){const latest=documentStateRef.current.games.find(g=>g.id===targetId);if(!latest||latest.physicalOwned)throw new Error('Cette fiche a changé. Vérifie son édition dans ta bibliothèque.');return persistPatch('games',targetId,{...physical,...(latest.status==='wishlist'?{status:'collection'}:{})},{success:'Boîte associée à ta collection.'});}
+        return addGameToFirebase({...game,...physical,status:'collection',completed:false,progressStatus:'not_started',rating:0});
+      }}/></Suspense>}
       {collectionAddDraft&&<QuickCollectionAdd key={collectionAddDraft.rawgId||collectionAddDraft.name} game={collectionAddDraft} onSave={addGameToFirebase} onClose={()=>setCollectionAddDraft(null)}/>}
       <GameDetailModal
         personalLists={appOptions.personalLists}
         onPersonalListsChange={value=>updateAppOption('personalLists',value)}
         game={selectedGame}
         onSetExperienceInfo={setExperienceInfo}
+        onSavePlatformActivity={(id,patch)=>persistPatch("games",id,patch,{success:"Relevé de plateforme enregistré."})}
         onClose={closeGameDetail}
         onDelete={deleteGame}
         onSetStatus={setStatus}
