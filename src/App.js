@@ -1,3 +1,4 @@
+import ToolDialog from './components/ToolDialog';
 import {hardwareImageForEdition,hardwareBaseImage,hardwareDisplayImage,hardwarePhotoUrl,hardwareEditionChoices} from './services/hardwareEditionPhotos';
 import HardwareEditionEditor from './components/HardwareEditionEditor';
 import {hardwareEditionLabel,normalizeHardwareEdition,hasHardwareEdition,duplicateHardwareEdition} from './services/hardwareEditions';
@@ -6,6 +7,15 @@ import {normalizeDuelHistory} from "./services/soloDuel";
 import {THEME_CATALOG} from "./data/themeCatalog";
 import { Fragment, useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
+import useRendezvousUpdates from './components/useRendezvousUpdates';
+import RendezvousHub from './components/RendezvousHub';
+import FriendChallenges from './components/FriendChallenges';
+import GameRecommendations from './components/GameRecommendations';
+import GamingPredictions from './components/GamingPredictions';
+import {normalizeEngagement} from './services/engagement';
+import QuickCollectionAdd from './components/QuickCollectionAdd';
+import useDetailReturn from './components/useDetailReturn';
+import {recommendationReason} from './services/recommendationReason';
 import "./App.css";
 import "./polish.css";
 import "./components/OnePieceTheme.css";
@@ -82,6 +92,7 @@ import { TAB_TUTORIALS } from "./data/tabTutorials";
 import { buildBulkGamePatch } from "./services/libraryBulk";
 import "./components/CollectionImprovements.css";
 import "./components/LandscapeLayout.css";
+import "./components/GeneralPolish.css";
 import "./components/HardwareCards.css";
 import SeriesCatalogProgress from "./components/SeriesCatalogProgress";
 import { loadSeriesCatalog, dedupeSeriesGames, findSeriesLibraryMatch, isSeriesLibraryEpisode, seriesCatalogTitle } from "./services/seriesCatalog";
@@ -380,6 +391,7 @@ function normalizeAppOptions(options = {}) {
     hiddenTabs:normalizeHiddenTabs(source.hiddenTabs),
     personalLists:normalizePersonalLists(source.personalLists),
     experiences:normalizeExperiences(source.experiences),
+    engagement:normalizeEngagement(source.engagement),
     duelPalmares:normalizeDuelHistory(source.duelPalmares),
     editionLinks:normalizeEditionLinks(source.editionLinks),
     notifications:normalizeNotificationPreferences(source.notifications),
@@ -861,6 +873,7 @@ function AdvancedStats({ games }) {
 }
 
 function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
+  useDetailReturn(Boolean(game));
   const [details, setDetails] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
   const [movies, setMovies] = useState([]);
@@ -947,7 +960,7 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
   return (
     <div className="search-detail-backdrop" onClick={onClose}>
       <div className="search-detail-modal" onClick={(e) => e.stopPropagation()}>
-        <button className="modal-close-btn" type="button" onClick={onClose}>
+        <button className="modal-close-btn" type="button" aria-label="Fermer la fiche du jeu" onClick={onClose}>
           ✕
         </button>
 
@@ -1334,37 +1347,6 @@ const createPixelEffect = (x, y) => {
   setTimeout(() => {
     pixel.remove();
   }, 400);
-};
-
-const importNewsFromRSS = async () => {
-  try {
-    const res = await fetch(
-      "https://api.rss2json.com/v1/api.json?rss_url=https://www.jeuxvideo.com/rss/rss.xml"
-    );
-
-    const data = await res.json();
-
-    const news = data.items.slice(0, 10);
-
-    for (const item of news) {
-      await addDoc(collection(db, "news"), {
-        title: item.title,
-        summary: item.description,
-        url: item.link,
-        date: item.pubDate,
-        source: "JeuxVideo.com",
-        image: item.thumbnail || "",
-        createdAt: new Date(),
-      });
-    }
-
-    alert("Actus importées !");
-  } catch (error) {
-  if (isAbortError(error)) return;
-
-  console.error("Erreur import RSS :", error);
-  alert("Erreur import RSS");
-}
 };
 
 /* -------------------- HELPERS -------------------- */
@@ -4831,7 +4813,7 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
 
 /* ==================== MODAL DÉTAIL JEU ==================== */
 
-function GameDetailModal({
+export function GameDetailModal({
   personalLists=[],
   onPersonalListsChange,
   game,
@@ -4860,6 +4842,7 @@ function GameDetailModal({
   canGoNext,
   closeAfterRating = false,
 }) {
+  useDetailReturn(Boolean(game));
   const [localReview, setLocalReview] = useState("");
   const [savingReview, setSavingReview] = useState(false);
   const [localReviewSpoiler,setLocalReviewSpoiler]=useState(false);
@@ -5157,6 +5140,7 @@ function GameDetailModal({
       >
         <button
           className="modal-close-btn"
+          aria-label="Fermer la fiche du jeu"
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -5221,7 +5205,15 @@ function GameDetailModal({
         </div>
 
         <div className="modal-content game-detail-premium-content">
-          <GameExperiencePanel key={game.id} game={game} onChange={onSetExperienceInfo} />
+          <div className="game-detail-essential-actions" aria-label="Actions du jeu">
+            <button type="button" onClick={()=>onSetProgressStatus(game.id,'in_progress')}>Commencer / reprendre</button>
+            <button type="button" onClick={()=>onSetProgressStatus(game.id,'completed')}>Déjà terminé</button>
+          </div>
+          <p className="game-detail-essential-note">Ta progression et ta note sont indépendantes. Les détails ci-dessous sont facultatifs.</p>
+          <details className="game-detail-organized-group" open={!experience || undefined}>
+            <summary>Ton expérience{experience ? ` : ${experience === 'completed' ? 'Terminé' : experience === 'partial' ? 'Joué, non terminé' : 'Essayé'}` : ' avec ce jeu'}</summary>
+            <GameExperiencePanel key={game.id} game={game} onChange={onSetExperienceInfo} />
+          </details>
 
           {experience && <div className="game-detail-section">
             <div className="modal-block-title">{experience === "completed" ? "Note globale" : experience === "tried" ? "Ton ressenti (facultatif)" : "Ressenti général · Avis partiel"}</div>
@@ -5242,17 +5234,17 @@ function GameDetailModal({
             )}
           </div>}
 
-          {(experience === "completed" || experience === "partial") && <div className="game-detail-section game-detail-ratings-section">
-            <div className="modal-block-title">Notes détaillées</div>
+          {(experience === "completed" || experience === "partial") && <details className="game-detail-organized-group">
+            <summary>Notes détaillées par critère</summary>
+            <div className="game-detail-section game-detail-ratings-section">
 
             <DetailedRatingsBlock
               game={game}
               onSetDetailedRating={onSetDetailedRating}
             />
-          </div>}
+          </div></details>}
 
-          {experience === "completed" && <div className="game-detail-section ost-block">
-            <div className="modal-block-title">OST / Musique</div>
+          {experience === "completed" && <details className="game-detail-organized-group"><summary>OST / Musique</summary><div className="game-detail-section ost-block">
 
             <RatingSlider
               rating={localOstRating}
@@ -5261,13 +5253,13 @@ function GameDetailModal({
                 onSetOstInfo(game.id, { ostRating: value });
               }}
             />
-          </div>
+          </div></details>
 
           }
 
           {game.favorite&&<div className="game-detail-section"><FavoriteReasonEditor key={game.id} game={game} onSave={onSetFavoriteReason}/></div>}
 
-          <div className="game-detail-section">
+          <details className="game-detail-organized-group"><summary>Mon avis et son partage</summary><div className="game-detail-section">
             <div className="modal-block-title">{experience === "tried" ? "Un petit mot sur ton expérience ?" : "Avis personnel"}</div>
 
             <textarea
@@ -5295,9 +5287,9 @@ function GameDetailModal({
                 } finally { setSavingReview(false); }
               }}
             >
-              {savingReview ? "Enregistrement…" : "Enregistrer"}
+              {savingReview ? "Enregistrement…" : "Enregistrer l’avis"}
             </button>
-          </div>
+          </div></details>
 
           <details className="game-detail-organized-group">
             <summary>Ta session de jeu</summary>
@@ -8635,6 +8627,8 @@ export function SocialTab({
   onOpenFriend,
   initialView = "feed",
   targetPollId,
+  targetChallengeId,
+  targetRecommendationId,
   onSetFavoriteReason,
   onOpenComparisonGame,
   onDiscoverGame,
@@ -9011,6 +9005,8 @@ export function SocialTab({
         setShowPublicPreview(false);
       }} />
       {socialView === "polls" && !sharedProfile && <FriendPolls games={games} friends={socialFriends} targetId={targetPollId}/>}
+      {socialView === "challenges" && !sharedProfile && <FriendChallenges key={auth.currentUser?.uid||'local'} targetId={targetChallengeId} games={games} friends={socialFriends}/>}
+      {socialView === "recommendations" && !sharedProfile && <GameRecommendations key={auth.currentUser?.uid||'local'} targetId={targetRecommendationId} games={games} friends={socialFriends} onDiscoverGame={onDiscoverGame}/>}
       {socialMessage && <p role="status" className="social-hub-notice">{socialMessage}</p>}
       {socialView === "feed" && <div className="social-hub-feed-tabs" role="group" aria-label="Choisir le fil">
         <button type="button" className={socialFeedSource === "friends" ? "active" : ""} aria-pressed={socialFeedSource === "friends"} onClick={() => setSocialFeedSource("friends")}>Mes amis</button>
@@ -9465,6 +9461,8 @@ export function SocialTab({
 }
 
 export function HomeTab({
+  onEngagementChange,
+  onOpenChallenges,
   socialProfile={},
   socialFriends=[],
   onExperiencesChange,
@@ -9962,10 +9960,10 @@ export function HomeTab({
   useEffect(() => {
     const fetchRecommendations = async () => {
       const likedGames = games.filter(
-        (game) => game.favorite || getGameRating(game) >= 8
+        (game) => game.status !== 'wishlist' && (game.favorite || getGameRating(game) >= 8)
       );
 
-      const sourceGames = likedGames.length > 0 ? likedGames : games;
+      const sourceGames = likedGames.length > 0 ? likedGames : games.filter(game=>game.status!=='wishlist');
 
       if (sourceGames.length === 0) {
         setRecommendations([]);
@@ -10060,6 +10058,7 @@ export function HomeTab({
               ...rawgGame,
               recommendationScore: score,
               recommendationReasons: [...new Set(reasons)].slice(0, 2),
+              recommendationExplanation: recommendationReason(rawgGame, games),
             };
           })
           .sort((a, b) => b.recommendationScore - a.recommendationScore);
@@ -10122,11 +10121,12 @@ export function HomeTab({
   return (
     <HomeLayout value={dealPreferences.homeLayout} onChange={onHomeLayoutChange}>
       {levelSection}
+      <HomeBlock id="rendezvous" notice="Vote de la semaine"><RendezvousHub key={auth.currentUser?.uid||'local'} games={games} value={dealPreferences.engagement} onChange={onEngagementChange} onOpenGame={onOpenDetail} onChallenges={onOpenChallenges}/></HomeBlock>
       <FirstSteps games={games} onSearch={() => setActiveTab("search")} onOpenGame={onOpenDetail} onHardware={() => setActiveTab("hardware")}/>
-      {games.length > 0 && <><HomeBlock id="collection">{collectionSection}</HomeBlock><HomeBlock id="nextLevel">{nextLevelSection}</HomeBlock><HomeBlock id="session">{sessionSection}</HomeBlock><HomeBlock id="picker"><SessionPicker games={games} onOpen={onOpenDetail}/></HomeBlock></>}
-      <HomeBlock id="rediscover"><Rediscover games={games} ratingGetter={getGameRating} onOpen={onOpenDetail} onPin={onRediscoverPin}/></HomeBlock>
-      <HomeBlock id="duel"><ArenaShortcut onOpen={()=>setActiveTab("arena")}/></HomeBlock>
-      <HomeBlock id="monthly"><MonthlyRecap games={games}/></HomeBlock>
+      {games.some(game=>game.status!=='wishlist') && <><HomeBlock id="collection">{collectionSection}</HomeBlock><HomeBlock id="nextLevel">{nextLevelSection}</HomeBlock><HomeBlock id="session">{sessionSection}</HomeBlock><HomeBlock id="picker"><SessionPicker games={games} onOpen={onOpenDetail}/></HomeBlock></>}
+      {games.some(game=>isGameFinishedStatus(game))&&<HomeBlock id="rediscover"><Rediscover games={games} ratingGetter={getGameRating} onOpen={onOpenDetail} onPin={onRediscoverPin}/></HomeBlock>}
+      {games.filter(game=>game.status!=='wishlist').length>=2&&<HomeBlock id="duel"><ArenaShortcut onOpen={()=>setActiveTab("arena")}/></HomeBlock>}
+      {games.some(game=>game.status!=='wishlist')&&<HomeBlock id="monthly"><MonthlyRecap games={games}/></HomeBlock>}
       <HomeBlock id="experiences" notice={dueCapsuleCount?`${dueCapsuleCount} capsule${dueCapsuleCount>1?'s':''} à ouvrir`:null}><CheckpointExperiences games={games} profile={socialProfile} friends={socialFriends} lists={dealPreferences.personalLists} level={level} value={dealPreferences.experiences} onChange={onExperiencesChange} loadProfile={loadCheckpointSocialProfile} onOpenGame={onOpenDetail}/></HomeBlock>
       <HomeBlock id="quiz"><WeeklyQuiz quiz={weeklyQuiz} progress={weeklyQuizProgress} onAnswer={onAnswerWeeklyQuiz}/></HomeBlock>
 
@@ -10184,7 +10184,7 @@ export function HomeTab({
         </div></HomeBlock>
       )}
 
-      <HomeBlock id="activity"><div className="home-card home-activity-card home-pulse-panel">
+      {socialActivities.length>0&&<HomeBlock id="activity"><div className="home-card home-activity-card home-pulse-panel">
         <div className="home-section-head">
           <div>
             <div className="home-card-title">Activité récente</div>
@@ -10261,10 +10261,10 @@ export function HomeTab({
             subtitle="Ajoute des jeux, des notes ou du matériel pour alimenter ton activité."
           />
         )}
-      </div></HomeBlock>
+      </div></HomeBlock>}
 
 
-      <HomeBlock id="radar"><div className="search-panel home-recommendations-panel home-radar-panel">
+      {games.some(game=>game.status!=='wishlist')&&<HomeBlock id="radar"><div className="search-panel home-recommendations-panel home-radar-panel">
         <div className="home-section-head home-radar-head">
           <div>
             <div className="home-card-title">Radar découverte</div>
@@ -10290,12 +10290,12 @@ export function HomeTab({
         {loadingRecommendations ? (
           <div className="home-radar-loading">
             <span />
-            Analyse de ton univers en cours...
+            Recherche de jeux à découvrir…
           </div>
         ) : !primaryRecommendation ? (
           <div className="home-radar-empty">
             <strong>Radar en calibration</strong>
-            <span>Ajoute quelques notes ou favoris pour obtenir des pistes plus fines.</span>
+            <span>Ajoute un jeu à ta collection, puis indique ceux que tu apprécies. Les suggestions expliqueront leur lien avec tes jeux.</span>
           </div>
         ) : (
           <div className="home-radar-layout">
@@ -10314,9 +10314,7 @@ export function HomeTab({
                 <span className="home-recommendation-kicker">Signal principal</span>
                 <strong>{primaryRecommendation.name}</strong>
                 <small>
-                  {(primaryRecommendation.recommendationReasons || []).length
-                    ? `Aligné avec ${primaryRecommendation.recommendationReasons.join(" / ")}`
-                    : "Une piste forte à comparer à ta bibliothèque"}
+                  {primaryRecommendation.recommendationExplanation}
                 </small>
                 <em>
                   {primaryRecommendation.released?.split("-")[0] || "Année inconnue"} ·{" "}
@@ -10341,6 +10339,7 @@ export function HomeTab({
                   <div>
                     <span>Signal {index + 2}</span>
                     <strong>{game.name}</strong>
+                    <small className="recommendation-explanation">{game.recommendationExplanation}</small>
                     <small>{formatRating10(game.rating || 0, "Non noté")}</small>
                   </div>
                 </button>
@@ -10357,7 +10356,7 @@ export function HomeTab({
             </div>
           </div>
         )}
-      </div></HomeBlock>
+      </div></HomeBlock>}
       <HomeBlock id="agenda"><div className="search-panel live-event-card home-agenda-card">
         <div className="home-section-head home-agenda-head">
           <div>
@@ -12598,6 +12597,7 @@ function HardwareDetailModal({
     setLocalReview(item?.review || "");
   }, [item?.id]);
 
+  useDetailReturn(Boolean(item));
   if (!item) return null;
 
   const fields = getHardwareRatingFields(item.type);
@@ -12645,7 +12645,7 @@ function HardwareDetailModal({
   return (
     <div className="hardware-inline-detail" ref={detailRef}>
       <div className="hardware-inline-detail-panel">
-        <button className="hardware-inline-close" type="button" onClick={onClose}>
+        <button className="hardware-inline-close" type="button" aria-label="Fermer la fiche du matériel" onClick={onClose}>
           ✕
         </button>
 
@@ -16073,7 +16073,7 @@ function OptionsTab({
                 ))}
               </div>
             </div>
-          </div>} events={<AdminPanel events={developerEvents} onImportNews={onImportNews}/>} feedback={<FeedbackInbox/>}/>
+          </div>} events={<AdminPanel events={developerEvents} onImportNews={onImportNews}/>} feedback={<FeedbackInbox/>} predictions={<GamingPredictions manage/>}/>
         </OptionGroup>}
 
         <OptionGroup id="data" isOpen={!!openOptionGroups.data} onToggle={() => setOpenOptionGroups((current) => ({ ...current, data: !current.data }))}
@@ -16307,9 +16307,6 @@ function EventsAdminList({ events, onEdit }) {
             </button>
           </div>
 
-        <button onClick={importNewsFromRSS}>
-          📰 Importer les actus
-        </button>
         </div>
       ))}
     </div>
@@ -17413,6 +17410,8 @@ export default function App({ startupVisible = false, onStartupProgress, tutoria
   const [platforms, setPlatforms] = useState([]);
   const [genres, setGenres] = useState([]);
   const [toast, setToast] = useState("");
+  const [collectionAddDraft,setCollectionAddDraft]=useState(null);
+  const startCollectionAdd=game=>setCollectionAddDraft(game);
   const [seenBadgeIds, setSeenBadgeIds] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [librarySearch, setLibrarySearch] = useState("");
@@ -17473,6 +17472,7 @@ export default function App({ startupVisible = false, onStartupProgress, tutoria
     });
   };
   const [socialEntryView, setSocialEntryView] = useState("feed");
+  const [rendezvousNotice,setRendezvousNotice]=useState(null);
   const [selectedGame, setSelectedGame] = useState(null);
   const [detailGameList, setDetailGameList] = useState([]);
   const detailCloseTimerRef = useRef(null);
@@ -17511,7 +17511,9 @@ export default function App({ startupVisible = false, onStartupProgress, tutoria
   const { games: upcomingGames, status: upcomingSourceStatus } = upcomingReleases;
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
   const [monthlyNotification,setMonthlyNotification]=useState(null);
-  const extraNotifications=useUsefulUpdates({games,preferences:appOptions.notifications,enabled:!showSplash&&privateSettingsReady});
+  const existingExtraNotifications=useUsefulUpdates({games,preferences:appOptions.notifications,enabled:!showSplash&&privateSettingsReady});
+  const rendezvousNotifications=useRendezvousUpdates({accountUid:auth.currentUser?.uid,games,value:appOptions.engagement,preferences:appOptions.notifications,enabled:!showSplash&&privateSettingsReady});
+  const extraNotifications=[...existingExtraNotifications,...rendezvousNotifications];
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState(() => {
     try {
       const ids=JSON.parse(localStorage.getItem("checkpoint-dismissed-notifications-v2") || "[]");return Array.isArray(ids)?ids.filter(id=>typeof id==="string"):[];
@@ -17731,7 +17733,12 @@ const importCheckpointBackup = async (event) => {
 
 const updateHardwareRank = (id,rank) => persistPatch("hardware",id,{controllerRank:rank},{success:"Classement du matériel enregistré"});
 
+const newsImportInFlight = useRef(false);
 const importNewsFromRSS = async ({ silent = false, force = false } = {}) => {
+  if(newsImportInFlight.current)return;
+  newsImportInFlight.current=true;
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),15000);
   try {
     const lastImport = localStorage.getItem("checkpoint-last-news-import");
     const extractImage = (item) => {
@@ -17752,10 +17759,12 @@ const importNewsFromRSS = async ({ silent = false, force = false } = {}) => {
     }
 
     const res = await fetch(
-      "https://api.rss2json.com/v1/api.json?rss_url=https://www.jeuxvideo.com/rss/rss.xml"
+      "https://api.rss2json.com/v1/api.json?rss_url=https://www.jeuxvideo.com/rss/rss.xml",
+      {signal:controller.signal}
     );
-
+    if(!res.ok)throw new Error('Le flux d’actualités est indisponible.');
     const data = await res.json();
+    if(!Array.isArray(data.items))throw new Error('Le flux d’actualités est invalide.');
     const news = (data.items || []).slice(0, 10);
 
     for (const item of news) {
@@ -17789,6 +17798,9 @@ const importNewsFromRSS = async ({ silent = false, force = false } = {}) => {
 
     console.error("Erreur import RSS :", error);
     if (!silent) alert("Erreur import RSS");
+  } finally {
+    clearTimeout(timeout);
+    newsImportInFlight.current=false;
   }
 };
 
@@ -18941,6 +18953,8 @@ useEffect(() => {
         rawgId: game.rawgId || game.id || null,
         name: game.name,
         completed: game.completed || isFinished || false,
+        progressStatus: game.progressStatus || (isFinished ? "completed" : "not_started"),
+        ratingExperience: game.ratingExperience || (isFinished ? "completed" : ""),
         rating: getGameRating(game),
         favorite: game.favorite || false,
         sanctuary: Boolean(game.sanctuary),
@@ -18967,6 +18981,7 @@ useEffect(() => {
 
       const ref = await addDoc(collection(db, "games"), newGame);
       const savedGame = { ...newGame, id: ref.id };
+      setToast(`${game.name} ajouté à ta collection${newGame.status==='wishlist' ? ' · Wishlist' : ''}.`);
 
       if (appOptions.afterAddAction === "library") {
         setSelectedSearchGame(null);
@@ -19753,6 +19768,9 @@ useEffect(() => {
 
   const openNotification = (notification) => {
     setNotificationPanelOpen(false);
+    if(notification?.type==='rendezvous'){setRendezvousNotice({view:notification.view,token:Date.now()});return;}
+    if(notification?.type==='challenge'){changeTab('social');setSharedProfile(null);setSocialEntryView('challenges');setSearchDestination({kind:'challenge',id:notification.challengeId,token:Date.now()});return;}
+    if(notification?.type==='recommendation'){changeTab('social');setSharedProfile(null);setSocialEntryView('recommendations');setSearchDestination({kind:'recommendation',id:notification.recommendationId,token:Date.now()});return;}
     if(notification?.type==="monthly"){setMonthlyNotification({month:notification.month,token:Date.now()});return;}
     if(notification?.type==="poll"){changeTab("social");setSharedProfile(null);setSocialEntryView("polls");setSearchDestination({kind:"poll",id:notification.pollId,token:Date.now()});return;}
     if (notification?.type === "trial" && pendingCheckpointLevel) {
@@ -19913,6 +19931,8 @@ useEffect(() => {
   socialProfile={socialProfile}
   socialFriends={socialFriends}
   onExperiencesChange={value=>updateAppOption('experiences',value)}
+  onEngagementChange={value=>updateAppOption('engagement',value)}
+  onOpenChallenges={()=>{changeTab('social');setSharedProfile(null);setSocialEntryView('challenges');}}
   theme={theme}
   games={games}
   hardware={hardware}
@@ -20159,7 +20179,7 @@ useEffect(() => {
                         key={game.id}
                         game={game}
                         games={games}
-                        onAdd={addGameToFirebase}
+                        onAdd={startCollectionAdd}
                         onWishlist={addGameToFirebase}
                         isOwned={games.some((g) => g.rawgId === game.id || g.name.toLowerCase() === game.name.toLowerCase())}
                         onOpenSearchDetail={setSelectedSearchGame}
@@ -20372,8 +20392,10 @@ useEffect(() => {
 
           {activeTab === "social" && (
             <SocialTab
-              key={searchDestination?.kind==="poll"?searchDestination.token:"social"}
+              key={['poll','challenge','recommendation'].includes(searchDestination?.kind)?searchDestination.token:"social"}
               targetPollId={searchDestination?.kind==="poll"?searchDestination.id:null}
+              targetChallengeId={searchDestination?.kind==='challenge'?searchDestination.id:null}
+              targetRecommendationId={searchDestination?.kind==='recommendation'?searchDestination.id:null}
               onSetFavoriteReason={setFavoriteReason}
               onOpenComparisonGame={game=>openGameDetail(game,games)}
               onDiscoverGame={game=>{changeTab("search");setSearch(game.name);}}
@@ -20467,7 +20489,7 @@ useEffect(() => {
           game={selectedSearchGame}
           onClose={() => setSelectedSearchGame(null)}
           onWishlist={addGameToFirebase}
-          onCollection={addGameToFirebase}
+          onCollection={startCollectionAdd}
         />
       </div>
 
@@ -20491,6 +20513,8 @@ useEffect(() => {
       )}
 
       {couchOpen&&<CouchMode games={games} lists={appOptions.personalLists} onClose={()=>setCouchOpen(false)} onOpenGame={game=>openGameDetail(game,games)}/>}
+      {rendezvousNotice&&<ToolDialog title="Les rendez-vous Checkpoint" wide onClose={()=>setRendezvousNotice(null)}><RendezvousHub key={rendezvousNotice.token} initialView={rendezvousNotice.view} games={games} value={appOptions.engagement} onChange={value=>updateAppOption('engagement',value)} onOpenGame={game=>{setRendezvousNotice(null);openGameDetail(game,games);}} onChallenges={()=>{setRendezvousNotice(null);changeTab('social');setSharedProfile(null);setSocialEntryView('challenges');}}/></ToolDialog>}
+      {collectionAddDraft&&<QuickCollectionAdd key={collectionAddDraft.rawgId||collectionAddDraft.name} game={collectionAddDraft} onSave={addGameToFirebase} onClose={()=>setCollectionAddDraft(null)}/>}
       <GameDetailModal
         personalLists={appOptions.personalLists}
         onPersonalListsChange={value=>updateAppOption('personalLists',value)}

@@ -29,5 +29,6 @@ export default function SeriesCatalogProgress({name, games, isFinished}) {
       : !state.catalog.games.length ? 'Pas d’autre titre confirmé dans le catalogue'
       : count.remaining ? `${state.catalog.complete ? '' : 'Au moins '}${count.remaining} jeu${count.remaining > 1 ? 'x' : ''} répertorié${count.remaining > 1 ? 's' : ''} à terminer · ${count.outside} hors bibliothèque`
       : `Tous les jeux répertoriés sont terminés${state.catalog.complete ? '' : ' · catalogue partiel'}`}
+    {state.catalog&&!state.catalog.complete&&<small className="series-catalog-limit">Le catalogue est partiel : ce nombre ne couvre pas forcément toute la série.</small>}
   </span>;
 }

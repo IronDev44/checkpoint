@@ -1,4 +1,6 @@
 import {normalizeArenaEnvelope} from './arena-state.js';
+import {handleSelections,handleChallenges} from './engagement-api.js';
+import {handleRecommendations,handlePredictions} from './social-moments-api.js';
 import { publicProfileView } from "./profile-privacy.js";
 const PRIVATE = new Set(['games','hardware','gameCollections','playerProgress','playerPrivateSettings']);
 const SHARED = new Set(['news','events','publicProfiles']);
@@ -88,6 +90,10 @@ export async function handleAccountApi(request,env,verify=verifyFirebaseToken){
   let uid;try{const match=request.headers.get('Authorization')?.match(/^Bearer (.+)$/);if(!match)return response({error:'Connexion nécessaire.'},401);uid=await verify(match[1]);}catch{return response({error:'Reconnecte-toi pour ouvrir ton espace.'},401);}
   const url=new URL(request.url);const name=url.searchParams.get('collection');const id=url.searchParams.get('id');
   if(name==='friendPolls')return handleFriendPolls(request,env,uid,url);
+  if(name==='communitySelections')return handleSelections(request,env,uid);
+  if(name==='friendChallenges')return handleChallenges(request,env,uid,url);
+  if(name==='gameRecommendations')return handleRecommendations(request,env,uid,url);
+  if(name==='gamingPredictions')return handlePredictions(request,env,uid,url);
   if(!PRIVATE.has(name)&&!SHARED.has(name))return response({error:'Collection inconnue.'},400);
   if(id!==null&&(!id||id.length>250||id.includes('/')))return response({error:'Identifiant invalide.'},400);
   const owner=PRIVATE.has(name)?uid:'__shared__';

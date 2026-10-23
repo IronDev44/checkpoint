@@ -15,7 +15,7 @@ export function SocialNavigation({ view, onChange, profile, friendCount }) {
       </button>
     </header>
     <nav className="social-hub-nav" aria-label="Navigation sociale">
-      {[["feed", "Fil"], ["friends", "Amis"], ["polls", "Sondages"], ["profile", "Profil public"]].map(([key, label]) =>
+      {[["feed", "Fil"], ["friends", "Amis"], ["recommendations", "Recommandations"], ["polls", "Sondages"], ["challenges", "Défis"], ["profile", "Profil public"]].map(([key, label]) =>
         <button key={key} type="button" aria-pressed={key === "profile" ? profileView : view === key}
           className={(key === "profile" ? profileView : view === key) ? "active" : ""} onClick={() => onChange(key)}>
           {label}{key === "friends" && friendCount > 0 && <small>{friendCount}</small>}

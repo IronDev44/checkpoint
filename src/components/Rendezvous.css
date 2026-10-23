@@ -1,0 +1,43 @@
+.rendezvous-hub,.rendezvous-section {min-width:0;color:var(--text-main,#f4f4f4)}
+.rendezvous-hub {padding:24px;border:1px solid var(--surface-border,#ffffff25);border-radius:24px;background:var(--surface-bg,#ffffff05)}
+.rendezvous-hub h2,.rendezvous-section h2 {margin:8px 0 14px;font-size:1.45rem}
+.rendezvous-hub p,.rendezvous-section p {line-height:1.65;color:var(--text-soft,#bfc5cc);font-size:.9rem}
+.rendezvous-tabs,.rendezvous-actions {display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}
+html body[data-theme] .rendezvous-tabs button {min-height:44px;min-width:0;width:auto;height:auto;padding:10px 14px;border-radius:12px;border:1px solid var(--surface-border,#ffffff25);background:var(--surface-bg,#ffffff08);color:var(--text-main,#fff);font:inherit;white-space:normal}
+html body[data-theme] .rendezvous-tabs button[aria-pressed=true] {border-color:var(--accent-solid,#d6b66f);color:var(--accent-solid,#d6b66f)}
+.rendezvous-heading,.rendezvous-round>header {display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.rendezvous-heading>div {flex:1;min-width:min(100%,200px)}
+.rendezvous-round,.memory-card,.rendezvous-challenge {padding:24px 0;border-top:1px solid var(--surface-border,#ffffff25);margin-top:20px}
+.rendezvous-round h3,.memory-card h3,.rendezvous-challenge h3,.expedition-card h3 {font-size:1.1rem;line-height:1.45;margin:8px 0;overflow-wrap:anywhere}
+.rendezvous-round>header>span {font-size:.75rem;color:var(--text-soft);line-height:1.6}
+.rendezvous-section small,.rendezvous-round small {color:var(--accent-solid,#d6b66f);font-size:.75rem;line-height:1.55}
+.rendezvous-votes {display:grid;gap:10px;margin:18px 0}
+html body[data-theme] .rendezvous-votes button {display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;height:auto;min-height:64px;padding:14px 16px;box-sizing:border-box;text-align:left;white-space:normal;border:1px solid var(--surface-border,#ffffff25);border-radius:14px;background:var(--surface-bg,#ffffff05);color:var(--text-main,#fff);font:inherit;line-height:1.5}
+html body[data-theme] .rendezvous-votes button[aria-pressed=true] {border-color:var(--accent-solid,#d6b66f)}
+.rendezvous-votes strong {font-size:.9rem;overflow-wrap:anywhere}
+.rendezvous-votes small {display:block}.rendezvous-count {flex:0 0 auto;text-align:right}
+.rendezvous-votes button:disabled {cursor:default;opacity:.85!important}
+.rendezvous-caption {font-size:.75rem!important;line-height:1.65}
+html body[data-theme] .rendezvous-text-button {display:inline-flex;min-height:44px;width:auto;height:auto;padding:8px 0;background:transparent!important;border:0!important;box-shadow:none!important;color:var(--accent-solid,#d6b66f);font:inherit;font-size:.85rem;line-height:1.55;text-align:left;white-space:normal}
+.rendezvous-archives {margin-top:18px}.rendezvous-archives summary {cursor:pointer;min-height:44px;align-content:center;font-size:.9rem}
+.rendezvous-archive-month {display:grid;gap:8px;font-size:.85rem;margin:16px 0;max-width:260px}.rendezvous-archive-month input {min-height:44px;box-sizing:border-box;max-width:100%;padding:10px;border-radius:10px;border:1px solid var(--surface-border,#ffffff25);background:var(--input-bg,#10141a);color:var(--text-main,#fff);font:inherit}
+.rendezvous-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:16px;margin:22px 0}
+.expedition-card {padding:20px;border:1px solid var(--surface-border,#ffffff25);border-radius:18px;display:flex;align-items:flex-start;flex-direction:column}
+.expedition-card button {margin-top:auto;white-space:normal}
+.expedition-journey {line-height:1.65}.expedition-journey a {color:var(--accent-solid,#d6b66f)}
+.expedition-stamp {display:grid;gap:18px;place-items:center;text-align:center;padding:30px 20px;border:1px solid var(--accent-solid,#d6b66f);border-radius:18px;margin-bottom:24px}
+.expedition-stamp>span {font-size:3rem;color:var(--accent-solid,#d6b66f)}
+.rendezvous-form {display:grid;gap:18px}.rendezvous-form label {display:grid;gap:10px;font-size:.9rem;line-height:1.5;min-width:0}
+.rendezvous-form input:not([type=checkbox]):not([type=radio]),.rendezvous-form select,.rendezvous-form textarea {box-sizing:border-box;width:100%;max-width:100%;min-height:44px;padding:12px;border:1px solid var(--surface-border,#ffffff25);border-radius:12px;background:var(--input-bg,#10141a);color:var(--text-main,#fff);font:inherit}
+.rendezvous-form textarea {min-height:120px;resize:vertical}
+.rendezvous-checkbox,.rendezvous-game-picker label,.rendezvous-form fieldset label {display:flex;align-items:center;gap:12px;min-height:44px;font-size:.9rem;line-height:1.5}
+.rendezvous-checkbox input,.rendezvous-game-picker input,.rendezvous-form fieldset input {width:20px;height:20px;min-height:20px;flex:0 0 auto;accent-color:var(--accent-solid,#d6b66f)}
+.rendezvous-game-picker {max-height:260px;overflow-y:auto;overscroll-behavior:contain;padding:4px}
+.rendezvous-form fieldset {min-width:0;border:1px solid var(--surface-border,#ffffff25);padding:14px;border-radius:12px}
+.memory-card blockquote,.challenge-comments blockquote {margin:16px 0;padding:4px 0 4px 16px;border-left:2px solid var(--accent-solid,#d6b66f);white-space:pre-wrap;overflow-wrap:anywhere;font-size:.9rem;line-height:1.6}
+.rendezvous-form button,.rendezvous-actions button {white-space:normal;min-height:44px}
+.rendezvous-message {margin:16px 0;padding:4px 0 4px 16px;border-left:2px solid var(--accent-solid,#d6b66f);white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.65}
+.rendezvous-section a {color:var(--accent-solid,#d6b66f);overflow-wrap:anywhere}
+.rendezvous-section summary {min-height:44px;align-content:center;cursor:pointer}
+.rendezvous-section :focus-visible {outline:2px solid var(--accent-solid,#d6b66f);outline-offset:4px}
+@media(max-width:480px){.rendezvous-hub {padding:18px}.rendezvous-tabs {gap:8px}.rendezvous-tabs button {flex:1;font-size:.8rem!important;padding:10px!important}.rendezvous-actions {flex-direction:column}.rendezvous-actions button {width:100%}}

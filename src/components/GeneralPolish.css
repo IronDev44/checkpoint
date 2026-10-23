@@ -1,0 +1,30 @@
+/* Shared dialogs keep their controls outside a single scrolling content area. */
+.tool-dialog-backdrop {box-sizing:border-box;padding:calc(16px + env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+html body[data-theme] .tool-dialog {box-sizing:border-box;display:flex;flex-direction:column;max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));padding:0;overflow:hidden}
+html body[data-theme] .tool-dialog > header {flex:0 0 auto;margin:0;padding:18px 20px;border-bottom:1px solid var(--surface-border,#ffffff25)}
+html body[data-theme] .tool-dialog > header h2 {min-width:0;line-height:1.35}
+html body[data-theme] .tool-dialog > header button {display:grid;place-items:center;position:static;width:44px;height:44px;min-width:44px;padding:0;margin:0}
+html body[data-theme] .tool-dialog-content {min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:20px}
+.tool-dialog-footer {flex:0 0 auto;padding:16px 20px}
+.quick-collection-add h3 {margin:0 0 12px;overflow-wrap:anywhere}
+.quick-collection-choices {display:grid;gap:12px;margin:20px 0}
+html body[data-theme] .quick-collection-choices button {display:grid;gap:6px;width:100%;height:auto;min-height:70px;padding:16px;text-align:left;white-space:normal;border:1px solid var(--surface-border,#ffffff25);border-radius:14px;background:var(--surface-bg,#ffffff08);color:var(--text-main,#fff);font:inherit;line-height:1.45}
+.quick-collection-choices span {font-size:.85rem;color:var(--text-soft,#c6ccd5)}
+.quick-collection-choices button:disabled {opacity:.55;cursor:wait}
+html body[data-theme] .game-detail-essential-actions {display:flex;flex-wrap:wrap;gap:10px;padding:0 0 20px}
+html body[data-theme] .game-detail-essential-actions button {min-height:44px;width:auto;height:auto;white-space:normal;font:inherit;font-size:.85rem;padding:10px 14px;border:1px solid var(--surface-border,#ffffff25);border-radius:12px;background:var(--surface-bg,#ffffff08);color:var(--text-main,#fff)}
+.game-detail-essential-note {margin:0 0 16px;color:var(--text-soft);font-size:.85rem;line-height:1.6}
+.home-radar-mini-card .recommendation-explanation {display:block;color:var(--text-soft);line-height:1.55;white-space:normal}
+.series-catalog-limit {display:block;margin-top:6px;font-size:.75rem;line-height:1.5;color:var(--text-soft)}
+.first-steps > p {color:var(--text-soft);font-size:.9rem;line-height:1.6}
+html body[data-theme] .game-modal .game-detail-nav-btn {top:18px!important;width:44px!important;height:44px!important;min-width:44px!important;transform:none!important}
+html body[data-theme] .game-modal .game-detail-nav-btn.prev {left:18px!important;right:auto!important}
+html body[data-theme] .game-modal .game-detail-nav-btn.next {left:72px!important;right:auto!important}
+html body[data-theme] :is(.game-modal,.search-detail-modal) .modal-close-btn {min-width:44px!important;min-height:44px!important}
+@media(max-width:700px) {
+  html body[data-theme] .game-modal .game-detail-premium-hero {grid-template-columns:96px minmax(0,1fr)!important;gap:14px!important;min-height:230px!important;padding:74px 18px 22px!important}
+  html body[data-theme] .game-modal .game-detail-premium-cover {width:96px!important;min-width:96px!important;height:128px!important}
+  html body[data-theme] .game-modal .game-detail-premium-identity {grid-template-rows:auto!important;gap:10px!important}
+  html body[data-theme] .game-modal .game-detail-premium-identity h2 {display:block!important;min-height:0!important;max-height:none!important;font-size:clamp(1.35rem,5.6vw,1.8rem)!important;line-height:1.2!important;overflow-wrap:anywhere}
+}
+@media (orientation:landscape) and (max-height:500px) {.tool-dialog > header {padding:10px 16px!important}.tool-dialog-content {padding:16px!important}}

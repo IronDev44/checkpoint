@@ -36,7 +36,7 @@ jest.mock("./services/d1Data",()=>({
 // Each case uses an in-memory account; no authentication or network writes.
 const mockOriginalFetch = global.fetch;
 beforeEach(()=>{
-  mockGameDocuments=[];mockHardwareDocuments=[];updateDoc.mockResolvedValue(undefined);
+  mockGameDocuments=[];mockHardwareDocuments=[];updateDoc.mockResolvedValue(undefined);addDoc.mockResolvedValue({id:'fixture'});
   mockStore.clear();mockStore.set('checkpoint-tab-tutorials-v1',JSON.stringify(Object.fromEntries(Object.keys(TAB_TUTORIALS).map(key=>[key,'completed']))));mockAccountStorage.setItem.mockImplementation((key,value)=>mockStore.set(key,value));setDoc.mockResolvedValue(undefined);
   mockStore.set("checkpoint-app-options",JSON.stringify({startTab:"options",sound:{enabled:false}}));
   mockStore.set("checkpoint-trial-progress",JSON.stringify({completed:{25:true,50:true}}));
@@ -65,6 +65,16 @@ const openSearch=async(options={})=>{
  fireEvent.change(screen.getByPlaceholderText('Rechercher un jeu ou utiliser les filtres'),{target:{value:'Halo'}});
  await waitFor(()=>expect(resultNames()).toHaveLength(3),{timeout:3000});
 };
+
+test('search collection additions ask for progress and save it with one creation',async()=>{
+ await openSearch();
+ const card=document.querySelector('.results-container .game-card');
+ fireEvent.click(card);fireEvent.click(await screen.findByRole('button',{name:'Collection',exact:true}));
+ const dialog=await screen.findByRole('dialog',{name:'Ajouter à ma collection'});
+ expect(addDoc.mock.calls.filter(([ref])=>ref.collection==='games')).toHaveLength(0);
+ fireEvent.click(within(dialog).getByRole('button',{name:/^Déjà terminé/}));
+ await waitFor(()=>expect(addDoc).toHaveBeenCalledWith({collection:'games'},expect.objectContaining({name:'Halo',completed:true,progressStatus:'completed',status:'collection',ratingExperience:'completed',rating:0})));
+});
 test('sorting updates visible results, sends the requested order, and retains it after loading more',async()=>{
  await openSearch();expect(resultNames()[0]).toBe('Halo');
  fireEvent.click(screen.getByRole('button',{name:'Ouvrir les filtres'}));
@@ -170,13 +180,13 @@ test('an unfinished review survives another edit and a failed save keeps its edi
  fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name:'Bibliothèque',exact:true}));
  await waitFor(()=>expect(document.querySelector('.game-grid-item')).not.toBeNull());
  fireEvent.click(document.querySelector('.game-grid-item'));
- const editor=await screen.findByPlaceholderText('Ton avis sur ce jeu...');
+ fireEvent.click(await screen.findByText('Mon avis et son partage'));const editor=await screen.findByPlaceholderText('Ton avis sur ce jeu...');
  fireEvent.change(editor,{target:{value:'Mon avis en cours de rédaction'}});
  fireEvent.click(document.querySelector('.game-detail-premium-actions .heart-btn'));
  await waitFor(()=>expect(updateDoc).toHaveBeenCalled());
  expect(editor).toHaveValue('Mon avis en cours de rédaction');
  updateDoc.mockRejectedValueOnce(new Error('offline'));
- fireEvent.click(screen.getByRole('button',{name:'Enregistrer',exact:true}));
+ fireEvent.click(screen.getByRole('button',{name:'Enregistrer l’avis',exact:true}));
  expect(await screen.findByRole('alert')).toHaveTextContent('Modification non enregistrée');
  expect(editor).toBeVisible();expect(editor).toHaveValue('Mon avis en cours de rédaction');
 });
@@ -186,7 +196,7 @@ test('the global search matches locally while typing and opens the saved game',a
  fireEvent.click(screen.getByRole('button',{name:'Rechercher dans mon espace',exact:true}));fireEvent.change(screen.getByLabelText('Jeu, matériel, série ou ami'),{target:{value:'Halo'}});
  expect(GameService.rawg).not.toHaveBeenCalled();
  fireEvent.click(within(document.querySelector('.personal-search-results')).getByRole('button'));
- expect(await screen.findByPlaceholderText('Ton avis sur ce jeu...')).toBeVisible();
+ expect(await screen.findByRole('button',{name:'Fermer la fiche du jeu'})).toBeVisible();
 });
 test('a quick completion uses the same consistent progression mutation as the full sheet',async()=>{
  mockGameDocuments=[{id:'saved-halo',name:'Halo',status:'collection',rating:8,image:'/checkpoint-icon-192.png'}];await openSearch();
@@ -237,8 +247,8 @@ test('the real review editor wraps a selected passage and saves its spoiler sett
  mockGameDocuments=[{id:'saved-halo',name:'Halo',status:'collection',rating:8,review:'Début Secret fin',image:'/checkpoint-icon-192.png'}];
  await openSearch();fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name:'Bibliothèque',exact:true}));
  await waitFor(()=>expect(document.querySelector('.game-grid-item')).not.toBeNull());fireEvent.click(document.querySelector('.game-grid-item'));
- const editor=await screen.findByLabelText('Ton avis personnel');editor.selectionStart=6;editor.selectionEnd=12;fireEvent.select(editor);fireEvent.click(screen.getByText('Masquer la sélection'));
- expect(editor).toHaveValue('Début [spoiler]Secret[/spoiler] fin');expect(screen.getByText('Révéler le spoiler')).toBeInTheDocument();fireEvent.click(screen.getByLabelText('Tout mon avis contient des spoilers'));fireEvent.click(screen.getByLabelText('Afficher cet avis dans mon activité publique'));fireEvent.click(screen.getByRole('button',{name:'Enregistrer',exact:true}));
+ fireEvent.click(await screen.findByText('Mon avis et son partage'));const editor=await screen.findByLabelText('Ton avis personnel');editor.selectionStart=6;editor.selectionEnd=12;fireEvent.select(editor);fireEvent.click(screen.getByText('Masquer la sélection'));
+ expect(editor).toHaveValue('Début [spoiler]Secret[/spoiler] fin');expect(screen.getByText('Révéler le spoiler')).toBeInTheDocument();fireEvent.click(screen.getByLabelText('Tout mon avis contient des spoilers'));fireEvent.click(screen.getByLabelText('Afficher cet avis dans mon activité publique'));fireEvent.click(screen.getByRole('button',{name:'Enregistrer l’avis',exact:true}));
  await waitFor(()=>expect(updateDoc).toHaveBeenCalledWith({collection:'games',id:'saved-halo'},expect.objectContaining({review:'Début [spoiler]Secret[/spoiler] fin',reviewSpoiler:true,reviewShared:true})));
 });
 
@@ -315,4 +325,32 @@ test('hardware collection filters combine brand and obtained year without removi
 
 test('Checkpoint experiences save time capsules only in the private account settings',async()=>{
  await openSearch();fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name:'Accueil',exact:true}));fireEvent.click(await screen.findByRole('button',{name:/Expériences Checkpoint.*Ouvrir/}));fireEvent.click(await screen.findByRole('button',{name:/04 Capsules temporelles/}));fireEvent.click(screen.getByText('Préparer une capsule'));fireEvent.change(screen.getByLabelText('Titre de ma capsule'),{target:{value:'Ma prochaine aventure'}});fireEvent.change(screen.getByLabelText('Mon message'),{target:{value:'Ma prédiction privée'}});fireEvent.click(screen.getByText('Sceller ma capsule'));await waitFor(()=>expect(updateDoc.mock.calls.some(([ref,patch])=>ref.collection==='playerPrivateSettings'&&(patch['appOptions.experiences.capsules']||patch['appOptions.experiences']?.capsules||patch.appOptions?.experiences?.capsules)?.[0]?.title==='Ma prochaine aventure')).toBe(true),{timeout:3000});expect(setDoc.mock.calls.filter(([ref])=>ref.collection==='publicProfiles')).toHaveLength(0);
+});
+
+test('a retrospective memory persists privately without editing the game review or publishing it',async()=>{
+ const now=new Date(),date=new Date(Date.UTC(now.getUTCFullYear()-2,now.getUTCMonth(),now.getUTCDate())).toISOString();
+ mockGameDocuments=[{id:'memory-halo',name:'Halo',status:'collection',completed:true,completedAt:date,rating:8,review:'Avis initial'}];
+ await openSearch({homeLayout:{groupActivities:false,order:['rendezvous']}});
+ fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name:'Accueil',exact:true}));
+ fireEvent.click(await screen.findByRole('button',{name:'Souvenirs',exact:true}));fireEvent.click(screen.getByRole('button',{name:'Ajouter un mot avec le recul'}));
+ fireEvent.change(screen.getByLabelText('Ce que j’en retiens aujourd’hui'),{target:{value:'Mon regard après deux ans'}});fireEvent.click(screen.getByRole('button',{name:'Conserver mon souvenir'}));
+ await waitFor(()=>expect(updateDoc.mock.calls.some(([ref,patch])=>ref.collection==='playerPrivateSettings'&&Object.keys(patch).some(key=>key==='appOptions'||key.startsWith('appOptions.engagement'))&&JSON.stringify(patch).includes('Mon regard après deux ans'))).toBe(true),{timeout:3000});
+ expect(updateDoc.mock.calls.filter(([ref])=>ref.collection==='games')).toHaveLength(0);expect(setDoc.mock.calls.filter(([ref])=>ref.collection==='publicProfiles')).toHaveLength(0);
+});
+
+
+test('the owner’s two startup paths share one news import and failed HTTP is not cached as success',async()=>{
+ GameService.getUpcomingGames.mockResolvedValue({results:[]});GameService.rawg.mockResolvedValue({results:[]});
+ const {auth}=require('./firebase'),{ownerUid}=require('./services/accountConfig');
+ const previous=auth.currentUser.uid;auth.currentUser.uid=ownerUid;
+ let finish;const pending=new Promise(resolve=>{finish=resolve;});
+ global.fetch=jest.fn(url=>String(url).includes('rss2json')?pending:Promise.resolve({ok:true,json:async()=>({items:[]}),headers:{get:()=> 'application/json'}}));
+ const quiet=jest.spyOn(console,'error').mockImplementation(()=>{});
+ try{
+  render(<App/>);
+  await waitFor(()=>expect(global.fetch.mock.calls.filter(([url])=>String(url).includes('rss2json'))).toHaveLength(1));
+  await act(async()=>finish({ok:false,status:503,json:async()=>({error:'Unavailable'})}));
+  expect(mockStore.has('checkpoint-last-news-import')).toBe(false);
+  expect(setDoc.mock.calls.some(([ref])=>ref.collection==='news')).toBe(false);
+ }finally{auth.currentUser.uid=previous;quiet.mockRestore();}
 });
