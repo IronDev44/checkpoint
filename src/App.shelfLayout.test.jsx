@@ -29,6 +29,6 @@ test('Recent restores addition order after switching to alphabetical sorting',()
  const view=render(<LibrarySection title="Collection" games={games} libraryCardMode="compact" setLibraryCardMode={()=>{}}/>);
  const names=()=>[...view.container.querySelectorAll('.grid-title')].map(el=>el.textContent);
  expect(names()).toEqual(['Z new addition','A classic']);
- fireEvent.click(view.getByRole('button',{name:'A-Z',exact:true}));expect(names()).toEqual(['A classic','Z new addition']);
- fireEvent.click(view.getByRole('button',{name:'Récent',exact:true}));expect(names()).toEqual(['Z new addition','A classic']);
+ fireEvent.change(view.getByRole('combobox',{name:'Trier la bibliothèque'}),{target:{value:'alphabetical'}});expect(names()).toEqual(['A classic','Z new addition']);
+ fireEvent.change(view.getByRole('combobox',{name:'Trier la bibliothèque'}),{target:{value:'recent'}});expect(names()).toEqual(['Z new addition','A classic']);
 });

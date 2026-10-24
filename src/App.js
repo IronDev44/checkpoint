@@ -17,6 +17,8 @@ import QuickCollectionAdd from './components/QuickCollectionAdd';
 import useDetailReturn from './components/useDetailReturn';
 import {recommendationReason} from './services/recommendationReason';
 import "./App.css";
+import LibraryGameCover from "./components/LibraryGameCover";
+import "./components/LibraryPresentation.css";
 import "./polish.css";
 import "./components/OnePieceTheme.css";
 import "./components/KartTheme.css";
@@ -5737,12 +5739,9 @@ function LibraryShelf3D({ games, onOpenDetail }) {
                           key={`${platform}-${game.id}`}
                           type="button"
                           className="shelf3d-case"
-                          style={{
-                            "--cover": `url(${game.image || ""})`,
-                          }}
                           onClick={() => onOpenDetail(game)}
                         >
-                          <span className="shelf3d-cover" />
+                          <LibraryGameCover game={game} fallback={game.image} className="shelf3d-cover" alt=""/>
                           <span className="shelf3d-label">{game.name}</span>
                         </button>
                       ))}
@@ -6819,7 +6818,7 @@ export function LibrarySection({
           className="game-grid-item"
           onClick={() => onOpenDetail(game)}
         >
-          <img loading="lazy" decoding="async" src={gameVisual} alt={game.name} />
+          <LibraryGameCover game={game} fallback={gameVisual} className="library-card-art"/>
 
           {onQuickProgress&&<QuickGameActions game={game} rating={getGameRating(game)} onProgress={onQuickProgress} onRate={onSetRating}/>}
           <div className="grid-top-actions">
@@ -6876,7 +6875,7 @@ export function LibrarySection({
           onClick={() => onOpenDetail(game)}
         >
           {onQuickProgress&&<QuickGameActions game={game} rating={getGameRating(game)} onProgress={onQuickProgress} onRate={onSetRating}/>}
-          <img loading="lazy" decoding="async" src={gameVisual} alt={game.name} className="library-game-cover" />
+          <LibraryGameCover game={game} fallback={gameVisual} className="library-game-cover library-card-art"/>
 
           <div className="game-item-content">
             <div className="game-name">{game.name}</div>
@@ -6928,7 +6927,7 @@ export function LibrarySection({
 
         <div className="game-card-head">
           <div className="game-item-left">
-            <img loading="lazy" decoding="async" src={gameVisual} alt={game.name} className="game-thumb" />
+            <LibraryGameCover game={game} fallback={gameVisual} className="game-thumb library-card-art"/>
           </div>
 
           <div className="game-head-main">
@@ -7053,6 +7052,7 @@ export function LibrarySection({
         <span className="section-count">{games.length} jeux</span>
       </div>
 
+      <div className="library-controls">
       {onBulkUpdate && <LibraryBulkEditor games={games} onApply={onBulkUpdate} active={bulkMode} onActiveChange={setBulkMode}/>}
       {!bulkMode && <>
       <div className="library-view-toggle">
@@ -7081,48 +7081,18 @@ export function LibrarySection({
         </button>
       </div>
 
-      <div className="library-sort">
-        <button
-          type="button"
-          className={sortBy === "recent" ? "active" : ""}
-          onClick={() => setSortBy("recent")}
-        >
-          Récent
-        </button>
-
-        <button
-          type="button"
-          className={sortBy === "year" ? "active" : ""}
-          onClick={() => setSortBy("year")}
-        >
-          Année
-        </button>
-
-        <button
-          type="button"
-          className={sortBy === "alphabetical" ? "active" : ""}
-          onClick={() => setSortBy("alphabetical")}
-        >
-          A-Z
-        </button>
-
-        <button
-          type="button"
-          className={sortBy === "platform" ? "active" : ""}
-          onClick={() => setSortBy("platform")}
-        >
-          Plateforme
-        </button>
-
-        <button
-          type="button"
-          className={sortBy === "genre" ? "active" : ""}
-          onClick={() => setSortBy("genre")}
-        >
-          Genre
-        </button>
+      <label className="library-sort-select">Trier
+        <select aria-label="Trier la bibliothèque" value={sortBy} onChange={event=>setSortBy(event.target.value)}>
+          <option value="recent">Ajouts récents</option>
+          <option value="year">Année de sortie</option>
+          <option value="alphabetical">Titre A–Z</option>
+          <option value="platform">Plateforme</option>
+          <option value="genre">Genre</option>
+        </select>
+      </label>
+      </>}
       </div>
-
+      {!bulkMode && <>
       {games.length === 0 ? (
         <EmptyState
           title="Cette section est encore calme"
@@ -19978,8 +19948,8 @@ useEffect(() => {
 
           {activeTab === "search" && (
             <>
-              <div className="toolbar-row"><button type="button" className="option-pill" onClick={()=>setPhysicalScannerOpen(true)}>Scanner un jeu physique</button></div>
-              <div className="search-panel">
+    <div className="toolbar-row"><button type="button" className="option-pill" onClick={()=>setPhysicalScannerOpen(true)}>Scanner un jeu physique</button></div>
+                        <div className="search-panel">
                 <div className="input-container">
                   <input
                     value={search}
@@ -20242,7 +20212,6 @@ useEffect(() => {
       </div>
     </div>
 
-    <div className="toolbar-row"><button type="button" className="option-pill" onClick={()=>setPhysicalScannerOpen(true)}>Scanner un jeu physique</button></div>
     <LibrarySmartPanel
       games={filteredLibraryGames}
       collectionGames={collectionGames}
@@ -20253,6 +20222,7 @@ useEffect(() => {
       onSetLibrarySearch={setLibrarySearch}
     />
 
+    <div className="library-navigation">
     <div className="library-switch">
   <button
     type="button"
@@ -20289,7 +20259,8 @@ useEffect(() => {
   {[['paused','En pause'],['abandoned','Abandonnés'],['lists','Mes listes']].map(([id,label])=><button key={id} type="button" className={`library-switch-btn ${libraryView===id?'active':''}`} onClick={()=>setLibraryView(id)}>{label}</button>)}
 </div>
 
-<button type="button" className="option-pill" onClick={()=>setCouchOpen(true)}>Ouvrir le mode canapé</button>
+<div className="library-actions"><button type="button" className="option-pill" onClick={()=>setPhysicalScannerOpen(true)}>Scanner un jeu physique</button><button type="button" className="option-pill" onClick={()=>setCouchOpen(true)}>Mode canapé</button></div>
+</div>
 {libraryView==='lists'&&<PersonalLists value={appOptions.personalLists} games={games} onChange={value=>updateAppOption('personalLists',value)} onOpen={game=>openGameDetail(game)}/>}
 {['paused','abandoned'].includes(libraryView)&&<LibrarySection title={libraryView==='paused'?'Jeux en pause':'Jeux abandonnés'} games={filteredLibraryGames.filter(game=>game.progressStatus===libraryView)} onBulkUpdate={bulkUpdateGames} onDelete={deleteGame} onSetStatus={setStatus} onSetRating={setRating} onToggleFavorite={toggleFavorite} onQuickProgress={setProgressStatus} onOpenDetail={game=>openGameDetail(game,filteredLibraryGames.filter(item=>item.progressStatus===libraryView))} libraryCardMode={libraryCardMode} setLibraryCardMode={setLibraryCardMode}/>}
 

@@ -19,8 +19,8 @@ test('reading a patch note does not suppress the feature tutorial in its tab',()
 });
 test('an existing player gets only the new features once, without losing base completion',()=>{
  mockStore.set('checkpoint-tab-tutorials-v1',JSON.stringify({home:'completed'}));const view=render(<TabTutorialEntry tab="home"/>);
- expect(screen.getByRole('dialog')).toHaveTextContent('Étape 1 sur 3');expect(screen.queryByRole('heading',{name:'Ton point de départ'})).toBeNull();
- fireEvent.click(screen.getByRole('button',{name:'Suivant'}));fireEvent.click(screen.getByRole('button',{name:'Suivant'}));expect(screen.getByText(/Options → Aide et tutoriels/)).toBeVisible();fireEvent.click(screen.getByRole('button',{name:'J’ai compris'}));
+ expect(screen.getByRole('dialog')).toHaveTextContent('Étape 1 sur 4');expect(screen.queryByRole('heading',{name:'Ton point de départ'})).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'Suivant'}));fireEvent.click(screen.getByRole('button',{name:'Suivant'}));fireEvent.click(screen.getByRole('button',{name:'Suivant'}));expect(screen.getByText(/Options → Aide et tutoriels/)).toBeVisible();fireEvent.click(screen.getByRole('button',{name:'J’ai compris'}));
  expect(JSON.parse(mockStore.get('checkpoint-tab-tutorials-v1')).home).toBe('completed');view.unmount();render(<TabTutorialEntry tab="home"/>);expect(screen.queryByRole('dialog')).toBeNull();
 });
 test('first-time players get the full current guide and no duplicate update tour',()=>{

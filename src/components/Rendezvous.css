@@ -41,3 +41,9 @@ html body[data-theme] .rendezvous-text-button {display:inline-flex;min-height:44
 .rendezvous-section summary {min-height:44px;align-content:center;cursor:pointer}
 .rendezvous-section :focus-visible {outline:2px solid var(--accent-solid,#d6b66f);outline-offset:4px}
 @media(max-width:480px){.rendezvous-hub {padding:18px}.rendezvous-tabs {gap:8px}.rendezvous-tabs button {flex:1;font-size:.8rem!important;padding:10px!important}.rendezvous-actions {flex-direction:column}.rendezvous-actions button {width:100%}}
+
+/* Keep every destination readable, including narrow phones and larger text. */
+.rendezvous-tabs {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+html body[data-theme] .rendezvous-tabs button {box-sizing:border-box;display:flex;align-items:center;justify-content:center;width:100%;min-width:0;min-height:48px;padding:12px 10px;font-size:.9rem;line-height:1.4;font-weight:600;text-align:center;overflow-wrap:anywhere}
+html body[data-theme] .rendezvous-tabs button[aria-pressed=true] {background:color-mix(in srgb,var(--accent-solid,#d6b66f) 15%,var(--panel-bg,#11171d));box-shadow:inset 0 0 0 1px var(--accent-solid,#d6b66f)}
+@media(max-width:600px){.rendezvous-tabs {grid-template-columns:repeat(2,minmax(0,1fr))}}

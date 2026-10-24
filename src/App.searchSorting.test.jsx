@@ -393,3 +393,13 @@ test('a platform snapshot is saved only after confirmation and keeps the actual 
  fireEvent.click(screen.getByRole('button',{name:'Enregistrer ces données'}));await waitFor(()=>expect(updateDoc.mock.calls.some(([ref])=>ref.collection==='games')).toBe(true));
  const patch=updateDoc.mock.calls.find(([ref])=>ref.collection==='games')[1];expect(patch.steamPlaytimeForever).toBe(120);expect(patch.playtime).toBeUndefined();expect(patch.completed).toBeUndefined();expect(patch.rating).toBeUndefined();expect(patch.review).toBeUndefined();
 });
+
+test('library prioritizes known box covers and keeps sorting and full view usable',async()=>{
+ const cover='https://images.igdb.com/igdb/image/upload/t_cover_big/known-cover.jpg';
+ mockGameDocuments=[{id:'z',name:'Zeta',status:'collection',released:'2000-01-01',image:'https://media.rawg.io/z-gameplay.jpg',cover_image:cover},{id:'a',name:'Alpha',status:'collection',released:'2010-01-01',image:'https://media.rawg.io/a-gameplay.jpg',cover_image:cover}];
+ await openSearch();fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name:'Bibliothèque',exact:true}));
+ await waitFor(()=>expect(document.querySelector('.library-section img')).toHaveAttribute('src',cover));
+ fireEvent.change(screen.getByRole('combobox',{name:'Trier la bibliothèque'}),{target:{value:'alphabetical'}});
+ expect([...document.querySelectorAll('.library-section .grid-title')].map(el=>el.textContent)).toEqual(['Alpha','Zeta']);
+ fireEvent.click(screen.getByRole('button',{name:'Complet',exact:true}));expect(document.querySelector('.library-section .game-thumb')).toHaveAttribute('src',cover);
+});

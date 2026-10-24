@@ -50,5 +50,14 @@ test('title-only import matches require a deliberate selection and non-Latin tit
 
 test('home activities are lazy until opened and the grouping can be disabled',()=>{
  const mounted=jest.fn();function Activity(){mounted();return <h3>Contenu du quiz</h3>;}
- const onChange=jest.fn();render(<HomeLayout onChange={onChange}><h2>Niveau</h2><HomeBlock id="quiz"><Activity/></HomeBlock></HomeLayout>);expect(screen.getByText('Pour toi')).toBeInTheDocument();expect(mounted).not.toHaveBeenCalled();fireEvent.click(screen.getByRole('button',{name:/Quiz de la semaine.*Ouvrir/}));expect(screen.getByText('Contenu du quiz')).toBeInTheDocument();fireEvent.click(screen.getByText('Personnaliser l’accueil'));fireEvent.click(screen.getByLabelText('Regrouper les activités dans « Pour toi »'));expect(onChange).toHaveBeenCalledWith(expect.objectContaining({groupActivities:false}));
+ const onChange=jest.fn();render(<HomeLayout onChange={onChange}><h2>Niveau</h2><HomeBlock id="quiz"><Activity/></HomeBlock></HomeLayout>);expect(screen.getByText('Pour toi')).toBeInTheDocument();expect(mounted).not.toHaveBeenCalled();fireEvent.click(screen.getByRole('button',{name:/Quiz de la semaine.*Ouvrir/}));expect(within(screen.getByRole('dialog',{name:'Quiz de la semaine'})).getByText('Contenu du quiz')).toBeVisible();fireEvent.click(screen.getByRole('button',{name:'Fermer',exact:true}));expect(screen.queryByRole('dialog')).toBeNull();fireEvent.click(screen.getByText('Personnaliser l’accueil'));fireEvent.click(screen.getByLabelText('Regrouper les activités dans « Pour toi »'));expect(onChange).toHaveBeenCalledWith(expect.objectContaining({groupActivities:false}));
+});
+
+test('opening a game from a home activity closes its overlay before navigating',()=>{
+ const navigate=jest.fn();function Activity({onOpen}){return <button onClick={()=>onOpen(game)}>Ouvrir Portal</button>;}
+ render(<HomeLayout><HomeBlock id="picker"><Activity onOpen={navigate}/></HomeBlock></HomeLayout>);
+ fireEvent.click(screen.getByRole('button',{name:/À quoi je joue.*Ouvrir/}));
+ const dialog=screen.getByRole('dialog',{name:'À quoi je joue ?'});
+ fireEvent.click(within(dialog).getByRole('button',{name:'Ouvrir Portal'}));
+ expect(navigate).toHaveBeenCalledWith(game);expect(screen.queryByRole('dialog')).toBeNull();
 });
