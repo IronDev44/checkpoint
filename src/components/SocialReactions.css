@@ -1,0 +1,5 @@
+.social-reactions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.social-reactions button{width:auto!important;max-width:100%;display:inline-flex;gap:8px;align-items:center;justify-content:center;min-height:44px;padding:8px 12px;border:1px solid var(--surface-border);border-radius:14px;background:var(--surface-bg);color:var(--text-main);font:inherit;font-size:.85rem;cursor:pointer;word-break:normal!important;overflow-wrap:normal!important}
+.social-reactions button[aria-pressed=true]{border-color:var(--accent-solid);background:var(--accent);font-weight:700}
+.social-reactions span{font-variant-numeric:tabular-nums;opacity:.8}
+.social-reactions button:focus-visible{outline:2px solid var(--accent-solid);outline-offset:2px}

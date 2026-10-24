@@ -1,0 +1,19 @@
+.friend-requests{margin:20px 0;display:grid;gap:12px;min-width:0}
+.friend-requests-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.friend-requests h3,.friend-requests h4{margin:0 0 10px}
+.friend-requests p{color:var(--text-soft);line-height:1.5}
+.friend-requests [role=status]:empty{display:none}
+.friend-request{padding:14px 0;border-bottom:1px solid var(--surface-border);display:grid;gap:12px}
+.friend-request-person{display:flex;align-items:center;gap:12px;min-width:0}
+.friend-request-person>div{min-width:0;overflow-wrap:anywhere}
+.friend-request-person small{display:block;color:var(--text-soft);margin-top:4px}
+.friend-request-actions{display:flex;flex-wrap:wrap;gap:8px}
+.friend-requests button{width:auto;max-width:100%;min-height:44px;padding:10px 14px;border:1px solid var(--surface-border);border-radius:12px;background:var(--surface-bg);color:var(--text-main);font:inherit;cursor:pointer;word-break:normal;overflow-wrap:normal}
+.friend-request-actions .friend-request-accept{background:var(--accent);font-weight:700}
+.friend-requests button:disabled{opacity:.6;cursor:wait}
+.friend-requests button:focus-visible{outline:2px solid var(--accent-solid);outline-offset:3px}
+.social-contact-settings{border-top:1px solid var(--surface-border);padding-top:16px}
+.social-contact-settings summary{cursor:pointer;font-weight:700;min-height:44px}
+.social-contact-choice{display:flex;align-items:center;gap:10px;min-height:44px;line-height:1.4}
+.social-contact-choice input{width:20px!important;height:20px;min-height:20px!important;flex:0 0 20px}
+@media(max-width:380px){.friend-request-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.friend-request-actions button{width:100%}.friend-request-actions button:first-child{grid-column:1/-1}}

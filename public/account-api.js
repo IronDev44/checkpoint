@@ -3,6 +3,12 @@ import {handleSelections,handleChallenges} from './engagement-api.js';
 import {handleRecommendations,handlePredictions} from './social-moments-api.js';
 import {handleBarcodeLookup} from './barcode-api.js';
 import { publicProfileView } from "./profile-privacy.js";
+import {handleFriendships} from './friendships-api.js';
+import {handleSocialControls} from './social-controls-api.js';
+import {handleSocialReactions} from './social-reactions-api.js';
+import {handleSharedGames} from './shared-games-api.js';
+import {handleSocialReports} from './social-reports-api.js';
+import {socialBlocked,canContact,canReadSocialProfile} from './social-access.js';
 const PRIVATE = new Set(['games','hardware','gameCollections','playerProgress','playerPrivateSettings']);
 const SHARED = new Set(['news','events','publicProfiles']);
 let keyCache;
@@ -91,6 +97,11 @@ export async function handleAccountApi(request,env,verify=verifyFirebaseToken){
   let uid;try{const match=request.headers.get('Authorization')?.match(/^Bearer (.+)$/);if(!match)return response({error:'Connexion nécessaire.'},401);uid=await verify(match[1]);}catch{return response({error:'Reconnecte-toi pour ouvrir ton espace.'},401);}
   const url=new URL(request.url);const name=url.searchParams.get('collection');const id=url.searchParams.get('id');
   if(name==='friendPolls')return handleFriendPolls(request,env,uid,url);
+  if(name==='friendships')return handleFriendships(request,env,uid);
+  if(name==='socialControls')return handleSocialControls(request,env,uid);
+  if(name==='socialReactions')return handleSocialReactions(request,env,uid,url);
+  if(name==='sharedGames')return handleSharedGames(request,env,uid,url);
+  if(name==='socialReports')return handleSocialReports(request,env,uid,url);
   if(name==='communitySelections')return handleSelections(request,env,uid);
   if(name==='friendChallenges')return handleChallenges(request,env,uid,url);
   if(name==='gameRecommendations')return handleRecommendations(request,env,uid,url);
@@ -107,9 +118,10 @@ export async function handleAccountApi(request,env,verify=verifyFirebaseToken){
   const profileForReader=async data=>{
     if(!data)return null;
     if(data.ownerUid===uid)return data;
+    if(data.ownerUid&&await socialBlocked(db,uid,data.ownerUid))return null;
     const settings=data.ownerUid?await db.prepare("SELECT data FROM documents WHERE owner=? AND collection='playerPrivateSettings' AND id='main'").bind(data.ownerUid).first():null;
     const authority=settings?JSON.parse(settings.data).socialProfile:null;
-    if((data.visibility&&data.visibility!=='public')||(authority?.visibility&&authority.visibility!=='public'))return null;
+    if(!await canReadSocialProfile(db,uid,data,authority))return null;
     return publicProfileView(data,authority);
   };
   try{
@@ -172,7 +184,8 @@ async function handleFriendPolls(request,env,uid,url){
   try{
     if(request.method==='GET'){
       const rows=await db.prepare("SELECT id,data FROM documents WHERE owner='__shared__' AND collection='friendPolls' AND (json_extract(data,'$.ownerUid')=? OR EXISTS (SELECT 1 FROM json_each(documents.data,'$.audience') WHERE value=?)) ORDER BY json_extract(data,'$.createdAt') DESC LIMIT 50").bind(uid,uid).all();
-      return response({polls:rows.results.map(r=>visible(r.id,JSON.parse(r.data)))});
+      const polls=await Promise.all(rows.results.map(async r=>{const data=JSON.parse(r.data);return data.ownerUid!==uid&&await socialBlocked(db,uid,data.ownerUid)?null:visible(r.id,data);}));
+      return response({polls:polls.filter(Boolean)});
     }
     if(!id||!/^[a-zA-Z0-9_-]{1,100}$/.test(id))return response({error:'Sondage invalide.'},400);
     const row=await db.prepare("SELECT data FROM documents WHERE owner='__shared__' AND collection='friendPolls' AND id=?").bind(id).first();
@@ -195,7 +208,7 @@ async function handleFriendPolls(request,env,uid,url){
       const friends=settings?.socialFriends||[];
       if(handles.some(handle=>!friends.some(friend=>friend.handle===handle)))return response({error:'Choisis des amis enregistrés dans ton espace. Actualise si tu viens de les ajouter.'},403);
       const audience=[];
-      for(const handle of handles){const profile=await read('__shared__','publicProfiles',handle);if(profile?.ownerUid&&profile.ownerUid!==uid&&(!profile.visibility||profile.visibility==='public'))audience.push(profile.ownerUid);else return response({error:'Un des profils invités est indisponible.'},400);}
+      for(const handle of handles){const profile=await read('__shared__','publicProfiles',handle);if(profile?.ownerUid&&profile.ownerUid!==uid&&await canReadSocialProfile(db,uid,profile))audience.push(profile.ownerUid);else return response({error:'Un des profils invités est indisponible.'},400);}
       const options=[];
       for(const key of ids){const game=await read(uid,'games',key);if(!game?.name||game._deletedAt)return response({error:'Un jeu sélectionné n’est plus disponible.'},400);options.push({name:String(game.name).slice(0,180)});}
       const count=await db.prepare("SELECT COUNT(*) AS total FROM documents WHERE owner='__shared__' AND collection='friendPolls' AND json_extract(data,'$.ownerUid')=?").bind(uid).first();
@@ -203,6 +216,7 @@ async function handleFriendPolls(request,env,uid,url){
       data={ownerUid:uid,audience:[...new Set(audience)],author:String(settings?.socialProfile?.displayName||'Un ami').slice(0,80),title:'Je commence lequel ?',options,votes:{},createdAt:new Date().toISOString(),endsAt:new Date(Date.now()+7*86400000).toISOString(),closed:false};
     }else{
       if(!allowed(previous))return response({error:'Sondage indisponible.'},403);
+      if(previous.ownerUid!==uid&&await socialBlocked(db,uid,previous.ownerUid))return response({error:'Sondage indisponible.'},403);
       data=structuredClone(previous);
       if(body.action==='close'){
         if(data.ownerUid!==uid)return response({error:'Seul le créateur peut fermer ce sondage.'},403);

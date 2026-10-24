@@ -25,3 +25,7 @@
 .feedback-inbox-meta { display:flex; flex-wrap:wrap; justify-content:space-between; gap:8px; color:var(--text-main); }
 .feedback-inbox-meta time { color:var(--text-muted); font-size:12px; }
 @media(max-width:600px){.tester-feedback-head{align-items:stretch;flex-direction:column}.tester-feedback-head>button{width:100%}.tester-feedback-types button{font-size:13px}}
+
+.feedback-inbox-delete-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px}
+.feedback-inbox-delete button{width:auto;max-width:100%;min-height:44px;padding:10px 16px;border:1px solid var(--surface-border);border-radius:12px;background:var(--surface-bg);color:var(--text-main);font:inherit;cursor:pointer;overflow-wrap:normal;word-break:normal}
+.feedback-inbox-delete button:disabled{opacity:.6;cursor:wait}

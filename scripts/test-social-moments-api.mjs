@@ -10,7 +10,9 @@ const seed=(owner,collection,id,data)=>db.prepare('INSERT INTO documents(owner,c
 const call=(handler,collection,uid,id,body,date=now)=>{const request=new Request(`https://checkpoint.test/api/account-data?collection=${collection}&id=${id}`,{method:body?'POST':'GET',...(body?{body:JSON.stringify(body)}:{})});return handler(request,env,uid,new URL(request.url),date);};
 const rec=(uid,id,body,date)=>call(handleRecommendations,'gameRecommendations',uid,id,body,date);
 const predict=(uid,id,body,date)=>call(handlePredictions,'gamingPredictions',uid,id,body,date);
-seed('alice','playerPrivateSettings','main',{socialFriends:[{handle:'bob'},{handle:'private'}],socialProfile:{displayName:'Alice'}});
+seed('alice','playerPrivateSettings','main',{socialFriends:[{handle:'bob'},{handle:'private'}],socialProfile:{displayName:'Alice',handle:'alice'}});
+seed('bob','playerPrivateSettings','main',{socialFriends:[{handle:'alice'}],socialProfile:{displayName:'Bob',handle:'bob'}});
+seed('__shared__','publicProfiles','alice',{ownerUid:'alice',handle:'alice',displayName:'Alice',visibility:'public'});
 seed('__shared__','publicProfiles','bob',{ownerUid:'bob',displayName:'Bob',visibility:'public'});
 seed('__shared__','publicProfiles','private',{ownerUid:'private',visibility:'prive'});
 seed('alice','games','halo',{name:'Halo',review:'DO_NOT_SHARE',rating:8});seed('alice','games','wish',{name:'Wish',status:'wishlist'});

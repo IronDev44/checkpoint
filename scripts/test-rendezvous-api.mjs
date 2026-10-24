@@ -31,7 +31,9 @@ const archiveRequest=req('GET','communitySelections');const archiveUrl=new URL(a
 const archive=await(await handleSelections(new Request(archiveUrl,{headers:archiveRequest.headers}),env,'alice',new Date('2028-01-10'))).json();
 assert.equal(archive.rounds.find(r=>r.id==='week-2026-10-19').total,2);assert.equal(archive.rounds.find(r=>r.id==='final-2026-10').options.length,3);
 const seed=(owner,collection,id,data)=>sqlite.prepare('INSERT INTO documents(owner,collection,id,data) VALUES(?,?,?,?)').run(owner,collection,id,JSON.stringify(data));
-seed('alice','playerPrivateSettings','main',{socialFriends:[{handle:'bob'}],socialProfile:{displayName:'Alice'}});seed('__shared__','publicProfiles','bob',{ownerUid:'bob',displayName:'Bob',visibility:'public'});
+seed('alice','playerPrivateSettings','main',{socialFriends:[{handle:'bob'}],socialProfile:{displayName:'Alice',handle:'alice'}});seed('__shared__','publicProfiles','bob',{ownerUid:'bob',displayName:'Bob',visibility:'public'});
+seed('bob','playerPrivateSettings','main',{socialFriends:[{handle:'alice'}],socialProfile:{displayName:'Bob',handle:'bob'}});
+seed('__shared__','publicProfiles','alice',{ownerUid:'alice',handle:'alice',displayName:'Alice',visibility:'public'});
 seed('alice','games','halo',{name:'Halo'});seed('alice','games','portal',{name:'Portal',review:'PRIVATE_REVIEW'});
 const draft={action:'create',question:'La meilleure bande-son',handle:'bob',gameIds:['halo','portal'],choice:0};
 assert.equal((await challenge('eve',draft)).status,403);

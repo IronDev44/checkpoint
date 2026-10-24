@@ -1,4 +1,5 @@
 import {selectionCalendar,monthlyFinal,EXPEDITIONS,CHALLENGE_QUESTIONS} from './rendezvous-catalog.js';
+import {canContact,socialBlocked,canReadSocialProfile} from './social-access.js';
 const response=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 const read=async(db,owner,collection,id)=>{const row=await db.prepare('SELECT data FROM documents WHERE owner=? AND collection=? AND id=?').bind(owner,collection,id).first();return row?JSON.parse(row.data):null;};
 async function bodyOf(request){const text=await request.text();if(text.length>12000)throw new Error('Demande trop volumineuse.');const body=JSON.parse(text);if(!body||typeof body!=='object'||Array.isArray(body))throw new Error('Demande invalide.');return body;}
@@ -48,21 +49,23 @@ export async function handleChallenges(request,env,uid,url,now=new Date()){
  try{
   if(request.method==='GET'){
    const rows=await db.prepare("SELECT id,data FROM documents WHERE owner='__shared__' AND collection='friendChallenges' AND EXISTS (SELECT 1 FROM json_each(documents.data,'$.members') WHERE value=?) ORDER BY json_extract(data,'$.createdAt') DESC LIMIT 100").bind(uid).all();
-   return response({challenges:rows.results.map(row=>challengeView(row.id,JSON.parse(row.data),uid,now))});
+   const visible=await Promise.all(rows.results.map(async row=>{const data=JSON.parse(row.data),other=data.members.find(member=>member!==uid);return await socialBlocked(db,uid,other)?null:challengeView(row.id,data,uid,now);}));
+   return response({challenges:visible.filter(Boolean)});
   }
   if(request.method!=='POST')return response({error:'Méthode non autorisée.'},405);
   if(!id||!/^[a-zA-Z0-9_-]{1,100}$/.test(id))return response({error:'Défi invalide.'},400);
   let body;try{body=await bodyOf(request);}catch{return response({error:'Défi invalide.'},400);}
   const row=await db.prepare("SELECT data FROM documents WHERE owner='__shared__' AND collection='friendChallenges' AND id=?").bind(id).first();
   const old=row?JSON.parse(row.data):null;
+  if(old?.members?.includes(uid)&&await socialBlocked(db,uid,old.members.find(member=>member!==uid)))return response({error:'Ce défi est indisponible.'},403);
   let data;
   if(body.action==='create'){
    if(old)return old.ownerUid===uid?response({challenge:challengeView(id,old,uid,now)}):response({error:'Ce défi existe déjà.'},409);
    if(!CHALLENGE_QUESTIONS.includes(body.question)||![0,1].includes(body.choice)||!Array.isArray(body.gameIds)||body.gameIds.length!==2||new Set(body.gameIds).size!==2||!body.gameIds.every(key=>typeof key==='string'&&key.length<=250)||typeof body.handle!=='string')return response({error:'Choisis deux jeux, une question, un ami et ton choix.'},400);
    const settings=await read(db,uid,'playerPrivateSettings','main');
-   if(!(settings?.socialFriends||[]).some(friend=>friend.handle===body.handle))return response({error:'Choisis un ami enregistré dans ton espace.'},403);
    const profile=await read(db,'__shared__','publicProfiles',body.handle);
-   if(!profile?.ownerUid||profile.ownerUid===uid||(profile.visibility&&profile.visibility!=='public'))return response({error:'Le profil de cet ami est indisponible.'},403);
+   if(!profile?.ownerUid||profile.ownerUid===uid||!await canReadSocialProfile(db,uid,profile))return response({error:'Le profil de cet ami est indisponible.'},403);
+   if(!await canContact(db,uid,profile.ownerUid,'challenges'))return response({error:'Ce joueur accepte uniquement les défis de ses amis confirmés, selon ses réglages.'},403);
    const options=[];
    for(const key of body.gameIds){const game=await read(db,uid,'games',key);if(!game?.name||game._deletedAt)return response({error:'Un jeu n’est plus disponible.'},400);options.push({name:String(game.name).slice(0,180)});}
    if(options[0].name.toLocaleLowerCase()===options[1].name.toLocaleLowerCase())return response({error:'Choisis deux jeux différents.'},400);

@@ -1,4 +1,9 @@
 const nameKey=g=>String(g.name||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+export function socialCompletion(game={}){
+ if(game.completed===true||game.progressStatus==='completed'||game.ratingExperience==='completed')return true;
+ if(typeof game.completed==='boolean'||game.progressStatus||game.ratingExperience)return false;
+ return null;
+}
 export function sameSocialGame(a,b){
  const aIgdb=a.sourceIds?.igdb||a.igdbId, bIgdb=b.sourceIds?.igdb||b.igdbId;
  if(aIgdb&&bIgdb)return String(aIgdb)===String(bIgdb);
@@ -7,9 +12,10 @@ export function sameSocialGame(a,b){
  return !year(a)||!year(b)||year(a)===year(b);
 }
 export function compareFriendGames(ownGames,profile,ratingGetter=game=>Number(game.rating)||0){
- if(profile.visibility&&profile.visibility!=='public')return {common:[],discover:[],visibleCount:0};
+ if(profile.visibility&&!['public','friends'].includes(profile.visibility))return {common:[],discover:[],visibleCount:0};
  const sections=profile.publicSections||{};
  const visible=[
+   ...(profile.sharedLibrary===true?profile.sharedGames||[]:[]),
    ...(sections.identityGames!==false?profile.identityGames||[]:[]),
    ...(sections.essential!==false?[
      ...(profile.favoriteGames||[]).map(g=>({...g,favorite:true})),...(profile.sanctuaryGames||[]),
@@ -26,8 +32,8 @@ export function compareFriendGames(ownGames,profile,ratingGetter=game=>Number(ga
  }
  const common=[],discover=[];
  for(const game of games){
-   const own=ownGames.find(g=>g.status!=="wishlist"&&sameSocialGame(g,game));
-   if(own){
+   const own=ownGames.find(g=>!g._deletedAt&&g.status!=="wishlist"&&sameSocialGame(g,game));
+   if(own&&!own._deletedAt){
      const ownRating=ratingGetter(own),friendRating=Number(game.rating)||0;
      common.push({game,ownGame:own,ownRating,friendRating,gap:ownRating>0&&friendRating>0?Math.abs(ownRating-friendRating):null,agreement:ownRating>0&&friendRating>0&&Math.abs(ownRating-friendRating)<=1});
    }else if(game.favorite||Number(game.rating)>=8)discover.push({...game,inWishlist:ownGames.some(g=>g.status==="wishlist"&&sameSocialGame(g,game))});

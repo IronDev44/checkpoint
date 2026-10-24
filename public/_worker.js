@@ -1944,15 +1944,19 @@ export async function handleTesterFeedback(request, env, verify = verifyFirebase
       return reply({ items, cursor: page.list_complete ? null : page.cursor });
     }
   } else if (request.method !== "POST") return reply({ error: "Méthode non autorisée." }, 405);
-  if (request.method !== "POST" && request.method !== "PATCH") return reply({ error: "Méthode non autorisée." }, 405);
+  if (!["POST", "PATCH", "DELETE"].includes(request.method)) return reply({ error: "Méthode non autorisée." }, 405);
   const raw = await request.text();
   if (new TextEncoder().encode(raw).length > 16000) return reply({ error: "Message trop long." }, 413);
   let data; try { data = JSON.parse(raw); } catch { return reply({ error: "Message invalide." }, 400); }
   if (!data || typeof data !== "object") return reply({ error: "Message invalide." }, 400);
   if (admin) {
-    if (request.method !== "PATCH" || !/^report:\d{13}:[a-f0-9-]{36}$/.test(data.id || "") || !["new","progress","resolved"].includes(data.status)) return reply({ error: "Modification invalide." }, 400);
+    if (!["PATCH", "DELETE"].includes(request.method) || !/^report:\d{13}:[a-f0-9-]{36}$/.test(data.id || "") || (request.method === "PATCH" && !["new","progress","resolved"].includes(data.status))) return reply({ error: "Modification invalide." }, 400);
     const report = await env.FEEDBACK_STORE.get(data.id, "json");
     if (!report) return reply({ error: "Retour introuvable." }, 404);
+    if (request.method === "DELETE") {
+      await env.FEEDBACK_STORE.delete(data.id);
+      return reply({ ok: true });
+    }
     await env.FEEDBACK_STORE.put(data.id, JSON.stringify({ ...report, status: data.status }));
     return reply({ ok: true });
   }

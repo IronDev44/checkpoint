@@ -13,3 +13,5 @@
 .home-activity-dialog .tool-dialog-content>.checkpoint-experiences {margin:0;padding:0;border:0;background:none;box-shadow:none}
 .home-activity-dialog .rendezvous-hub>header h2,
 .home-activity-dialog .rendezvous-hub>header .home-kicker {display:none}
+
+.friend-comparison.friend-comparison-embedded{padding:0!important;margin:0!important;border:0!important;background:transparent!important;box-shadow:none!important}

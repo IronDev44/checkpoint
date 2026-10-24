@@ -2,8 +2,8 @@ import { useId, useState } from "react";
 import { ownerUid } from "../services/accountConfig";
 import "./DeveloperTools.css";
 
-const sections = [{id:"tests",label:"Tests"},{id:"events",label:"Lives et actus"},{id:"feedback",label:"Retours"},{id:"predictions",label:"Pronostics"}];
-export default function DeveloperTools({accountUid,tests,events,feedback,predictions}) {
+const sections = [{id:"tests",label:"Tests"},{id:"events",label:"Lives et actus"},{id:"feedback",label:"Retours"},{id:"reports",label:"Signalements"},{id:"predictions",label:"Pronostics"}];
+export default function DeveloperTools({accountUid,tests,events,feedback,predictions,reports}) {
   const [section,setSection]=useState("tests");
   const [visited,setVisited]=useState(["tests"]);
   const [unlocked,setUnlocked]=useState(false);
@@ -23,7 +23,7 @@ export default function DeveloperTools({accountUid,tests,events,feedback,predict
     {error&&<p id={`${id}-error`} role="alert">{error}</p>}
     <button type="submit" className="checkpoint-primary-action">Déverrouiller</button>
   </form>;
-  const panels={tests,events,feedback,predictions};
+  const panels={tests,events,feedback,predictions,reports};
   return <div className="developer-tools">
     <div className="developer-tools-head"><span>Espace développeur</span><button type="button" className="option-pill" onClick={lock}>Verrouiller</button></div>
     <div className="developer-tools-nav" role="group" aria-label="Rubriques développeur">

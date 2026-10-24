@@ -1,3 +1,4 @@
+import {canContact,socialBlocked,canReadSocialProfile} from './social-access.js';
 const reply=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 const get=async(db,owner,collection,id)=>{const row=await db.prepare('SELECT data FROM documents WHERE owner=? AND collection=? AND id=?').bind(owner,collection,id).first();return row?JSON.parse(row.data):null;};
 const text=(value,max)=>typeof value==='string'&&value.trim().length>0&&value.trim().length<=max;
@@ -13,19 +14,21 @@ export async function handleRecommendations(request,env,uid,url,now=new Date()){
  try{
   if(request.method==='GET'){
    const rows=await db.prepare("SELECT id,data FROM documents WHERE owner='__shared__' AND collection='gameRecommendations' AND (json_extract(data,'$.sender')=? OR json_extract(data,'$.recipient')=?) ORDER BY json_extract(data,'$.createdAt') DESC LIMIT 200").bind(uid,uid).all();
-   return reply({recommendations:rows.results.map(r=>recommendationView(r.id,JSON.parse(r.data),uid))});
+   const visible=await Promise.all(rows.results.map(async r=>{const data=JSON.parse(r.data);return await socialBlocked(db,uid,data.sender===uid?data.recipient:data.sender)?null:recommendationView(r.id,data,uid);}));
+   return reply({recommendations:visible.filter(Boolean)});
   }
   if(request.method!=='POST')return reply({error:'Méthode non autorisée.'},405);
   if(!id||!/^[a-zA-Z0-9_-]{1,100}$/.test(id))return reply({error:'Recommandation invalide.'},400);
   let input;try{input=await body(request);}catch{return reply({error:'Demande invalide.'},400);}
   const old=await get(db,'__shared__','gameRecommendations',id);let data;
+  if(old&&[old.sender,old.recipient].includes(uid)&&await socialBlocked(db,old.sender,old.recipient))return reply({error:'Cet échange est indisponible.'},403);
   if(input.action==='create'){
    if(old)return old.sender===uid?reply({recommendation:recommendationView(id,old,uid)}):reply({error:'Cet envoi existe déjà.'},409);
    if(!text(input.handle,80)||!text(input.gameId,250)||!text(input.message,500))return reply({error:'Choisis un ami, un jeu et un petit mot (500 caractères maximum).'},400);
    const settings=await get(db,uid,'playerPrivateSettings','main');
-   if(!(settings?.socialFriends||[]).some(f=>f.handle===input.handle))return reply({error:'Choisis un ami enregistré.'},403);
    const profile=await get(db,'__shared__','publicProfiles',input.handle),game=await get(db,uid,'games',input.gameId);
-   if(!profile?.ownerUid||profile.ownerUid===uid||(profile.visibility&&profile.visibility!=='public'))return reply({error:'Ce profil est indisponible.'},403);
+   if(!profile?.ownerUid||profile.ownerUid===uid||!await canReadSocialProfile(db,uid,profile))return reply({error:'Ce profil est indisponible.'},403);
+   if(!await canContact(db,uid,profile.ownerUid,'recommendations'))return reply({error:'Ce joueur accepte uniquement les recommandations de ses amis confirmés, selon ses réglages.'},403);
    if(!game?.name||game._deletedAt||game.status==='wishlist')return reply({error:'Choisis un jeu de ta collection.'},400);
    const recent=await db.prepare("SELECT COUNT(*) AS total FROM documents WHERE owner='__shared__' AND collection='gameRecommendations' AND json_extract(data,'$.sender')=? AND json_extract(data,'$.createdAt')>?").bind(uid,new Date(now.getTime()-86400000).toISOString()).first();
    if(recent.total>=10)return reply({error:'Dix recommandations par jour suffisent : laisse le temps à tes amis de les découvrir.'},429);

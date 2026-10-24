@@ -22,6 +22,13 @@
 .social-hub-friend-actions .social-hub-primary { background:var(--accent); color:white; }
 .social-hub-friend-actions .social-hub-remove { background:transparent; color:var(--text-muted); }
 .social-hub-empty { padding:24px 16px; color:var(--text-soft); line-height:1.6; border:1px dashed var(--surface-border); border-radius:16px; }
+.social-report-trigger{display:block;width:auto;max-width:100%;min-height:44px;margin-top:10px;padding:8px 0;border:0;background:transparent;color:var(--text-muted);font:inherit;font-size:.82rem;text-align:left;cursor:pointer}
+.social-hub-friend-manage{flex-basis:100%;min-width:0}
+.social-hub-friend-manage summary{cursor:pointer;min-height:44px;align-content:center;color:var(--text-soft);font-size:.9rem}
+.social-hub-friend-secondary{display:flex;flex-wrap:wrap;gap:8px;padding:8px 0}
+.social-hub-friend-secondary>small{flex-basis:100%;color:var(--text-soft)}
+.social-invitation-search{display:grid;gap:8px;color:var(--text-soft);margin:10px 0}
+.social-invitation-search input{width:100%;min-width:0;box-sizing:border-box;min-height:44px;padding:12px;border-radius:12px;border:1px solid var(--surface-border);background:var(--input-bg);color:var(--text-main);font:inherit}
 .social-hub-notice { color:var(--text-soft); line-height:1.5; }
 .social-hub-feed-heading { display:flex; justify-content:space-between; align-items:center; gap:12px; }
 .social-hub-feed-heading h3 { margin:0; font-size:1.1rem; }

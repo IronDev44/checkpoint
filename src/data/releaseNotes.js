@@ -1,6 +1,23 @@
 // New releases go first. Published IDs stay stable: reading a patch note and
 // discovering a feature are tracked independently, per account on this device.
 export const RELEASE_NOTES = [{
+ id:'2026-10-social-community',date:'2026-10-24',title:'Un social plus personnel et mieux protégé',
+ summary:'Profils réservés aux amis, fil filtré et signalements confidentiels.',
+ changes:[
+  {title:'Amis uniquement',where:'Social → Profil public → Identité et partage',text:'Entre privé et public, réserve ta vitrine à tes amis confirmés. Le lien du profil respecte ce choix.'},
+  {title:'Un fil à ton goût',where:'Social → Fil et Amis',text:'Filtre les activités et masque celles d’un ami sans couper le contact. Retrouve les amis masqués dans les réglages sociaux.'},
+  {title:'Signaler un profil ou une publication',where:'Social → Profil ou Fil',text:'Choisis un motif et ajoute des précisions si nécessaire. Le propriétaire reçoit le signalement dans son accès développeur ; le joueur signalé ne le voit pas.'},
+  {title:'Des demandes plus simples à gérer',where:'Social → Amis',text:'Recherche une invitation par nom ou identifiant. Les refus imposent des délais croissants et trois refus empêchent de nouvelles relances de ce joueur.'},
+ ],fixes:['Le masquage d’un ami conserve son profil, l’amitié et les échanges.','Un ancien lien ne permet pas de contourner la visibilité du profil.'],
+},{
+ id:'2026-10-friend-invitations',date:'2026-10-24',title:'Un cercle d’amis plus complet',
+ summary:'Invitations, confidentialité, réactions et jeux en commun.',
+ changes:[{title:'Accepter ou refuser une invitation',where:'Social → Amis',text:'Envoie une invitation avec un identifiant public. Retrouve les demandes reçues et envoyées, accepte ou refuse les invitations, et annule celles que tu as envoyées. La cloche signale les demandes et les acceptations.'},
+  {title:'Choisir qui peut te contacter',where:'Social → Amis → Contacts et confidentialité',text:'Désactive les invitations, recommandations, défis ou réactions. Bloque un joueur depuis son profil ou la liste d’amis, et retrouve ta liste de blocage dans ces réglages.'},
+  {title:'Partager un jeu et réagir',where:'Fiche d’un jeu et Social → Fil',text:'Partage un jeu à un ami directement depuis sa fiche. Dans le fil, réagis avec « Bien joué », « Ça me tente » ou « Excellent choix ». Une réaction peut être changée ou retirée.'},
+  {title:'Comparer vos collections',where:'Social → Amis → Nos jeux en commun',text:'Active le partage de ta collection avec tes amis si tu le souhaites. Comparez vos jeux, ceux terminés par un seul et les possibilités de coop. Les notes et avis privés restent masqués.'}],
+ fixes:['Les nouvelles invitations ne créent plus d’amitié sans réponse. Les amis déjà enregistrés sont conservés.'],
+},{
  id:'2026-10-physical-sync',date:'2026-10-23',title:'Tes boîtes et tes parties, mieux reliées',
  summary:'Scanner les jeux physiques et consulter les relevés Steam et Xbox.',
  changes:[
@@ -40,6 +57,12 @@ export const FEATURE_TUTORIALS = [{
 
 
 FEATURE_TUTORIALS.push({
+ id:'friend-invitations-social-v1',releaseId:'2026-10-friend-invitations',tab:'social',label:'Les invitations d’amis',steps:[
+  {title:'Choisir tes amis',text:'Dans Social → Amis, saisis un identifiant public puis appuie sur « Inviter ». Ton profil doit être public ou réservé aux amis ; ton nom et ton identifiant permettent au joueur de reconnaître l’invitation.',points:['Dans « Reçues », accepte ou refuse une invitation. Après acceptation, vous apparaissez dans vos listes respectives.','Dans « Envoyées », retrouve tes demandes en attente et annule-les si besoin. Les amis déjà enregistrés restent dans ta liste.']},
+  {title:'Garder la main sur les échanges',text:'La cloche signale les invitations et leur acceptation. Dans « Amis → Contacts et confidentialité », règle ce que tu souhaites recevoir.',points:['Les recommandations, défis et réactions sont réservés aux amis confirmés. Une ancienne amitié non réciproque peut être confirmée avec le bouton prévu dans la liste.','Tu peux bloquer un joueur depuis sa carte ou son profil, puis le débloquer dans les réglages. Le débloquer ne restaure pas l’amitié.']},
+  {title:'Partager et jouer ensemble',text:'Dans le fil, réagis aux activités d’un ami. Depuis une fiche de jeu, « Partager à un ami » lui envoie ton titre et ton petit mot.',points:['Pour voir vos bibliothèques en commun, chacun choisit d’activer le partage de sa collection dans les réglages sociaux. Ce partage est désactivé par défaut ; les avis et notes privés ne sont pas transmis.','Ouvre « Nos jeux en commun » sur la carte d’un ami pour repérer vos jeux, ceux terminés par un seul et les modes coop renseignés. Une plateforme commune ne garantit pas le cross-play.']},
+ ]
+},{
  id:'physical-scanner-search-v1',releaseId:'2026-10-physical-sync',tab:'search',label:'Scanner une boîte de jeu',steps:[
   {title:'Ajouter un jeu en scannant sa boîte',text:'Ouvre « Scanner un jeu physique », autorise la caméra ou saisis les chiffres sous le code-barres.',points:['Vérifie le titre proposé, la plateforme et l’édition avant de confirmer. Si le code est inconnu, cherche le jeu par son nom.','Si le jeu est déjà dans ta bibliothèque, choisis la fiche à compléter. Ses notes et sa progression sont conservées.']},
  ]
@@ -53,3 +76,10 @@ FEATURE_TUTORIALS.push({
   {title:'Relier tes jeux aux plateformes',text:'Dans « Profil & services », ouvre la gestion des services. Steam utilise ton profil public ; Xbox propose une connexion Microsoft.',points:['Analyse les jeux puis vérifie l’import avant de confirmer les fiches à ajouter ou synchroniser. Les correspondances par titre demandent ta confirmation.','La liste Xbox concerne les activités de succès, pas tous tes achats. « Charger la suite des titres Xbox » complète les pages disponibles.']},
  ]
 });
+
+FEATURE_TUTORIALS.push({id:'social-community-v1',releaseId:'2026-10-social-community',tab:'social',label:'Confidentialité, fil et signalements',steps:[
+{title:'Un profil réservé aux amis',text:'Dans Profil public → Identité et partage, choisis Privé, Amis uniquement ou Public.',points:['Amis uniquement donne accès à tes amis confirmés, y compris via le lien du profil. Retirer un ami retire aussi cet accès.','Ton nom et ton identifiant restent présents dans les invitations que tu envoies. Les rubriques désactivées restent masquées à tes amis.']},
+{title:'Un fil qui te convient',text:'Le fil des amis reste classé du plus récent au plus ancien. Filtre les jeux terminés, notes et avis, nouveaux ajouts ou publications.',points:['Les jeux terminés utilisent les dates de fin renseignées, sans inventer de date pour les anciennes parties.','Dans Amis → Gérer cet ami, masque ses activités sans le bloquer. Réaffiche-les depuis sa carte ou Contacts et confidentialité.']},
+{title:'Signaler un problème',text:'Depuis un profil ou une publication, appuie sur Signaler, choisis un motif et ajoute des précisions si besoin.',points:['Le propriétaire de Checkpoint reçoit le contenu signalé et ton identifiant pour examiner le problème. Le joueur signalé ne voit pas ton signalement.','Le signalement ne supprime pas automatiquement le contenu. Si tu souhaites arrêter les contacts, utilise aussi Bloquer.']},
+{title:'Retrouver les demandes en attente',text:'Dans Amis, recherche les invitations par nom ou identifiant. Accepte, refuse ou bloque depuis une demande reçue.',points:['Après un refus, le joueur doit attendre un jour ; après le deuxième, sept jours. Trois refus empêchent de nouvelles relances de sa part.','Une invitation annulée ne peut pas être renvoyée immédiatement. Ces limites protègent les deux côtés et ne retirent pas les amis existants.']}
+]});

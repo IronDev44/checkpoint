@@ -122,6 +122,17 @@ import TransitionSettings from "./components/TransitionSettings";
 import SoundSettings from "./components/SoundSettings";
 import { DEFAULT_SOUND_SETTINGS, normalizeSoundSettings, readLegacySoundSettings, playSound, applySoundSettings, stopAllSounds } from "./services/soundEffects";
 import { SocialNavigation, SocialFriendsDirectory, FriendsActivityFeed } from "./components/SocialHub";
+import FriendRequests from "./components/FriendRequests";
+import useFriendships from "./components/useFriendships";
+import {mergeConfirmedFriends,friendshipNotices} from "./services/friendships";
+import useSocialControls from './components/useSocialControls';
+import ProfileVisibilityChoices from './components/ProfileVisibilityChoices';
+import SocialReportDialog from './components/SocialReportDialog';
+import SocialReportsInbox from './components/SocialReportsInbox';
+import SocialContactSettings,{BlockPlayerDialog} from './components/SocialContactSettings';
+import FriendCommonGames from './components/FriendCommonGames';
+import ShareGameToFriend from './components/ShareGameToFriend';
+import SocialReactions,{useSocialReactions} from './components/SocialReactions';
 import { readPublicSocialProfile } from "./services/socialProfiles";
 import { getPlayerNotes, getFounderSignature, getPublicPlayerNotes } from "./services/playerNotes";
 import ProfilePhotoEditor, { SocialAvatar } from "./components/ProfilePhoto";
@@ -4823,6 +4834,7 @@ function Top5TabV2({ games, hardware = [], onSetGameOfYear }) {
 /* ==================== MODAL DÉTAIL JEU ==================== */
 
 export function GameDetailModal({
+  socialFriends=[],
   personalLists=[],
   onPersonalListsChange,
   game,
@@ -5219,6 +5231,7 @@ export function GameDetailModal({
             <button type="button" onClick={()=>onSetProgressStatus(game.id,'in_progress')}>Commencer / reprendre</button>
             <button type="button" onClick={()=>onSetProgressStatus(game.id,'completed')}>Déjà terminé</button>
           </div>
+          <ShareGameToFriend key={game.id} game={game} friends={socialFriends}/>
           <p className="game-detail-essential-note">Ta progression et ta note sont indépendantes. Les détails ci-dessous sont facultatifs.</p>
           {game.physicalOwned&&(game.physicalBarcode||game.physicalPlatform)&&<details className="game-detail-organized-group"><summary>Mon exemplaire physique</summary><p>{game.physicalPlatform||'Plateforme non renseignée'}{game.physicalEdition?` · ${game.physicalEdition}`:''}</p>{game.physicalBarcode&&<p>Code-barres : {game.physicalBarcode}</p>}</details>}
           <GamePlatformActivity key={game.id} game={game} onSave={onSavePlatformActivity}/>
@@ -7476,7 +7489,7 @@ function normalizeSocialProfile(profile = {}) {
       typeof source.platform === "string"
         ? source.platform
         : DEFAULT_SOCIAL_PROFILE.platform,
-    visibility: source.visibility === "public" ? "public" : "prive",
+    visibility: ["public","friends"].includes(source.visibility) ? source.visibility : "prive",
     featuredBadgeId:
       source.featuredBadgeId || (creatorEnabled ? "creator_checkpoint" : ""),
     selectedBadgeIds: normalizeArray(source.selectedBadgeIds, 4).map(String),
@@ -7633,6 +7646,10 @@ function getSocialActivityFeed(games = [], hardware = [], badges = []) {
       source: "games",
       ...reviewActivityFields(game,getGameRating(game)),
     };
+    const finishedDate=parseActivityDate(game.completedAt);
+    if(isGameFinishedStatus(game)&&finishedDate){
+      activities.push({id:`finished-${game.id||index}`,image:base.image,title:game.name,date:game.completedAt,sortTime:finishedDate.getTime(),priority:75,source:'games',type:'Terminé',kind:'completed',text:`a terminé ${game.name}`,detail:''});
+    }
 
     if (getGameRating(game) > 0) {
       activities.push({
@@ -7855,6 +7872,8 @@ function resizeSocialPhoto(file) {
 }
 
 function ActivityFeed({
+  reactionResource,
+  reactionHandle,
   activities = [],
   compact = false,
   activityLikes = {},
@@ -7942,7 +7961,8 @@ function ActivityFeed({
               {activity.detail && <p><SpoilerText text={activity.detail}/></p>}
               {activity.reviewText&&<p><SpoilerText text={activity.reviewText} whole={activity.reviewSpoiler}/></p>}
 
-              {(canLike || canComment || likeCount > 0 || comments.length > 0) && (
+              {reactionResource&&<SocialReactions handle={reactionHandle} activityId={activity.id} resource={reactionResource}/>}
+              {!reactionResource&&(canLike || canComment || likeCount > 0 || comments.length > 0) && (
                 <div className="social-feed-actions">
                   <button
                     type="button"
@@ -8090,6 +8110,8 @@ export function PublicProfilePreview({
   title = "Profil public",
   actionLabel,
   onAction,
+  onBlock,
+  onReport,
   onClose,
   closeLabel = "Fermer",
 }) {
@@ -8475,6 +8497,8 @@ export function PublicProfilePreview({
           {actionLabel}
         </button>
       )}
+      {onBlock&&<button type="button" className="option-pill" onClick={()=>onBlock(profile)}>Bloquer ce joueur</button>}
+      {onReport&&<button type="button" className="option-pill" onClick={()=>onReport({type:'profile',handle:profile.handle})}>Signaler ce profil</button>}
     </div>
   );
 }
@@ -8612,12 +8636,20 @@ export function SocialTab({
   onSetFavoriteReason,
   onOpenComparisonGame,
   onDiscoverGame,
+  friendInvitations,
+  socialControls,
+  onBlockFriend,
+  onCommonGames,
+  onMuteFriend,
+  onReportSocial,
+  navigationToken,
   loadFriendProfile = loadCheckpointSocialProfile,
 }) {
   const [friendHandle, setFriendHandle] = useState("");
   const [socialMessage, setSocialMessage] = useState("");
   const [showPublicPreview, setShowPublicPreview] = useState(false);
   const [socialView, setSocialView] = useState(initialView);
+  useEffect(()=>setSocialView(initialView),[initialView,navigationToken]);
   const [socialFeedSource, setSocialFeedSource] = useState("friends");
   const [socialFeedFilter, setSocialFeedFilter] = useState("all");
   const [postDraft, setPostDraft] = useState("");
@@ -8695,6 +8727,7 @@ export function SocialTab({
     if (socialFeedFilter === "all") return true;
     return activity.source === socialFeedFilter;
   });
+  const ownReactions=useSocialReactions(socialView==='feed'&&socialFeedSource==='mine'&&['public','friends'].includes(socialProfile.visibility)?[{...socialProfile,recentActivity:allSocialFeedItems}]:[]);
   const socialFeedFilters = [
     { key: "all", label: "Tout", count: allSocialFeedItems.length },
     { key: "posts", label: "Posts", count: socialPostActivities.length },
@@ -8722,7 +8755,7 @@ export function SocialTab({
     currentHardware.length > 0,
     (socialProfile.setupPhotos || []).length > 0 ||
       (socialProfile.collectionPhotos || []).length > 0,
-    socialProfile.visibility === "public",
+    ["public","friends"].includes(socialProfile.visibility),
   ];
   const profileCompletion = Math.round(
     (profileCompletionItems.filter(Boolean).length / profileCompletionItems.length) * 100
@@ -8980,7 +9013,7 @@ export function SocialTab({
 
   return (
     <div className={`progression-stack social-tab social-clean ${sharedProfile ? "social-visiting" : ""}`}>
-      <SocialNavigation view={socialView} profile={socialProfile} friendCount={socialFriends.length} onChange={view => {
+      <SocialNavigation view={socialView} profile={socialProfile} friendCount={socialFriends.length} requestCount={friendInvitations?.connections.filter(item=>item.status==='pending'&&item.direction==='received').length||0} onChange={view => {
         setSocialView(view);
         setShowPublicPreview(false);
       }} />
@@ -8999,7 +9032,9 @@ export function SocialTab({
           title="Profil du joueur"
           closeLabel="Retour au Social"
           onClose={onCloseSharedProfile}
-          actionLabel={socialFriends.some(friend => friend.handle === sharedProfile.handle) ? undefined : "Ajouter en ami"}
+          onBlock={sharedProfile.handle!==socialProfile.handle?onBlockFriend:undefined}
+          onReport={sharedProfile.handle!==socialProfile.handle?onReportSocial:undefined}
+          actionLabel={socialFriends.some(friend => friend.handle === sharedProfile.handle) ? undefined : "Envoyer une invitation"}
           onAction={async () => {
             const result = await onAddFriend(sharedProfile.handle);
             setSocialMessage(result.message);
@@ -9177,22 +9212,7 @@ export function SocialTab({
           </div>
         </div>
 
-        <div className="social-visibility-toggle">
-          <button
-            type="button"
-            className={socialProfile.visibility !== "public" ? "active" : ""}
-            onClick={() => handleVisibilityChange("prive")}
-          >
-            Privé
-          </button>
-          <button
-            type="button"
-            className={socialProfile.visibility === "public" ? "active" : ""}
-            onClick={() => handleVisibilityChange("public")}
-          >
-            Public
-          </button>
-        </div>
+        <ProfileVisibilityChoices value={socialProfile.visibility} onChange={handleVisibilityChange}/><p className="option-value">Amis uniquement : seuls tes amis confirmés voient le profil. Ton identifiant et ton nom restent visibles dans les invitations que tu envoies.</p>
 
         <div className="social-share-row">
           <div className="social-share-link">{shareUrl}</div>
@@ -9384,7 +9404,7 @@ export function SocialTab({
           <div>
             <h2 className="panel-title">Amis</h2>
             <div className="option-value">
-              Ajoute un profil public avec son identifiant.
+              Envoie une invitation avec un identifiant Checkpoint. Vous serez amis après acceptation.
             </div>
           </div>
           <span className="social-section-count">{socialFriends.length}</span>
@@ -9397,16 +9417,19 @@ export function SocialTab({
             placeholder="identifiant ami"
             aria-label="Identifiant de l’ami à ajouter"
           />
-          <button type="button" onClick={handleAddFriend}>
-            Ajouter
+          <button type="button" disabled={friendInvitations?.busy} onClick={handleAddFriend}>
+            Inviter
           </button>
         </div>
 
-        {socialView === "friends" && !sharedProfile && <SocialFriendsDirectory friends={socialFriends} onOpen={onOpenFriend} onRemove={onRemoveFriend} loadProfile={loadFriendProfile} />}
+        {!['public','friends'].includes(socialProfile.visibility) && <p className="social-hub-notice">Pour envoyer une invitation, choisis « Public » ou « Amis uniquement » dans « Profil public → Identité et partage ». Tu peux toujours répondre aux demandes reçues.</p>}
+        {socialView === "friends" && !sharedProfile && friendInvitations && <FriendRequests {...friendInvitations} onOpen={onOpenFriend} onBlock={onBlockFriend}/>}
+        {socialView === "friends" && !sharedProfile && <SocialFriendsDirectory friends={socialFriends} onOpen={onOpenFriend} onRemove={onRemoveFriend} loadProfile={loadFriendProfile} onBlock={onBlockFriend} onCommon={onCommonGames} onReport={onReportSocial} onMute={onMuteFriend} mutedHandles={socialControls?.data?.muted?.map(player=>player.handle)||[]} onInvite={async handle=>{const result=await onAddFriend(handle);setSocialMessage(result.message);}} confirmedHandles={friendInvitations?.connections.filter(item=>item.status==='accepted').map(item=>item.profile.handle)||[]} />}
+        {socialView==='friends'&&!sharedProfile&&socialControls&&<SocialContactSettings controls={socialControls}/>}
 
       </div>
 
-      {socialView === "feed" && socialFeedSource === "friends" && !sharedProfile && <FriendsActivityFeed friends={socialFriends} loadProfile={loadFriendProfile} onOpen={onOpenFriend} />}
+      {socialView === "feed" && socialFeedSource === "friends" && !sharedProfile && <FriendsActivityFeed friends={socialFriends} loadProfile={loadFriendProfile} onOpen={onOpenFriend} mutedHandles={socialControls?.data?.muted?.map(player=>player.handle)||[]} onReport={onReportSocial}/>}
       <div className={`search-panel ${socialView === "feed" && socialFeedSource === "mine" ? "" : "social-section-hidden"}`}>
         <div className="home-section-head">
           <h2 className="panel-title">Mon activité</h2>
@@ -9427,6 +9450,8 @@ export function SocialTab({
         </div>
         <ActivityFeed
           activities={socialFeedItems.slice(0, 8)}
+          reactionResource={ownReactions}
+          reactionHandle={socialProfile.handle}
           compact
           activityLikes={activityLikes}
           onToggleLike={handleToggleActivityLike}
@@ -15544,7 +15569,7 @@ function OptionsTab({
         <OptionGroup id="services" isOpen={!!openOptionGroups.services} onToggle={() => setOpenOptionGroups((current) => ({ ...current, services: !current.services }))}
           title="Profil & services"
           description="Profil public, comptes liés et sources externes."
-          summary={`${socialProfile.visibility === "public" ? "Public" : "Privé"} · Steam ${steamProfile.steamId ? "lié" : "off"}`}
+          summary={`${socialProfile.visibility === "public" ? "Public" : socialProfile.visibility === "friends" ? "Amis uniquement" : "Privé"} · Steam ${steamProfile.steamId ? "lié" : "off"}`}
         >
 
           <AccountOptions />
@@ -15555,22 +15580,7 @@ function OptionsTab({
                 <SectionTitle title="Profil public" help="publicProfile" />
                 <span>Choisis si ton profil peut être partagé ou reste seulement visible par toi.</span>
               </div>
-              <div className="option-pill-grid two startup-primary">
-                <button
-                  type="button"
-                  className={`option-pill ${socialProfile.visibility !== "public" ? "active" : ""}`}
-                  onClick={() => onProfileVisibilityChange("prive")}
-                >
-                  Privé
-                </button>
-                <button
-                  type="button"
-                  className={`option-pill ${socialProfile.visibility === "public" ? "active" : ""}`}
-                  onClick={() => onProfileVisibilityChange("public")}
-                >
-                  Public
-                </button>
-              </div>
+              <ProfileVisibilityChoices value={socialProfile.visibility} onChange={onProfileVisibilityChange}/>
             </div>
 
             <div className="option-setting-card">
@@ -16058,7 +16068,7 @@ function OptionsTab({
                 ))}
               </div>
             </div>
-          </div>} events={<AdminPanel events={developerEvents} onImportNews={onImportNews}/>} feedback={<FeedbackInbox/>} predictions={<GamingPredictions manage/>}/>
+          </div>} events={<AdminPanel events={developerEvents} onImportNews={onImportNews}/>} feedback={<FeedbackInbox/>} reports={<SocialReportsInbox/>} predictions={<GamingPredictions manage/>}/>
         </OptionGroup>}
 
         <OptionGroup id="data" isOpen={!!openOptionGroups.data} onToggle={() => setOpenOptionGroups((current) => ({ ...current, data: !current.data }))}
@@ -17483,6 +17493,20 @@ export default function App({ startupVisible = false, onStartupProgress, tutoria
     }
   });
   const [privateSettingsReady, setPrivateSettingsReady] = useState(false);
+  const socialControls=useSocialControls({accountUid:auth.currentUser?.uid,enabled:privateSettingsReady&&!showSplash,onBlocked:blocked=>{
+    setSocialFriends(current=>{
+      const next=current.filter(friend=>!blocked.some(player=>player.handle===friend.handle));
+      return next.length===current.length?current:storeSocialFriends(next);
+    });
+  }});
+  const [blockTarget,setBlockTarget]=useState(null),[commonFriend,setCommonFriend]=useState(null);
+  const [reportTarget,setReportTarget]=useState(null);
+  const friendInvitations=useFriendships({accountUid:auth.currentUser?.uid,enabled:privateSettingsReady&&!showSplash,onSync:connections=>{
+    setSocialFriends(current=>{
+      const next=normalizeSocialFriends(mergeConfirmedFriends(current,connections)).filter(friend=>!socialControls.data?.blocked.some(player=>player.handle===friend.handle));
+      return JSON.stringify(next)===JSON.stringify(current)?current:storeSocialFriends(next);
+    });
+  }});
   const privateSettingsBaseRef=useRef(null);
   const privateSettingsExistsRef=useRef(false);
   const privateSettingsVersionRef=useRef(0);
@@ -17503,7 +17527,7 @@ export default function App({ startupVisible = false, onStartupProgress, tutoria
   const [releaseNotesOpen,setReleaseNotesOpen]=useState(false);
   const unreadReleases=RELEASE_NOTES.filter(r=>!releaseProgress.read.includes(r.id));
   const releaseNotifications=unreadReleases.length?[{id:`release-${unreadReleases[0].id}`,category:'updates',type:'release-notes',priority:88,title:'Du nouveau dans Checkpoint',message:unreadReleases[0].summary,cta:'Voir les nouveautés',tone:'focus'}]:[];
-  const extraNotifications=[...existingExtraNotifications,...rendezvousNotifications,...releaseNotifications];
+  const extraNotifications=[...existingExtraNotifications,...rendezvousNotifications,...releaseNotifications,...friendshipNotices(friendInvitations.connections)];
   const [dismissedNotificationIds, setDismissedNotificationIds] = useState(() => {
     try {
       const ids=JSON.parse(localStorage.getItem("checkpoint-dismissed-notifications-v2") || "[]");return Array.isArray(ids)?ids.filter(id=>typeof id==="string"):[];
@@ -18063,7 +18087,7 @@ const updateSocialProfile = (field, value) => {
 
   setSocialProfile(nextProfile);
 
-  if(!profileVisibilityBusyRef.current&&nextProfile.visibility==='public'&&normalizeHandle(nextProfile.handle)){
+  if(!profileVisibilityBusyRef.current&&['public','friends'].includes(nextProfile.visibility)&&normalizeHandle(nextProfile.handle)){
     syncPublicProfileIfNeeded(nextProfile);
   }
 };
@@ -18071,7 +18095,7 @@ const updateSocialProfile = (field, value) => {
 const syncPublicProfileIfNeeded = async (profile) => {
   const handle = normalizeHandle(profile.handle);
 
-  if (profile.visibility !== "public" || !handle) return;
+  if (!["public","friends"].includes(profile.visibility) || !handle) return;
 
   if(profileVisibilityBusyRef.current)return false;
   const owner=auth.currentUser?.uid,version=++publicProfileVersionRef.current;
@@ -18079,7 +18103,7 @@ const syncPublicProfileIfNeeded = async (profile) => {
     key:'public-profile',
     isCurrent:()=>auth.currentUser?.uid===owner&&publicProfileVersionRef.current===version,
     success:'Profil public mis à jour',
-    write:()=>setDoc(doc(db,'publicProfiles',handle),{...buildPublicSocialProfile(profile),visibility:'public',...(owner?{ownerUid:owner}:{})},{merge:true})
+    write:()=>setDoc(doc(db,'publicProfiles',handle),{...buildPublicSocialProfile(profile),visibility:profile.visibility,...(owner?{ownerUid:owner}:{})},{merge:true})
   });
 };
 
@@ -18276,12 +18300,12 @@ const setSocialProfileVisibility = async (visibility) => {
   const owner=auth.currentUser?.uid,version=++publicProfileVersionRef.current;
   const normalizedProfile=normalizeSocialProfile({...socialProfile,handle,visibility});
   try{
-    const saved=await saveFeedback.run({key:'public-profile',isCurrent:()=>auth.currentUser?.uid===owner&&publicProfileVersionRef.current===version,success:visibility==='public'?'Profil public activé':'Profil privé appliqué',write:async()=>{
-      if(visibility==='public')await setDoc(doc(db,'publicProfiles',handle),{...buildPublicSocialProfile(normalizedProfile),visibility:'public',ownerUid:owner},{merge:true});
+    const saved=await saveFeedback.run({key:'public-profile',isCurrent:()=>auth.currentUser?.uid===owner&&publicProfileVersionRef.current===version,success:visibility==='public'?'Profil public activé':visibility==='friends'?'Profil réservé aux amis':'Profil privé appliqué',write:async()=>{
+      if(['public','friends'].includes(visibility))await setDoc(doc(db,'publicProfiles',handle),{...buildPublicSocialProfile(normalizedProfile),visibility,ownerUid:owner},{merge:true});
       else await deleteDoc(doc(db,'publicProfiles',handle));
-      if(auth.currentUser?.uid===owner){setSocialProfile(current=>storeSocialProfile({...current,handle,visibility}));showToast(visibility==='public'?'Profil public activé.':'Profil repassé en privé.');}
+      if(auth.currentUser?.uid===owner){setSocialProfile(current=>storeSocialProfile({...current,handle,visibility}));showToast(visibility==='public'?'Profil public activé.':visibility==='friends'?'Profil visible uniquement par tes amis.':'Profil repassé en privé.');}
     }});
-    return saved===false?{ok:false,message:'Impossible de changer la visibilité pour le moment.'}:{ok:true,message:visibility==='public'?'Profil public. Tes amis peuvent te trouver.':"Profil privé. Il n’est plus trouvable."};
+    return saved===false?{ok:false,message:'Impossible de changer la visibilité pour le moment.'}:{ok:true,message:visibility==='public'?'Profil public. Tes amis peuvent te trouver.':visibility==='friends'?'Seuls tes amis confirmés peuvent consulter ton profil.':"Profil privé. Il n’est plus trouvable."};
   }finally{profileVisibilityBusyRef.current=false;}
 };
 
@@ -18292,10 +18316,10 @@ const copySocialProfileLink = async () => {
     return { ok: false, message: "Choisis d'abord un identifiant public." };
   }
 
-  if (socialProfile.visibility !== "public") {
+  if (!["public","friends"].includes(socialProfile.visibility)) {
     return {
       ok: false,
-      message: "Passe le profil en public avant de partager le lien.",
+      message: "Choisis un profil public ou réservé aux amis avant de partager le lien.",
     };
   }
 
@@ -18324,38 +18348,28 @@ const addSocialFriend = async (handleValue) => {
     return { ok: false, message: "Tu ne peux pas t'ajouter toi-même." };
   }
 
-  if (socialFriends.some((friend) => friend.handle === handle)) {
+  if (friendInvitations.connections.some(item=>item.profile.handle===handle&&item.status==='accepted')) {
     return { ok: false, message: "Cet ami est déjà dans ta liste." };
   }
 
   try {
-    const profile = await loadCheckpointSocialProfile(handle);
-    const friend = {
-      photoURL: profile.photoURL || "",
-      displayName: profile.displayName || handle,
-      handle,
-      bio: profile.bio || "",
-      platform: profile.platform || "",
-      level: profile.level || 1,
-      addedAt: new Date().toISOString(),
-    };
-
-    setSocialFriends((prev) => {
-      return storeSocialFriends([...prev, friend]);
-    });
-
-    showToast("Nouvel ami ajouté.");
-    return { ok: true, message: `${friend.displayName} a été ajouté.` };
+    if(await syncPublicProfileIfNeeded(socialProfile)===false)return {ok:false,message:'Attends la fin de l’enregistrement de ton profil.'};
+    const result=await friendInvitations.act('send',{handle});
+    const message=result.status==='accepted'?'Vous êtes déjà amis.':result.direction==='received'?'Ce joueur t’a déjà envoyé une invitation. Retrouve-la dans Social → Amis.':'Invitation envoyée. Ce joueur pourra l’accepter ou la refuser.';
+    showToast(message);
+    return {ok:true,message};
   } catch (error) {
     console.error("Erreur ajout ami :", error);
     return { ok: false, message: error.message || "Impossible d'ajouter cet ami pour le moment." };
   }
 };
 
-const removeSocialFriend = (handle) => {
-  setSocialFriends((prev) => {
-    return storeSocialFriends(prev.filter((friend) => friend.handle !== handle));
-  });
+const removeSocialFriend = async (handle) => {
+  try{
+    const connection=friendInvitations.connections.find(item=>item.profile.handle===handle&&item.status==='accepted');
+    if(connection)await friendInvitations.act('remove',{id:connection.id});
+    setSocialFriends(prev=>storeSocialFriends(prev.filter(friend=>friend.handle!==handle)));
+  }catch(error){showToast(error.message||'Impossible de retirer cet ami.');}
 };
 
 const openSocialFriendProfile = async handle => {
@@ -19748,6 +19762,7 @@ useEffect(() => {
   const openNotification = (notification) => {
     setNotificationPanelOpen(false);
     if(notification?.type==='release-notes'){setReleaseNotesOpen(true);return;}
+    if(notification?.type==='friendship'){changeTab('social');setSharedProfile(null);setSocialEntryView('friends');setSearchDestination({kind:'friendship',token:Date.now()});return;}
     if(notification?.type==='rendezvous'){setRendezvousNotice({view:notification.view,token:Date.now()});return;}
     if(notification?.type==='challenge'){changeTab('social');setSharedProfile(null);setSocialEntryView('challenges');setSearchDestination({kind:'challenge',id:notification.challengeId,token:Date.now()});return;}
     if(notification?.type==='recommendation'){changeTab('social');setSharedProfile(null);setSocialEntryView('recommendations');setSearchDestination({kind:'recommendation',id:notification.recommendationId,token:Date.now()});return;}
@@ -20397,6 +20412,13 @@ useEffect(() => {
               onCopyProfileLink={copySocialProfileLink}
               onAddProfilePhotos={addSocialProfilePhotos}
               onRemoveProfilePhoto={removeSocialProfilePhoto}
+              friendInvitations={friendInvitations}
+              socialControls={socialControls}
+              onBlockFriend={setBlockTarget}
+              onCommonGames={setCommonFriend}
+              onReportSocial={setReportTarget}
+              onMuteFriend={async friend=>{try{const muted=socialControls.data?.muted?.some(player=>player.handle===friend.handle);await socialControls.act(muted?'unmute':'mute',{handle:friend.handle});showToast(muted?'Activités réaffichées dans le fil.':'Activités masquées. Ce joueur reste ton ami.');}catch(error){showToast(error.message);}}}
+              navigationToken={searchDestination?.token}
               onAddFriend={addSocialFriend}
               onRemoveFriend={removeSocialFriend}
               onOpenFriend={openSocialFriendProfile}
@@ -20505,6 +20527,7 @@ useEffect(() => {
       }}/></Suspense>}
       {collectionAddDraft&&<QuickCollectionAdd key={collectionAddDraft.rawgId||collectionAddDraft.name} game={collectionAddDraft} onSave={addGameToFirebase} onClose={()=>setCollectionAddDraft(null)}/>}
       <GameDetailModal
+        socialFriends={socialFriends}
         personalLists={appOptions.personalLists}
         onPersonalListsChange={value=>updateAppOption('personalLists',value)}
         game={selectedGame}
@@ -20535,6 +20558,9 @@ useEffect(() => {
         canGoNext={canGoNextGame}
         closeAfterRating={appOptions.afterRatingAction === "list"}
       />
+      {blockTarget&&<BlockPlayerDialog key={blockTarget.handle} player={blockTarget} controls={socialControls} onClose={()=>setBlockTarget(null)} onBlocked={()=>{setSharedProfile(null);showToast('Joueur bloqué.');}}/>}
+      {reportTarget&&<SocialReportDialog key={`${reportTarget.handle}:${reportTarget.activityId||'profile'}`} target={reportTarget} onClose={()=>setReportTarget(null)}/>}
+      {commonFriend&&<FriendCommonGames key={commonFriend.handle} friend={commonFriend} games={games} onClose={()=>setCommonFriend(null)} onOpenGame={game=>openGameDetail(game,games)}/>}
     </>
   );
 }
