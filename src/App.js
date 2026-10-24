@@ -99,6 +99,7 @@ import { buildBulkGamePatch } from "./services/libraryBulk";
 import "./components/CollectionImprovements.css";
 import "./components/LandscapeLayout.css";
 import "./components/GeneralPolish.css";
+import "./components/ResponsiveControls.css";
 import "./components/HardwareCards.css";
 import SeriesCatalogProgress from "./components/SeriesCatalogProgress";
 import { loadSeriesCatalog, dedupeSeriesGames, findSeriesLibraryMatch, isSeriesLibraryEpisode, seriesCatalogTitle } from "./services/seriesCatalog";
