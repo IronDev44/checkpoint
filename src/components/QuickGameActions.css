@@ -1,0 +1,32 @@
+/* Give each action room without splitting French words into fragments. */
+html body[data-theme] .quick-game-actions .quick-progress-actions {
+ display:grid!important;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ grid-auto-rows:1fr;
+ gap:10px;
+ width:100%;
+ min-width:0;
+}
+html body[data-theme] .quick-game-actions .quick-progress-actions>.option-pill {
+ box-sizing:border-box;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ width:100%!important;
+ min-width:0!important;
+ height:auto!important;
+ min-height:60px!important;
+ margin:0!important;
+ padding:12px 10px!important;
+ font-size:.9rem!important;
+ line-height:1.4!important;
+ text-align:center;
+ white-space:normal!important;
+ word-break:normal!important;
+ overflow-wrap:normal!important;
+ hyphens:none;
+}
+@media(max-width:340px){
+ html body[data-theme] .quick-game-actions .quick-progress-actions {grid-template-columns:minmax(0,1fr)}
+ html body[data-theme] .quick-game-actions .quick-progress-actions>.option-pill {min-height:48px!important}
+}

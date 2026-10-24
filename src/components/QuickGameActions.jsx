@@ -1,5 +1,6 @@
 import React,{useState} from 'react';
 import ToolDialog from './ToolDialog';
+import './QuickGameActions.css';
 export default function QuickGameActions({game,rating=0,onProgress,onRate}){
  const [open,setOpen]=useState(false),[value,setValue]=useState(rating),[busy,setBusy]=useState(false),[error,setError]=useState('');
  const apply=async action=>{setBusy(true);setError('');try{const result=await action();if(result===false){setError('La modification n’est pas enregistrée. Réessaie.');return;}setOpen(false);}catch{setError('La modification n’est pas enregistrée. Réessaie.');}finally{setBusy(false);}};
