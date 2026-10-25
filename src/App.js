@@ -6706,6 +6706,7 @@ export function LibrarySection({
           <div className="grid-top-actions">
             <button
               className={`heart-btn grid-heart ${game.favorite ? "active" : ""}`}
+              aria-pressed={Boolean(game.favorite)}
               aria-label={game.favorite ? `Retirer ${game.name} des favoris` : `Ajouter ${game.name} aux favoris`}
               onClick={(e) => {
                 e.stopPropagation();
