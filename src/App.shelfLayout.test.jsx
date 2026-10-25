@@ -2,6 +2,14 @@ import {fireEvent,render} from '@testing-library/react';
 import {LibrarySection} from './App';
 jest.mock('./firebase',()=>({auth:{currentUser:null},db:{}}));
 jest.mock('./services/accountData',()=>({accountsEnabled:false,accountStorage:{getItem:()=>null,setItem:()=>{}},collection:jest.fn(),doc:jest.fn()}));
+test('collection shortcuts filter the cards and can restore the full library',()=>{
+ const games=[{id:'one',name:'Unrated',status:'collection'},{id:'two',name:'Paused',status:'collection',progressStatus:'paused',rating:8},{id:'three',name:'Rated',status:'collection',rating:9}];
+ const view=render(<LibrarySection title="Collection" games={games} libraryCardMode="compact" setLibraryCardMode={()=>{}}/>);
+ const names=()=>[...view.container.querySelectorAll('.grid-title')].map(el=>el.textContent);
+ fireEvent.click(view.getByRole('button',{name:'Sans note 1'}));expect(names()).toEqual(['Unrated']);
+ fireEvent.click(view.getByRole('button',{name:'En pause 1'}));expect(names()).toEqual(['Paused']);
+ fireEvent.click(view.getByRole('button',{name:'Tous 3'}));expect(names()).toHaveLength(3);
+});
 test('shelves regroup all games when their available width changes and keep the last row partly filled',()=>{
  const games=Array.from({length:45},(_,i)=>({id:String(i),name:`Game ${i}`,playedPlatforms:['PC']}));
  let width=252;

@@ -11,6 +11,16 @@ const local = [
  {id:'d',name:'God of War III Remastered',completed:true},
  {id:'e',name:'God of War: Ragnarok',completed:true},
 ].map(game=>({...game,status:'collection'}));
+test('The Witcher titles are never grouped into Assassin’s Creed by a subtitle',async()=>{
+ loadSeriesCatalog.mockResolvedValue({games:[],complete:true});
+ const games=['The Witcher','The Witcher 2: Assassins of Kings',"Assassin's Creed II","Assassin's Creed III",'The Lord of the Party','The Lord of the Party II'].map((name,i)=>({id:String(i),name,status:'collection'}));
+ render(<GameSeriesTab games={games} onAddGameToLibrary={()=>{}}/>);
+ const cards=[...document.querySelectorAll('.compact-series-card')];
+ expect(cards.find(e=>e.querySelector('strong')?.textContent==='The Witcher')).toHaveTextContent('0/2');
+ expect(cards.find(e=>e.querySelector('strong')?.textContent==='Assassin’s Creed')).toHaveTextContent('0/2');
+ expect(cards.map(e=>e.querySelector('strong').textContent)).not.toContain('The Lord of the Rings');
+ await screen.findAllByText('Pas d’autre titre confirmé dans le catalogue');
+});
 const catalog={name:'God of War',complete:true,games:[
  {id:'igdb:1',name:'God of War',released:'2005-03-22'},
  {id:'igdb:2',name:'God of War II',released:'2007-03-13'},
@@ -54,6 +64,6 @@ test('apostrophes and subtitles keep Spider-Man in its own series',async()=>{
  loadSeriesCatalog.mockResolvedValue({games:[],complete:true});
  const games=["Marvel’s Spider-Man","Marvel's Spider-Man: Miles Morales",'Marvel Ultimate Alliance','Marvel Ultimate Alliance 2'].map((name,i)=>({id:String(i),name,status:'collection'}));
  render(<GameSeriesTab games={games} onAddGameToLibrary={()=>{}}/>);
- expect([...document.querySelectorAll('.compact-series-card strong')].map(el=>el.textContent)).toEqual(expect.arrayContaining(["Marvel's Spider-Man",'Marvel Ultimate']));
+ expect([...document.querySelectorAll('.compact-series-card strong')].map(el=>el.textContent)).toEqual(expect.arrayContaining(["Marvel's Spider-Man",'Marvel Ultimate Alliance']));
  expect(await screen.findAllByText('Pas d’autre titre confirmé dans le catalogue')).toHaveLength(2);
 });

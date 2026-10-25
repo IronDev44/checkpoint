@@ -9,6 +9,12 @@ import {normalizeHomeLayout} from '../services/homeLayout';
 import {planGameImport} from '../services/importPlan';
 import {searchPersonalSpace} from '../services/personalSearch';
 const game={id:'one',name:'Portal',rating:8,status:'collection',steamAppId:1};
+test('dismissing an activity persists its preference and undo restores it',()=>{
+ const changes=jest.fn();function Home(){const [value,setValue]=React.useState({});return <HomeLayout value={value} onChange={next=>{changes(next);setValue(next);}}><HomeBlock id="quiz"><p>Quiz</p></HomeBlock></HomeLayout>;}
+ render(<Home/>);fireEvent.click(screen.getByRole('button',{name:'Masquer l’activité : Quiz de la semaine'}));
+ expect(changes).toHaveBeenCalledWith(expect.objectContaining({hidden:['quiz']}));expect(screen.queryByRole('button',{name:/Quiz de la semaine.*Ouvrir/})).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'Annuler',exact:true}));expect(screen.getByRole('button',{name:/Quiz de la semaine.*Ouvrir/})).toBeVisible();
+});
 test('invalid layout keys cannot hide the level or erase future blocks',()=>{expect(normalizeHomeLayout({order:['quiz','quiz','unknown'],hidden:['level','quiz']})).toMatchObject({hidden:['quiz']});expect(normalizeHomeLayout({order:['quiz']}).order[0]).toBe('quiz');expect(normalizeHomeLayout({order:['quiz']}).order).toContain('collection');});
 test('home rearrangement and hiding keeps the level pinned and emits preferences',()=>{
  const onChange=jest.fn();render(<HomeLayout value={{groupActivities:false,order:['quiz','collection'],hidden:['collection']}} onChange={onChange}><h2>Mon niveau</h2><HomeBlock id="collection"><h2>Collection</h2></HomeBlock><HomeBlock id="quiz"><h2>Quiz</h2></HomeBlock></HomeLayout>);

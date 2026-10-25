@@ -1,0 +1,14 @@
+.home-activity-choice{display:flex;flex-direction:column;min-width:0;gap:6px}
+.home-activity-choice>.home-activity-shortcut{width:100%;flex:1}
+html body[data-theme] .home-dismiss-action{display:block;min-height:44px;max-width:100%;padding:8px 6px;margin:0;background:transparent;border:0;border-radius:8px;box-shadow:none;color:var(--text-soft,#b9c7cf);font:inherit;font-size:.75rem;line-height:1.5;text-align:left;white-space:normal;overflow-wrap:anywhere;cursor:pointer}
+.home-dismiss-action:focus-visible{outline:2px solid currentColor;outline-offset:2px}
+.home-dismiss-notice{line-height:1.6;padding:12px}
+.home-radar-featured,.home-radar-mini-choice{display:flex;flex-direction:column;min-width:0;gap:6px}
+.home-radar-featured>.home-radar-hero{flex:1;width:100%;min-height:280px}
+.home-radar-mini-choice>.home-radar-mini-card{width:100%}
+/* Discoveries now open deliberately from For you instead of staying CSS-hidden. */
+html body[data-theme] .home-page .home-radar-panel,html body[data-theme] .home-activity-dialog .home-radar-panel{display:block!important}
+.home-activity-dialog .home-radar-panel{margin:0;border:0;padding:0;box-shadow:none;background:none}
+.home-activity-dialog .home-radar-head{margin:0 0 16px;padding:0;gap:12px;align-items:flex-start}
+.home-activity-dialog .home-radar-head .home-card-title{font-size:1.1rem;line-height:1.4;margin:0 0 8px}
+.home-activity-dialog .home-radar-head .home-section-subtitle{font-size:.82rem;line-height:1.6}

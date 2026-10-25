@@ -1,0 +1,86 @@
+// Only named title families qualify; a shared word is not evidence of a series.
+const normalize=value=>String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/['’]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+export function detectSeriesName(gameName) {
+  const game=typeof gameName==='object'&&gameName?gameName:null;
+  const name = normalize(game?game.name:gameName).replace(/^tom clancys /, "");
+
+  const seriesRules = [
+    { key: "splinter cell", label: "Tom Clancy's Splinter Cell" },
+    { key: "rainbow six", label: "Tom Clancy's Rainbow Six" },
+    { key: "ghost recon", label: "Tom Clancy's Ghost Recon" },
+    { key: "the division", label: "Tom Clancy's The Division" },
+    { key: "lego star wars", label: "Lego Star Wars" },
+    { key: "star wars", label: "Star Wars" },
+    { key: "lord of the rings", label: "The Lord of the Rings" },
+    { key: "the lord of the rings", label: "The Lord of the Rings" },
+
+    { key: "resident evil", label: "Resident Evil" },
+    { key: "call of duty", label: "Call of Duty" },
+    { key: "shadow of mordor", label: "Middle-earth" },
+    { key: "shadow of war", label: "Middle-earth" },
+    { key: "middle earth", label: "Middle-earth" },
+    { key: "middle-earth", label: "Middle-earth" },
+    { key: "marvel spider", label: "Marvel's Spider-Man" },
+    { key: "marvels spider", label: "Marvel's Spider-Man" },
+    { key: "spider-man", label: "Spider-Man" },
+    { key: "spiderman", label: "Spider-Man" },
+    { key: "batman arkham", label: "Batman Arkham" },
+    { key: "need for speed", label: "Need for Speed" },
+    { key: "final fantasy", label: "Final Fantasy" },
+    { key: "dragon ball", label: "Dragon Ball" },
+    { key: "dragon age", label: "Dragon Age" },
+    { key: "mass effect", label: "Mass Effect" },
+    { key: "red dead", label: "Red Dead Redemption" },
+    { key: "watch dogs", label: "Watch Dogs" },
+    { key: "far cry", label: "Far Cry" },
+    { key: "bioshock", label: "BioShock" },
+    { key: "borderlands", label: "Borderlands" },
+    { key: "hitman", label: "Hitman" },
+    { key: "halo", label: "Halo" },
+    { key: "gears of war", label: "Gears of War" },
+    { key: "forza horizon", label: "Forza Horizon" },
+    { key: "forza motorsport", label: "Forza Motorsport" },
+    { key: "pokemon", label: "Pokemon" },
+    { key: "pokémon", label: "Pokemon" },
+    { key: "kirby", label: "Kirby" },
+    { key: "metroid", label: "Metroid" },
+    { key: "assassins creed", label: "Assassin’s Creed" },
+    { key: "grand theft", label: "Grand Theft Auto" },
+    { key: "gta", label: "Grand Theft Auto" },
+    { key: "metal gear", label: "Metal Gear" },
+    { key: "tomb raider", label: "Tomb Raider" },
+    { key: "dead space", label: "Dead Space" },
+    { key: "fight night", label: "Fight Night" },
+    { key: "mortal kombat", label: "Mortal Kombat" },
+    { key: "saints row", label: "Saints Row" },
+    { key: "devil may cry", label: "Devil May Cry" },
+    { key: "deus ex", label: "Deus Ex" },
+    { key: "max payne", label: "Max Payne" },
+    { key: "a plague tale", label: "A Plague Tale" },
+    { key: "uncharted", label: "Uncharted" },
+    { key: "gran turismo", label: "Gran Turismo" },
+    { key: "mafia", label: "Mafia" },
+    { key: "the legend of zelda", label: "The Legend of Zelda" },
+    { key: "super mario", label: "Super Mario" },
+    { key: "mario kart", label: "Mario Kart" },
+    { key: "god of war", label: "God of War" },
+    { key: "the last of us", label: "The Last of Us" },
+    { key: "the witcher", label: "The Witcher" },
+    { key: "witcher", label: "The Witcher" },
+    { key: "portal knights", label: "Portal Knights" },
+    { key: "portal", label: "Portal" },
+    { key: "half life", label: "Half-Life" },
+    { key: "marvel ultimate alliance", label: "Marvel Ultimate Alliance" },
+    { key: "dark souls", label: "Dark Souls" },
+    { key: "doom", label: "Doom" },
+    { key: "persona", label: "Persona" },
+    { key: "tekken", label: "Tekken" },
+    { key: "silent hill", label: "Silent Hill" },
+  ];
+
+  const found = seriesRules.find(series => {const key=normalize(series.key);return name===key||name.startsWith(key+' ');});
+  if(found)return found.label;
+  // Preserve catalogue-confirmed families without inventing a label from title words.
+  const collections=[...(Array.isArray(game?.normalized?.collections)?game.normalized.collections:[]),...(Array.isArray(game?.collections)?game.collections:[]),game?.collection].map(value=>typeof value==='string'?value:value?.name).filter(Boolean);
+  return collections.find(value=>{const key=normalize(value);return key.length>=4&&(name===key||name.startsWith(key+' '));})||null;
+}

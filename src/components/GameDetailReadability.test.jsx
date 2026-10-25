@@ -1,10 +1,24 @@
 import {render,screen,fireEvent,waitFor,within} from '@testing-library/react';
 import {GameDetailModal,HomeTab} from '../App';
 import {GameService} from '../services/gameService';
+import React from 'react';
+import {HOME_BLOCKS} from '../services/homeLayout';
 
 jest.mock('../services/gameService',()=>({GameService:{rawg:jest.fn(async()=>({results:[]})),igdb:jest.fn(async()=>({results:[]}))}}));
 beforeEach(()=>{jest.spyOn(window,'scrollTo').mockImplementation(()=>{});});
 afterEach(()=>jest.restoreAllMocks());
+test('dismissing an explained discovery replaces it and keeps a reversible preference',async()=>{
+ const candidates=['The Witcher 3: Wild Hunt','Portal 2','Mass Effect 2','BioShock 2','Halo 2'].map((name,i)=>({id:i+100,name,rating:4,ratings_count:500,genres:[{name:'RPG'}]}));
+ GameService.rawg.mockResolvedValue({results:candidates});
+ const owned=[{id:'one',name:'The Witcher 2: Assassins of Kings',status:'collection',rating:9,genreNames:['RPG']}];
+ const updates=jest.fn();function Home(){const [homeLayout,setLayout]=React.useState({hidden:Object.keys(HOME_BLOCKS).filter(id=>id!=='radar')});return <HomeTab games={owned} hardware={[]} badges={[]} level={1} totalXP={0} progress={{percent:0,currentXP:0,xpToNext:100}} setActiveTab={()=>{}} onOpenDetail={()=>{}} dealPreferences={{homeLayout}} onHomeLayoutChange={value=>{updates(value);setLayout(value);}}/>;}
+ render(<Home/>);
+ fireEvent.click(screen.getByRole('button',{name:/Découvertes.*Ouvrir/}));
+ expect(await screen.findByText('Tu as aimé The Witcher 2: Assassins of Kings. Ce jeu appartient aussi à la série The Witcher.')).toBeVisible();
+ fireEvent.click(screen.getByRole('button',{name:'Ça ne m’intéresse pas · The Witcher 3: Wild Hunt'}));
+ expect(updates).toHaveBeenCalledWith(expect.objectContaining({dismissedGames:['100']}));expect(screen.queryByText('The Witcher 3: Wild Hunt')).toBeNull();expect(screen.getByText('Halo 2')).toBeVisible();
+ fireEvent.click(screen.getByRole('button',{name:'Rétablir les suggestions masquées (1)'}));expect(screen.getByText('The Witcher 3: Wild Hunt')).toBeVisible();
+});
 test('game sheets separate progress, reviews, collection and catalogue information',async()=>{
  const progress=jest.fn().mockResolvedValue(true),navigate=jest.fn();
  const game={id:'one',name:'Halo',status:'collection',completed:true,rating:8,platformNames:['PC']};

@@ -1,3 +1,5 @@
+import {detectSeriesName} from './services/seriesIdentity';
+import {matchesLibraryShortcut} from './services/libraryShortcuts';
 import ToolDialog from './components/ToolDialog';
 import {hardwareImageForEdition,hardwareBaseImage,hardwareDisplayImage,hardwarePhotoUrl,hardwareEditionChoices} from './services/hardwareEditionPhotos';
 import HardwareEditionEditor from './components/HardwareEditionEditor';
@@ -4992,7 +4994,7 @@ export function GameDetailModal({
     ? game.genreNames.slice(0, 3).join(" • ")
     : "Genre à compléter";
   const releaseLabel = game.released ? formatReleaseDate(game.released) : "Date inconnue";
-  const seriesLabel = detectSeriesName(game.name) || game.parentGame || "Série non détectée";
+  const seriesLabel = detectSeriesName(game) || "Série non détectée";
   const editionLabel = game.isDLC
     ? "DLC / Extension"
     : game.name.match(
@@ -6620,13 +6622,17 @@ export function LibrarySection({
   setLibraryCardMode,
 }) {
   const [bulkMode,setBulkMode]=useState(false);
+  const [quickFilter,setQuickFilter]=useState('all');
+  const activeShortcut=title==='Collection'?quickFilter:'all';
+  const shortcutOptions=[['all','Tous'],['recent','Ajoutés · 30 jours'],['unrated','Sans note'],['paused','En pause']];
+  const shortcutGames=useMemo(()=>games.filter(game=>matchesLibraryShortcut(game,activeShortcut,getGameRating)),[games,activeShortcut]);
   const [sortBy, setSortBy] = useState("recent");
   const [visibleLimit,setVisibleLimit]=useState(48);
   // Live saves can reorder or remove records without changing the user's view.
   // Keep expanded pages until the user changes the search, sorting or layout.
-  useEffect(()=>setVisibleLimit(48),[sortBy,title,libraryCardMode,filterKey]);
+  useEffect(()=>setVisibleLimit(48),[sortBy,title,libraryCardMode,filterKey,quickFilter]);
 
-  const sortedGames = useMemo(()=>[...games].sort((a, b) => {
+  const sortedGames = useMemo(()=>[...shortcutGames].sort((a, b) => {
     if (sortBy === "alphabetical") {
       return (a.name || "").localeCompare(b.name || "", "fr", {
         numeric: true,
@@ -6656,7 +6662,7 @@ export function LibrarySection({
     }
 
     return compareLatestLibraryAdditions(a, b);
-  }),[games,sortBy]);
+  }),[shortcutGames,sortBy]);
   const visibleGames=sortedGames.slice(0,visibleLimit);
 
   const groupedGames = visibleGames.reduce((acc, game) => {
@@ -6932,11 +6938,11 @@ export function LibrarySection({
     <div className={`library-section ${libraryCardMode === "shelf" ? "library-section-shelf" : ""}`}>
       <div className="section-header">
         <h2>{title}</h2>
-        <span className="section-count">{games.length} jeux</span>
+        <span className="section-count">{sortedGames.length} jeux{activeShortcut!=='all'?` / ${games.length}`:''}</span>
       </div>
 
       <div className="library-controls">
-      {onBulkUpdate && <LibraryBulkEditor games={games} onApply={onBulkUpdate} active={bulkMode} onActiveChange={setBulkMode}/>}
+      {onBulkUpdate && <LibraryBulkEditor games={shortcutGames} onApply={onBulkUpdate} active={bulkMode} onActiveChange={setBulkMode}/>}
       {!bulkMode && <>
       <div className="library-view-toggle">
         <button
@@ -6973,13 +6979,14 @@ export function LibrarySection({
           <option value="genre">Genre</option>
         </select>
       </label>
+      {title==='Collection'&&<div className="library-shortcuts" role="group" aria-label="Raccourcis de la collection">{shortcutOptions.map(([key,label])=><button type="button" key={key} className="option-pill" aria-pressed={quickFilter===key} onClick={()=>setQuickFilter(key)}>{label} <span>{games.filter(game=>matchesLibraryShortcut(game,key,getGameRating)).length}</span></button>)}</div>}
       </>}
       </div>
       {!bulkMode && <>
-      {games.length === 0 ? (
+      {sortedGames.length === 0 ? (
         <EmptyState
-          title="Cette section est encore calme"
-          subtitle="Ajoute un jeu, change un statut ou lance une recherche pour lui donner du relief."
+          title={activeShortcut==='all'?"Cette section est encore calme":"Aucun jeu pour ce raccourci"}
+          subtitle={activeShortcut==='all'?"Ajoute un jeu, change un statut ou lance une recherche pour lui donner du relief.":"Choisis Tous pour retrouver les autres jeux. Les derniers ajouts couvrent les 30 derniers jours, quand leur date d’ajout est connue."}
         />
       ) : libraryCardMode === "shelf" ? (
         <LibraryShelf3D
@@ -9471,24 +9478,13 @@ export function HomeTab({
     { label: "Top 5", tab: "top5", icon: Trophy },
   ];
   const favoriteGamesCount = games.filter((game) => game.favorite).length;
-  const primaryRecommendation = recommendations[0] || null;
-  const secondaryRecommendations = recommendations.slice(1, 4);
-  const radarSignals = [
-    {
-      label: "Profil",
-      value: playerAnalysis.title,
-    },
-    {
-      label: "Affinités",
-      value: favoriteGamesCount
-        ? `${favoriteGamesCount} favoris`
-        : `${ratedGames.length} notes`,
-    },
-    {
-      label: "Plateformes",
-      value: `${hardwareByType.console || 0} actives`,
-    },
-  ];
+  const homeLayout=normalizeHomeLayout(dealPreferences.homeLayout);
+  const visibleRecommendations=recommendations.filter(game=>!homeLayout.dismissedGames.includes(String(game.id)));
+  const primaryRecommendation = visibleRecommendations[0] || null;
+  const secondaryRecommendations = visibleRecommendations.slice(1, 4);
+  const dismissRecommendation=game=>onHomeLayoutChange?.({...homeLayout,dismissedGames:[String(game.id),...homeLayout.dismissedGames]});
+
+
   const homeActivityItems = socialActivities.slice(0, 4);
   const featuredActivity = homeActivityItems[0] || null;
   const secondaryActivities = homeActivityItems.slice(1, 4);
@@ -9938,7 +9934,7 @@ export function HomeTab({
           })
           .sort((a, b) => b.recommendationScore - a.recommendationScore);
 
-        setRecommendations(scored.slice(0, 3));
+        setRecommendations(scored.slice(0, 20));
       } catch (e) {
         if (isAbortError(e)) return;
         console.warn("Erreur recommandations ignorée :", e);
@@ -10143,9 +10139,9 @@ export function HomeTab({
       {games.some(game=>game.status!=='wishlist')&&<HomeBlock id="radar"><div className="search-panel home-recommendations-panel home-radar-panel">
         <div className="home-section-head home-radar-head">
           <div>
-            <div className="home-card-title">Radar découverte</div>
+            <div className="home-card-title">Des idées pour toi</div>
             <p className="home-section-subtitle">
-              Une veille personnalisée qui mélange tes goûts, tes notes et tes plateformes.
+              Des jeux en lien avec tes goûts. Chaque suggestion explique pourquoi elle apparaît.
             </p>
           </div>
 
@@ -10154,15 +10150,7 @@ export function HomeTab({
           </button>
         </div>
 
-        <div className="home-radar-signals">
-          {radarSignals.map((signal) => (
-            <div key={signal.label} className="home-radar-signal">
-              <span>{signal.label}</span>
-              <strong>{signal.value}</strong>
-            </div>
-          ))}
-        </div>
-
+        {homeLayout.dismissedGames.length>0&&onHomeLayoutChange&&<button type="button" className="home-dismiss-action" onClick={()=>onHomeLayoutChange({...homeLayout,dismissedGames:[]})}>Rétablir les suggestions masquées ({homeLayout.dismissedGames.length})</button>}
         {loadingRecommendations ? (
           <div className="home-radar-loading">
             <span />
@@ -10170,12 +10158,12 @@ export function HomeTab({
           </div>
         ) : !primaryRecommendation ? (
           <div className="home-radar-empty">
-            <strong>Radar en calibration</strong>
-            <span>Ajoute un jeu à ta collection, puis indique ceux que tu apprécies. Les suggestions expliqueront leur lien avec tes jeux.</span>
+            <strong>Pas de suggestion pour l’instant</strong>
+            <span>{homeLayout.dismissedGames.length?'Tu as écarté les suggestions disponibles. Tu peux les rétablir avec le bouton ci-dessus ou revenir plus tard pour de nouvelles découvertes.':'Ajoute un jeu à ta collection, puis indique ceux que tu apprécies. Les suggestions expliqueront leur lien avec tes jeux.'}</span>
           </div>
         ) : (
           <div className="home-radar-layout">
-            <button
+            <div className="home-radar-featured"><button
               type="button"
               className="home-radar-hero"
               onClick={() => setActiveTab("search")}
@@ -10187,7 +10175,7 @@ export function HomeTab({
               )}
 
               <div className="home-radar-hero-overlay">
-                <span className="home-recommendation-kicker">Signal principal</span>
+                <span className="home-recommendation-kicker">À découvrir</span>
                 <strong>{primaryRecommendation.name}</strong>
                 <small>
                   {primaryRecommendation.recommendationExplanation}
@@ -10197,12 +10185,10 @@ export function HomeTab({
                   {formatRating10(primaryRecommendation.rating || 0, "Non noté")}
                 </em>
               </div>
-            </button>
-
+            </button>{onHomeLayoutChange&&<button type="button" className="home-dismiss-action" onClick={()=>dismissRecommendation(primaryRecommendation)}>Ça ne m’intéresse pas · {primaryRecommendation.name}</button>}</div>
             <div className="home-radar-side-list">
               {secondaryRecommendations.map((game, index) => (
-                <button
-                  key={game.id}
+                <div key={game.id} className="home-radar-mini-choice"><button
                   type="button"
                   className="home-radar-mini-card"
                   onClick={() => setActiveTab("search")}
@@ -10213,12 +10199,12 @@ export function HomeTab({
                     <div className="home-game-placeholder">CP</div>
                   )}
                   <div>
-                    <span>Signal {index + 2}</span>
+                    <span>Autre idée</span>
                     <strong>{game.name}</strong>
                     <small className="recommendation-explanation">{game.recommendationExplanation}</small>
                     <small>{formatRating10(game.rating || 0, "Non noté")}</small>
                   </div>
-                </button>
+                </button>{onHomeLayoutChange&&<button type="button" className="home-dismiss-action" onClick={()=>dismissRecommendation(game)}>Ça ne m’intéresse pas · {game.name}</button>}</div>
               ))}
 
               <button
@@ -11651,93 +11637,13 @@ function gameMatchesSearchFilters(game, filters = {}) {
   return true;
 }
 
-function detectSeriesName(gameName) {
-  const name = normalizeSearchText(String(gameName || '').replace(/['’]/g, ''));
-
-  const seriesRules = [
-    { key: "splinter cell", label: "Tom Clancy's Splinter Cell" },
-    { key: "rainbow six", label: "Tom Clancy's Rainbow Six" },
-    { key: "ghost recon", label: "Tom Clancy's Ghost Recon" },
-    { key: "the division", label: "Tom Clancy's The Division" },
-    { key: "lego star wars", label: "Lego Star Wars" },
-    { key: "star wars", label: "Star Wars" },
-    { key: "lord of the rings", label: "The Lord of the Rings" },
-    { key: "the lord", label: "The Lord of the Rings" },
-    { key: "resident evil", label: "Resident Evil" },
-    { key: "call of duty", label: "Call of Duty" },
-    { key: "shadow of mordor", label: "Middle-earth" },
-    { key: "shadow of war", label: "Middle-earth" },
-    { key: "middle earth", label: "Middle-earth" },
-    { key: "middle-earth", label: "Middle-earth" },
-    { key: "marvel spider", label: "Marvel's Spider-Man" },
-    { key: "marvels spider", label: "Marvel's Spider-Man" },
-    { key: "spider-man", label: "Marvel's Spider-Man" },
-    { key: "spiderman", label: "Marvel's Spider-Man" },
-    { key: "batman arkham", label: "Batman Arkham" },
-    { key: "need for speed", label: "Need for Speed" },
-    { key: "final fantasy", label: "Final Fantasy" },
-    { key: "dragon ball", label: "Dragon Ball" },
-    { key: "dragon age", label: "Dragon Age" },
-    { key: "mass effect", label: "Mass Effect" },
-    { key: "red dead", label: "Red Dead Redemption" },
-    { key: "watch dogs", label: "Watch Dogs" },
-    { key: "far cry", label: "Far Cry" },
-    { key: "bioshock", label: "BioShock" },
-    { key: "borderlands", label: "Borderlands" },
-    { key: "hitman", label: "Hitman" },
-    { key: "halo", label: "Halo" },
-    { key: "gears of war", label: "Gears of War" },
-    { key: "forza horizon", label: "Forza Horizon" },
-    { key: "forza motorsport", label: "Forza Motorsport" },
-    { key: "pokemon", label: "Pokemon" },
-    { key: "pokémon", label: "Pokemon" },
-    { key: "kirby", label: "Kirby" },
-    { key: "metroid", label: "Metroid" },
-    { key: "assassin", label: "Assassin’s Creed" },
-    { key: "grand theft", label: "Grand Theft Auto" },
-    { key: "gta", label: "Grand Theft Auto" },
-    { key: "metal gear", label: "Metal Gear" },
-    { key: "tomb raider", label: "Tomb Raider" },
-    { key: "dead space", label: "Dead Space" },
-    { key: "fight night", label: "Fight Night" },
-    { key: "mortal kombat", label: "Mortal Kombat" },
-    { key: "saints row", label: "Saints Row" },
-    { key: "devil may cry", label: "Devil May Cry" },
-    { key: "deus ex", label: "Deus Ex" },
-    { key: "max payne", label: "Max Payne" },
-    { key: "a plague", label: "A Plague Tale" },
-    { key: "uncharted", label: "Uncharted" },
-    { key: "gran turismo", label: "Gran Turismo" },
-    { key: "mafia", label: "Mafia" },
-    { key: "zelda", label: "The Legend of Zelda" },
-    { key: "super mario", label: "Super Mario" },
-    { key: "mario kart", label: "Mario Kart" },
-    { key: "god of war", label: "God of War" },
-    { key: "the last of us", label: "The Last of Us" },
-  ];
-
-  const found = seriesRules.find((series) => name.includes(series.key));
-  if (found) return found.label;
-  if (name.startsWith('tom clancys')) return null;
-
-  const words = name.split(" ").filter(Boolean);
-  if (words.length < 2) return null;
-
-  const connectorWords = new Set(["of", "the", "and", "de", "du", "des", "la", "le", "les"]);
-  const fallbackLength = connectorWords.has(words[1]) && words.length >= 3 ? 3 : 2;
-
-  return words
-    .slice(0, fallbackLength)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(" ");
-}
 
 function getDetectedGameSeries(games) {
   const groups = {};
 
   games.forEach((game) => {
     if (!isSeriesLibraryEpisode(game)) return;
-    const seriesName = detectSeriesName(game.name);
+    const seriesName = detectSeriesName(game);
     if (!seriesName) return;
 
     if (!groups[seriesName]) groups[seriesName] = [];
