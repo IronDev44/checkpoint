@@ -9,6 +9,7 @@ import {handleSocialReactions} from './social-reactions-api.js';
 import {handleSharedGames} from './shared-games-api.js';
 import {handleSocialReports} from './social-reports-api.js';
 import {socialBlocked,canContact,canReadSocialProfile} from './social-access.js';
+import {handleUsage} from './usage-api.js';
 const PRIVATE = new Set(['games','hardware','gameCollections','playerProgress','playerPrivateSettings']);
 const SHARED = new Set(['news','events','publicProfiles']);
 let keyCache;
@@ -96,6 +97,7 @@ export async function handleAccountApi(request,env,verify=verifyFirebaseToken){
   if(!env.ACCOUNT_DB)return response({error:'Le stockage des comptes n’est pas encore activé.'},503);
   let uid;try{const match=request.headers.get('Authorization')?.match(/^Bearer (.+)$/);if(!match)return response({error:'Connexion nécessaire.'},401);uid=await verify(match[1]);}catch{return response({error:'Reconnecte-toi pour ouvrir ton espace.'},401);}
   const url=new URL(request.url);const name=url.searchParams.get('collection');const id=url.searchParams.get('id');
+  if(name==='appUsage')return handleUsage(request,env,uid);
   if(name==='friendPolls')return handleFriendPolls(request,env,uid,url);
   if(name==='friendships')return handleFriendships(request,env,uid);
   if(name==='socialControls')return handleSocialControls(request,env,uid);

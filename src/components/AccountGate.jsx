@@ -7,6 +7,7 @@ import WelcomeTour from "./WelcomeTour";
 import StartupIntro from "./StartupIntro";
 import { readStartupAppearance } from "../services/startupAppearance";
 import "./AccountWelcome.css";
+import {startUsageTracking} from '../services/appUsage';
 
 const messages = {
   "auth/invalid-credential": "L’adresse ou le mot de passe ne correspond pas.",
@@ -19,6 +20,7 @@ const messages = {
 };
 export default function AccountGate({ children }) {
   const [user, setUser] = useState(undefined);
+  useEffect(()=>{if(accountsEnabled&&user?.uid)return startUsageTracking();},[user?.uid]);
   const [mode, setMode] = useState("create");
   const [pseudo, setPseudo] = useState("");
   const [email, setEmail] = useState("");
