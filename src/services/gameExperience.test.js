@@ -23,3 +23,11 @@ test('partial criteria exclude longevity while full criteria return after comple
   expect(getExperienceRatingFields({ ratingExperience: 'completed' }, fields)).toEqual(fields);
   expect(new Set(DISCOVERY_FEELINGS.map((item) => item.id)).size).toBe(14);
 });
+
+
+test('recorded progression defines the review without another experience choice',()=>{
+ expect(getGameExperience({progressStatus:'completed',ratingExperience:'tried'})).toBe('completed');
+ expect(getGameExperience({progressStatus:'tried',ratingExperience:'completed'})).toBe('tried');
+ for(const progressStatus of ['in_progress','paused','abandoned'])expect(getGameExperience({progressStatus,ratingExperience:'completed'})).toBe('partial');
+ expect(getGameExperience({status:'collection',ratingExperience:'completed'})).toBe('completed');
+});

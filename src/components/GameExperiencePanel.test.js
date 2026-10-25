@@ -1,12 +1,9 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import GameExperiencePanel from './GameExperiencePanel';
 
-test('the three experiences remain changeable without deleting notes', () => {
-  const onChange = jest.fn();
-  render(<GameExperiencePanel game={{ id: 'a', rating: 7 }} onChange={onChange} />);
-  fireEvent.click(screen.getByRole('button', { name: /Terminé Ton expérience complète/ }));
-  expect(onChange).toHaveBeenCalledWith('a', expect.objectContaining({ ratingExperience: 'completed', completed: true }));
-  expect(onChange.mock.calls[0][1]).not.toHaveProperty('rating');
+test('completed games do not expose a second status selector', () => {
+ const {container}=render(<GameExperiencePanel game={{id:'a',completed:true}} onChange={jest.fn()}/>);
+ expect(container).toBeEmptyDOMElement();
 });
 
 test('discovery supports multiple feelings, toggling and revealing more choices', () => {

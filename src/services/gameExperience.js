@@ -22,9 +22,11 @@ export const DISCOVERY_FEELINGS = [
 ];
 
 export function getGameExperience(game = {}) {
-  if (EXPERIENCE_OPTIONS.some((option) => option.id === game.ratingExperience)) return game.ratingExperience;
   if (game.completed || game.progressStatus === 'completed' || /termin/i.test(game.status || '')) return 'completed';
   if (game.progressStatus === 'tried') return 'tried';
+  if (['playing', 'in_progress', 'deep_play', 'paused', 'abandoned'].includes(game.progressStatus)) return 'partial';
+  // Keep legacy notes usable, while a recorded progress state takes precedence.
+  if (EXPERIENCE_OPTIONS.some((option) => option.id === game.ratingExperience)) return game.ratingExperience;
   if (['playing', 'in_progress', 'deep_play'].includes(game.progressStatus) || game.status === 'en cours' || ['rating', 'ratingGraphics', 'ratingGameplay', 'ratingStory', 'ratingSound', 'ratingLongevity'].some((key) => Number(game[key]) > 0)) return 'partial';
   return null;
 }

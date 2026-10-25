@@ -4878,6 +4878,8 @@ export function GameDetailModal({
   const [localOstRating, setLocalOstRating] = useState(0);
   const [dlcs, setDlcs] = useState([]);
   const [loadingDlcs, setLoadingDlcs] = useState(false);
+  const [dlcStatus,setDlcStatus]=useState("unavailable");
+  const [dlcRetry,setDlcRetry]=useState(0);
   const swipeStartRef = useRef(null);
 
   useEffect(() => {
@@ -4920,154 +4922,24 @@ export function GameDetailModal({
   }, [game, onClose, onNavigateGame, canGoPrevious, canGoNext]);
 
   useEffect(() => {
-    if (detailTab !== "infos") return;
+    if(detailTab!=="infos")return;
     let active=true;
     setDlcs([]);
-    if (!game?.name) {
-      setDlcs([]);
-      return;
-    }
-
-    const fetchDlcs = async () => {
-      try {
-        setLoadingDlcs(true);
-
-        const rawgGameId = game.rawgId || game.rawg_id || game.rawgID;
-
-        let foundDlcs = [];
-
-        if (rawgGameId) {
-          const additionsData = await rawgApiRequest(
-            `/games/${encodeURIComponent(rawgGameId)}/additions`,
-            {
-              page_size: "20",
-            }
-          );
-          foundDlcs = additionsData.results || [];
-        }
-
-        if (foundDlcs.length === 0) {
-          const search = `${game.name} DLC expansion`;
-          const searchData = await rawgApiRequest(
-            "/games",
-            {
-              search,
-              page_size: "20",
-            }
-          );
-          const parentName = game.name.toLowerCase();
-          const parentBaseName = parentName.split(":")[0].split("-")[0].trim();
-
-          foundDlcs = (searchData.results || []).filter((item) => {
-            const name = (item.name || "").toLowerCase();
-
-            if (!name || name === parentName) return false;
-
-            const positiveKeywords = [
-              "dlc",
-              "expansion",
-              "season pass",
-              "story expansion",
-              "add-on",
-              "addon",
-              "chapter",
-              "episode",
-              "phantom liberty",
-              "blood and wine",
-              "hearts of stone",
-              "frozen wilds",
-              "shadow of the erdtree",
-              "the old hunters",
-              "left behind",
-              "burning shores",
-              "iceborne",
-              "separate ways",
-              "expansion",
-              "chapter",
-              "episode",
-              "story",
-              "pass",
-              "quest",
-              "campaign",
-              "adventure",
-              "content",
-            ];
-
-            const negativeKeywords = [
-              "edition",
-              "ultimate",
-              "definitive",
-              "complete",
-              "collection",
-              "bundle",
-              "remastered",
-              "remake",
-              "game of the year",
-              "goty",
-              "trilogy",
-              "anthology",
-            ];
-
-            const hasPositiveKeyword = positiveKeywords.some((keyword) =>
-              name.includes(keyword)
-            );
-
-            const hasNegativeKeyword = negativeKeywords.some((keyword) =>
-              name.includes(keyword)
-            );
-
-            const linkedToParent =
-              parentBaseName.length > 3 && name.includes(parentBaseName);
-
-            const isProbablyEdition = negativeKeywords.some((keyword) =>
-              name.includes(keyword)
-            );
-
-            const knownDlcNames = [
-              "phantom liberty",
-              "blood and wine",
-              "hearts of stone",
-              "frozen wilds",
-              "burning shores",
-              "shadow of the erdtree",
-              "the old hunters",
-              "left behind",
-              "iceborne",
-              "separate ways",
-            ];
-
-            const isKnownDlc = knownDlcNames.some((keyword) =>
-              name.includes(keyword)
-            );
-
-            const isLinkedDlc =
-              linkedToParent &&
-              name !== parentName &&
-              name.length > parentName.length + 3 &&
-              hasPositiveKeyword;
-
-            return (isKnownDlc || isLinkedDlc) && !isProbablyEdition;
-          });
-        }
-
-        const uniqueDlcs = foundDlcs.filter(
-          (dlc, index, self) =>
-            index === self.findIndex((item) => item.id === dlc.id)
-        );
-
-        if(active)setDlcs(uniqueDlcs);
-      } catch (e) {
-        if (isAbortError(e)) return;
-        console.warn("Erreur recherche DLC ignorée :", e);
-        if(active)setDlcs([]);
-      } finally {
-        if(active)setLoadingDlcs(false);
-      }
-    };
-
-    fetchDlcs();
+    const rawgId=String(game?.rawgId||game?.rawg_id||game?.rawgID||'');
+    if(!/^[1-9]\d*$/.test(rawgId)){setDlcStatus('unavailable');setLoadingDlcs(false);return;}
+    setLoadingDlcs(true);setDlcStatus('loading');
+    // Only the catalogue's explicit parent/extension relationship is reliable.
+    // A title search also returns unrelated games from the same franchise.
+    rawgApiRequest(`/games/${encodeURIComponent(rawgId)}/additions`,{page_size:'20'})
+      .then(data=>{
+        if(!active)return;
+        if(!Array.isArray(data?.results))throw Error('Invalid additions response');
+        setDlcs(data.results.filter((item,index,items)=>item?.id&&item?.name&&String(item.id)!==rawgId&&items.findIndex(other=>String(other.id)===String(item.id))===index));
+        setDlcStatus('ready');
+      }).catch(()=>{if(active)setDlcStatus('error');})
+      .finally(()=>{if(active)setLoadingDlcs(false);});
     return()=>{active=false;};
-  }, [game?.id,detailTab]);
+  },[game?.id,detailTab,dlcRetry]);
 
   if (!game) return null;
 
@@ -5172,6 +5044,7 @@ export function GameDetailModal({
         onTouchStart={handleSwipeStart}
         onTouchEnd={handleSwipeEnd}
       >
+        <div className="game-detail-toolbar" aria-label="Navigation de la fiche">
         <button
           className="modal-close-btn"
           aria-label="Fermer la fiche du jeu"
@@ -5204,6 +5077,8 @@ export function GameDetailModal({
         >
           ›
         </button>
+
+        </div>
 
         <div
           className={`game-detail-premium-hero ${game.image ? "" : "empty"}`}
@@ -5346,10 +5221,9 @@ export function GameDetailModal({
           </section>
           <section role="tabpanel" id="game-detail-panel-avis" aria-labelledby="game-detail-tab-avis" hidden={detailTab!=='avis'} key={`avis-${game.id}`}>
             <p className="game-detail-panel-intro">Ta note et ce que tu retiens de ce jeu.</p>
-          <details className="game-detail-organized-group" open={!experience || undefined}>
-            <summary>Ton expérience{experience ? ` : ${experience === 'completed' ? 'Terminé' : experience === 'partial' ? 'Joué, non terminé' : 'Essayé'}` : ' avec ce jeu'}</summary>
-            <GameExperiencePanel key={game.id} game={game} onChange={onSetExperienceInfo} />
-          </details>
+          {!experience&&<p className="game-detail-rating-context">Pour noter ce jeu, indique où tu en es dans « Ma partie ». <button type="button" className="option-pill" onClick={()=>setDetailTab('partie')}>Renseigner ma partie</button></p>}
+          {experience==='partial'&&<p className="game-detail-rating-context">Note ce que tu as découvert jusqu’ici. Tu pourras compléter ton avis au fil de ta partie.</p>}
+          {experience==='tried'&&<details className="game-detail-organized-group"><summary>Mes impressions (facultatif)</summary><GameExperiencePanel key={game.id} game={game} onChange={onSetExperienceInfo}/></details>}
 
           {experience && <div className="game-detail-section">
             <div className="modal-block-title">{experience === "completed" ? "Note globale" : experience === "tried" ? "Ton ressenti (facultatif)" : "Ressenti général · Avis partiel"}</div>
@@ -5555,11 +5429,11 @@ export function GameDetailModal({
           <div className="game-detail-section">
             <div className="modal-block-title">DLC & Extensions</div>
 
-            {loadingDlcs && <div className="option-value">Recherche des DLC...</div>}
+            {loadingDlcs && <div className="option-value" role="status">Chargement des extensions…</div>}
 
-            {!loadingDlcs && dlcs.length === 0 && (
-              <div className="option-value">Aucun DLC trouvé automatiquement.</div>
-            )}
+            {!loadingDlcs&&dlcStatus==='unavailable'&&<p className="option-value">Les extensions ne sont pas renseignées pour ce jeu.</p>}
+            {!loadingDlcs&&dlcStatus==='error'&&<div><p role="status">Impossible de charger les extensions pour le moment.</p><button type="button" className="option-pill" onClick={()=>setDlcRetry(value=>value+1)}>Réessayer</button></div>}
+            {!loadingDlcs&&dlcStatus==='ready'&&!dlcs.length&&<p className="option-value">Aucune extension répertoriée.</p>}
 
             {!loadingDlcs && dlcs.length > 0 && (
               <div className="library-dlc-list">
@@ -5631,9 +5505,10 @@ export function GameDetailModal({
           </div>
 
           <div className="game-detail-section game-detail-history-section">
-            <div className="modal-block-title">Historique</div>
+            <div className="modal-block-title">Dates de ta collection</div>
+            {historyItems.filter(item=>item.label!=="Statut actuel"&&item.value!=="Non renseigné").length===0&&<p className="option-value">Aucune date enregistrée pour ce jeu.</p>}
             <div className="game-detail-history-list">
-              {historyItems.map((item) => (
+              {historyItems.filter(item=>item.label!=="Statut actuel"&&item.value!=="Non renseigné").map((item) => (
                 <div key={item.label}>
                   <span>{item.label}</span>
                   <strong>{item.value}</strong>

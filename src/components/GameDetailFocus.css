@@ -2,7 +2,9 @@
 html body[data-theme] .game-modal.game-detail-focused .game-detail-premium-hero{
   min-height:0!important;grid-template-columns:100px minmax(0,1fr)!important;align-items:center!important;gap:18px!important;padding:72px 22px 22px!important
 }
-html body[data-theme] .game-modal.game-detail-focused .game-detail-premium-cover{width:100px!important;max-width:100%;aspect-ratio:3/4;height:auto!important;border-radius:12px!important}
+html body[data-theme] .game-modal.game-detail-focused .game-detail-premium-cover{width:100px!important;min-width:0!important;max-width:100%;aspect-ratio:3/4;height:auto!important;border-radius:12px!important;align-self:start!important}
+html body[data-theme] .game-modal.game-detail-focused .game-detail-premium-identity{display:flex!important;flex-direction:column!important;align-items:flex-start!important;min-width:0!important;gap:0!important;padding:0!important}
+html body[data-theme] .game-modal.game-detail-focused .game-detail-premium-identity h2{min-height:0!important;max-height:none!important;display:block!important;overflow:visible!important;overflow-wrap:anywhere!important}
 html body[data-theme] .game-modal.game-detail-focused .game-detail-premium-identity h2{font-size:clamp(1.2rem,3.8vw,1.7rem)!important;line-height:1.25!important;margin:8px 0!important}
 html body[data-theme] .game-modal.game-detail-focused .game-detail-premium-identity p{font-size:.8rem!important;line-height:1.5;margin:0 0 10px!important}
 html body[data-theme] .game-modal.game-detail-focused .game-detail-kicker{display:flex!important;font-size:.7rem}
@@ -37,3 +39,21 @@ html body[data-theme] .game-detail-tabs>[role=tab][aria-selected=true]{border-co
  html body[data-theme] .game-modal.game-detail-focused .game-detail-premium-identity p{margin:0 0 6px!important;font-size:.7rem!important}
  .game-detail-focused .game-detail-tabs{margin-bottom:10px;padding-bottom:8px}
 }
+
+/* Keep navigation in its own row, including when the hero has scrolled away. */
+html body[data-theme] .game-detail-focused .game-detail-toolbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:8px;min-height:64px;padding:10px 16px;box-sizing:border-box;background:var(--panel-bg,#101319);border-bottom:1px solid var(--surface-border,#ffffff16)}
+html body[data-theme] .game-detail-focused .game-detail-toolbar :is(.game-detail-nav-btn,.modal-close-btn){position:static!important;inset:auto!important;transform:none!important;width:44px!important;height:44px!important;min-width:44px!important;min-height:44px!important;margin:0!important;flex:0 0 44px;display:grid!important;place-items:center;padding:0!important}
+html body[data-theme] .game-detail-focused .game-detail-toolbar .prev{order:1}
+html body[data-theme] .game-detail-focused .game-detail-toolbar .next{order:2}
+html body[data-theme] .game-detail-focused .game-detail-toolbar .modal-close-btn{order:3;margin-left:auto!important}
+html body[data-theme] .game-modal.game-detail-focused .game-detail-premium-hero{padding-top:20px!important}
+html body[data-theme] .game-detail-focused .game-detail-tabs{position:sticky;top:64px;z-index:10;background:var(--panel-bg,#101319);padding-top:8px}
+html body[data-theme] .game-detail-focused .game-detail-info-content>.game-detail-section{padding:20px 0!important;margin:0!important;border:0!important;border-top:1px solid var(--surface-border,#ffffff20)!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+html body[data-theme] .game-detail-focused .game-detail-meta-grid{gap:16px!important;margin:0 0 20px!important}
+html body[data-theme] .game-detail-focused :is(.game-detail-meta-grid,.game-detail-history-list)>div{min-width:0;padding:0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+html body[data-theme] .game-detail-focused :is(.game-detail-meta-grid,.game-detail-history-list) strong{overflow-wrap:anywhere;line-height:1.5}
+html body[data-theme] .game-detail-focused .library-dlc-card{display:grid!important;grid-template-columns:72px minmax(0,1fr)!important;align-items:start;gap:14px;padding:16px 0!important;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important}
+html body[data-theme] .game-detail-focused :is(.library-dlc-card>img,.library-dlc-placeholder){width:72px!important;height:96px!important;min-width:0!important;object-fit:cover;border-radius:10px}
+html body[data-theme] .game-detail-focused .library-dlc-content{min-width:0}
+html body[data-theme] .game-detail-focused .library-dlc-title{font-size:.95rem!important;line-height:1.45;overflow-wrap:anywhere}
+html body[data-theme] .game-detail-focused .library-dlc-btn{max-width:100%;width:auto!important;min-height:44px;height:auto!important;padding:10px 12px!important;font-size:.8rem!important;white-space:normal!important;word-break:normal!important;overflow-wrap:normal!important}

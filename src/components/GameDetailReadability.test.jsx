@@ -1,4 +1,4 @@
-import {render,screen,fireEvent,waitFor} from '@testing-library/react';
+import {render,screen,fireEvent,waitFor,within} from '@testing-library/react';
 import {GameDetailModal,HomeTab} from '../App';
 import {GameService} from '../services/gameService';
 
@@ -38,4 +38,45 @@ test('the empty home gives a concrete first action without empty personal statis
  expect(screen.queryByText('Pulse en attente')).toBeNull();
  expect(screen.queryByRole('button',{name:/Bilan du mois/})).toBeNull();
  expect(GameService.rawg).not.toHaveBeenCalledWith('/games',expect.objectContaining({genres:expect.anything()}));
+});
+
+
+test('a game without a RAWG link never suggests another franchise title as an extension',()=>{
+ GameService.rawg.mockClear();
+ render(<GameDetailModal game={{id:'igdb:1',name:'DRAGON BALL: Sparking! ZERO',status:'collection',rawgId:'igdb:1'}} onClose={()=>{}}/>);
+ fireEvent.click(screen.getByRole('tab',{name:'Infos'}));
+ expect(screen.getByText('Les extensions ne sont pas renseignées pour ce jeu.')).toBeVisible();
+ expect(GameService.rawg).not.toHaveBeenCalled();
+ expect(screen.getByText('Aucune date enregistrée pour ce jeu.')).toBeVisible();
+ expect(within(screen.getByRole('tabpanel',{name:'Infos'})).queryByText('Non renseigné')).toBeNull();
+});
+test('only explicitly linked additions appear and a failed catalogue request can be retried',async()=>{
+ GameService.rawg.mockClear();
+ GameService.rawg.mockRejectedValueOnce(new Error('Offline')).mockResolvedValueOnce({results:[{id:20,name:'Extension liée'},{id:20,name:'Extension liée'},{id:10,name:'Jeu parent'}]});
+ render(<GameDetailModal game={{id:'one',name:'Jeu parent',status:'collection',rawgId:10}} onClose={()=>{}}/>);
+ fireEvent.click(screen.getByRole('tab',{name:'Infos'}));
+ expect(await screen.findByText('Impossible de charger les extensions pour le moment.')).toBeVisible();
+ fireEvent.click(screen.getByRole('button',{name:'Réessayer'}));
+ expect(await screen.findByText('Extension liée')).toBeVisible();
+ expect(screen.getAllByText('Extension liée')).toHaveLength(1);
+ expect(GameService.rawg).toHaveBeenCalledTimes(2);
+ expect(GameService.rawg.mock.calls.every(([path])=>path==='/games/10/additions')).toBe(true);
+});
+
+
+test('the review adapts to the saved progress and never asks for the status again',()=>{
+ const game={id:'one',name:'Halo',status:'collection',completed:true,progressStatus:'completed',rating:8};
+ const props={game,onClose:()=>{},onSetProgressStatus:jest.fn()};
+ const view=render(<GameDetailModal {...props}/>);
+ fireEvent.click(screen.getByRole('tab',{name:'Mon avis'}));
+ expect(screen.getByText('Note globale')).toBeVisible();
+ expect(screen.queryByText('Ton expérience avec ce jeu')).toBeNull();
+ expect(screen.queryByRole('combobox',{name:'Ma progression'})).toBeNull();
+ view.rerender(<GameDetailModal {...props} game={{...game,completed:false,progressStatus:'paused',ratingExperience:'completed'}}/>);
+ expect(screen.getByText('Ressenti général · Avis partiel')).toBeVisible();
+ expect(screen.queryByText('Note globale')).toBeNull();
+ view.rerender(<GameDetailModal {...props} game={{...game,completed:false,progressStatus:'tried',ratingExperience:'completed'}}/>);
+ expect(screen.getByText('Ton ressenti (facultatif)')).toBeVisible();
+ expect(screen.queryByText('Notes détaillées par critère')).toBeNull();
+ expect(screen.getByText('Mes impressions (facultatif)')).toBeVisible();
 });
