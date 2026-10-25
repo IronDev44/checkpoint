@@ -1,0 +1,6 @@
+.selected-social-games{min-width:0;margin:12px 0}
+.selected-social-games p{font-size:.8rem;line-height:1.5}
+.selected-social-games ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.selected-social-games li{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.selected-social-games li span{min-width:0;overflow-wrap:anywhere;line-height:1.5}
+html body[data-theme] .selected-social-games button{flex:0 0 auto;width:auto;min-height:44px;height:auto;padding:8px 12px;white-space:normal;font-size:.8rem}

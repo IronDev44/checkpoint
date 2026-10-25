@@ -1,20 +1,33 @@
-import {render,screen,fireEvent} from '@testing-library/react';
+import {render,screen,fireEvent,waitFor} from '@testing-library/react';
 import {GameDetailModal,HomeTab} from '../App';
 import {GameService} from '../services/gameService';
 
 jest.mock('../services/gameService',()=>({GameService:{rawg:jest.fn(async()=>({results:[]})),igdb:jest.fn(async()=>({results:[]}))}}));
 beforeEach(()=>{jest.spyOn(window,'scrollTo').mockImplementation(()=>{});});
 afterEach(()=>jest.restoreAllMocks());
-test('a completed game keeps the essential actions visible and secondary editing folded',()=>{
- const progress=jest.fn();
- render(<GameDetailModal game={{id:'one',name:'Halo',status:'collection',completed:true,rating:8,platformNames:['PC']}} onClose={()=>{}} onSetProgressStatus={progress}/>);
- expect(screen.getByRole('button',{name:'Commencer / reprendre'})).toBeVisible();
- fireEvent.click(screen.getByRole('button',{name:'Déjà terminé'}));
- expect(progress).toHaveBeenCalledWith('one','completed');
- expect(screen.getByText('Notes détaillées par critère')).toBeVisible();
- expect(screen.getByRole('textbox',{name:'Ton avis personnel',hidden:true})).not.toBeVisible();
+test('game sheets separate progress, reviews, collection and catalogue information',async()=>{
+ const progress=jest.fn().mockResolvedValue(true),navigate=jest.fn();
+ const game={id:'one',name:'Halo',status:'collection',completed:true,rating:8,platformNames:['PC']};
+ const props={game,onClose:()=>{},onSetProgressStatus:progress,onNavigateGame:navigate,canGoNext:true};
+ const view=render(<GameDetailModal {...props}/>);
+ expect(screen.getByRole('tab',{name:'Ma partie'})).toHaveAttribute('aria-selected','true');
+ expect(screen.queryByRole('slider',{name:'Note'})).toBeNull();
+ expect(screen.queryByRole('button',{name:'Supprimer ce jeu'})).toBeNull();
+ fireEvent.change(screen.getByLabelText('Ma progression'),{target:{value:'paused'}});
+ fireEvent.click(screen.getByRole('button',{name:'Enregistrer ma progression'}));
+ await waitFor(()=>expect(progress).toHaveBeenCalledWith('one','paused',''));
+ fireEvent.click(screen.getByRole('tab',{name:'Mon avis'}));
+ expect(screen.getAllByRole('slider',{name:'Note'}).some(slider=>!slider.closest('details:not([open])'))).toBe(true);
  fireEvent.click(screen.getByText('Mon avis et son partage'));
- expect(screen.getByRole('textbox',{name:'Ton avis personnel'})).toBeVisible();
+ fireEvent.change(screen.getByRole('textbox',{name:'Ton avis personnel'}),{target:{value:'Un souvenir à garder.'}});
+ fireEvent.click(screen.getByRole('tab',{name:'Collection'}));expect(screen.queryByRole('textbox',{name:'Ton avis personnel'})).toBeNull();
+ fireEvent.click(screen.getByRole('tab',{name:'Mon avis'}));expect(screen.getByRole('textbox',{name:'Ton avis personnel'})).toHaveValue('Un souvenir à garder.');
+ fireEvent.keyDown(screen.getByRole('tab',{name:'Mon avis'}),{key:'ArrowRight'});
+ expect(screen.getByRole('tab',{name:'Collection'})).toHaveAttribute('aria-selected','true');expect(navigate).not.toHaveBeenCalled();
+ fireEvent.click(screen.getByText('Retirer ce jeu de Checkpoint'));expect(screen.getByRole('button',{name:'Supprimer ce jeu'})).toBeVisible();
+ fireEvent.click(screen.getByRole('tab',{name:'Infos'}));expect(screen.getByText('DLC & Extensions')).toBeVisible();
+ view.rerender(<GameDetailModal {...props} game={{...game,id:'two',name:'Portal'}}/>);
+ expect(screen.getByRole('tab',{name:'Ma partie'})).toHaveAttribute('aria-selected','true');
  expect(screen.getByRole('button',{name:'Fermer la fiche du jeu'})).toBeVisible();
 });
 test('the empty home gives a concrete first action without empty personal statistics or activities',()=>{

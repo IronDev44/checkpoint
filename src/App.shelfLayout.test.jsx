@@ -32,3 +32,19 @@ test('Recent restores addition order after switching to alphabetical sorting',()
  fireEvent.change(view.getByRole('combobox',{name:'Trier la bibliothèque'}),{target:{value:'alphabetical'}});expect(names()).toEqual(['A classic','Z new addition']);
  fireEvent.change(view.getByRole('combobox',{name:'Trier la bibliothèque'}),{target:{value:'recent'}});expect(names()).toEqual(['Z new addition','A classic']);
 });
+
+
+test('expanded library pages survive synchronized reordering and edits, while intentional view changes reset them',()=>{
+ const games=Array.from({length:140},(_,i)=>({id:String(i),name:'Game '+String(i).padStart(3,'0'),status:'collection',playedPlatforms:['PC'],createdAt:new Date(Date.UTC(2026,0,i+1)).toISOString()}));
+ const props={title:'Collection',games,libraryCardMode:'compact',setLibraryCardMode:()=>{}};
+ const view=render(<LibrarySection {...props}/>);
+ const count=()=>view.container.querySelectorAll('.game-grid-item').length;
+ expect(count()).toBe(48);
+ fireEvent.click(view.getByRole('button',{name:'Afficher les jeux suivants'}));expect(count()).toBe(96);
+ const updated=[...games].reverse().map(g=>g.id==='60'?{...g,favorite:true,rating:9}:g);
+ view.rerender(<LibrarySection {...props} games={updated}/>);expect(count()).toBe(96);
+ view.rerender(<LibrarySection {...props} games={updated.filter(g=>g.id!=='1')}/>);expect(count()).toBe(96);
+ view.rerender(<LibrarySection {...props} games={updated} filterKey="Game"/>);expect(count()).toBe(48);
+ fireEvent.click(view.getByRole('button',{name:'Afficher les jeux suivants'}));expect(count()).toBe(96);
+ fireEvent.change(view.getByRole('combobox',{name:'Trier la bibliothèque'}),{target:{value:'alphabetical'}});expect(count()).toBe(48);
+});

@@ -44,3 +44,40 @@ test('notification settings and destinations cover the two new activities',()=>{
  expect(notices.find(n=>n.id==='recommendation-one').recommendationId).toBe('one');expect(notices.find(n=>n.id==='prediction-open-one').view).toBe('predictions');
  expect(rendezvousUpdates({recommendations,predictions,preferences:{recommendations:false,rendezvous:false,challenges:false}})).toEqual([]);
 });
+
+
+test('recommendation platform filter combines with search and never sends a hidden selection',async()=>{
+ const request=jest.fn().mockResolvedValue({recommendations:[]});
+ render(<GameRecommendations games={[
+  {id:'halo',name:'Halo',playedPlatforms:['PC'],platformNames:['PC','Xbox']},
+  {id:'portal',name:'Portal',platforms:[{platform:{name:'PC'}}]},
+  {id:'zelda',name:'Zelda',platformNames:['Nintendo Switch']},
+  {id:'unknown',name:'Mystère'},
+  {id:'wish',name:'Souhait',status:'wishlist',playedPlatforms:['PS5']},
+  {id:'deleted',name:'Supprimé',_deletedAt:'2026-10-25',playedPlatforms:['PS4']}
+ ]} friends={[{handle:'bob'}]} request={request}/>);
+ await waitFor(()=>expect(screen.getByRole('button',{name:'Recommander un jeu'})).toBeEnabled());
+ fireEvent.click(screen.getByRole('button',{name:'Recommander un jeu'}));const form=within(screen.getByRole('dialog'));
+ expect(form.getAllByRole('radio')).toHaveLength(4);
+ expect(form.queryByRole('option',{name:'Xbox'})).toBeNull();
+ expect(form.queryByRole('option',{name:'PS5'})).toBeNull();
+ fireEvent.change(form.getByLabelText('Plateforme'),{target:{value:'PC'}});
+ expect(form.getAllByRole('radio')).toHaveLength(2);
+ fireEvent.click(form.getByRole('radio',{name:'Halo'}));
+ fireEvent.change(form.getByLabelText('Pourquoi je pense à toi'),{target:{value:'Pour toi.'}});
+ expect(form.getByRole('button',{name:'Envoyer à mon ami'})).toBeEnabled();
+ fireEvent.change(form.getByLabelText('Plateforme'),{target:{value:'Nintendo Switch'}});
+ expect(form.getByRole('radio',{name:'Zelda'})).toBeVisible();
+ expect(form.getByRole('button',{name:'Envoyer à mon ami'})).toBeDisabled();
+ expect(form.getByLabelText('Pourquoi je pense à toi')).toHaveValue('Pour toi.');
+ fireEvent.change(form.getByLabelText('Rechercher dans ma collection'),{target:{value:'Halo'}});
+ expect(form.queryAllByRole('radio')).toHaveLength(0);
+ expect(form.getByText('Aucun jeu trouvé.')).toBeVisible();
+ fireEvent.change(form.getByLabelText('Rechercher dans ma collection'),{target:{value:''}});
+ fireEvent.change(form.getByLabelText('Plateforme'),{target:{value:'unknown'}});
+ expect(form.getAllByRole('radio')).toHaveLength(1);
+ expect(form.getByRole('radio',{name:'Mystère'})).toBeVisible();
+ fireEvent.click(form.getByRole('button',{name:'Fermer'}));
+ fireEvent.click(screen.getByRole('button',{name:'Recommander un jeu'}));
+ expect(within(screen.getByRole('dialog')).getByLabelText('Plateforme')).toHaveValue('all');
+});

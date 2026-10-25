@@ -20,6 +20,7 @@ import "./App.css";
 import LibraryGameCover from "./components/LibraryGameCover";
 import "./components/LibraryPresentation.css";
 import "./polish.css";
+import "./components/GameDetailFocus.css";
 import "./components/OnePieceTheme.css";
 import "./components/KartTheme.css";
 import "./components/PopCultureThemes.css";
@@ -4865,6 +4866,9 @@ export function GameDetailModal({
   closeAfterRating = false,
 }) {
   useDetailReturn(Boolean(game));
+  const [detailTab,setDetailTab]=useState("partie");
+  const detailModalRef=useRef(null);
+  useEffect(()=>{setDetailTab("partie");if(detailModalRef.current)detailModalRef.current.scrollTop=0;},[game?.id]);
   const [localReview, setLocalReview] = useState("");
   const [savingReview, setSavingReview] = useState(false);
   const [localReviewSpoiler,setLocalReviewSpoiler]=useState(false);
@@ -4896,7 +4900,7 @@ export function GameDetailModal({
         onClose();
       }
 
-      if (e.target?.closest?.("input, textarea, select")) return;
+      if (e.target?.closest?.("input, textarea, select, [role=tablist]")) return;
 
       if (e.key === "ArrowLeft" && canGoPrevious) {
         onNavigateGame?.(-1);
@@ -4916,6 +4920,9 @@ export function GameDetailModal({
   }, [game, onClose, onNavigateGame, canGoPrevious, canGoNext]);
 
   useEffect(() => {
+    if (detailTab !== "infos") return;
+    let active=true;
+    setDlcs([]);
     if (!game?.name) {
       setDlcs([]);
       return;
@@ -5048,18 +5055,19 @@ export function GameDetailModal({
             index === self.findIndex((item) => item.id === dlc.id)
         );
 
-        setDlcs(uniqueDlcs);
+        if(active)setDlcs(uniqueDlcs);
       } catch (e) {
         if (isAbortError(e)) return;
         console.warn("Erreur recherche DLC ignorée :", e);
-        setDlcs([]);
+        if(active)setDlcs([]);
       } finally {
-        setLoadingDlcs(false);
+        if(active)setLoadingDlcs(false);
       }
     };
 
     fetchDlcs();
-  }, [game]);
+    return()=>{active=false;};
+  }, [game?.id,detailTab]);
 
   if (!game) return null;
 
@@ -5155,7 +5163,11 @@ export function GameDetailModal({
       }}
     >
       <div
-        className="game-modal"
+        className="game-modal game-detail-focused"
+        ref={detailModalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={game.name}
         onClick={(e) => e.stopPropagation()}
         onTouchStart={handleSwipeStart}
         onTouchEnd={handleSwipeEnd}
@@ -5216,135 +5228,29 @@ export function GameDetailModal({
             <div className="game-detail-premium-actions">
               <button
                 className={`heart-btn ${game.favorite ? "active" : ""}`}
+                aria-label={game.favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+                aria-pressed={Boolean(game.favorite)}
                 onClick={() => onToggleFavorite(game.id, game.favorite)}
                 type="button"
               >
                 <Heart size={18} fill={game.favorite ? "currentColor" : "none"} />
               </button>
-              <span>{calculateXP(game)} XP estimée</span>
+              <span>{getGameRating(game)>0 ? `Ma note : ${getGameRating(game)}/10` : "Pas encore noté"}</span>
             </div>
           </div>
         </div>
 
         <div className="modal-content game-detail-premium-content">
-          <div className="game-detail-essential-actions" aria-label="Actions du jeu">
-            <button type="button" onClick={()=>onSetProgressStatus(game.id,'in_progress')}>Commencer / reprendre</button>
-            <button type="button" onClick={()=>onSetProgressStatus(game.id,'completed')}>Déjà terminé</button>
+          <div className="game-detail-tabs" role="tablist" aria-label="Rubriques de la fiche">
+            {[['partie','Ma partie'],['avis','Mon avis'],['collection','Collection'],['infos','Infos']].map(([id,label],index)=><button type="button" role="tab" key={id} id={`game-detail-tab-${id}`} aria-selected={detailTab===id} aria-controls={`game-detail-panel-${id}`} tabIndex={detailTab===id?0:-1} onClick={()=>setDetailTab(id)} onKeyDown={event=>{const items=['partie','avis','collection','infos'];let next;if(event.key==='ArrowRight')next=(index+1)%4;if(event.key==='ArrowLeft')next=(index+3)%4;if(event.key==='Home')next=0;if(event.key==='End')next=3;if(next!==undefined){event.preventDefault();event.stopPropagation();setDetailTab(items[next]);event.currentTarget.parentElement.querySelectorAll('[role=tab]')[next].focus();}}}>{label}</button>)}
           </div>
-          <ShareGameToFriend key={game.id} game={game} friends={socialFriends}/>
-          <p className="game-detail-essential-note">Ta progression et ta note sont indépendantes. Les détails ci-dessous sont facultatifs.</p>
-          {game.physicalOwned&&(game.physicalBarcode||game.physicalPlatform)&&<details className="game-detail-organized-group"><summary>Mon exemplaire physique</summary><p>{game.physicalPlatform||'Plateforme non renseignée'}{game.physicalEdition?` · ${game.physicalEdition}`:''}</p>{game.physicalBarcode&&<p>Code-barres : {game.physicalBarcode}</p>}</details>}
-          <GamePlatformActivity key={game.id} game={game} onSave={onSavePlatformActivity}/>
-          <details className="game-detail-organized-group" open={!experience || undefined}>
-            <summary>Ton expérience{experience ? ` : ${experience === 'completed' ? 'Terminé' : experience === 'partial' ? 'Joué, non terminé' : 'Essayé'}` : ' avec ce jeu'}</summary>
-            <GameExperiencePanel key={game.id} game={game} onChange={onSetExperienceInfo} />
-          </details>
-
-          {experience && <div className="game-detail-section">
-            <div className="modal-block-title">{experience === "completed" ? "Note globale" : experience === "tried" ? "Ton ressenti (facultatif)" : "Ressenti général · Avis partiel"}</div>
-
-            <RatingSlider
-              rating={getGameRating(game)}
-              onRate={(value) => onSetRating(game.id, value)}
-            />
-
-            {closeAfterRating && (
-              <button
-                className="save-review-btn game-rating-save-btn"
-                type="button"
-                onClick={() => onRatingCommit?.()}
-              >
-                Enregistrer la note
-              </button>
-            )}
-          </div>}
-
-          {(experience === "completed" || experience === "partial") && <details className="game-detail-organized-group">
-            <summary>Notes détaillées par critère</summary>
-            <div className="game-detail-section game-detail-ratings-section">
-
-            <DetailedRatingsBlock
-              game={game}
-              onSetDetailedRating={onSetDetailedRating}
-            />
-          </div></details>}
-
-          {experience === "completed" && <details className="game-detail-organized-group"><summary>OST / Musique</summary><div className="game-detail-section ost-block">
-
-            <RatingSlider
-              rating={localOstRating}
-              onRate={(value) => setLocalOstRating(value)}
-              onCommit={(value) => {
-                onSetOstInfo(game.id, { ostRating: value });
-              }}
-            />
-          </div></details>
-
-          }
-
-          {game.favorite&&<div className="game-detail-section"><FavoriteReasonEditor key={game.id} game={game} onSave={onSetFavoriteReason}/></div>}
-
-          <details className="game-detail-organized-group"><summary>Mon avis et son partage</summary><div className="game-detail-section">
-            <div className="modal-block-title">{experience === "tried" ? "Un petit mot sur ton expérience ?" : "Avis personnel"}</div>
-
-            <textarea
-              className="review-textarea"
-              ref={reviewTextareaRef}
-              aria-label="Ton avis personnel"
-              value={localReview}
-              onSelect={e=>setReviewSelection({start:e.target.selectionStart,end:e.target.selectionEnd})}
-              onChange={e=>{setLocalReview(e.target.value);setReviewSelection({start:e.target.selectionStart,end:e.target.selectionEnd});}}
-              placeholder={experience === "tried" ? "Une impression, un souvenir… si tu en as envie." : "Ton avis sur ce jeu..."}
-            />
-
-            <div className="review-spoiler-tools"><button type="button" className="option-pill" disabled={savingReview||reviewSelection.start===reviewSelection.end} onClick={()=>{setLocalReview(text=>wrapSpoilerSelection(text,reviewSelection.start,reviewSelection.end));setReviewSelection({start:0,end:0});reviewTextareaRef.current?.focus();}}>Masquer la sélection</button><label><input type="checkbox" checked={localReviewSpoiler} disabled={savingReview} onChange={e=>setLocalReviewSpoiler(e.target.checked)}/>Tout mon avis contient des spoilers</label><label><input type="checkbox" checked={localReviewShared} disabled={savingReview} onChange={e=>setLocalReviewShared(e.target.checked)}/>Afficher cet avis dans mon activité publique</label></div>
-            <p className="option-value">Sélectionne un passage puis masque-le, ou protège l’avis entier. Les lecteurs devront choisir de le révéler. Le partage dépend aussi de la visibilité de ton profil et de sa rubrique Activité.</p>
-            {localReview&&<div className="review-spoiler-preview"><small>Aperçu pour les lecteurs</small><p><SpoilerText text={localReview} whole={localReviewSpoiler}/></p></div>}
-            <button
-              className="save-review-btn"
-              type="button"
-              disabled={savingReview}
-              onClick={async () => {
-                setSavingReview(true);
-                try {
-                  const saved = await onSetReview(game.id, localReview, {reviewSpoiler:localReviewSpoiler,reviewShared:localReviewShared});
-                  if (saved !== false) onClose();
-                } finally { setSavingReview(false); }
-              }}
-            >
-              {savingReview ? "Enregistrement…" : "Enregistrer l’avis"}
-            </button>
-          </div></details>
-
+          <section role="tabpanel" id="game-detail-panel-partie" aria-labelledby="game-detail-tab-partie" hidden={detailTab!=='partie'} key={`partie-${game.id}`}>
+            <p className="game-detail-panel-intro">Ta progression, ta plateforme et ton temps de jeu.</p>
+            <GameJourneyEditor key={`${game.id}-${game.progressStatus}`} game={game} onSave={onSetProgressStatus}/>
           <details className="game-detail-organized-group">
             <summary>Ta session de jeu</summary>
             <div className="game-detail-group-content">
-          {experience === "partial" && <>
-          <div className="game-detail-section">
-            <div className="modal-block-title">Où tu en es</div>
-
-            <div className="choice-grid progress-choice-grid">
-              {PROGRESS_OPTIONS.filter((option) => ["playing", "deep_play"].includes(option.id)).map((option) => (
-                <button
-                  key={option.id}
-                  className={`choice-pill ${
-                    (game.progressStatus ||
-                      (isGameFinishedStatus(game) ? "completed" : "not_started")) === option.id
-                      ? "active"
-                      : ""
-                  }`}
-                  onClick={() => onSetProgressStatus(game.id, option.id)}
-                  type="button"
-                >
-                  <span className="choice-icon">{option.icon}</span>
-                  <span>{option.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-          </>}
-
-          <div className="game-detail-section">
+<div className="game-detail-section">
             <div className="modal-block-title">Plateforme utilisée</div>
 
             <div className="choice-grid platform-choice-grid">
@@ -5436,13 +5342,100 @@ export function GameDetailModal({
             </div>
           </details>
 
-          <details className="game-detail-organized-group">
-            <summary>Dans ta bibliothèque</summary>
-            <div className="game-detail-group-content">
+          <GamePlatformActivity key={game.id} game={game} onSave={onSavePlatformActivity}/>
+          </section>
+          <section role="tabpanel" id="game-detail-panel-avis" aria-labelledby="game-detail-tab-avis" hidden={detailTab!=='avis'} key={`avis-${game.id}`}>
+            <p className="game-detail-panel-intro">Ta note et ce que tu retiens de ce jeu.</p>
+          <details className="game-detail-organized-group" open={!experience || undefined}>
+            <summary>Ton expérience{experience ? ` : ${experience === 'completed' ? 'Terminé' : experience === 'partial' ? 'Joué, non terminé' : 'Essayé'}` : ' avec ce jeu'}</summary>
+            <GameExperiencePanel key={game.id} game={game} onChange={onSetExperienceInfo} />
+          </details>
+
+          {experience && <div className="game-detail-section">
+            <div className="modal-block-title">{experience === "completed" ? "Note globale" : experience === "tried" ? "Ton ressenti (facultatif)" : "Ressenti général · Avis partiel"}</div>
+
+            <RatingSlider
+              rating={getGameRating(game)}
+              onRate={(value) => onSetRating(game.id, value)}
+            />
+
+            {closeAfterRating && (
+              <button
+                className="save-review-btn game-rating-save-btn"
+                type="button"
+                onClick={() => onRatingCommit?.()}
+              >
+                Enregistrer la note
+              </button>
+            )}
+          </div>}
+
+          {(experience === "completed" || experience === "partial") && <details className="game-detail-organized-group">
+            <summary>Notes détaillées par critère</summary>
+            <div className="game-detail-section game-detail-ratings-section">
+
+            <DetailedRatingsBlock
+              game={game}
+              onSetDetailedRating={onSetDetailedRating}
+            />
+          </div></details>}
+
+          {experience === "completed" && <details className="game-detail-organized-group"><summary>OST / Musique</summary><div className="game-detail-section ost-block">
+
+            <RatingSlider
+              rating={localOstRating}
+              onRate={(value) => setLocalOstRating(value)}
+              onCommit={(value) => {
+                onSetOstInfo(game.id, { ostRating: value });
+              }}
+            />
+          </div></details>
+
+          }
+
+          {game.favorite&&<div className="game-detail-section"><FavoriteReasonEditor key={game.id} game={game} onSave={onSetFavoriteReason}/></div>}
+
+          <details className="game-detail-organized-group"><summary>Mon avis et son partage</summary><div className="game-detail-section">
+            <div className="modal-block-title">{experience === "tried" ? "Un petit mot sur ton expérience ?" : "Avis personnel"}</div>
+
+            <textarea
+              className="review-textarea"
+              ref={reviewTextareaRef}
+              aria-label="Ton avis personnel"
+              value={localReview}
+              onSelect={e=>setReviewSelection({start:e.target.selectionStart,end:e.target.selectionEnd})}
+              onChange={e=>{setLocalReview(e.target.value);setReviewSelection({start:e.target.selectionStart,end:e.target.selectionEnd});}}
+              placeholder={experience === "tried" ? "Une impression, un souvenir… si tu en as envie." : "Ton avis sur ce jeu..."}
+            />
+
+            <div className="review-spoiler-tools"><button type="button" className="option-pill" disabled={savingReview||reviewSelection.start===reviewSelection.end} onClick={()=>{setLocalReview(text=>wrapSpoilerSelection(text,reviewSelection.start,reviewSelection.end));setReviewSelection({start:0,end:0});reviewTextareaRef.current?.focus();}}>Masquer la sélection</button><label><input type="checkbox" checked={localReviewSpoiler} disabled={savingReview} onChange={e=>setLocalReviewSpoiler(e.target.checked)}/>Tout mon avis contient des spoilers</label><label><input type="checkbox" checked={localReviewShared} disabled={savingReview} onChange={e=>setLocalReviewShared(e.target.checked)}/>Afficher cet avis dans mon activité publique</label></div>
+            <p className="option-value">Sélectionne un passage puis masque-le, ou protège l’avis entier. Les lecteurs devront choisir de le révéler. Le partage dépend aussi de la visibilité de ton profil et de sa rubrique Activité.</p>
+            {localReview&&<div className="review-spoiler-preview"><small>Aperçu pour les lecteurs</small><p><SpoilerText text={localReview} whole={localReviewSpoiler}/></p></div>}
+            <button
+              className="save-review-btn"
+              type="button"
+              disabled={savingReview}
+              onClick={async () => {
+                setSavingReview(true);
+                try {
+                  const saved = await onSetReview(game.id, localReview, {reviewSpoiler:localReviewSpoiler,reviewShared:localReviewShared});
+                  if (saved !== false) onClose();
+                } finally { setSavingReview(false); }
+              }}
+            >
+              {savingReview ? "Enregistrement…" : "Enregistrer l’avis"}
+            </button>
+          </div></details>
+
+            <ShareGameToFriend key={game.id} game={game} friends={socialFriends}/>
+          </section>
+          <section role="tabpanel" id="game-detail-panel-collection" aria-labelledby="game-detail-tab-collection" hidden={detailTab!=='collection'} key={`collection-${game.id}`}>
+            <p className="game-detail-panel-intro">Range ce jeu dans tes listes ou mets-le en avant dans ton Sanctuaire.</p>
+          {game.physicalOwned&&(game.physicalBarcode||game.physicalPlatform)&&<details className="game-detail-organized-group"><summary>Mon exemplaire physique</summary><p>{game.physicalPlatform||'Plateforme non renseignée'}{game.physicalEdition?` · ${game.physicalEdition}`:''}</p>{game.physicalBarcode&&<p>Code-barres : {game.physicalBarcode}</p>}</details>}
+          <div className="game-detail-collection-content">
           <div className="game-detail-section">
             {onPersonalListsChange&&games.some(item=>String(item.id)===String(game.id))&&<GameListMembership key={game.id} game={game} value={personalLists} onChange={onPersonalListsChange}/>}
             <GameHistory key={`history-${game.id}`} game={game}/>
-            <GameJourneyEditor key={`${game.id}-${game.progressStatus}`} game={game} onSave={onSetProgressStatus}/>
             <div className="modal-block-title">Rangement</div>
 
             <div className="status-row">
@@ -5520,12 +5513,18 @@ export function GameDetailModal({
               )}
             </div>
           </div>
-            </div>
-          </details>
-
-          <details className="game-detail-organized-group">
-            <summary>Autour du jeu</summary>
-            <div className="game-detail-group-content">
+          </div>
+            <details className="game-detail-remove"><summary>Retirer ce jeu de Checkpoint</summary><p>Le jeu sera placé dans la corbeille.</p>          <button
+            className="delete-large-btn"
+            onClick={() => onDelete(game.id)}
+            type="button"
+          >
+            Supprimer ce jeu
+          </button></details>
+          </section>
+          <section role="tabpanel" id="game-detail-panel-infos" aria-labelledby="game-detail-tab-infos" hidden={detailTab!=='infos'} key={`infos-${game.id}`}>
+            <p className="game-detail-panel-intro">La série, l’édition, les images et les extensions.</p>
+          <div className="game-detail-info-content">
           <div className="game-detail-meta-grid">
             <div>
               <span>Série</span>
@@ -5642,16 +5641,8 @@ export function GameDetailModal({
               ))}
             </div>
           </div>
-            </div>
-          </details>
-
-          <button
-            className="delete-large-btn"
-            onClick={() => onDelete(game.id)}
-            type="button"
-          >
-            Supprimer ce jeu
-          </button>
+          </div>
+          </section>
         </div>
       </div>
     </div>
@@ -6741,6 +6732,7 @@ function SanctuaryTab({
 
 export function LibrarySection({
   title,
+  filterKey = "",
   onBulkUpdate,
   games,
   onDelete,
@@ -6755,8 +6747,9 @@ export function LibrarySection({
   const [bulkMode,setBulkMode]=useState(false);
   const [sortBy, setSortBy] = useState("recent");
   const [visibleLimit,setVisibleLimit]=useState(48);
-  const gameIdentity=games.map(game=>game.id).join("|");
-  useEffect(()=>setVisibleLimit(48),[sortBy,title,libraryCardMode,gameIdentity]);
+  // Live saves can reorder or remove records without changing the user's view.
+  // Keep expanded pages until the user changes the search, sorting or layout.
+  useEffect(()=>setVisibleLimit(48),[sortBy,title,libraryCardMode,filterKey]);
 
   const sortedGames = useMemo(()=>[...games].sort((a, b) => {
     if (sortBy === "alphabetical") {
@@ -9539,7 +9532,7 @@ export function HomeTab({
       id: `review-${game.id}`, title: `Ton avis sur ${game.name}`, detail: "Écris un avis de plus de 20 caractères sur ce que tu as joué.", xp: 20, game,
     })),
     ...games.filter((game) => game.status !== "wishlist" && (!game.playtimeRange || game.playtimeRange === "none")).map((game) => ({
-      id: `time-${game.id}`, title: `Ton temps sur ${game.name}`, detail: "Renseigne le temps que tu y as passé dans « Ta session de jeu ».", xp: null, game,
+      id: `time-${game.id}`, title: `Ton temps sur ${game.name}`, detail: "Ouvre « Ma partie → Ta session de jeu » pour renseigner le temps passé.", xp: null, game,
     })),
     ...hardware.filter((item) => isOwnedHardware(item) && !(Number(item.rating) > 0)).map((item) => ({
       id: `hardware-${item.id}`, title: `Noter ${item.name}`, detail: "Ouvre sa fiche dans Matériel pour donner ton avis.", xp: 20, tab: "hardware",
@@ -20278,11 +20271,12 @@ useEffect(() => {
 <div className="library-actions"><button type="button" className="option-pill" onClick={()=>setPhysicalScannerOpen(true)}>Scanner un jeu physique</button><button type="button" className="option-pill" onClick={()=>setCouchOpen(true)}>Mode canapé</button></div>
 </div>
 {libraryView==='lists'&&<PersonalLists value={appOptions.personalLists} games={games} onChange={value=>updateAppOption('personalLists',value)} onOpen={game=>openGameDetail(game)}/>}
-{['paused','abandoned'].includes(libraryView)&&<LibrarySection title={libraryView==='paused'?'Jeux en pause':'Jeux abandonnés'} games={filteredLibraryGames.filter(game=>game.progressStatus===libraryView)} onBulkUpdate={bulkUpdateGames} onDelete={deleteGame} onSetStatus={setStatus} onSetRating={setRating} onToggleFavorite={toggleFavorite} onQuickProgress={setProgressStatus} onOpenDetail={game=>openGameDetail(game,filteredLibraryGames.filter(item=>item.progressStatus===libraryView))} libraryCardMode={libraryCardMode} setLibraryCardMode={setLibraryCardMode}/>}
+{['paused','abandoned'].includes(libraryView)&&<LibrarySection filterKey={librarySearch} title={libraryView==='paused'?'Jeux en pause':'Jeux abandonnés'} games={filteredLibraryGames.filter(game=>game.progressStatus===libraryView)} onBulkUpdate={bulkUpdateGames} onDelete={deleteGame} onSetStatus={setStatus} onSetRating={setRating} onToggleFavorite={toggleFavorite} onQuickProgress={setProgressStatus} onOpenDetail={game=>openGameDetail(game,filteredLibraryGames.filter(item=>item.progressStatus===libraryView))} libraryCardMode={libraryCardMode} setLibraryCardMode={setLibraryCardMode}/>}
 
 {libraryView === "collection" && (
   <LibrarySection
   title="Collection"
+  filterKey={librarySearch}
   games={collectionGames}
   onBulkUpdate={bulkUpdateGames}
   onDelete={deleteGame}
@@ -20299,6 +20293,7 @@ useEffect(() => {
 {libraryView === "en cours" && (
   <LibrarySection
     title="Jeux en cours"
+    filterKey={librarySearch}
     games={inProgressGames}
     onBulkUpdate={bulkUpdateGames}
     onDelete={deleteGame}
@@ -20315,6 +20310,7 @@ useEffect(() => {
 {libraryView === "wishlist" && (
   <LibrarySection
     title="Wishlist"
+    filterKey={librarySearch}
     games={wishlistGames}
     onBulkUpdate={bulkUpdateGames}
     onDelete={deleteGame}
