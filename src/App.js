@@ -1,4 +1,5 @@
 import ProfileSearch from './components/ProfileSearch';
+import {publishProfileWithIdentity} from './services/profileIdentity';
 import {detectSeriesName} from './services/seriesIdentity';
 import {matchesLibraryShortcut} from './services/libraryShortcuts';
 import ToolDialog from './components/ToolDialog';
@@ -9079,7 +9080,7 @@ export function SocialTab({
           <span>Profil</span>
           <strong>Ton identité joueur</strong>
           <p>
-            Modifie ton pseudo, ta bio, ton identifiant et choisis comment ton profil peut être visible.
+            Choisis ton pseudo, ajoute une photo ou une bio, puis décide qui peut voir ton profil.
           </p>
         </div>
 
@@ -9110,29 +9111,17 @@ export function SocialTab({
         <ProfilePhotoEditor name={socialProfile.displayName} value={socialProfile.photoURL || ""} onChange={photo => onProfileChange("photoURL", photo)} />
         <div className="social-editor-grid">
           <label>
-            Nom affiché
+            Pseudo
             <input
               value={socialProfile.displayName}
+              aria-label="Pseudo"
               onChange={(e) => onProfileChange("displayName", e.target.value)}
               placeholder="Le nom visible sur ton profil"
             />
             <span className="field-hint">C'est le nom que les autres voient dans le fil et sur ton profil.</span>
           </label>
 
-          <label>
-            Identifiant public
-            <input
-              value={socialProfile.handle}
-              onChange={(e) =>
-                onProfileChange(
-                  "handle",
-                  e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, "")
-                )
-              }
-              placeholder="checkpoint"
-            />
-            <span className="field-hint">Il sert au lien de partage, comme une adresse courte : @{socialProfile.handle || "checkpoint"}.</span>
-          </label>
+          <p className="field-hint">Tes amis peuvent te chercher avec ton pseudo. Ton lien de profil est créé automatiquement à l’activation du profil.{socialProfile.handle ? ` Adresse actuelle : @${socialProfile.handle}.` : ''}</p>
 
           <FavoritePlatforms
             value={socialProfile.platform}
@@ -9282,7 +9271,7 @@ export function SocialTab({
           <div>
             <h2 className="panel-title">Amis</h2>
             <div className="option-value">
-              Recherche des profils publics, consulte leur vitrine et invite les joueurs que tu souhaites retrouver.
+              Retrouve un joueur par son pseudo. L’accès à son profil et les invitations dépendent de ses réglages.
             </div>
           </div>
           <span className="social-section-count">{socialFriends.length}</span>
@@ -9303,7 +9292,7 @@ export function SocialTab({
         </div>
 
         </details>
-        {!['public','friends'].includes(socialProfile.visibility) && <p className="social-hub-notice">Pour envoyer une invitation, choisis « Public » ou « Amis uniquement » dans « Profil public → Identité et partage ». Tu peux toujours répondre aux demandes reçues.</p>}
+        {!['public','friends'].includes(socialProfile.visibility) && <p className="social-hub-notice">Ton pseudo reste visible dans la recherche, mais ton profil privé ne peut pas être consulté et ne reçoit pas d’invitations. Pour envoyer une invitation, choisis « Public » ou « Amis uniquement » dans « Profil public → Identité et partage ». Tu peux toujours répondre aux demandes reçues.</p>}
         {socialView === "friends" && !sharedProfile && friendInvitations && <FriendRequests {...friendInvitations} onOpen={onOpenFriend} onBlock={onBlockFriend}/>}
         {socialView === "friends" && !sharedProfile && <SocialFriendsDirectory friends={socialFriends} onOpen={onOpenFriend} onRemove={onRemoveFriend} loadProfile={loadFriendProfile} onBlock={onBlockFriend} onCommon={onCommonGames} onReport={onReportSocial} onMute={onMuteFriend} mutedHandles={socialControls?.data?.muted?.map(player=>player.handle)||[]} onInvite={async handle=>{const result=await onAddFriend(handle);setSocialMessage(result.message);}} confirmedHandles={friendInvitations?.connections.filter(item=>item.status==='accepted').map(item=>item.profile.handle)||[]} />}
         {socialView==='friends'&&!sharedProfile&&socialControls&&<SocialContactSettings controls={socialControls}/>}
@@ -18073,20 +18062,20 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
 };
 
 const setSocialProfileVisibility = async (visibility) => {
-  const handle=normalizeHandle(socialProfile.handle);
+  let handle=normalizeHandle(socialProfile.handle);
   if(!['public','friends','prive'].includes(visibility))return {ok:false,message:'Choisis une visibilité valide.'};
-  if(!handle&&visibility!=='prive')return {ok:false,message:"Choisis d’abord ton identifiant dans Identité et partage, puis active ton profil."};
+  if(!String(socialProfile.displayName||'').trim()&&visibility!=='prive')return {ok:false,message:'Renseigne ton pseudo pour activer ton profil.'};
   if(profileVisibilityBusyRef.current)return {ok:false,message:'Le changement de visibilité est déjà en cours.'};
   profileVisibilityBusyRef.current=true;
   const owner=auth.currentUser?.uid,version=++publicProfileVersionRef.current;
   const normalizedProfile=normalizeSocialProfile({...socialProfile,handle,visibility});
   try{
     const saved=await saveFeedback.run({key:'public-profile',isCurrent:()=>auth.currentUser?.uid===owner&&publicProfileVersionRef.current===version,success:visibility==='public'?'Profil public activé':visibility==='friends'?'Profil réservé aux amis':'Profil privé appliqué',write:async()=>{
-      if(['public','friends'].includes(visibility))await setDoc(doc(db,'publicProfiles',handle),{...buildPublicSocialProfile(normalizedProfile),visibility,ownerUid:owner},{merge:true});
+      if(['public','friends'].includes(visibility))handle=await publishProfileWithIdentity({profile:normalizedProfile,owner,write:profile=>setDoc(doc(db,'publicProfiles',profile.handle),{...buildPublicSocialProfile(profile),visibility,ownerUid:owner},{merge:true})});
       else if(handle)await deleteDoc(doc(db,'publicProfiles',handle));
       if(auth.currentUser?.uid===owner){setSocialProfile(current=>storeSocialProfile({...current,handle,visibility}));showToast(visibility==='public'?'Profil public activé.':visibility==='friends'?'Profil visible uniquement par tes amis.':'Profil repassé en privé.');}
     }});
-    return saved===false?{ok:false,message:'Impossible de changer la visibilité pour le moment.'}:{ok:true,message:visibility==='public'?'Profil public. Tes amis peuvent te trouver.':visibility==='friends'?'Seuls tes amis confirmés peuvent consulter ton profil.':"Profil privé. Il n’est plus trouvable."};
+    return saved===false?{ok:false,message:'Impossible de changer la visibilité pour le moment.'}:{ok:true,message:visibility==='public'?'Profil public. Tes amis peuvent te trouver.':visibility==='friends'?'Seuls tes amis confirmés peuvent consulter ton profil.':"Profil privé. Seul ton pseudo apparaît dans la recherche, sans accès au profil ni invitation."};
   }finally{profileVisibilityBusyRef.current=false;}
 };
 
@@ -18094,7 +18083,7 @@ const copySocialProfileLink = async () => {
   const handle = normalizeHandle(socialProfile.handle);
 
   if (!handle) {
-    return { ok: false, message: "Choisis d'abord un identifiant public." };
+    return { ok: false, message: 'Active ton profil public ou réservé aux amis pour créer ton lien automatiquement.' };
   }
 
   if (!["public","friends"].includes(socialProfile.visibility)) {

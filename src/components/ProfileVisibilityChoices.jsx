@@ -11,5 +11,5 @@ export default function ProfileVisibilityChoices({value,onChange}){
  }
  return <><div className="profile-visibility-choices" role="group" aria-label="Visibilité du profil" aria-busy={Boolean(pending)}>
   {[['prive','Privé'],['friends','Amis uniquement'],['public','Public']].map(([mode,label])=><button type="button" key={mode} disabled={Boolean(pending)} className={`option-pill ${current===mode?'active':''}`} aria-pressed={current===mode} onClick={()=>change(mode)}>{pending===mode?'Enregistrement…':label}</button>)}
- </div>{error&&<p role="alert" className="option-value">{error}</p>}</>;
+ </div><p className="option-value">En privé, seul ton pseudo apparaît dans la recherche. Ton profil reste fermé et les autres joueurs ne peuvent pas t’envoyer d’invitation.</p>{error&&<p role="alert" className="option-value">{error}</p>}</>;
 }

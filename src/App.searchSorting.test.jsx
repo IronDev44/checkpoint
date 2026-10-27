@@ -278,6 +278,20 @@ test('rediscovery pins a finished favorite without changing its progress or rati
 test('a rejected privacy change keeps the public state and gives an explicit error',async()=>{
  mockSettings={theme:'theme-checkpoint',socialProfile:{handle:'test-player',visibility:'public',displayName:'Fixture'}};await openSearch();fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name:'Social',exact:true}));fireEvent.click(await screen.findByRole('button',{name:'Profil public',exact:true}));deleteDoc.mockRejectedValueOnce(new Error('Network failed'));fireEvent.click(screen.getByRole('button',{name:'Privé',exact:true}));await screen.findByText('Impossible de changer la visibilité pour le moment.');expect(screen.getByRole('button',{name:'Public',exact:true})).toHaveClass('active');expect(JSON.parse(mockStore.get('checkpoint-social-profile')).visibility).toBe('public');
 });
+test('a pseudo alone activates a profile and keeps its generated address after renaming',async()=>{
+ mockSettings={theme:'theme-checkpoint',socialProfile:{handle:'',visibility:'prive',displayName:'Nastasia'}};
+ await openSearch();fireEvent.click(within(document.querySelector('.bottom-tabs')).getByRole('button',{name:'Social',exact:true}));fireEvent.click(await screen.findByRole('button',{name:'Profil public',exact:true}));
+ expect(screen.queryByLabelText('Identifiant public')).not.toBeInTheDocument();
+ fireEvent.click(screen.getByRole('button',{name:'Public',exact:true}));
+ await waitFor(()=>expect(screen.getByRole('button',{name:'Public',exact:true})).toHaveClass('active'));
+ const saved=JSON.parse(mockStore.get('checkpoint-social-profile'));
+ expect(saved.handle).toMatch(/^nastasia-/);expect(saved.visibility).toBe('public');
+ expect(setDoc).toHaveBeenCalledWith({collection:'publicProfiles',id:saved.handle},expect.objectContaining({handle:saved.handle,displayName:'Nastasia',ownerUid:'theme-reward-fixture'}),{merge:true});
+ fireEvent.change(screen.getByLabelText('Pseudo'),{target:{value:'Nouveau pseudo'}});
+ await waitFor(()=>expect(setDoc).toHaveBeenCalledWith({collection:'publicProfiles',id:saved.handle},expect.objectContaining({displayName:'Nouveau pseudo'}),{merge:true}));
+ expect(JSON.parse(mockStore.get('checkpoint-social-profile')).handle).toBe(saved.handle);
+});
+
 test('dismissed notifications are stored for the current account',async()=>{
  const poll={id:'dismiss-test',title:'Je commence lequel ?',author:'Alex',createdAt:new Date().toISOString(),endsAt:new Date(Date.now()+86400000).toISOString(),options:[{name:'Halo'},{name:'Portal'}],counts:[0,0],total:0,myVote:null};global.fetch.mockImplementation(async url=>({ok:true,json:async()=>String(url).includes('collection=friendPolls')?{polls:[poll]}:{items:[],cursor:null},headers:{get:()=> 'application/json'}}));
  await openSearch();fireEvent.click(screen.getByRole('button',{name:'Ouvrir les notifications utiles'}));await screen.findByText('Alex attend ton vote');const row=screen.getByText('Alex attend ton vote').closest('.notification-item');fireEvent.click(within(row).getByRole('button',{name:'Masquer cette notification'}));expect(JSON.parse(mockStore.get('checkpoint-dismissed-notifications-v2'))).toContain('poll-invite-dismiss-test');
