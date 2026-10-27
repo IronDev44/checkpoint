@@ -1,3 +1,4 @@
+import ProfileSearch from './components/ProfileSearch';
 import {detectSeriesName} from './services/seriesIdentity';
 import {matchesLibraryShortcut} from './services/libraryShortcuts';
 import ToolDialog from './components/ToolDialog';
@@ -8762,7 +8763,8 @@ export function SocialTab({
 
   const handleVisibilityChange = async (visibility) => {
     const result = await onSetProfileVisibility(visibility);
-    setSocialMessage(result.message);
+    setSocialMessage(result.ok?result.message:'');
+    return result;
   };
 
   const handleCopy = async () => {
@@ -9280,12 +9282,14 @@ export function SocialTab({
           <div>
             <h2 className="panel-title">Amis</h2>
             <div className="option-value">
-              Envoie une invitation avec un identifiant Checkpoint. Vous serez amis après acceptation.
+              Recherche des profils publics, consulte leur vitrine et invite les joueurs que tu souhaites retrouver.
             </div>
           </div>
           <span className="social-section-count">{socialFriends.length}</span>
         </div>
 
+        <ProfileSearch onOpen={onOpenFriend} onInvite={onAddFriend} connections={friendInvitations?.connections||[]} canInvite={['public','friends'].includes(socialProfile.visibility)}/>
+        <details><summary>Inviter directement avec un identifiant</summary><p className="option-value">Tu connais déjà son identifiant ? Envoie une demande sans passer par la recherche.</p>
         <div className="social-add-friend">
           <input
             value={friendHandle}
@@ -9298,6 +9302,7 @@ export function SocialTab({
           </button>
         </div>
 
+        </details>
         {!['public','friends'].includes(socialProfile.visibility) && <p className="social-hub-notice">Pour envoyer une invitation, choisis « Public » ou « Amis uniquement » dans « Profil public → Identité et partage ». Tu peux toujours répondre aux demandes reçues.</p>}
         {socialView === "friends" && !sharedProfile && friendInvitations && <FriendRequests {...friendInvitations} onOpen={onOpenFriend} onBlock={onBlockFriend}/>}
         {socialView === "friends" && !sharedProfile && <SocialFriendsDirectory friends={socialFriends} onOpen={onOpenFriend} onRemove={onRemoveFriend} loadProfile={loadFriendProfile} onBlock={onBlockFriend} onCommon={onCommonGames} onReport={onReportSocial} onMute={onMuteFriend} mutedHandles={socialControls?.data?.muted?.map(player=>player.handle)||[]} onInvite={async handle=>{const result=await onAddFriend(handle);setSocialMessage(result.message);}} confirmedHandles={friendInvitations?.connections.filter(item=>item.status==='accepted').map(item=>item.profile.handle)||[]} />}
@@ -18069,7 +18074,8 @@ const buildPublicSocialProfile = (profileOverride = socialProfile) => {
 
 const setSocialProfileVisibility = async (visibility) => {
   const handle=normalizeHandle(socialProfile.handle);
-  if(!handle)return {ok:false,message:"Choisis d'abord un identifiant public."};
+  if(!['public','friends','prive'].includes(visibility))return {ok:false,message:'Choisis une visibilité valide.'};
+  if(!handle&&visibility!=='prive')return {ok:false,message:"Choisis d’abord ton identifiant dans Identité et partage, puis active ton profil."};
   if(profileVisibilityBusyRef.current)return {ok:false,message:'Le changement de visibilité est déjà en cours.'};
   profileVisibilityBusyRef.current=true;
   const owner=auth.currentUser?.uid,version=++publicProfileVersionRef.current;
@@ -18077,7 +18083,7 @@ const setSocialProfileVisibility = async (visibility) => {
   try{
     const saved=await saveFeedback.run({key:'public-profile',isCurrent:()=>auth.currentUser?.uid===owner&&publicProfileVersionRef.current===version,success:visibility==='public'?'Profil public activé':visibility==='friends'?'Profil réservé aux amis':'Profil privé appliqué',write:async()=>{
       if(['public','friends'].includes(visibility))await setDoc(doc(db,'publicProfiles',handle),{...buildPublicSocialProfile(normalizedProfile),visibility,ownerUid:owner},{merge:true});
-      else await deleteDoc(doc(db,'publicProfiles',handle));
+      else if(handle)await deleteDoc(doc(db,'publicProfiles',handle));
       if(auth.currentUser?.uid===owner){setSocialProfile(current=>storeSocialProfile({...current,handle,visibility}));showToast(visibility==='public'?'Profil public activé.':visibility==='friends'?'Profil visible uniquement par tes amis.':'Profil repassé en privé.');}
     }});
     return saved===false?{ok:false,message:'Impossible de changer la visibilité pour le moment.'}:{ok:true,message:visibility==='public'?'Profil public. Tes amis peuvent te trouver.':visibility==='friends'?'Seuls tes amis confirmés peuvent consulter ton profil.':"Profil privé. Il n’est plus trouvable."};
@@ -20247,7 +20253,8 @@ useEffect(() => {
                 onProfileChange={updateSocialProfile}
                 onProfileVisibilityChange={async (visibility) => {
                   const result = await setSocialProfileVisibility(visibility);
-                  showToast(result.message);
+                  if(result.ok)showToast(result.message);
+                  return result;
                 }}
                 onExportBackup={exportCheckpointBackup}
                 onImportBackup={importCheckpointBackup}

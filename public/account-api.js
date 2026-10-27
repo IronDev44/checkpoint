@@ -129,6 +129,13 @@ export async function handleAccountApi(request,env,verify=verifyFirebaseToken){
   try{
     if(request.method==='GET'){
       if(name==='news')await refreshNews(env);
+      if(name==='publicProfiles'&&url.searchParams.has('search')){
+        const query=url.searchParams.get('search').trim().replace(/^@/,'').toLowerCase();
+        if(query.length<2||query.length>60)return response({error:'Entre entre 2 et 60 caractères pour rechercher un profil.'},400);
+        const rows=await db.prepare("SELECT id,data FROM documents WHERE owner='__shared__' AND collection='publicProfiles' AND json_extract(data,'$.visibility')='public' AND (instr(lower(id),?)>0 OR instr(lower(COALESCE(json_extract(data,'$.displayName'),'')),?)>0) ORDER BY CASE WHEN id=? THEN 0 ELSE 1 END,id LIMIT 51").bind(query,query,query).all();
+        const visible=await Promise.all(rows.results.slice(0,50).map(async row=>{const profile=await profileForReader(JSON.parse(row.data));return profile&&profile.ownerUid!==uid?{handle:row.id,displayName:String(profile.displayName||row.id),photoURL:profile.photoURL||''}:null;}));
+        return response({profiles:visible.filter(Boolean).slice(0,20),limited:rows.results.length>50||visible.filter(Boolean).length>20});
+      }
       if(id){const row=await db.prepare('SELECT data FROM documents WHERE owner=? AND collection=? AND id=?').bind(owner,name,id).first();let data=row?JSON.parse(row.data):null;if(name==='publicProfiles')data=await profileForReader(data);const visible=!!data&&!inTrash(data);return response({exists:visible,data:visible?data:null,id});}
       const rows=await db.prepare('SELECT id,data FROM documents WHERE owner=? AND collection=? ORDER BY id').bind(owner,name).all();const documents=await Promise.all(rows.results.map(async r=>({id:r.id,data:name==='publicProfiles'?await profileForReader(JSON.parse(r.data)):JSON.parse(r.data)})));return response({documents:documents.filter(r=>r.data&&(url.searchParams.get('trash')==='1'?restorable(r.data):!inTrash(r.data)))});
     }
