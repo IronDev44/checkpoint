@@ -1,5 +1,5 @@
 import {render,screen,fireEvent,waitFor,within} from '@testing-library/react';
-import {GameDetailModal,HomeTab} from '../App';
+import {GameDetailModal,HomeTab,LibrarySection} from '../App';
 import {GameService} from '../services/gameService';
 import React from 'react';
 import {HOME_BLOCKS} from '../services/homeLayout';
@@ -7,6 +7,36 @@ import {HOME_BLOCKS} from '../services/homeLayout';
 jest.mock('../services/gameService',()=>({GameService:{rawg:jest.fn(async()=>({results:[]})),igdb:jest.fn(async()=>({results:[]}))}}));
 beforeEach(()=>{jest.spyOn(window,'scrollTo').mockImplementation(()=>{});});
 afterEach(()=>jest.restoreAllMocks());
+test('library filters combine platform, genre and progress and can be reset',async()=>{
+ const games=[{id:'a',name:'Alpha',platformNames:['PC'],genreNames:['Action'],status:'collection'},
+ {id:'b',name:'Beta',platformNames:['PC'],genreNames:['RPG'],status:'collection'},
+ {id:'c',name:'Gamma',platformNames:['PS5'],genreNames:['Action'],status:'collection'}];
+ render(<LibrarySection title="Collection" games={games} libraryCardMode="compact" setLibraryCardMode={()=>{}} onOpenDetail={()=>{}}/>);
+ expect(screen.getByText('Filtrer les jeux').closest('details')).not.toHaveAttribute('open');
+ fireEvent.click(screen.getByText('Filtrer les jeux'));
+ fireEvent.change(screen.getByLabelText('Plateforme'),{target:{value:'PC'}});
+ fireEvent.change(screen.getByLabelText('Genre'),{target:{value:'Action'}});
+ expect(screen.getByText('1 / 3 jeux correspondent')).toBeVisible();
+ expect(screen.getByText('Alpha')).toBeVisible();expect(screen.queryByText('Beta')).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'Réinitialiser les filtres'}));
+ expect(screen.getByText('3 / 3 jeux correspondent')).toBeVisible();
+ await waitFor(()=>expect(screen.getByText('Beta')).toBeVisible());
+});
+test('the catalogue opens the explicit game ID without exposing add actions and returns to the personal sheet',async()=>{
+ GameService.rawg.mockImplementation(async path=>path.endsWith('/screenshots')||path.endsWith('/movies')?{results:[]}:{name:'Halo',description_raw:'Synopsis du catalogue'});
+ const close=jest.fn();
+ render(<GameDetailModal game={{id:'local',name:'Halo',rawgId:42,status:'collection',rating:8}} onClose={close}/>);
+ fireEvent.click(screen.getByRole('tab',{name:'Infos'}));
+ fireEvent.click(screen.getByRole('button',{name:'Voir la fiche complète du jeu'}));
+ expect(await screen.findByText('Synopsis du catalogue')).toBeVisible();
+ expect(GameService.rawg).toHaveBeenCalledWith('/games/42',{lang:'fr'},{});
+ expect(screen.queryByRole('button',{name:'Wishlist'})).toBeNull();
+ fireEvent.click(screen.getByRole('button',{name:'← Retour à ma fiche'}));
+ expect(screen.queryByText('Synopsis du catalogue')).toBeNull();
+ expect(screen.getByRole('tab',{name:'Infos'})).toHaveAttribute('aria-selected','true');
+ expect(close).not.toHaveBeenCalled();
+ GameService.rawg.mockResolvedValue({results:[]});
+});
 test('dismissing an explained discovery replaces it and keeps a reversible preference',async()=>{
  const candidates=['The Witcher 3: Wild Hunt','Portal 2','Mass Effect 2','BioShock 2','Halo 2'].map((name,i)=>({id:i+100,name,rating:4,ratings_count:500,genres:[{name:'RPG'}]}));
  GameService.rawg.mockResolvedValue({results:candidates});

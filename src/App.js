@@ -2,6 +2,7 @@ import ProfileSearch from './components/ProfileSearch';
 import {publishProfileWithIdentity} from './services/profileIdentity';
 import {detectSeriesName} from './services/seriesIdentity';
 import {matchesLibraryShortcut} from './services/libraryShortcuts';
+import {getCatalogueId,selectCatalogueMatch,toCatalogueGame} from './services/catalogueGame';
 import ToolDialog from './components/ToolDialog';
 import {hardwareImageForEdition,hardwareBaseImage,hardwareDisplayImage,hardwarePhotoUrl,hardwareEditionChoices} from './services/hardwareEditionPhotos';
 import HardwareEditionEditor from './components/HardwareEditionEditor';
@@ -897,26 +898,32 @@ function AdvancedStats({ games }) {
   );
 }
 
-function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
+function SearchGameDetailModal({ game, onClose, onWishlist, onCollection, libraryReturn = false }) {
   useDetailReturn(Boolean(game));
   const [details, setDetails] = useState(null);
   const [screenshots, setScreenshots] = useState([]);
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [detailError,setDetailError]=useState(false);
+  const [detailRetry,setDetailRetry]=useState(0);
 
   useEffect(() => {
   if (!game) return;
 
   document.body.classList.add("modal-open");
+  const escape=event=>{if(event.key==='Escape')onClose();};
+  window.addEventListener('keydown',escape);
 
   return () => {
-    document.body.classList.remove("modal-open");
+    window.removeEventListener('keydown',escape);
+    if (!document.querySelector('.modal-backdrop')) document.body.classList.remove("modal-open");
   };
 }, [game?.id, game?.review, game?.ostRating]);
 
   useEffect(() => {
     if (!game) return;
-
+    let active = true;
+    setDetails(null);setScreenshots([]);setMovies([]);setDetailError(false);
     const fetchDetails = async () => {
       try {
         setLoading(true);
@@ -927,19 +934,22 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
           rawgApiRequest(`/games/${encodeURIComponent(game.id)}/movies`),
         ]);
 
+        if (!active) return;
         setDetails(detailsData);
         setScreenshots(screenshotsData.results || []);
         setMovies(moviesData.results || []);
       } catch (error) {
         if (isAbortError(error)) return;
         console.warn("Erreur détail RAWG ignorée :", error);
+        if(active)setDetailError(true);
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     fetchDetails();
-  }, [game]);
+    return () => { active = false; };
+  }, [game,detailRetry]);
 
   if (!game) return null;
 
@@ -983,8 +993,8 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
     : "";
 
   return (
-    <div className="search-detail-backdrop" onClick={onClose}>
-      <div className="search-detail-modal" onClick={(e) => e.stopPropagation()}>
+    <div className={`search-detail-backdrop ${libraryReturn ? 'library-catalogue-backdrop' : ''}`} onClick={onClose}>
+      <div role="dialog" aria-modal="true" aria-label={`Fiche complète · ${game.name}`} className="search-detail-modal" onKeyDown={event=>{if(event.key==='Escape'){event.stopPropagation();onClose();}}} onClick={(e) => e.stopPropagation()}>
         <button className="modal-close-btn" type="button" aria-label="Fermer la fiche du jeu" onClick={onClose}>
           ✕
         </button>
@@ -1002,7 +1012,7 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
               <div className="search-detail-hero-blur" />
 
               <img
-                src={details?.background_image || game.background_image}
+                src={details?.background_image || game.background_image || undefined}
                 alt={game.name}
                 className="search-detail-cover"
               />
@@ -1017,7 +1027,8 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
             </div>
 
             <div className="search-detail-content">
-              <div className="search-detail-actions">
+              {detailError&&<div role="status"><p>Les informations du catalogue n’ont pas pu être chargées.</p><button type="button" onClick={()=>setDetailRetry(value=>value+1)}>Réessayer</button></div>}
+              {libraryReturn ? <div className="search-detail-actions"><button type="button" autoFocus onClick={onClose}>← Retour à ma fiche</button></div> : <div className="search-detail-actions">
                 <button
                   type="button"
                   onClick={() => onWishlist(buildPayload("wishlist"))}
@@ -1033,7 +1044,7 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection }) {
                   <Library size={18} />
                   Collection
                 </button>
-              </div>
+              </div>}
 
               <div className="search-detail-section">
                 <h3>Synopsis</h3>
@@ -4871,6 +4882,26 @@ export function GameDetailModal({
 }) {
   useDetailReturn(Boolean(game));
   const [detailTab,setDetailTab]=useState("partie");
+  const [catalogueGame,setCatalogueGame]=useState(null);
+  const [catalogueLoading,setCatalogueLoading]=useState(false);
+  const [catalogueError,setCatalogueError]=useState('');
+  const catalogueRequest=useRef(0);
+  useEffect(()=>{catalogueRequest.current+=1;setCatalogueGame(null);setCatalogueLoading(false);setCatalogueError('');return()=>{catalogueRequest.current+=1;};},[game?.id]);
+  const openCatalogue = async () => {
+    const request = ++catalogueRequest.current;
+    setCatalogueError('');
+    const id=getCatalogueId(game);
+    if(id){setCatalogueGame(toCatalogueGame(game,id));return;}
+    setCatalogueLoading(true);
+    try {
+      const payload=await GameService.igdb('/games',{search:game.name,page_size:20});
+      if(request!==catalogueRequest.current)return;
+      const match=selectCatalogueMatch(game,payload.results || []);
+      if(!match){setCatalogueError('Aucune fiche identifiée avec certitude pour cette édition.');return;}
+      setCatalogueGame(toCatalogueGame(match));
+    } catch {if(request===catalogueRequest.current)setCatalogueError('La fiche complète est indisponible. Réessaie dans un instant.');}
+    finally {if(request===catalogueRequest.current)setCatalogueLoading(false);}
+  };
   const detailModalRef=useRef(null);
   useEffect(()=>{setDetailTab("partie");if(detailModalRef.current)detailModalRef.current.scrollTop=0;},[game?.id]);
   const [localReview, setLocalReview] = useState("");
@@ -4902,6 +4933,7 @@ export function GameDetailModal({
     document.body.classList.add("modal-open");
 
     const handleEsc = (e) => {
+      if(catalogueGame)return;
       if (e.key === "Escape") {
         onClose();
       }
@@ -4923,7 +4955,7 @@ export function GameDetailModal({
       document.body.classList.remove("modal-open");
       window.removeEventListener("keydown", handleEsc);
     };
-  }, [game, onClose, onNavigateGame, canGoPrevious, canGoNext]);
+  }, [game, onClose, onNavigateGame, canGoPrevious, canGoNext, catalogueGame]);
 
   useEffect(() => {
     if(detailTab!=="infos")return;
@@ -5040,6 +5072,7 @@ export function GameDetailModal({
     >
       <div
         className="game-modal game-detail-focused"
+        inert={catalogueGame ? true : undefined}
         ref={detailModalRef}
         role="dialog"
         aria-modal="true"
@@ -5402,6 +5435,11 @@ export function GameDetailModal({
           </section>
           <section role="tabpanel" id="game-detail-panel-infos" aria-labelledby="game-detail-tab-infos" hidden={detailTab!=='infos'} key={`infos-${game.id}`}>
             <p className="game-detail-panel-intro">La série, l’édition, les images et les extensions.</p>
+            <div className="game-detail-catalogue-link">
+              <button type="button" className="option-pill" disabled={catalogueLoading} onClick={openCatalogue}>{catalogueLoading?'Recherche de la fiche…':'Voir la fiche complète du jeu'}</button>
+              <p>Synopsis, vidéos et informations du catalogue, comme dans la recherche.</p>
+              {catalogueError&&<p role="status">{catalogueError}</p>}
+            </div>
           <div className="game-detail-info-content">
           <div className="game-detail-meta-grid">
             <div>
@@ -5524,6 +5562,7 @@ export function GameDetailModal({
           </section>
         </div>
       </div>
+      {catalogueGame&&createPortal(<SearchGameDetailModal game={catalogueGame} libraryReturn onClose={()=>setCatalogueGame(null)}/>,document.body)}
     </div>
   );
 }
@@ -6625,14 +6664,19 @@ export function LibrarySection({
 }) {
   const [bulkMode,setBulkMode]=useState(false);
   const [quickFilter,setQuickFilter]=useState('all');
+  const [platformChoice,setPlatformChoice]=useState('');
+  const [genreChoice,setGenreChoice]=useState('');
+  const platformChoices=useMemo(()=>[...new Set(games.flatMap(game=>game.playedPlatforms?.length?game.playedPlatforms:game.platformNames || []))].sort((a,b)=>a.localeCompare(b,'fr')),[games]);
+  const genreChoices=useMemo(()=>[...new Set(games.flatMap(game=>game.genreNames || []))].sort((a,b)=>a.localeCompare(b,'fr')),[games]);
+  const activeFilterCount=Number(Boolean(platformChoice))+Number(Boolean(genreChoice))+Number(quickFilter!=='all'&&title==='Collection');
   const activeShortcut=title==='Collection'?quickFilter:'all';
   const shortcutOptions=[['all','Tous'],['recent','Ajoutés · 30 jours'],['unrated','Sans note'],['paused','En pause']];
-  const shortcutGames=useMemo(()=>games.filter(game=>matchesLibraryShortcut(game,activeShortcut,getGameRating)),[games,activeShortcut]);
+  const shortcutGames=useMemo(()=>games.filter(game=>matchesLibraryShortcut(game,activeShortcut,getGameRating)&&(!platformChoice||(game.playedPlatforms?.length?game.playedPlatforms:game.platformNames || []).includes(platformChoice))&&(!genreChoice||(game.genreNames || []).includes(genreChoice))),[games,activeShortcut,platformChoice,genreChoice]);
   const [sortBy, setSortBy] = useState("recent");
   const [visibleLimit,setVisibleLimit]=useState(48);
   // Live saves can reorder or remove records without changing the user's view.
   // Keep expanded pages until the user changes the search, sorting or layout.
-  useEffect(()=>setVisibleLimit(48),[sortBy,title,libraryCardMode,filterKey,quickFilter]);
+  useEffect(()=>setVisibleLimit(48),[sortBy,title,libraryCardMode,filterKey,quickFilter,platformChoice,genreChoice]);
 
   const sortedGames = useMemo(()=>[...shortcutGames].sort((a, b) => {
     if (sortBy === "alphabetical") {
@@ -6981,14 +7025,23 @@ export function LibrarySection({
           <option value="genre">Genre</option>
         </select>
       </label>
-      {title==='Collection'&&<div className="library-shortcuts" role="group" aria-label="Raccourcis de la collection">{shortcutOptions.map(([key,label])=><button type="button" key={key} className="option-pill" aria-pressed={quickFilter===key} onClick={()=>setQuickFilter(key)}>{label} <span>{games.filter(game=>matchesLibraryShortcut(game,key,getGameRating)).length}</span></button>)}</div>}
+      <details className="library-filter-panel">
+        <summary>Filtrer les jeux <span>{activeFilterCount?`${activeFilterCount} actif${activeFilterCount>1?'s':''}`:'Plateforme, genre et suivi'}</span></summary>
+        <div className="library-filter-fields">
+          <label>Plateforme<select value={platformChoice} onChange={event=>setPlatformChoice(event.target.value)}><option value="">Toutes les plateformes</option>{platformChoices.map(name=><option key={name} value={name}>{name}</option>)}</select></label>
+          <label>Genre<select value={genreChoice} onChange={event=>setGenreChoice(event.target.value)}><option value="">Tous les genres</option>{genreChoices.map(name=><option key={name} value={name}>{name}</option>)}</select></label>
+          {title==='Collection'&&<label>Suivi<select value={quickFilter} onChange={event=>setQuickFilter(event.target.value)}>{shortcutOptions.map(([key,label])=><option value={key} key={key}>{label}</option>)}</select></label>}
+          {activeFilterCount>0&&<button type="button" className="option-pill" onClick={()=>{setQuickFilter('all');setPlatformChoice('');setGenreChoice('');}}>Réinitialiser les filtres</button>}
+        </div>
+        <p role="status">{shortcutGames.length} / {games.length} jeux correspondent</p>
+      </details>
       </>}
       </div>
       {!bulkMode && <>
       {sortedGames.length === 0 ? (
         <EmptyState
-          title={activeShortcut==='all'?"Cette section est encore calme":"Aucun jeu pour ce raccourci"}
-          subtitle={activeShortcut==='all'?"Ajoute un jeu, change un statut ou lance une recherche pour lui donner du relief.":"Choisis Tous pour retrouver les autres jeux. Les derniers ajouts couvrent les 30 derniers jours, quand leur date d’ajout est connue."}
+          title={activeFilterCount?'Aucun jeu ne correspond aux filtres':"Cette section est encore calme"}
+          subtitle={activeFilterCount?'Modifie ou réinitialise les filtres pour retrouver les autres jeux.':"Ajoute un jeu, change un statut ou lance une recherche pour lui donner du relief."}
         />
       ) : libraryCardMode === "shelf" ? (
         <LibraryShelf3D
@@ -14554,7 +14607,7 @@ function OptionsTab({
   const [connectedServicesExpanded, setConnectedServicesExpanded] = useState(false);
   const [openOptionGroups, setOpenOptionGroups] = useState({
     help: false,
-    interface: true,
+    interface: false,
     behavior: false,
     rating: false,
     services: false,
