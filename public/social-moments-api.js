@@ -1,4 +1,5 @@
 import {canContact,socialBlocked,canReadSocialProfile} from './social-access.js';
+import {socialQuota} from './social-reliability.js';
 const reply=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 const get=async(db,owner,collection,id)=>{const row=await db.prepare('SELECT data FROM documents WHERE owner=? AND collection=? AND id=?').bind(owner,collection,id).first();return row?JSON.parse(row.data):null;};
 const text=(value,max)=>typeof value==='string'&&value.trim().length>0&&value.trim().length<=max;
@@ -13,9 +14,14 @@ export async function handleRecommendations(request,env,uid,url,now=new Date()){
  const db=env.ACCOUNT_DB,id=url.searchParams.get('id');
  try{
   if(request.method==='GET'){
-   const rows=await db.prepare("SELECT id,data FROM documents WHERE owner='__shared__' AND collection='gameRecommendations' AND (json_extract(data,'$.sender')=? OR json_extract(data,'$.recipient')=?) ORDER BY json_extract(data,'$.createdAt') DESC LIMIT 200").bind(uid,uid).all();
+   const view=url.searchParams.get('view')||'all';if(!['all','received','saved','sent','archived'].includes(view))return reply({error:'Rubrique invalide.'},400);
+   const archiveFilter="EXISTS(SELECT 1 FROM json_each(documents.data,'$.archived') WHERE value=?)";
+   const filter=view==='all'?'':view==='archived'?` AND ${archiveFilter}`:` AND NOT ${archiveFilter} AND json_extract(data,'$.sender')${view==='sent'?'=':'<>'}?`+(view==='saved'?" AND json_extract(data,'$.saved')=1":'');
+   const filterArgs=view==='all'?[]:view==='archived'?[uid]:[uid,uid];
+   let cursor;try{const value=url.searchParams.get('cursor');if(value){if(value.length>1000)throw Error();cursor=JSON.parse(atob(value));if(!Number.isFinite(Date.parse(cursor.at))||!/^[a-zA-Z0-9_-]{1,100}$/.test(cursor.id))throw Error();}}catch{return reply({error:'Page invalide.'},400);}
+   const rows=await db.prepare("SELECT id,data FROM documents WHERE owner='__shared__' AND collection='gameRecommendations' AND (json_extract(data,'$.sender')=? OR json_extract(data,'$.recipient')=?)"+filter+(cursor?" AND (json_extract(data,'$.createdAt')<? OR (json_extract(data,'$.createdAt')=? AND id>?))":'')+" ORDER BY json_extract(data,'$.createdAt') DESC,id ASC LIMIT 51").bind(uid,uid,...filterArgs,...(cursor?[cursor.at,cursor.at,cursor.id]:[])).all();
    const visible=await Promise.all(rows.results.map(async r=>{const data=JSON.parse(r.data);return await socialBlocked(db,uid,data.sender===uid?data.recipient:data.sender)?null:recommendationView(r.id,data,uid);}));
-   return reply({recommendations:visible.filter(Boolean)});
+   const last=rows.results[49];return reply({recommendations:visible.slice(0,50).filter(Boolean),cursor:rows.results.length>50?btoa(JSON.stringify({at:JSON.parse(last.data).createdAt,id:last.id})):null});
   }
   if(request.method!=='POST')return reply({error:'Méthode non autorisée.'},405);
   if(!id||!/^[a-zA-Z0-9_-]{1,100}$/.test(id))return reply({error:'Recommandation invalide.'},400);
@@ -32,6 +38,7 @@ export async function handleRecommendations(request,env,uid,url,now=new Date()){
    if(!game?.name||game._deletedAt||game.status==='wishlist')return reply({error:'Choisis un jeu de ta collection.'},400);
    const recent=await db.prepare("SELECT COUNT(*) AS total FROM documents WHERE owner='__shared__' AND collection='gameRecommendations' AND json_extract(data,'$.sender')=? AND json_extract(data,'$.createdAt')>?").bind(uid,new Date(now.getTime()-86400000).toISOString()).first();
    if(recent.total>=10)return reply({error:'Dix recommandations par jour suffisent : laisse le temps à tes amis de les découvrir.'},429);
+   if(!await socialQuota(db,uid,'recommendations',10,86400000,now.getTime()))return reply({error:'Dix recommandations par jour suffisent : laisse le temps à tes amis de les découvrir.'},429);
    data={sender:uid,recipient:profile.ownerUid,author:String(settings.socialProfile?.displayName||'Un ami').slice(0,80),friend:String(profile.displayName||input.handle).slice(0,80),game:{name:String(game.name).slice(0,180)},message:input.message.trim(),createdAt:now.toISOString(),saved:false,response:'',archived:[]};
   }else{
    if(!old||![old.sender,old.recipient].includes(uid))return reply({error:'Recommandation indisponible.'},403);

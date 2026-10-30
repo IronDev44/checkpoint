@@ -1,5 +1,6 @@
 import {selectionCalendar,monthlyFinal,EXPEDITIONS,CHALLENGE_QUESTIONS} from './rendezvous-catalog.js';
 import {canContact,socialBlocked,canReadSocialProfile} from './social-access.js';
+import {socialQuota} from './social-reliability.js';
 const response=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 const read=async(db,owner,collection,id)=>{const row=await db.prepare('SELECT data FROM documents WHERE owner=? AND collection=? AND id=?').bind(owner,collection,id).first();return row?JSON.parse(row.data):null;};
 async function bodyOf(request){const text=await request.text();if(text.length>12000)throw new Error('Demande trop volumineuse.');const body=JSON.parse(text);if(!body||typeof body!=='object'||Array.isArray(body))throw new Error('Demande invalide.');return body;}
@@ -71,6 +72,7 @@ export async function handleChallenges(request,env,uid,url,now=new Date()){
    if(options[0].name.toLocaleLowerCase()===options[1].name.toLocaleLowerCase())return response({error:'Choisis deux jeux différents.'},400);
    const count=await db.prepare("SELECT COUNT(*) AS total FROM documents WHERE owner='__shared__' AND collection='friendChallenges' AND json_extract(data,'$.ownerUid')=? AND json_extract(data,'$.endsAt')>? AND (SELECT COUNT(*) FROM json_each(documents.data,'$.votes'))<2").bind(uid,now.toISOString()).first();
    if(count.total>=20)return response({error:'Tu as déjà 20 défis en attente. Attends quelques réponses avant d’en créer un autre.'},400);
+   if(!await socialQuota(db,uid,'challenges',20,86400000,now.getTime()))return response({error:'Tu as déjà proposé vingt défis aujourd’hui. Réessaie demain.'},429);
    data={ownerUid:uid,members:[uid,profile.ownerUid],question:body.question,options,author:String(settings.socialProfile?.displayName||'Un ami').slice(0,80),friend:String(profile.displayName||body.handle).slice(0,80),votes:{[uid]:body.choice},comments:{},createdAt:now.toISOString(),endsAt:new Date(now.getTime()+7*86400000).toISOString()};
   }else{
    if(!old?.members?.includes(uid))return response({error:'Défi indisponible.'},403);

@@ -2,6 +2,7 @@ import * as firestore from 'firebase/firestore';
 import { auth } from '../firebase';
 import { d1Enabled } from './accountConfig';
 import { deviceRead, deviceWrite } from './deviceStore';
+import {reportSocialNetworkIssue} from './socialDiagnostics';
 export { d1Enabled } from './accountConfig';
 const listeners=new Map();
 const privateNames=new Set(['games','hardware','gameCollections','playerProgress','playerPrivateSettings']);
@@ -18,7 +19,7 @@ async function request(ref,method='GET',body,owner=auth.currentUser?.uid,extra='
   const user=auth.currentUser;if(!user||user.uid!==owner)throw new Error('Connexion nécessaire.');
   const token=await user.getIdToken();if(auth.currentUser?.uid!==owner)throw new Error('Compte changé.');
   const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),20000);
-  try{const result=await fetch(`/api/account-data?collection=${encodeURIComponent(ref.collection)}${ref.id?`&id=${encodeURIComponent(ref.id)}`:''}${extra}`,{method,headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined,cache:'no-store',signal:controller.signal});const data=await result.json();if(auth.currentUser?.uid!==owner){const error=new Error('Compte changé.');error.status=401;throw error;}if(!result.ok){const error=new Error(data.error||'Enregistrement impossible.');error.status=result.status;throw error;}return data;}finally{clearTimeout(timer);}
+  try{const result=await fetch(`/api/account-data?collection=${encodeURIComponent(ref.collection)}${ref.id?`&id=${encodeURIComponent(ref.id)}`:''}${extra}`,{method,headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},body:body?JSON.stringify(body):undefined,cache:'no-store',signal:controller.signal});const data=await result.json();if(auth.currentUser?.uid!==owner){const error=new Error('Compte changé.');error.status=401;throw error;}if(!result.ok){const error=new Error(data.error||'Enregistrement impossible.');error.status=result.status;throw error;}return data;}catch(error){if(ref.collection==='publicProfiles'&&auth.currentUser?.uid===owner)void reportSocialNetworkIssue('profile',error);throw error;}finally{clearTimeout(timer);}
 }
 function snapshot(data){return {id:data.id,exists:()=>data.exists!==false,data:()=>data.data};}
 function refresh(name,localOnly=false){for(const fn of listeners.get(name)||[])fn(localOnly);}

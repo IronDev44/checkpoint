@@ -4,6 +4,22 @@ import GamingPredictions from './GamingPredictions';
 import ToolDialog from './ToolDialog';
 import {rendezvousUpdates} from '../services/rendezvousUpdates';
 const recommendation={id:'one',author:'Alice',friend:'Bob',game:{name:'Halo'},message:'Pour nos prochaines soirées.',createdAt:'2026-10-23',isSender:false,saved:false,response:'',archived:false};
+test('older recommendations can be loaded, retried and kept after a save refresh',async()=>{
+ const older={...recommendation,id:'older',game:{name:'Ancien jeu'},saved:false};let fail=true,saved=false;
+ const request=jest.fn(async(action,payload)=>{
+  if(action==='save'){saved=true;return {ok:true};}
+  if(payload?.cursor){if(fail){fail=false;throw Error('Connexion interrompue');}return {recommendations:[{...older,saved}],cursor:null};}
+  return {recommendations:[recommendation],cursor:'page-2'};
+ });
+ render(<GameRecommendations request={request}/>);
+ fireEvent.click(await screen.findByRole('button',{name:'Afficher les échanges précédents'}));
+ expect(await screen.findByRole('alert')).toHaveTextContent('Connexion interrompue');expect(screen.getByText('Halo')).toBeVisible();
+ fireEvent.click(screen.getByRole('button',{name:'Afficher les échanges précédents'}));
+ const article=(await screen.findByText('Ancien jeu')).closest('article');
+ fireEvent.click(within(article).getByRole('button',{name:'Garder pour plus tard'}));
+ await waitFor(()=>expect(within(screen.getByText('Ancien jeu').closest('article')).getByRole('button',{name:'Retirer de mes jeux à découvrir'})).toBeVisible());
+ expect(request).toHaveBeenCalledWith('list',{cursor:'page-2',view:'received'});
+});
 beforeEach(()=>jest.spyOn(window,'scrollTo').mockImplementation(()=>{}));
 afterEach(()=>jest.restoreAllMocks());
 test('a received recommendation can be kept without creating a library record and can fail honestly',async()=>{
@@ -13,7 +29,7 @@ test('a received recommendation can be kept without creating a library record an
  expect(screen.getByRole('button',{name:'Garder pour plus tard'})).toHaveAttribute('aria-pressed','false');
  fireEvent.click(screen.getByRole('button',{name:'Garder pour plus tard'}));
  await waitFor(()=>expect(screen.getByRole('button',{name:'Retirer de mes jeux à découvrir'})).toHaveAttribute('aria-pressed','true'));
- expect(request).toHaveBeenCalledWith('save',{id:'one',saved:true});fireEvent.click(screen.getByRole('button',{name:'À découvrir'}));expect(screen.getByRole('heading',{name:'Halo'})).toBeVisible();
+ expect(request).toHaveBeenCalledWith('save',{id:'one',saved:true});fireEvent.click(screen.getByRole('button',{name:'À découvrir'}));expect(await screen.findByRole('heading',{name:'Halo'})).toBeVisible();
 });
 test('recommendations require a real message and game; retries preserve the draft',async()=>{
  const request=jest.fn().mockResolvedValueOnce({recommendations:[]}).mockRejectedValue(new Error('Serveur indisponible'));

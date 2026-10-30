@@ -1,4 +1,5 @@
 import {socialBlocked,socialPairId} from './social-access.js';
+import {indexedSocialCandidates} from './social-directory.js';
 export const normalizeProfileQuery=value=>String(value||'').normalize('NFKD').replace(/\p{M}/gu,'').toLowerCase().replace(/œ/g,'oe').replace(/æ/g,'ae').replace(/[’‘]/g,"'").replace(/[‐‑–—]/g,'-').replace(/\s+/g,' ').trim();
 const rank=(row,query)=>{
  const handle=normalizeProfileQuery(row.id),name=normalizeProfileQuery(row.displayName);
@@ -8,7 +9,9 @@ const rank=(row,query)=>{
 // then rank normalized matches; fetch full profiles only after selecting candidates.
 export async function findVisibleProfiles(db,query,uid,readable){
  const candidates=[];let cursor='',overflow=false;
- do{
+ const indexed=await indexedSocialCandidates(db,query,normalizeProfileQuery);
+ if(indexed){candidates.push(...indexed.slice(0,100));overflow=indexed.length>100;}
+ else do{
   // Search only identity metadata. Never return private settings or a private photo.
   const page=await db.prepare(`SELECT * FROM (
    SELECT 'p:'||p.id AS searchKey,p.id,

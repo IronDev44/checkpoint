@@ -11,6 +11,7 @@ import {handleSocialReports} from './social-reports-api.js';
 import {socialBlocked,canContact,canReadSocialProfile} from './social-access.js';
 import {handleUsage} from './usage-api.js';
 import {findVisibleProfiles,normalizeProfileQuery} from './profile-search.js';
+import {socialQuota,recordSocialIssue,handleSocialDiagnostics} from './social-reliability.js';
 const PRIVATE = new Set(['games','hardware','gameCollections','playerProgress','playerPrivateSettings']);
 const SHARED = new Set(['news','events','publicProfiles']);
 let keyCache;
@@ -95,9 +96,17 @@ export function mergeGamingProgress(previous={}, incoming={}) {
   return {quiz,goals:mergeLedger(previous.goals,incoming.goals,'claimed'),trials};
 }
 export async function handleAccountApi(request,env,verify=verifyFirebaseToken){
+ const url=new URL(request.url),name=url.searchParams.get('collection');
+ const operation=name==='publicProfiles'?(url.searchParams.has('search')?'search':'profile'):name;
+ let result;try{result=await accountApiRequest(request,env,verify);}catch{result=response({error:'Le service est temporairement indisponible. Réessaie.'},503);}
+ if(env.ACCOUNT_DB&&result.status>=400)await recordSocialIssue(env.ACCOUNT_DB,operation,result.status);
+ return result;
+}
+async function accountApiRequest(request,env,verify){
   if(!env.ACCOUNT_DB)return response({error:'Le stockage des comptes n’est pas encore activé.'},503);
   let uid;try{const match=request.headers.get('Authorization')?.match(/^Bearer (.+)$/);if(!match)return response({error:'Connexion nécessaire.'},401);uid=await verify(match[1]);}catch{return response({error:'Reconnecte-toi pour ouvrir ton espace.'},401);}
   const url=new URL(request.url);const name=url.searchParams.get('collection');const id=url.searchParams.get('id');
+  if(name==='socialDiagnostics')return handleSocialDiagnostics(request,env,uid);
   if(name==='appUsage')return handleUsage(request,env,uid);
   if(name==='friendPolls')return handleFriendPolls(request,env,uid,url);
   if(name==='friendships')return handleFriendships(request,env,uid);
@@ -134,6 +143,7 @@ export async function handleAccountApi(request,env,verify=verifyFirebaseToken){
         const raw=url.searchParams.get('search').trim().replace(/^@/,'');
         const query=normalizeProfileQuery(raw);
         if(raw.length>60||query.length<2||query.length>120)return response({error:'Entre entre 2 et 60 caractères pour rechercher un profil.'},400);
+        if(!await socialQuota(db,uid,'profile-search',30,60000))return response({error:'Trop de recherches rapprochées. Patiente une minute puis réessaie.'},429);
         return response(await findVisibleProfiles(db,query,uid,profileForReader));
       }
       if(id){const row=await db.prepare('SELECT data FROM documents WHERE owner=? AND collection=? AND id=?').bind(owner,name,id).first();let data=row?JSON.parse(row.data):null;if(name==='publicProfiles')data=await profileForReader(data);const visible=!!data&&!inTrash(data);return response({exists:visible,data:visible?data:null,id});}
@@ -222,6 +232,7 @@ async function handleFriendPolls(request,env,uid,url){
       for(const key of ids){const game=await read(uid,'games',key);if(!game?.name||game._deletedAt)return response({error:'Un jeu sélectionné n’est plus disponible.'},400);options.push({name:String(game.name).slice(0,180)});}
       const count=await db.prepare("SELECT COUNT(*) AS total FROM documents WHERE owner='__shared__' AND collection='friendPolls' AND json_extract(data,'$.ownerUid')=?").bind(uid).first();
       if(count.total>=100)return response({error:'Supprime un ancien sondage avant d’en créer un autre.'},400);
+      if(!await socialQuota(db,uid,'polls',10,86400000))return response({error:'Tu as déjà créé dix sondages aujourd’hui. Réessaie demain.'},429);
       data={ownerUid:uid,audience:[...new Set(audience)],author:String(settings?.socialProfile?.displayName||'Un ami').slice(0,80),title:'Je commence lequel ?',options,votes:{},createdAt:new Date().toISOString(),endsAt:new Date(Date.now()+7*86400000).toISOString(),closed:false};
     }else{
       if(!allowed(previous))return response({error:'Sondage indisponible.'},403);

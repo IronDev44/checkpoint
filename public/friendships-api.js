@@ -1,4 +1,5 @@
 import {canContact,socialBlocked,canReadSocialProfile} from './social-access.js';
+import {socialQuota} from './social-reliability.js';
 const reply=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}});
 const identity=(handle,p)=>({handle,displayName:String(p.displayName||handle).slice(0,80),photoURL:p.photoURL||'',platform:String(p.platform||'').slice(0,120),level:Number(p.level)||1});
 
@@ -57,6 +58,7 @@ export async function handleFriendships(request,env,uid){
    const since=new Date(Date.now()-86400000).toISOString();
    const daily=await db.prepare("SELECT COUNT(*) AS total FROM documents,json_each(documents.data,'$.sentHistory') AS history,json_each(history.value) AS sent WHERE owner='__shared__' AND collection='friendships' AND history.key=? AND sent.value>?").bind(uid,since).first();
    if(daily.total>=20)return reply({error:'Tu as déjà envoyé vingt invitations aujourd’hui. Réessaie demain.'},429);
+   if(!await socialQuota(db,uid,'invitations',20,86400000))return reply({error:'Tu as déjà envoyé vingt invitations aujourd’hui. Réessaie demain.'},429);
    const sentHistory=Object.fromEntries(Object.entries(previous?.sentHistory||{}).map(([member,dates])=>[member,dates.filter(date=>date>since)]));
    sentHistory[uid]=[...(sentHistory[uid]||[]),now];
    next={sender:uid,recipient:target.uid,senderProfile:own.profile,recipientProfile:target.profile,status:'pending',createdAt:now,updatedAt:now,refusals:previous?.refusals||{},sentHistory};
@@ -74,8 +76,13 @@ export async function handleFriendships(request,env,uid){
    if(body.action==='decline')next.refusals={...previous.refusals,[previous.sender]:{count:(previous.refusals?.[previous.sender]?.count||0)+1,at:now}};
    if(body.action==='accept')next.refusals={};
   }
-  const result=row?await db.prepare("UPDATE documents SET data=? WHERE owner='__shared__' AND collection='friendships' AND id=? AND data=?").bind(JSON.stringify(next),id,row.data).run():await db.prepare("INSERT OR IGNORE INTO documents(owner,collection,id,data) VALUES('__shared__','friendships',?,?)").bind(id,JSON.stringify(next)).run();
-  if(!result.meta.changes)return reply({error:'La demande a changé. Actualise puis réessaie.'},409);
+  const cap=body.action==='send'?" AND (SELECT COUNT(*) FROM documents WHERE owner='__shared__' AND collection='friendships' AND json_extract(data,'$.sender')=? AND json_extract(data,'$.status')='pending')<50":'';
+  const result=row?await db.prepare("UPDATE documents SET data=? WHERE owner='__shared__' AND collection='friendships' AND id=? AND data=?"+cap).bind(JSON.stringify(next),id,row.data,...(cap?[uid]:[])).run():await db.prepare("INSERT OR IGNORE INTO documents(owner,collection,id,data) SELECT '__shared__','friendships',?,? WHERE 1=1"+cap).bind(id,JSON.stringify(next),...(cap?[uid]:[])).run();
+  if(!result.meta.changes){
+   const latest=await db.prepare("SELECT data FROM documents WHERE owner='__shared__' AND collection='friendships' AND id=?").bind(id).first();
+   if(latest){const data=JSON.parse(latest.data);if(data.status===next.status&&data.sender===next.sender&&data.recipient===next.recipient)return reply({ok:true,status:data.status});}
+   return reply({error:'La demande a changé. Actualise puis réessaie.'},409);
+  }
   return reply({ok:true,status:next.status});
  }catch{return reply({error:'Impossible de charger les invitations. Réessaie.'},503);}
 }

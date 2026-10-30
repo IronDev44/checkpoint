@@ -1,4 +1,5 @@
 import {auth} from '../firebase';
+import {reportSocialNetworkIssue} from './socialDiagnostics';
 export async function friendshipRequest(action='list',payload={},collection='friendships'){
  const user=auth.currentUser;
  if(!user)throw new Error('Connecte-toi pour retrouver tes invitations.');
@@ -10,13 +11,13 @@ export async function friendshipRequest(action='list',payload={},collection='fri
   const response=await fetch(`/api/account-data?collection=${collection}${action==='list'&&payload.handle?`&handle=${encodeURIComponent(payload.handle)}`:''}${action==='list'&&payload.cursor?`&cursor=${encodeURIComponent(payload.cursor)}`:''}`,{method:action==='list'?'GET':'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},cache:'no-store',signal:controller.signal,...(action==='list'?{}:{body:JSON.stringify({...payload,action})})});
   const data=await response.json();
   if(auth.currentUser?.uid!==user.uid)throw new Error('Le compte a changé.');
-  if(!response.ok)throw new Error(data.error||'Invitation indisponible.');
+  if(!response.ok)throw Object.assign(new Error(data.error||'Invitation indisponible.'),{status:response.status});
   if(action==='list'&&collection==='friendships'&&(!Array.isArray(data.connections)||data.connections.some(item=>!item?.profile?.handle||!item.id)))throw new Error('Les invitations sont temporairement indisponibles. Réessaie.');
   if(collection==='socialControls'&&(!data.preferences||!Array.isArray(data.blocked)))throw new Error('Les réglages sociaux sont temporairement indisponibles. Réessaie.');
   if(collection==='sharedGames'&&(typeof data.shared!=='boolean'||!Array.isArray(data.games)))throw new Error('La comparaison est temporairement indisponible. Réessaie.');
   if(collection==='socialReactions'&&(!data.reactions||typeof data.reactions!=='object'))throw new Error('Les réactions sont temporairement indisponibles. Réessaie.');
   return data;
- }catch(error){if(error.name==='AbortError')throw new Error('Le chargement prend trop de temps. Réessaie.');throw error;}
+ }catch(error){if(auth.currentUser?.uid===user.uid)void reportSocialNetworkIssue(collection,error);if(error.name==='AbortError')throw new Error('Le chargement prend trop de temps. Réessaie.');throw error;}
  finally{clearTimeout(timer);}
 }
 

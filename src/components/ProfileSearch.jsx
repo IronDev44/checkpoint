@@ -8,9 +8,9 @@ export default function ProfileSearch({onOpen,onInvite,connections=[],canInvite=
  const edit=value=>{request.current?.abort();version.current++;setBusy(false);setQuery(value);setResult(null);setError('');setMessage('');};
  async function search(e){e.preventDefault();const term=query.trim();if(term.replace(/^@/,'').length<2){setError('Entre au moins 2 caractères.');return;}
   request.current?.abort();const controller=new AbortController();request.current=controller;const current=++version.current;setBusy(true);setError('');setResult(null);
-  const timer=setTimeout(()=>controller.abort(),15000);
+  const timer=setTimeout(()=>controller.abort(new DOMException('Délai dépassé','TimeoutError')),15000);
   try{const data=await searchPublicProfiles(term,controller.signal);if(alive.current&&version.current===current)setResult(data);}
-  catch(e){if(alive.current&&version.current===current)setError(e.name==='AbortError'?'La recherche prend trop de temps. Réessaie.':e.message);}
+  catch(e){if(alive.current&&version.current===current)setError(['AbortError','TimeoutError'].includes(e.name)?'La recherche prend trop de temps. Réessaie.':e.message);}
   finally{clearTimeout(timer);if(alive.current&&version.current===current)setBusy(false);}
  }
  async function act(profile,invite){if(profile.private||acting.current)return;acting.current=true;setAction(profile.handle);setError('');setMessage('');
