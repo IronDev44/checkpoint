@@ -1,9 +1,10 @@
 import {ALL_THEME_CATALOG} from '../data/themeCatalog';
 import {THEME_REWARD_LEVELS,getThemeUnlockLevel,isCheckpointTheme,CHECKPOINT_PREMIUM_THEME as premium,CHECKPOINT_ULTIMATE_THEME as ultimate,earnThemeUnlocks,mergeThemeUnlocks,canUseTheme,resolveThemeRewards} from './themeRewards';
-test('51 distinct themes include a starter and exactly one reward for every even level through 100',()=>{
- expect(ALL_THEME_CATALOG).toHaveLength(51);expect(new Set(ALL_THEME_CATALOG.map(t=>t.id)).size).toBe(51);
- expect(Object.keys(THEME_REWARD_LEVELS)).toHaveLength(50);
- expect(Object.values(THEME_REWARD_LEVELS).sort((a,b)=>a-b)).toEqual(Array.from({length:50},(_,i)=>(i+1)*2));
+test('52 distinct themes preserve the original milestones and add a bonus at level 60',()=>{
+ expect(ALL_THEME_CATALOG).toHaveLength(52);expect(new Set(ALL_THEME_CATALOG.map(t=>t.id)).size).toBe(52);
+ expect(Object.keys(THEME_REWARD_LEVELS)).toHaveLength(51);
+ expect(Object.entries(THEME_REWARD_LEVELS).filter(([id])=>id!=='theme-checkpoint2077').map(([,level])=>level).sort((a,b)=>a-b)).toEqual(Array.from({length:50},(_,i)=>(i+1)*2));
+ expect(getThemeUnlockLevel('theme-checkpoint2077')).toBe(60);
  expect(getThemeUnlockLevel(premium)).toBe(50);expect(getThemeUnlockLevel(ultimate)).toBe(100);expect(getThemeUnlockLevel('theme-checkpoint')).toBe(0);
 });
 test.each(Object.entries(THEME_REWARD_LEVELS))('%s unlocks exactly at level %s and stays earned after a level drop',(id,level)=>{
@@ -30,7 +31,7 @@ test('multiple milestones earned in one load do not change an available selectio
 test('all themes unlock only for the authenticated configured owner after loading',()=>{
  const {ownerUid}=require('./accountConfig'),state={theme:'theme-ori',unlockedThemes:[],level:1,ready:true};
  const owner=resolveThemeRewards({...state,accountUid:ownerUid});
- expect(owner.unlockedThemes).toHaveLength(50);expect(owner.theme).toBe('theme-ori');
+ expect(owner.unlockedThemes).toHaveLength(51);expect(owner.theme).toBe('theme-ori');
  ALL_THEME_CATALOG.forEach(theme=>expect(canUseTheme(theme.id,owner.unlockedThemes)).toBe(true));
  expect(resolveThemeRewards({...owner,level:1,ready:true,accountUid:ownerUid}).justUnlocked).toBe(false);
  expect(resolveThemeRewards({...state,accountUid:'other',isOwner:true,displayName:'Créateur'}).unlockedThemes).toEqual([]);

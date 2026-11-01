@@ -32,5 +32,6 @@ export const THEME_CATALOG = [
   { id: "theme-graphite", label: "Carbon Ice" },
   { id: "theme-retro", label: "Arcade Sunset" },
   { id: "theme-cyberpunk", label: "Neon Tokyo" },
+  { id: "theme-checkpoint2077", label: "Cyberpunk 2077 · Checkpoint 2077" },
 ];
 export const ALL_THEME_CATALOG=[...THEME_CATALOG,{id:"theme-checkpointpremium",label:"Checkpoint Premium"},{id:"theme-checkpointultimate",label:"Checkpoint Ultime"}];

@@ -1,7 +1,7 @@
 import {FEATURE_TUTORIALS} from './data/releaseNotes';
 import {TAB_TUTORIALS} from './data/tabTutorials';
 import { render, waitFor, screen, fireEvent, within } from "@testing-library/react";
-import App from "./App";
+import App, { AppHeaderBrand } from "./App";
 import { setDoc, updateDoc } from "./services/d1Data";
 import { getWeeklyQuiz, getWeeklyQuizKey, getQuizAnswerKey } from "./services/weeklyQuiz";
 
@@ -31,6 +31,14 @@ jest.mock("./services/d1Data",()=>({
 
 // Each case uses an in-memory account; no authentication or network writes.
 const mockOriginalFetch = global.fetch;
+
+test("2077 renames only the themed header and restores the regular brand on another theme",()=>{
+  const view=render(<AppHeaderBrand theme="theme-checkpoint2077"/>);
+  expect(screen.getByRole('heading',{name:'Checkpoint 2077'})).toBeInTheDocument();
+  view.rerender(<AppHeaderBrand theme="theme-checkpoint"/>);
+  expect(screen.getByRole('heading',{name:'Checkpoint'})).toBeInTheDocument();
+  expect(screen.queryByLabelText('Checkpoint 2077')).toBeNull();
+});
 beforeEach(()=>{
   mockStore.clear();mockStore.set('checkpoint-release-progress-v1',JSON.stringify({read:[],guides:FEATURE_TUTORIALS.map(g=>g.id)}));mockStore.set('checkpoint-tab-tutorials-v1',JSON.stringify(Object.fromEntries(Object.keys(TAB_TUTORIALS).map(key=>[key,'completed']))));mockAccountStorage.setItem.mockImplementation((key,value)=>mockStore.set(key,value));setDoc.mockResolvedValue(undefined);
   mockStore.set("checkpoint-app-options",JSON.stringify({startTab:"options",sound:{enabled:false}}));

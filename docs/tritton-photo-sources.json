@@ -1,0 +1,256 @@
+[
+  {
+    "slug": "ax-120",
+    "imageUrl": "https://www.wog.ch/nas/screens/X2/xb360_headsettrittonax120a.jpg",
+    "source": "https://www.wog.ch/en/index.cfm/details/product/25355-Headset-AX-120-Tritton",
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.55,
+        0.35
+      ]
+    ]
+  },
+  {
+    "slug": "ax-720",
+    "imageUrl": "https://www.cdiscount.com/pdt2/0/5/2/1/700x700/0836121000052/rw/tritton-ax720-casque-et-micro-ps3-x360-pc-mac.jpg",
+    "source": "https://www.cdiscount.com/informatique/gaming/tritton-ax720-casque-et-micro-ps3-x360-pc-mac/f-107140308-0836121000052.html",
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.52,
+        0.3
+      ]
+    ]
+  },
+  {
+    "slug": "kunai-universal",
+    "imageUrl": "https://s.pacn.ws/1/p/j3/tritton-kunai-stereo-headset-black-343957.4.jpg",
+    "source": "https://www.play-asia.com/en/tritton-kunai-stereo-headset-black/13/707ded",
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.5,
+        0.4
+      ]
+    ]
+  },
+  {
+    "slug": "kunai-ps3-vita",
+    "imageUrl": "https://www.softclub.ru/areas/accessories/images/accessories/tritton/kunai_1.jpg",
+    "source": "https://www.softclub.ru/accessories/tritton",
+    "threshold": 245
+  },
+  {
+    "slug": "warhead-7-1",
+    "imageUrl": "https://www.softclub.ru/areas/accessories/images/accessories/tritton/warhead_7_1_1.jpg",
+    "source": "https://www.softclub.ru/accessories/tritton",
+    "threshold": 190,
+    "backgroundSeeds": [
+      [
+        0.5,
+        0.3
+      ]
+    ]
+  },
+  {
+    "slug": "ax-180",
+    "imageUrl": "https://ecommerce.datablitz.com.ph/cdn/shop/products/casque-tritton-ax180-matte-ps4-pc-ps3-xbox-360.png?v=1676911596",
+    "source": "https://ecommerce.datablitz.com.ph/products/tritton-ax180-performance-stereo-headset-360-ps3-p",
+    "excludeRects": [
+      [
+        0,
+        0,
+        0.34,
+        0.37
+      ]
+    ],
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.6,
+        0.3
+      ]
+    ]
+  },
+  {
+    "slug": "pro-plus",
+    "imageUrl": "https://c1.neweggimages.com/ProductImageCompressAll1280/68-991-004-03.jpg",
+    "source": "https://www.newegg.ca/p/N82E16868991004",
+    "threshold": 245
+  },
+  {
+    "slug": "720-plus",
+    "imageUrl": "https://img1.kakaku.k-img.com/Images/news_icv/900x675/2012100/20121002174428_445_.jpg",
+    "source": "https://news.kakaku.com/prdnews/cd=pc/ctcd=0162/id=25352/",
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.5,
+        0.3
+      ]
+    ]
+  },
+  {
+    "slug": "kunai-wii-u-3ds",
+    "imageUrl": "https://www.4gamer.net/games/097/G009735/20121128019/SS/002.jpg",
+    "source": "https://www.4gamer.net/games/097/G009735/20121128019/",
+    "threshold": 245
+  },
+  {
+    "slug": "kunai-wireless",
+    "imageUrl": "https://scale.coolshop-cdn.com/product-media.coolshop-cdn.com/AH26DW/b5f28f04d5024be0b6a538eb1197b8cd.jpeg/f/tritton-kunai-wireless-stereo-headset.jpeg",
+    "source": "https://www.coolshop.dk/produkt/tritton-kunai-wireless-stereo-headset/AH26DW/",
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.65,
+        0.4
+      ]
+    ]
+  },
+  {
+    "slug": "trigger",
+    "imageUrl": "https://www.discoazul.pt/uploads/media/images/TrittonTrigger-01.jpg",
+    "source": "https://www.discoazul.pt/tritton-trigger-xbox-360.html",
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.55,
+        0.3
+      ]
+    ]
+  },
+  {
+    "slug": "detonator",
+    "imageUrl": "https://image.news.livedoor.com/newsimage/9/3/935f6_1186_detonator.png",
+    "source": "https://news.livedoor.com/article/detail/6492172/",
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.55,
+        0.3
+      ]
+    ]
+  },
+  {
+    "slug": "primer",
+    "imageUrl": "https://media.s-bol.com/xkGN37BPgzmJ/550x384.jpg",
+    "source": "https://www.bol.com/nl/nl/p/tritton-primer-draadloze-stereo-headset-zwart-xbox-360/1004004011950253/",
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.66,
+        0.35
+      ],
+      [
+        0.8,
+        0.35
+      ]
+    ]
+  },
+  {
+    "slug": "ark-100-console",
+    "imageUrl": "https://i5.walmartimages.com/seo/Tritton-ARK-100-Headset_4b30a7ff-8aee-40c0-a032-bf5d4dcffdc9.54938e54289cc2a7432bf960b8663ed1.jpeg",
+    "source": "https://www.walmart.com/ip/196494410",
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.55,
+        0.32
+      ],
+      [
+        0.56,
+        0.4
+      ],
+      [
+        0.67,
+        0.3
+      ]
+    ]
+  },
+  {
+    "slug": "katana-hd",
+    "imageUrl": "https://www.techspot.com/images/products/2016/pc-headset/org/2016-07-11-product-3.jpg",
+    "source": "https://www.techspot.com/products/headphones/tritton-katana-hd-71-wireless-headset.141278/",
+    "threshold": 254
+  },
+  {
+    "slug": "swarm",
+    "imageUrl": "https://img1.kakaku.k-img.com/images/productimage/fullscale/K0000756280.jpg",
+    "source": "https://kakaku.com/item/K0000756280/",
+    "threshold": 245
+  },
+  {
+    "slug": "switchblade",
+    "imageUrl": "https://www.softclub.ru/areas/accessories/images/accessories/tritton/switchblade_wireless_headset_2.jpg",
+    "source": "https://www.softclub.ru/accessories/tritton",
+    "threshold": 250
+  },
+  {
+    "slug": "pc-510",
+    "imageUrl": "https://metku.net/reviews/tritton-pc-150-hda/pose.jpg",
+    "source": "https://metku.net/index.html?path=reviews/tritton-pc-150-hda/index_eng2",
+    "threshold": 245
+  },
+  {
+    "slug": "ark-100-pc",
+    "imageUrl": "https://media.cdnws.com/_i/45353/fb%7B630%7D-7836/2101/39/materiels-informatique-casque-micro-tritton-ark-100-infinytech-reunion-1.jpeg",
+    "source": "https://www.infinytech-reunion.re/casque-et-micro/casques-micro-gaming/casque-micro-tritton-ark-100.html",
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.65,
+        0.4
+      ]
+    ]
+  },
+  {
+    "slug": "kaiken-ps4",
+    "imageUrl": "https://scale.coolshop-cdn.com/product-media.coolshop-cdn.com/AF9Z63/baf9b6a0b048412e8d279c87cc8f5f2c.jpeg/f/tritton-kaiken-mono-chat-headset-for-ps4.jpeg",
+    "source": "https://www.coolshop.dk/produkt/tritton-kaiken-mono-chat-headset-for-ps4/AF9Z63/",
+    "threshold": 245
+  },
+  {
+    "slug": "ax-pro",
+    "imageUrl": "https://theawesomer.com/photos/2008/11/111208_tritton_1.jpg",
+    "source": "https://theawesomer.com/tritton-ax-pro-headphones/6176/",
+    "threshold": 245
+  },
+  {
+    "slug": "ax-360",
+    "imageUrl": "https://c1.neweggimages.com/ProductImageCompressAll1280/26-235-001-03.jpg",
+    "source": "https://www.newegg.com/tritton-ax360/p/N82E16826235001",
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.7,
+        0.65
+      ],
+      [
+        0.8,
+        0.75
+      ],
+      [
+        0.5,
+        0.35
+      ],
+      [
+        0.3,
+        0.69
+      ]
+    ]
+  },
+  {
+    "slug": "kama-ps4",
+    "imageUrl": "https://www.4gamer.net/games/097/G009735/20170316114/SS/001.jpg",
+    "source": "https://www.4gamer.net/games/097/G009735/20170316114/",
+    "threshold": 245,
+    "backgroundSeeds": [
+      [
+        0.5,
+        0.3
+      ]
+    ]
+  }
+]

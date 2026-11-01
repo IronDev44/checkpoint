@@ -1,4 +1,5 @@
 import {ULTIMATE_VAULT_DURATION} from "./UltimateVaultTransition";
+import { CYBER2077_THEME, CYBER2077_TRANSITION_DURATION, Cyber2077Transition } from "./Cyber2077Effects";
 import { useEffect, useState } from "react";
 import { createPortal as renderPortal } from "react-dom";
 import "./ThemeTransition.css";
@@ -35,7 +36,7 @@ import { getGameUniverseTheme } from "../data/gameUniverseThemes";
 
 // Each theme has its own motif; motion stays short enough to finish before cleanup.
 export const THEME_TRANSITION_DURATION = 840;
-export const getThemeTransitionDuration=(theme,light=false)=>theme==="theme-matrix"?1320:theme==="theme-checkpointultimate"&&!light?ULTIMATE_VAULT_DURATION:THEME_TRANSITION_DURATION;
+export const getThemeTransitionDuration=(theme,light=false)=>theme===CYBER2077_THEME?CYBER2077_TRANSITION_DURATION:theme==="theme-matrix"?1320:theme==="theme-checkpointultimate"&&!light?ULTIMATE_VAULT_DURATION:THEME_TRANSITION_DURATION;
 
 const identities = {
   "theme-indigo": ["aurora", "#a78bfa", "M2 18 Q7 2 12 12 T22 6 M2 22 Q7 6 12 16 T22 10"],
@@ -131,6 +132,7 @@ export default function ThemeTransition({ theme, direction, effects, fullMotion 
     document.body
   );
   if (theme === "theme-checkpointultimate") return createPortal(<CheckpointUltimateTransition light={light} direction={direction}/>, document.body);
+  if (theme === CYBER2077_THEME) return createPortal(<Cyber2077Transition light={light} effects={effects} direction={direction}/>, document.body);
   if (theme === "theme-checkpointpremium") return createPortal(<CheckpointPremiumTransition light={light} direction={direction}/>, document.body);
   if (theme === "theme-checkpoint") return createPortal(<CheckpointTransition light={light} direction={direction}/>, document.body);
   if (getGameUniverseTheme(theme)) return createPortal(<GameUniverseTransition theme={theme} direction={direction} light={light} effects={effects}/>, document.body);

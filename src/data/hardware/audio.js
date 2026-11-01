@@ -1,7 +1,89 @@
 const audioImage = (id) => `/images/hardware/audio/${id}.png`;
 const audioVersion = (id, name) => ({ id, name, image: audioImage(id) });
+const trittonVersion = (id, name) => audioVersion(`tritton-${id}`, `Tritton ${name}`);
 
 export const AUDIO_HARDWARE = [
+
+{
+  id: "tritton-audio",
+  brand: "Tritton",
+  name: "Casques Tritton",
+  type: "audio",
+  category: "Casques gaming",
+  variants: [
+    {
+      id: "tritton-ax",
+      name: "AX",
+      versions: [
+        trittonVersion("ax-120", "AX 120"),
+        trittonVersion("ax-180", "AX 180"),
+        trittonVersion("ax-360", "AX 360"),
+        trittonVersion("ax-720", "AX 720"),
+        trittonVersion("ax-pro", "AX Pro"),
+      ],
+    },
+    {
+      id: "tritton-surround",
+      name: "Pro+ et 720+",
+      versions: [
+        trittonVersion("pro-plus", "Pro+"),
+        trittonVersion("720-plus", "720+"),
+      ],
+    },
+    {
+      id: "tritton-kunai",
+      name: "Kunai",
+      versions: [
+        trittonVersion("kunai-universal", "Kunai Universal"),
+        trittonVersion("kunai-ps3-vita", "Kunai PlayStation 3 / PS Vita"),
+        trittonVersion("kunai-wii-u-3ds", "Kunai Wii U / Nintendo 3DS"),
+        trittonVersion("kunai-wireless", "Kunai Wireless"),
+      ],
+    },
+    {
+      id: "tritton-kama-kaiken",
+      name: "Kama et Kaiken",
+      versions: [
+        trittonVersion("kama-ps4", "Kama PlayStation 4"),
+        trittonVersion("kaiken-ps4", "Kaiken PlayStation 4"),
+      ],
+    },
+    {
+      id: "tritton-xbox-360",
+      name: "Xbox 360",
+      versions: [
+        trittonVersion("trigger", "Trigger"),
+        trittonVersion("detonator", "Detonator"),
+        trittonVersion("primer", "Primer Wireless"),
+        trittonVersion("warhead-7-1", "Warhead 7.1"),
+      ],
+    },
+    {
+      id: "tritton-ark",
+      name: "ARK",
+      versions: [
+        trittonVersion("ark-100-console", "ARK 100 Console"),
+        trittonVersion("ark-100-pc", "ARK 100 PC"),
+      ],
+    },
+    {
+      id: "tritton-wireless",
+      name: "Katana et Swarm",
+      versions: [
+        trittonVersion("katana-hd", "Katana HD"),
+        trittonVersion("swarm", "Swarm Wireless"),
+      ],
+    },
+    {
+      id: "tritton-legacy",
+      name: "Autres modèles",
+      versions: [
+        trittonVersion("pc-510", "PC 510"),
+        trittonVersion("switchblade", "SwitchBlade Wireless"),
+      ],
+    },
+  ],
+},
 
  /* =========================
    SONY / PLAYSTATION

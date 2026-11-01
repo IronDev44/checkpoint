@@ -1,4 +1,5 @@
 import { accountStorage as localStorage } from "../services/accountData";
+import { CYBER2077_THEME, Cyber2077Intro } from "./Cyber2077Effects";
 import { useEffect, useMemo } from "react";
 import { CheckpointIntro, CheckpointPremiumIntro, CheckpointUltimateIntro } from "./CheckpointEffects";
 import PlayStationSymbol from "./PlayStationSymbol";
@@ -94,6 +95,8 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
   }, [managed, onRequestClose, showSplash]);
 
   if (!showSplash) return null;
+
+  if (splashTheme === CYBER2077_THEME) return <Cyber2077Intro progress={safeProgress} light={light} effects={effects} onRequestClose={onRequestClose}/>;
 
   if (splashTheme === "theme-checkpointultimate") return <CheckpointUltimateIntro progress={safeProgress} light={light} onRequestClose={onRequestClose}/>;
   if (splashTheme === "theme-checkpointpremium") return <CheckpointPremiumIntro progress={safeProgress} light={light} onRequestClose={onRequestClose}/>;

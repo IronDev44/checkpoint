@@ -6,9 +6,10 @@ export const CHECKPOINT_PREMIUM_LEVEL = 50;
 export const CHECKPOINT_ULTIMATE_THEME = "theme-checkpointultimate";
 export const CHECKPOINT_ULTIMATE_LEVEL = 100;
 // Stable catalogue order: one reward every two levels, with signature milestones reserved.
-const regular=ALL_THEME_CATALOG.filter(theme=>!['theme-checkpoint',CHECKPOINT_PREMIUM_THEME,CHECKPOINT_ULTIMATE_THEME].includes(theme.id));
+const regular=ALL_THEME_CATALOG.filter(theme=>!['theme-checkpoint','theme-checkpoint2077',CHECKPOINT_PREMIUM_THEME,CHECKPOINT_ULTIMATE_THEME].includes(theme.id));
 const regularLevels=Array.from({length:50},(_,i)=>(i+1)*2).filter(level=>![CHECKPOINT_PREMIUM_LEVEL,CHECKPOINT_ULTIMATE_LEVEL].includes(level));
-export const THEME_REWARD_LEVELS=Object.freeze({...Object.fromEntries(regular.map((theme,i)=>[theme.id,regularLevels[i]])),[CHECKPOINT_PREMIUM_THEME]:CHECKPOINT_PREMIUM_LEVEL,[CHECKPOINT_ULTIMATE_THEME]:CHECKPOINT_ULTIMATE_LEVEL});
+// Bonus theme: existing rewards retain their levels and the owner's access still applies.
+export const THEME_REWARD_LEVELS=Object.freeze({...Object.fromEntries(regular.map((theme,i)=>[theme.id,regularLevels[i]])),"theme-checkpoint2077":60,[CHECKPOINT_PREMIUM_THEME]:CHECKPOINT_PREMIUM_LEVEL,[CHECKPOINT_ULTIMATE_THEME]:CHECKPOINT_ULTIMATE_LEVEL});
 const REWARD_LEVELS=THEME_REWARD_LEVELS;
 export const getThemeUnlockLevel=theme=>REWARD_LEVELS[theme]||0;
 export const getThemeLabel=theme=>ALL_THEME_CATALOG.find(item=>item.id===theme)?.label||theme;

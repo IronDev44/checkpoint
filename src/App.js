@@ -34,6 +34,7 @@ import "./components/GameUniverseThemes.css";
 import { GAME_UNIVERSE_THEMES } from "./data/gameUniverseThemes";
 import "./documentScroll.css";
 import "./components/CheckpointTheme.css";
+import { CYBER2077_THEME, Cyber2077Wordmark } from "./components/Cyber2077Effects";
 import CheckpointPremiumChoice from "./components/CheckpointPremiumChoice";
 import { CHECKPOINT_PREMIUM_THEME, CHECKPOINT_ULTIMATE_THEME, normalizeThemeUnlocks, mergeThemeUnlocks, resolveThemeRewards, canUseTheme, isCheckpointTheme, getThemeUnlockLevel, getThemeLabel } from "./services/themeRewards";
 import { CheckpointMark } from "./components/CheckpointEffects";
@@ -2623,7 +2624,7 @@ const APP_TAB_DESCRIPTIONS = {
 
 export function AppHeaderBrand({theme}) {
   return <div className="app-brand">
-    <h1 className="title" data-title="Checkpoint"><CheckpointMark className="checkpoint-header-mark" variant={theme === CHECKPOINT_ULTIMATE_THEME ? "diamond" : theme === CHECKPOINT_PREMIUM_THEME ? "platinum" : "gold"}/><span className="checkpoint-wordmark">Checkpoint</span></h1>
+    <h1 className="title" data-title={theme === CYBER2077_THEME ? "Checkpoint 2077" : "Checkpoint"}>{theme === CYBER2077_THEME ? <Cyber2077Wordmark/> : <><CheckpointMark className="checkpoint-header-mark" variant={theme === CHECKPOINT_ULTIMATE_THEME ? "diamond" : theme === CHECKPOINT_PREMIUM_THEME ? "platinum" : "gold"}/><span className="checkpoint-wordmark">Checkpoint</span></>}</h1>
   </div>;
 }
 
@@ -13173,6 +13174,7 @@ export function HardwareTab({
     "Astro",
     "Corsair",
     "Turtle Beach",
+    "Tritton",
     "LG",
     "Samsung",
     "TCL",
@@ -18342,6 +18344,7 @@ useEffect(() => {
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
     document.body.setAttribute("data-theme", theme);
+    document.title = theme === CYBER2077_THEME ? "Checkpoint 2077" : "Checkpoint";
     localStorage.setItem("checkpoint-theme", theme);
 
     const metaTheme = document.querySelector('meta[name="theme-color"]');
@@ -18355,6 +18358,7 @@ useEffect(() => {
       "theme-graphite": "#111a22",
       "theme-retro": "#201326",
       "theme-cyberpunk": "#0c1027",
+      "theme-checkpoint2077": "#080b0e",
       "theme-playstation": "#101827",
       "theme-xbox": "#07120b",
       "theme-steamdeck": "#171717",
