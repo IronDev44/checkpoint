@@ -5,6 +5,7 @@ html body[data-theme="theme-checkpoint2077"] {
   --bg-main:radial-gradient(ellipse at 90% 0%,#15e5ec0b,transparent 45%),#080b0e!important;
   --panel-bg:linear-gradient(145deg,#141c21,#0b1015)!important;--panel-border:#e9f44136!important;
   --surface-bg:#142027!important;--surface-border:#5ab2b43b!important;--input-bg:#080e13!important;--muted-bg:#e9f4410b!important;
+  --card-bg:#0e1417!important;--border-color:#54d6dd38!important;--text-secondary:#cbd6d2!important;
   --text-main:#f1f4e8!important;--text-soft:#cbd6d2!important;--text-muted:#93a8ab!important;--genre-color:#68f3ed!important;
   --accent:linear-gradient(110deg,#e1ef35,#f5fa56)!important;--accent-solid:#eef64b!important;--accent-shadow:0 3px 20px #e9f4411a!important;
   --control-bg:linear-gradient(145deg,#18252b,#0c141a)!important;--control-border:#6ed6db55!important;--theme-aurora:none!important;
@@ -14,8 +15,39 @@ html body[data-theme="theme-checkpoint2077"] {
 html body[data-theme="theme-checkpoint2077"] .app-shell::before {background:var(--bg-main)!important}
 html body[data-theme="theme-checkpoint2077"] .app-shell::after {background:none!important;animation:none!important}
 html body[data-theme="theme-checkpoint2077"] .bottom-tabs {background:#0a1219f5!important;border-color:#51d7dd4d!important}
-html body[data-theme="theme-checkpoint2077"] :is(.bottom-tabs .tab-btn.active,.option-pill.active,.save-review-btn,.checkpoint-primary-action) {background:var(--accent)!important;color:#10150c!important;border-color:#eef64b!important;text-shadow:none!important}
 html body[data-theme="theme-checkpoint2077"] .bottom-tabs .tab-btn.active::after {background:#11180b!important;width:50%;left:25%;height:3px;border-radius:0;box-shadow:none!important}
+/* Active yellow controls must carry dark ink through nested labels and icons. */
+html body[data-theme="theme-checkpoint2077"] :is(
+  .bottom-tabs .tab-btn.active,.library-switch-btn.active,.library-view-toggle button.active,
+  .library-sort-switch button.active,.library-sort button.active,.sort-switch button.active,
+  .option-pill.active,.choice-pill.active,.status-btn.active,.profile-toggle-btn.active,
+  .hardware-type-switch button.active,.hardware-collection-filters button.active,
+  .hardware-catalog-toggle.active,.hardware-rank-btn.active,.hardware-status-action.active,
+  .deals-source-tabs button.active,.social-view-tabs button.active,.series-filter-tabs button.active,
+  .top5-content-tabs button.active,.top5-mode-tabs button.active,.top5-score-tabs button.active,
+  .social-feed-filters button.active,.social-visibility-toggle button.active,
+  .save-review-btn,.trial-primary-btn,.wishlist-upcoming-btn,.checkpoint-primary-action,
+  .home-resume-action,.input-container > button,.data-health-action:not(:disabled),.deals-refresh-btn
+) {background:var(--accent)!important;color:#10150c!important;-webkit-text-fill-color:#10150c!important;border-color:#eef64b!important;text-shadow:none!important}
+html body[data-theme="theme-checkpoint2077"] :is(
+  .bottom-tabs .tab-btn.active,.library-switch-btn.active,.library-view-toggle button.active,
+  .library-sort-switch button.active,.library-sort button.active,.sort-switch button.active,
+  .option-pill.active,.choice-pill.active,.status-btn.active,.profile-toggle-btn.active,
+  .hardware-type-switch button.active,.hardware-collection-filters button.active,
+  .hardware-catalog-toggle.active,.hardware-rank-btn.active,.hardware-status-action.active,
+  .deals-source-tabs button.active,.social-view-tabs button.active,.series-filter-tabs button.active,
+  .top5-content-tabs button.active,.top5-mode-tabs button.active,.top5-score-tabs button.active,
+  .social-feed-filters button.active,.social-visibility-toggle button.active,
+  .save-review-btn,.trial-primary-btn,.wishlist-upcoming-btn,.checkpoint-primary-action,
+  .home-resume-action,.input-container > button,.data-health-action:not(:disabled),.deals-refresh-btn
+) :is(span,small,b,strong,svg) {color:inherit!important;-webkit-text-fill-color:inherit!important;text-shadow:none!important}
+/* Options use the same black panels and signal-yellow accents as the theme. */
+html body[data-theme="theme-checkpoint2077"] .options-group {background:var(--panel-bg)!important;border-color:var(--panel-border)!important;box-shadow:inset 3px 0 #eaf34255!important}
+html body[data-theme="theme-checkpoint2077"] .options-group > .options-group-head {background:transparent!important;box-shadow:none!important;border-radius:0!important}
+html body[data-theme="theme-checkpoint2077"] .options-group-head::before,
+html body[data-theme="theme-checkpoint2077"] .options-group-head::after {content:none!important}
+html body[data-theme="theme-checkpoint2077"] .options-group-summary > b {background:#eaf34212!important;border-color:#eaf34266!important;color:#eef64b!important}
+html body[data-theme="theme-checkpoint2077"] :is(.option-section,.home-dashboard-panel,.home-session-card) {background:var(--panel-bg)!important;border-color:var(--panel-border)!important}
 html body[data-theme="theme-checkpoint2077"] .title {background:none!important;-webkit-text-fill-color:initial!important;text-shadow:none!important;line-height:1;margin:0!important}
 html body[data-theme="theme-checkpoint2077"] .title::after {content:none!important}
 html body[data-theme="theme-checkpoint2077"] .app-title-row {padding-inline:46px!important}
@@ -41,12 +73,12 @@ html:has(.cp2077-intro),body:has(.cp2077-intro) {overflow:hidden!important}
 .cp2077-optical-glaze i:last-child {top:72%;height:2px;background:linear-gradient(90deg,transparent 30%,#dffffa44 78%,transparent);box-shadow:0 0 9px #e0fffa22}
 .cp2077-boot-rail {position:absolute;z-index:4;top:max(28px,env(safe-area-inset-top));left:6%;right:6%;display:flex;justify-content:space-between;gap:20px;font-size:8px;letter-spacing:.12em;color:#c0eeed;border-top:1px solid #80fbef55;padding-top:12px;text-shadow:0 1px 3px #000}
 .cp2077-intro-stage {position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;text-align:center}
-.cp2077-intro-stage .cp2077-wordmark {color:#021016;width:min(74%,80vw);max-width:1100px;font-size:inherit}
+.cp2077-intro-stage .cp2077-wordmark {color:#021016;width:min(80%,86vw);max-width:1180px;font-size:inherit}
 .cp2077-intro-stage .cp2077-brush {filter:none}
 .cp2077-intro-stage .cp2077-year {color:#062e35}
-.cp2077-intro-stage .cp2077-wordmark {animation:cp2077TitleBoot 1.5s steps(1,end) .22s both}
-.cp2077-intro-stage .cp2077-ink-cyan {animation:cp2077Chromatic 1.5s steps(1,end) .22s both}
-.cp2077-intro-stage .cp2077-ink-red {animation:cp2077Chromatic 1.5s steps(1,end) .38s both}
+.cp2077-intro-stage .cp2077-wordmark {animation:cp2077TitleBoot .85s steps(1,end) .04s both}
+.cp2077-intro-stage .cp2077-ink-cyan {animation:cp2077Chromatic .85s steps(1,end) .04s both}
+.cp2077-intro-stage .cp2077-ink-red {animation:cp2077Chromatic .85s steps(1,end) .10s both}
 .cp2077-terminal {position:absolute;inset:0;overflow:hidden;pointer-events:none}
 .cp2077-terminal-board {position:absolute;left:-12%;top:-12%;width:124%;height:124%;background:linear-gradient(115deg,#09202b,#07121c 58%,#10101b);transform:perspective(1200px) rotateX(7deg) rotateY(-9deg) rotateZ(7deg) scale(1.06);animation:cp2077BoardDrift 12s ease-in-out infinite alternate}
 .cp2077-terminal-mast {position:absolute;top:9%;left:4%;right:4%;display:flex;justify-content:space-between;gap:25px;color:#ff465f;font:11px monospace;letter-spacing:.3em;border-block:3px solid #ff224d;padding:12px 0;box-shadow:0 0 22px #ff124a66,inset 0 -5px 18px #ff154a22}
@@ -55,7 +87,7 @@ html:has(.cp2077-intro),body:has(.cp2077-intro) {overflow:hidden!important}
 .cp2077-data-bank > span {font:8px monospace;white-space:nowrap;display:block;border-bottom:1px solid #f72a5277;padding-bottom:8px}
 .cp2077-data-bank pre {font:9px/1.8 monospace;margin:12px 0;opacity:.72;white-space:pre;letter-spacing:.06em}
 .cp2077-data-bank:nth-child(even) pre {color:#6acbd0;opacity:.38;transform:translateY(-18px)}
-.cp2077-cyan-channel {position:absolute;left:-4%;right:-4%;top:36%;height:29%;background:linear-gradient(180deg,#64fff159,#b4fff5ed 15%,#69f6e9f5 44%,#8bfff2ed 75%,#29c8ce88);border-block:4px solid #bdfffa;box-shadow:0 0 22px #3af4e5aa,0 0 75px #48e5df55,inset 0 0 55px #64fff1;overflow:hidden;animation:cp2077ChannelBoot 1.5s ease both}
+.cp2077-cyan-channel {position:absolute;left:-4%;right:-4%;top:36%;height:29%;background:linear-gradient(180deg,#64fff159,#b4fff5ed 15%,#69f6e9f5 44%,#8bfff2ed 75%,#29c8ce88);border-block:4px solid #bdfffa;box-shadow:0 0 22px #3af4e5aa,0 0 75px #48e5df55,inset 0 0 55px #64fff1;overflow:hidden;animation:cp2077ChannelBoot .6s ease both}
 .cp2077-cyan-channel::before {content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 3px,#06505638 3px 4px);opacity:.7}
 .cp2077-cyan-channel::after {content:"";position:absolute;inset:-30% auto -30% -50%;width:28%;transform:skewX(-22deg);background:linear-gradient(90deg,transparent,#f1fff94d,transparent);opacity:.55;animation:cp2077GlassReflection 5s cubic-bezier(.2,.5,.3,1) .2s both}
 .cp2077-cyan-channel i {position:absolute;inset:15% 0 auto;height:2px;background:#dcfffb;box-shadow:0 5px #092b3c77,0 14px #dcfffbcc,0 38px #0b778c44,0 53px #d8fffb99;animation:cp2077Stream 4s linear infinite}
@@ -98,13 +130,13 @@ html:has(.cp2077-intro),body:has(.cp2077-intro) {overflow:hidden!important}
 .cp2077-intro:is(.is-light,.effects-calm) .cp2077-cyan-channel::after {display:none}
 .cp2077-intro:is(.is-light,.effects-calm) .cp2077-glass-fragments i:nth-child(n+9) {display:none}
 .cp2077-intro:is(.is-light,.effects-calm) .cp2077-ink-echo {animation:none}
-.cp2077-intro:is(.is-light,.effects-calm) .cp2077-wordmark {animation:cp2077Reveal 1s ease .2s both}
+.cp2077-intro:is(.is-light,.effects-calm) .cp2077-wordmark {animation:cp2077Reveal .45s ease .04s both}
 .cp2077-transition:is(.is-light,.effects-calm) .cp2077-transfer-lines {display:none}
 @keyframes cp2077BoardDrift {from{transform:perspective(1200px) rotateX(7deg) rotateY(-9deg) rotateZ(7deg) scale(1.06)}to{transform:perspective(1200px) rotateX(4deg) rotateY(-5deg) rotateZ(5deg) scale(1.1)}}
-@keyframes cp2077ChannelBoot {0%{opacity:0;transform:scaleY(.02)}30%{opacity:.5;transform:scaleY(.3)}65%,100%{opacity:1;transform:scaleY(1)}}
+@keyframes cp2077ChannelBoot {0%{opacity:.55;filter:brightness(.7)}30%{opacity:.9;filter:brightness(1.1)}65%,100%{opacity:1;filter:none}}
 @keyframes cp2077Stream {from{translate:-4% 0}to{translate:4% 0}}
 @keyframes cp2077Glass {from{opacity:.2;translate:0 0}to{opacity:.7;translate:4px 6px}}
 @keyframes cp2077GlassReflection {from{left:-50%}to{left:125%}}
 @media(max-width:600px) and (min-height:481px) {.cp2077-terminal-board{left:-40%;width:180%;top:-5%;height:110%}.cp2077-data-banks{gap:8px}.cp2077-data-bank{padding-inline:4px}.cp2077-data-bank pre{font-size:7px}.cp2077-terminal-mast{font-size:8px;letter-spacing:.12em}.cp2077-cyan-channel{top:36%;height:29%}.cp2077-boot-rail{font-size:7px}}
-@media(max-height:480px) {.cp2077-intro .cp2077-wordmark{font-size:clamp(28px,8vw,82px)}.cp2077-load{bottom:35px;left:6%;width:32%}.cp2077-intro .cp2077-skip{right:5%;bottom:18px}.cp2077-boot-rail{top:15px}.cp2077-data-bank pre{font-size:7px;line-height:1.6}}
+@media(max-height:480px) {.cp2077-intro-stage .cp2077-wordmark{width:min(78%,82vw)}.cp2077-intro .cp2077-wordmark{font-size:clamp(28px,8vw,82px)}.cp2077-load{bottom:35px;left:6%;width:32%}.cp2077-intro .cp2077-skip{right:5%;bottom:18px}.cp2077-boot-rail{top:15px}.cp2077-data-bank pre{font-size:7px;line-height:1.6}}
 @media(prefers-reduced-motion:reduce) {.cp2077-intro *,.cp2077-intro *::before,.cp2077-intro *::after {animation:none!important;transition:none!important}}
