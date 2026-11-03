@@ -27,7 +27,7 @@ test("2077 uses its own short channel transition and respects reduced motion",()
   window.matchMedia=jest.fn(()=>preference);
   const view=render(<ThemeTransition theme={CYBER2077_THEME} direction="left" effects="calm" light/>);
   expect(document.querySelector('.cp2077-transition')).toHaveClass('direction-left','effects-calm','is-light');
-  expect(getThemeTransitionDuration(CYBER2077_THEME)).toBe(1040);
+  expect(getThemeTransitionDuration(CYBER2077_THEME)).toBe(1320);
   view.unmount();preference.matches=true;
   const still=render(<ThemeTransition theme={CYBER2077_THEME} direction="right"/>);
   expect(document.querySelector('.cp2077-transition')).toBeNull();

@@ -110,28 +110,14 @@ html:has(.cp2077-intro),body:has(.cp2077-intro) {overflow:hidden!important}
 .cp2077-skip span {margin-left:14px;color:#9cfff3}
 .cp2077-transition {position:fixed;inset:0;z-index:99999;pointer-events:none;isolation:isolate;overflow:hidden;--cp-direction:1}
 .cp2077-transition.direction-left {--cp-direction:-1}
-.cp2077-transfer-slab {position:absolute;inset:0;background:#eaf342;clip-path:polygon(0 0,96% 0,100% 12%,100% 100%,4% 100%,0 88%);animation:cp2077Channel 1.04s cubic-bezier(.65,0,.25,1) both}
-.cp2077-transfer-lockup {position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:20px;animation:cp2077TransferText 1.04s ease both}
-.cp2077-transfer-lockup > span {color:#193538;font:9px monospace;letter-spacing:.2em}
-.cp2077-transfer-lockup .cp2077-wordmark {color:#091219;font-size:clamp(27px,7vw,64px)}
-.cp2077-transfer-lockup .cp2077-year {color:#183b40}
-.cp2077-transfer-lockup .cp2077-brush {filter:drop-shadow(2px 0 #5ae9e5)}
-.cp2077-transfer-lines {position:absolute;inset:0;animation:cp2077TransferText 1.04s ease both}
-.cp2077-transfer-lines i {position:absolute;top:23%;height:2px;left:0;width:36%;background:#15303a;box-shadow:67vw 51vh #15303a}
-.cp2077-transfer-lines i:nth-child(2) {top:31%;width:17%;height:5px;background:#30afbb;box-shadow:83vw 40vh #30afbb}
-.cp2077-transfer-lines i:nth-child(3) {top:72%;width:8%;height:1px}
-.cp2077-transfer-code {position:absolute;bottom:12%;right:6%;color:#163a40;font:9px monospace;letter-spacing:.1em;animation:cp2077TransferText 1.04s ease both}
 @keyframes cp2077TitleBoot {0%,8%{opacity:0;transform:translateX(-12px);clip-path:inset(43% 0 49%)}15%{opacity:.8;transform:translateX(8px);clip-path:inset(10% 0 58%)}24%{opacity:.3;transform:translateX(-5px);clip-path:inset(60% 0 5%)}35%{opacity:1;transform:translateX(0);clip-path:none}48%{transform:translateX(5px);clip-path:inset(18% 0 32%)}55%{opacity:.6;transform:translateX(-3px);clip-path:none}64%,100%{opacity:1;transform:translateX(0);clip-path:none}}
 @keyframes cp2077Chromatic {0%,20%,42%,58%,100%{opacity:0}24%,35%,50%,62%{opacity:.85}}
 @keyframes cp2077Reveal {from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-@keyframes cp2077Channel {0%{transform:translateX(calc(var(--cp-direction)*-110%))}30%,62%{transform:translateX(0)}100%{transform:translateX(calc(var(--cp-direction)*110%))}}
-@keyframes cp2077TransferText {0%,23%{opacity:0;transform:translateX(calc(var(--cp-direction)*-20px))}34%,59%{opacity:1;transform:none}78%,100%{opacity:0;transform:translateX(calc(var(--cp-direction)*20px))}}
 .cp2077-intro:is(.is-light,.effects-calm) :is(.cp2077-terminal-board,.cp2077-cyan-channel,.cp2077-cyan-channel i,.cp2077-glass-fragments i) {animation:none}
 .cp2077-intro:is(.is-light,.effects-calm) .cp2077-cyan-channel::after {display:none}
 .cp2077-intro:is(.is-light,.effects-calm) .cp2077-glass-fragments i:nth-child(n+9) {display:none}
 .cp2077-intro:is(.is-light,.effects-calm) .cp2077-ink-echo {animation:none}
 .cp2077-intro:is(.is-light,.effects-calm) .cp2077-wordmark {animation:cp2077Reveal .45s ease .04s both}
-.cp2077-transition:is(.is-light,.effects-calm) .cp2077-transfer-lines {display:none}
 @keyframes cp2077BoardDrift {from{transform:perspective(1200px) rotateX(7deg) rotateY(-9deg) rotateZ(7deg) scale(1.06)}to{transform:perspective(1200px) rotateX(4deg) rotateY(-5deg) rotateZ(5deg) scale(1.1)}}
 @keyframes cp2077ChannelBoot {0%{opacity:.55;filter:brightness(.7)}30%{opacity:.9;filter:brightness(1.1)}65%,100%{opacity:1;filter:none}}
 @keyframes cp2077Stream {from{translate:-4% 0}to{translate:4% 0}}
@@ -139,4 +125,45 @@ html:has(.cp2077-intro),body:has(.cp2077-intro) {overflow:hidden!important}
 @keyframes cp2077GlassReflection {from{left:-50%}to{left:125%}}
 @media(max-width:600px) and (min-height:481px) {.cp2077-terminal-board{left:-40%;width:180%;top:-5%;height:110%}.cp2077-data-banks{gap:8px}.cp2077-data-bank{padding-inline:4px}.cp2077-data-bank pre{font-size:7px}.cp2077-terminal-mast{font-size:8px;letter-spacing:.12em}.cp2077-cyan-channel{top:36%;height:29%}.cp2077-boot-rail{font-size:7px}}
 @media(max-height:480px) {.cp2077-intro-stage .cp2077-wordmark{width:min(78%,82vw)}.cp2077-intro .cp2077-wordmark{font-size:clamp(28px,8vw,82px)}.cp2077-load{bottom:35px;left:6%;width:32%}.cp2077-intro .cp2077-skip{right:5%;bottom:18px}.cp2077-boot-rail{top:15px}.cp2077-data-bank pre{font-size:7px;line-height:1.6}}
-@media(prefers-reduced-motion:reduce) {.cp2077-intro *,.cp2077-intro *::before,.cp2077-intro *::after {animation:none!important;transition:none!important}}
+
+
+/* Startup: the yellow identity locks onto a dark red signal, as in the reference. */
+.cp2077-signal-intro {background:#0c0506}
+.cp2077-signal-intro::before {background:radial-gradient(ellipse at 48% 34%,#9d260a24,transparent 65%),linear-gradient(0deg,#030606cc,transparent 65%)}
+.cp2077-signal-field {position:absolute;inset:0;overflow:hidden;background:radial-gradient(ellipse at 50% 28%,#631a0d66,transparent 72%),linear-gradient(180deg,#310b06,#1d0807 46%,#060607)}
+.cp2077-signal-haze {position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 6px,#fc35170b 6px 7px),radial-gradient(ellipse at 12% 83%,#e82f1320,transparent 45%);opacity:.8}
+.cp2077-signal-city {position:absolute;inset:64% -2% 0;display:flex;align-items:flex-end;justify-content:space-between;opacity:.2;filter:blur(1px)}
+.cp2077-signal-city i {display:block;background:repeating-linear-gradient(0deg,transparent 0 9px,#90231550 9px 10px),#030609;border-top:1px solid #ac371b44;box-shadow:0 -10px 35px #ef37180c}
+.cp2077-signal-fragments {position:absolute;inset:0}
+.cp2077-signal-fragments i {position:absolute;height:1px;background:#52ded5;box-shadow:0 1px #ef5a3033}
+.cp2077-signal-fragments i:nth-child(3n) {background:#e9552b}
+.cp2077-signal-scan {position:absolute;inset:-12% 0 auto;height:10%;background:linear-gradient(transparent,#e14c1408,transparent);animation:cp2077SignalScan 9s linear infinite}
+.cp2077-signal-intro .cp2077-scanlines {opacity:.25;background:repeating-linear-gradient(transparent 0 3px,#ef542914 3px 4px)}
+.cp2077-signal-stage {position:relative;z-index:2;display:flex;align-items:center;justify-content:center;width:100%;transform:translateY(-2vh) rotate(-2deg)}
+.cp2077-signal-stage .cp2077-wordmark {width:min(88vw,1180px);color:#eef340;animation:cp2077SignalLock .9s steps(1,end) .04s both}
+.cp2077-signal-stage .cp2077-brush {filter:drop-shadow(1.5px 2px 0 #3ce4dc) drop-shadow(0 0 8px #e9d32a0c)}
+.cp2077-signal-stage .cp2077-year {color:#6cebe3}
+.cp2077-signal-stage .cp2077-ink-cyan {animation:cp2077Chromatic .9s steps(1,end) .04s both}
+.cp2077-signal-stage .cp2077-ink-red {animation:cp2077Chromatic .9s steps(1,end) .12s both}
+.cp2077-signal-intro .cp2077-boot-rail {border-color:#e97d4630;color:#ca7660}
+.cp2077-signal-intro .cp2077-progress span {background:#eaf342;box-shadow:0 0 10px #eaf34233}
+.cp2077-signal-intro .cp2077-load strong {color:#eaf342}
+/* Tab change: the former intro's terminal and cyan strip, with two short title dips. */
+.cp2077-terminal-transition {background:#04090f;animation:cp2077TerminalPass 1.32s ease both}
+.cp2077-terminal-transition .cp2077-terminal-board {animation:none;transform:perspective(1400px) rotateX(4deg) rotateY(-3deg) rotateZ(6deg) scale(1.02)}
+.cp2077-terminal-transition .cp2077-cyan-channel {animation:none}
+.cp2077-terminal-transition .cp2077-intro-stage .cp2077-wordmark {width:min(90%,90vw);max-width:1400px;animation:cp2077TerminalBlink 1.32s steps(1,end) both}
+.cp2077-terminal-transition .cp2077-intro-stage .cp2077-ink-echo {animation:none}
+.cp2077-terminal-transition .cp2077-glass-fragments i {animation:none}
+.cp2077-terminal-transition .cp2077-cyan-channel::after {animation:none;display:none}
+.cp2077-terminal-transition:is(.is-light,.effects-calm) .cp2077-intro-stage .cp2077-wordmark {animation:none}
+.cp2077-terminal-transition:is(.is-light,.effects-calm) .cp2077-cyan-channel i {animation:none}
+.cp2077-terminal-transition:is(.is-light,.effects-calm) .cp2077-glass-fragments {display:none}
+.cp2077-signal-intro:is(.is-light,.effects-calm) .cp2077-signal-scan {animation:none;display:none}
+.cp2077-signal-intro:is(.is-light,.effects-calm) .cp2077-signal-stage .cp2077-wordmark {animation:cp2077Reveal .45s ease .04s both}
+@keyframes cp2077SignalScan {from{top:-12%}to{top:112%}}
+@keyframes cp2077SignalLock {0%{opacity:.25;transform:translateX(-5px);clip-path:inset(45% 0 35%)}12%{opacity:1;transform:translateX(3px);clip-path:none}27%{opacity:.75;transform:translateX(-2px);clip-path:inset(12% 0 24%)}35%,100%{opacity:1;transform:none;clip-path:none}}
+@keyframes cp2077TerminalPass {0%{opacity:0;transform:translateX(calc(var(--cp-direction)*-2%))}12%,84%{opacity:1;transform:none}100%{opacity:0;transform:translateX(calc(var(--cp-direction)*2%))}}
+@keyframes cp2077TerminalBlink {0%{opacity:0}12%,29%{opacity:1}30%,34%{opacity:.18}35%,53%{opacity:1}54%,58%{opacity:.25}59%,88%{opacity:1}100%{opacity:0}}
+@media(max-height:480px) {.cp2077-signal-stage .cp2077-wordmark{width:min(80vw,1100px)}.cp2077-terminal-transition .cp2077-intro-stage .cp2077-wordmark{width:min(84%,84vw)}}
+@media(prefers-reduced-motion:reduce) {:is(.cp2077-intro,.cp2077-transition),:is(.cp2077-intro,.cp2077-transition) *,:is(.cp2077-intro,.cp2077-transition) *::before,:is(.cp2077-intro,.cp2077-transition) *::after {animation:none!important;transition:none!important}}

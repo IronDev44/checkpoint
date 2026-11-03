@@ -4,7 +4,7 @@ import { CHECKPOINT_2077_REFERENCE_P } from "../data/checkpoint2077ReferenceP";
 import "./Cyber2077Effects.css";
 
 export const CYBER2077_THEME = "theme-checkpoint2077";
-export const CYBER2077_TRANSITION_DURATION = 1040;
+export const CYBER2077_TRANSITION_DURATION = 1320;
 
 // Visible ink follows shared cap and baseline guides. H, I and T are drawn as
 // angular brush strokes to avoid the reference font's thin, serif-like outliers.
@@ -54,7 +54,7 @@ function TerminalBackdrop() {
         <span>SECTOR 0{bank + 1} / MEMORY</span>
         <pre>{Array.from({length: 22}, (_, line) => `${(bank * 971 + line * 139 + 2077).toString(16).padStart(6, '0').toUpperCase()}  ${(line * 73 + bank * 27).toString(2).padStart(10, '0')}  CP:${String(line * 17 + bank).padStart(4, '0')}`).join('\n')}</pre>
       </div>)}</div>
-      <div className="cp2077-cyan-channel"><i/><i/><i/><i/><main className="cp2077-intro-stage"><Cyber2077Wordmark/></main></div>
+      <div className="cp2077-cyan-channel"><i/><i/><i/><i/><div className="cp2077-intro-stage"><Cyber2077Wordmark/></div></div>
       <div className="cp2077-lower-banks" aria-hidden="true"><span>ARCHIVE // JEUX · PARCOURS · SOUVENIRS</span><div/><span>PERSONAL SYSTEM — 2077</span></div>
       <div className="cp2077-cross-grid"/>
     </div>
@@ -63,13 +63,22 @@ function TerminalBackdrop() {
   </div>;
 }
 
+function SignalBackdrop() {
+  return <div className="cp2077-signal-field" aria-hidden="true">
+    <div className="cp2077-signal-haze"/>
+    <div className="cp2077-signal-city">{Array.from({length:18},(_,i)=><i key={i} style={{height:`${12+(i*31)%70}%`,width:`${3+(i*7)%5}%`}}/>)}</div>
+    <div className="cp2077-signal-fragments">{Array.from({length:16},(_,i)=><i key={i} style={{left:`${(i*43+9)%100}%`,top:`${(i*29+8)%100}%`,width:`${3+(i*11)%31}px`,opacity:.12+(i%4)*.08}}/>)}</div>
+    <div className="cp2077-signal-scan"/>
+  </div>;
+}
+
 export function Cyber2077Intro({ progress = 0, light = false, effects = "balanced", onRequestClose }) {
   const value = Math.max(0, Math.min(100, Math.round(progress)));
   const grainId = useId();
-  return <div className={`cp2077-intro${light ? " is-light" : ""} effects-${effects}`}>
-    <TerminalBackdrop/>
+  return <div className={`cp2077-intro cp2077-signal-intro${light ? " is-light" : ""} effects-${effects}`}>
+    <SignalBackdrop/>
+    <main className="cp2077-signal-stage"><Cyber2077Wordmark/></main>
     <div className="cp2077-scanlines" aria-hidden="true"/>
-    <div className="cp2077-optical-glaze" aria-hidden="true"><i/><i/></div>
     {!light && <svg className="cp2077-optical-grain" width="100%" height="100%" aria-hidden="true" focusable="false">
       <defs><filter id={grainId}><feTurbulence type="fractalNoise" baseFrequency=".74" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></defs>
       <rect width="100%" height="100%" filter={`url(#${grainId})`}/>
@@ -84,10 +93,8 @@ export function Cyber2077Intro({ progress = 0, light = false, effects = "balance
 }
 
 export function Cyber2077Transition({ direction = "right", light = false, effects = "balanced" }) {
-  return <div className={`cp2077-transition direction-${direction}${light ? " is-light" : ""} effects-${effects}`} aria-hidden="true">
-    <div className="cp2077-transfer-slab"/>
-    <div className="cp2077-transfer-lines"><i/><i/><i/></div>
-    <div className="cp2077-transfer-lockup"><span>CHANGEMENT DE CANAL</span><Cyber2077Wordmark/></div>
-    <div className="cp2077-transfer-code">CP://2077 — SIGNAL CONNECTÉ</div>
+  return <div className={`cp2077-transition cp2077-terminal-transition direction-${direction}${light ? " is-light" : ""} effects-${effects}`} aria-hidden="true">
+    <TerminalBackdrop/>
+    <div className="cp2077-scanlines"/>
   </div>;
 }
