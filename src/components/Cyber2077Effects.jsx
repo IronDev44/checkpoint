@@ -69,6 +69,7 @@ function SignalBackdrop() {
     <div className="cp2077-signal-city">{Array.from({length:18},(_,i)=><i key={i} style={{height:`${12+(i*31)%70}%`,width:`${3+(i*7)%5}%`}}/>)}</div>
     <div className="cp2077-signal-fragments">{Array.from({length:16},(_,i)=><i key={i} style={{left:`${(i*43+9)%100}%`,top:`${(i*29+8)%100}%`,width:`${3+(i*11)%31}px`,opacity:.12+(i%4)*.08}}/>)}</div>
     <div className="cp2077-signal-scan"/>
+    <div className="cp2077-signal-interference"><i/><i/><i/></div>
   </div>;
 }
 

@@ -139,12 +139,12 @@ html:has(.cp2077-intro),body:has(.cp2077-intro) {overflow:hidden!important}
 .cp2077-signal-fragments i:nth-child(3n) {background:#e9552b}
 .cp2077-signal-scan {position:absolute;inset:-12% 0 auto;height:10%;background:linear-gradient(transparent,#e14c1408,transparent);animation:cp2077SignalScan 9s linear infinite}
 .cp2077-signal-intro .cp2077-scanlines {opacity:.25;background:repeating-linear-gradient(transparent 0 3px,#ef542914 3px 4px)}
-.cp2077-signal-stage {position:relative;z-index:2;display:flex;align-items:center;justify-content:center;width:100%;transform:translateY(-2vh) rotate(-2deg)}
-.cp2077-signal-stage .cp2077-wordmark {width:min(88vw,1180px);color:#eef340;animation:cp2077SignalLock .9s steps(1,end) .04s both}
+.cp2077-signal-stage {position:relative;z-index:2;display:flex;align-items:center;justify-content:center;width:100%;transform:translateY(-2vh)}
+.cp2077-signal-stage .cp2077-wordmark {width:min(88vw,1180px);color:#eef340;animation:cp2077SignalLock 1.2s steps(1,end) .04s both}
 .cp2077-signal-stage .cp2077-brush {filter:drop-shadow(1.5px 2px 0 #3ce4dc) drop-shadow(0 0 8px #e9d32a0c)}
 .cp2077-signal-stage .cp2077-year {color:#6cebe3}
-.cp2077-signal-stage .cp2077-ink-cyan {animation:cp2077Chromatic .9s steps(1,end) .04s both}
-.cp2077-signal-stage .cp2077-ink-red {animation:cp2077Chromatic .9s steps(1,end) .12s both}
+.cp2077-signal-stage .cp2077-ink-cyan {animation:cp2077SignalChroma 1.2s steps(1,end) .04s both}
+.cp2077-signal-stage .cp2077-ink-red {animation:cp2077SignalChroma 1.2s steps(1,end) .10s both;animation-direction:reverse}
 .cp2077-signal-intro .cp2077-boot-rail {border-color:#e97d4630;color:#ca7660}
 .cp2077-signal-intro .cp2077-progress span {background:#eaf342;box-shadow:0 0 10px #eaf34233}
 .cp2077-signal-intro .cp2077-load strong {color:#eaf342}
@@ -153,10 +153,11 @@ html:has(.cp2077-intro),body:has(.cp2077-intro) {overflow:hidden!important}
 .cp2077-terminal-transition .cp2077-terminal-board {animation:none;transform:perspective(1400px) rotateX(4deg) rotateY(-3deg) rotateZ(6deg) scale(1.02)}
 .cp2077-terminal-transition .cp2077-cyan-channel {animation:none}
 .cp2077-terminal-transition .cp2077-intro-stage .cp2077-wordmark {width:min(90%,90vw);max-width:1400px;animation:cp2077TerminalBlink 1.32s steps(1,end) both}
-.cp2077-terminal-transition .cp2077-intro-stage .cp2077-ink-echo {animation:none}
+.cp2077-terminal-transition .cp2077-intro-stage .cp2077-ink-echo {animation:cp2077TerminalChroma 1.32s steps(1,end) both}
+.cp2077-terminal-transition .cp2077-intro-stage .cp2077-ink-red {animation-direction:reverse}
 .cp2077-terminal-transition .cp2077-glass-fragments i {animation:none}
 .cp2077-terminal-transition .cp2077-cyan-channel::after {animation:none;display:none}
-.cp2077-terminal-transition:is(.is-light,.effects-calm) .cp2077-intro-stage .cp2077-wordmark {animation:none}
+.cp2077-terminal-transition:is(.is-light,.effects-calm) .cp2077-intro-stage :is(.cp2077-wordmark,.cp2077-ink-echo) {animation:none}
 .cp2077-terminal-transition:is(.is-light,.effects-calm) .cp2077-cyan-channel i {animation:none}
 .cp2077-terminal-transition:is(.is-light,.effects-calm) .cp2077-glass-fragments {display:none}
 .cp2077-signal-intro:is(.is-light,.effects-calm) .cp2077-signal-scan {animation:none;display:none}
@@ -164,6 +165,19 @@ html:has(.cp2077-intro),body:has(.cp2077-intro) {overflow:hidden!important}
 @keyframes cp2077SignalScan {from{top:-12%}to{top:112%}}
 @keyframes cp2077SignalLock {0%{opacity:.25;transform:translateX(-5px);clip-path:inset(45% 0 35%)}12%{opacity:1;transform:translateX(3px);clip-path:none}27%{opacity:.75;transform:translateX(-2px);clip-path:inset(12% 0 24%)}35%,100%{opacity:1;transform:none;clip-path:none}}
 @keyframes cp2077TerminalPass {0%{opacity:0;transform:translateX(calc(var(--cp-direction)*-2%))}12%,84%{opacity:1;transform:none}100%{opacity:0;transform:translateX(calc(var(--cp-direction)*2%))}}
-@keyframes cp2077TerminalBlink {0%{opacity:0}12%,29%{opacity:1}30%,34%{opacity:.18}35%,53%{opacity:1}54%,58%{opacity:.25}59%,88%{opacity:1}100%{opacity:0}}
+@keyframes cp2077TerminalBlink {0%{opacity:0;transform:translateX(-8px);clip-path:none}10%{opacity:.8;transform:translateX(3px);clip-path:inset(42% 0 18%)}15%,21%{opacity:1;transform:none;clip-path:none}22%{opacity:.08;transform:translateX(-4px)}24%{opacity:1;transform:translateX(1px)}25%{opacity:.65;transform:translateX(-2px);clip-path:inset(55% 0 30%)}28%,53%{opacity:1;transform:none;clip-path:none}54%{opacity:.25;transform:translateX(6px);clip-path:inset(14% 0 63%)}58%{opacity:.1;transform:translateX(-3px)}63%,78%{opacity:1;transform:none;clip-path:none}79%{opacity:.7;transform:translateX(2px);clip-path:inset(62% 0 23%)}81%,90%{opacity:1;transform:none;clip-path:none}100%{opacity:0;transform:none;clip-path:none}}
+@keyframes cp2077TerminalChroma {0%,20%,25%,54%,60%,78%,82%,100%{opacity:0}21%,24%{opacity:.7;transform:translateX(-7px);clip-path:inset(17% 0 72%)}55%,59%{opacity:.8;transform:translateX(9px);clip-path:inset(62% 0 25%)}79%,81%{opacity:.55;transform:translateX(-4px);clip-path:inset(40% 0 48%)}}
 @media(max-height:480px) {.cp2077-signal-stage .cp2077-wordmark{width:min(80vw,1100px)}.cp2077-terminal-transition .cp2077-intro-stage .cp2077-wordmark{width:min(84%,84vw)}}
+
+/* A finite signal-acquisition burst; the title settles without rotation. */
+.cp2077-signal-interference {position:absolute;inset:0;pointer-events:none}
+.cp2077-signal-interference i {position:absolute;left:0;right:0;top:28%;height:2px;background:linear-gradient(90deg,transparent,#56e6db55 18%,transparent 58%,#d7522533);box-shadow:0 6px #42b6b00e,0 17px #f362260b;opacity:0;animation:cp2077SignalBreak 1.2s steps(1,end) .08s both}
+.cp2077-signal-interference i:nth-child(2) {top:49%;height:3px;animation-delay:.21s;animation-direction:reverse}
+.cp2077-signal-interference i:nth-child(3) {top:72%;animation-delay:.16s}
+.cp2077-signal-stage .cp2077-wordmark::after {content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,#6df6e488 32%,#eaf34299 65%,transparent);box-shadow:0 2px 7px #5adbd526;opacity:0;pointer-events:none;animation:cp2077LogoScan 1.05s ease .12s both}
+.cp2077-signal-intro:is(.is-light,.effects-calm) .cp2077-signal-interference,
+.cp2077-signal-intro:is(.is-light,.effects-calm) .cp2077-wordmark::after {display:none}
+@keyframes cp2077SignalChroma {0%,14%,29%,45%,64%,100%{opacity:0}15%,24%{opacity:.8;transform:translateX(-9px);clip-path:inset(23% 0 65%)}46%,54%{opacity:.7;transform:translateX(6px);clip-path:inset(61% 0 27%)}}
+@keyframes cp2077SignalBreak {0%,11%,27%,44%,68%,100%{opacity:0;transform:none}12%,20%{opacity:.6;transform:translateX(-8px)}45%,53%{opacity:.4;transform:translateX(12px)}}
+@keyframes cp2077LogoScan {0%{opacity:0;top:5%}12%{opacity:.6}65%{opacity:.45}100%{opacity:0;top:85%}}
 @media(prefers-reduced-motion:reduce) {:is(.cp2077-intro,.cp2077-transition),:is(.cp2077-intro,.cp2077-transition) *,:is(.cp2077-intro,.cp2077-transition) *::before,:is(.cp2077-intro,.cp2077-transition) *::after {animation:none!important;transition:none!important}}
