@@ -1,4 +1,5 @@
 const fs=require('node:fs');
+require('./build-legal-pages.cjs');
 require('./prepare-barcode-runtime.cjs');
 fs.copyFileSync('src/services/barcodes.js','public/barcode-model.js');
 fs.copyFileSync('src/services/rendezvousCatalog.js','public/rendezvous-catalog.js');

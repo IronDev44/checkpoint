@@ -1,6 +1,13 @@
 // New releases go first. Published IDs stay stable: reading a patch note and
 // discovering a feature are tracked independently, per account on this device.
 export const RELEASE_NOTES = [{
+ id:'2026-11-legal-privacy',date:'2026-11-11',title:'Tes données et tes choix, plus accessibles',
+ summary:'Informations légales, contact pour tes droits et statistiques d’activité facultatives.',
+ changes:[
+  {title:'Les informations de Checkpoint',where:'Inscription et Options → Profil & services',text:'Consulte les mentions légales, les règles d’utilisation et la politique de confidentialité, même sans compte. Un contact permet de demander un accès ou un effacement des données.'},
+  {title:'Mesure d’activité en pause',where:'Options → Profil & services → Informations légales et données',text:'La mesure individuelle d’activité est suspendue pendant le cadrage de l’accueil des mineurs. Tu peux encore effacer les anciens relevés associés à ton compte. Le compteur de comptes connus reste disponible.'}
+ ],fixes:['Les informations sur le profil précisent que le pseudo peut rester trouvable même si son contenu est privé.'],
+},{
  id:'2026-10-social-community',date:'2026-10-24',title:'Un social plus personnel et mieux protégé',
  summary:'Profils réservés aux amis, fil filtré et signalements confidentiels.',
  changes:[

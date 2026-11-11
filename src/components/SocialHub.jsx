@@ -1,3 +1,4 @@
+import CatalogImage from './CatalogImage';
 import SpoilerText from "./SpoilerText";
 import { useEffect, useState } from "react";
 import { getFriendsFeed,activityMatchesFilter,SOCIAL_FEED_FILTERS } from "../services/socialProfiles";
@@ -124,7 +125,7 @@ export function FriendsActivityFeed({ friends, loadProfile, onOpen,mutedHandles=
         <span><strong>{item.profile.displayName || item.profile.handle}</strong><small>@{item.profile.handle}</small></span>
         <span className="social-hub-profile-link">{opening === item.profile.handle ? "Chargement…" : "Voir le profil"}</span>
       </button>
-      <div className="social-hub-post-body">{item.image && <img src={item.image} alt="" loading="lazy" />}<div><small>{item.type || "Activité"}</small><h4>{item.title}</h4>{item.text && <p>{item.text}</p>}{item.detail && <p><SpoilerText text={item.detail}/></p>}{item.reviewText&&<p><SpoilerText text={item.reviewText} whole={item.reviewSpoiler}/></p>}</div></div>
+      <div className="social-hub-post-body">{item.image && <CatalogImage src={item.image} alt="" loading="lazy" />}<div><small>{item.type || "Activité"}</small><h4>{item.title}</h4>{item.text && <p>{item.text}</p>}{item.detail && <p><SpoilerText text={item.detail}/></p>}{item.reviewText&&<p><SpoilerText text={item.reviewText} whole={item.reviewSpoiler}/></p>}</div></div>
       <SocialReactions handle={item.profile.handle} activityId={item.id} resource={reactions}/>
       {onReport&&<button type="button" className="social-report-trigger" onClick={()=>onReport({type:'activity',handle:item.profile.handle,activityId:String(item.id)})}>Signaler cette publication</button>}
     </article>)}

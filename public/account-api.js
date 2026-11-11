@@ -9,7 +9,7 @@ import {handleSocialReactions} from './social-reactions-api.js';
 import {handleSharedGames} from './shared-games-api.js';
 import {handleSocialReports} from './social-reports-api.js';
 import {socialBlocked,canContact,canReadSocialProfile} from './social-access.js';
-import {handleUsage} from './usage-api.js';
+import {handleUsage,handlePrivacyPreferences} from './usage-api.js';
 import {findVisibleProfiles,normalizeProfileQuery} from './profile-search.js';
 import {socialQuota,recordSocialIssue,handleSocialDiagnostics} from './social-reliability.js';
 const PRIVATE = new Set(['games','hardware','gameCollections','playerProgress','playerPrivateSettings']);
@@ -108,6 +108,7 @@ async function accountApiRequest(request,env,verify){
   const url=new URL(request.url);const name=url.searchParams.get('collection');const id=url.searchParams.get('id');
   if(name==='socialDiagnostics')return handleSocialDiagnostics(request,env,uid);
   if(name==='appUsage')return handleUsage(request,env,uid);
+  if(name==='privacyPreferences')return handlePrivacyPreferences(request,env,uid);
   if(name==='friendPolls')return handleFriendPolls(request,env,uid,url);
   if(name==='friendships')return handleFriendships(request,env,uid);
   if(name==='socialControls')return handleSocialControls(request,env,uid);

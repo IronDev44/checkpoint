@@ -1,3 +1,4 @@
+import CatalogImage from './CatalogImage';
 import {useEffect,useState} from 'react';
 export default function LibraryBulkEditor({games,onApply,active,onActiveChange}){
  const [selected,setSelected]=useState([]);
@@ -25,7 +26,7 @@ export default function LibraryBulkEditor({games,onApply,active,onActiveChange})
    </div>
    {changes.platform&&<p>La plateforme choisie remplacera les plateformes jouées des jeux sélectionnés.</p>}
    <button className="checkpoint-primary-action" type="button" disabled={busy||!selected.length||!Object.values(changes).some(Boolean)} onClick={apply}>{busy?'Enregistrement…':`Appliquer à ${selected.length} jeu${selected.length>1?'x':''}`}</button>
-   <div className="library-bulk-list">{games.map(g=><label key={g.id}><input type="checkbox" disabled={busy} checked={selected.includes(String(g.id))} onChange={()=>toggle(String(g.id))}/>{g.image&&<img src={g.image} alt="" loading="lazy"/>}<span>{g.name}</span></label>)}</div>
+   <div className="library-bulk-list">{games.map(g=><label key={g.id}><input type="checkbox" disabled={busy} checked={selected.includes(String(g.id))} onChange={()=>toggle(String(g.id))}/>{g.image&&<CatalogImage src={g.image} alt="" loading="lazy"/>}<span>{g.name}</span></label>)}</div>
   </>}
   {message&&<p role="status">{message}</p>}
  </section>;

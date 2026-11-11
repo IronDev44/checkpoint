@@ -1,3 +1,4 @@
+import CatalogImage from './CatalogImage';
 import { useEffect, useRef, useState } from "react";
 import { ZoomIn } from "lucide-react";
 import { loadProfilePhoto } from "../services/profilePhoto";
@@ -11,7 +12,7 @@ export function SocialAvatar({ name, src, className = "social-hub-avatar", zooma
   const initials = String(name || "CP").split(/\s+/).map(word => word[0]).slice(0, 2).join("").toUpperCase();
   return <>
     <span className={`${className} checkpoint-avatar ${zoomable && hasPhoto ? "checkpoint-avatar-zoomable" : ""}`} aria-hidden={zoomable && hasPhoto ? undefined : true}>
-      {hasPhoto ? <img src={src} alt="" onError={() => { setFailed(src); setViewing(false); }} /> : initials}
+      {hasPhoto ? <CatalogImage src={src} alt="" onError={() => { setFailed(src); setViewing(false); }} /> : initials}
       {zoomable && hasPhoto && <button type="button" className="checkpoint-avatar-open" aria-label={`Agrandir la photo de ${name || "profil"}`} onClick={() => setViewing(true)}><ZoomIn size={18} aria-hidden="true" /></button>}
     </span>
     {viewing && hasPhoto && <ProfilePhotoViewer key={src} name={name} src={src} onClose={() => setViewing(false)} />}

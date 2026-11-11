@@ -1,3 +1,4 @@
+import CatalogImage from './CatalogImage';
 import {useEffect,useRef,useState} from 'react';
 import {playerCardContent,renderPlayerCard} from '../services/playerCard';
 export default function PlayerShareCard({profile,games,level}){
@@ -14,7 +15,7 @@ export default function PlayerShareCard({profile,games,level}){
   <div className="player-share-fields">{[['photo','Ma photo'],['games','Mes jeux fondateurs'],['platforms','Mes plateformes']].map(([key,label])=><label key={key}><input type="checkbox" checked={options[key]} disabled={busy} onChange={e=>{setOptions(o=>({...o,[key]:e.target.checked}));setPreview('');setBlob(null);}}/>{label}</label>)}</div>
   <button type="button" className="checkpoint-primary-action" onClick={create} disabled={busy}>{busy?'Création de l’image…':preview?'Actualiser ma carte':'Créer ma carte'}</button>
   {error&&<p role="alert">{error}</p>}
-  {preview&&<><img className="player-share-preview" src={preview} alt="Aperçu de ta carte de joueur"/><div className="player-share-actions"><a href={preview} download="mon-profil-checkpoint.png">Enregistrer l’image</a>{canShare&&<button type="button" onClick={async()=>{try{await navigator.share({files:[file],title:'Mon profil Checkpoint'});}catch(e){if(e.name!=='AbortError')setError('Partage indisponible. Tu peux enregistrer l’image.');}}}>Partager</button>}</div></>}
+  {preview&&<><CatalogImage className="player-share-preview" src={preview} alt="Aperçu de ta carte de joueur"/><div className="player-share-actions"><a href={preview} download="mon-profil-checkpoint.png">Enregistrer l’image</a>{canShare&&<button type="button" onClick={async()=>{try{await navigator.share({files:[file],title:'Mon profil Checkpoint'});}catch(e){if(e.name!=='AbortError')setError('Partage indisponible. Tu peux enregistrer l’image.');}}}>Partager</button>}</div></>}
   <small>La carte reste privée tant que tu ne la partages pas. Les photos indisponibles sont remplacées par un visuel simple.</small>
  </section>;
 }

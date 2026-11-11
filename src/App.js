@@ -1,4 +1,7 @@
+import CatalogImage from './components/CatalogImage';
+import DataSourceCredits from './components/DataSourceCredits';
 import ProfileSearch from './components/ProfileSearch';
+import ExternalVideo from './components/ExternalVideo';
 import {publishProfileWithIdentity} from './services/profileIdentity';
 import {detectSeriesName} from './services/seriesIdentity';
 import {matchesLibraryShortcut} from './services/libraryShortcuts';
@@ -1012,7 +1015,7 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection, librar
             >
               <div className="search-detail-hero-blur" />
 
-              <img
+              <CatalogImage
                 src={details?.background_image || game.background_image || undefined}
                 alt={game.name}
                 className="search-detail-cover"
@@ -1060,7 +1063,7 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection, librar
                   <h3>Images</h3>
                   <div className="screenshots-carousel">
                     {screenshots.slice(0, 6).map((shot) => (
-                      <img key={shot.id} src={shot.image} alt="" />
+                      <CatalogImage key={shot.id} src={shot.image} alt="" />
                     ))}
                   </div>
                 </div>
@@ -1070,12 +1073,11 @@ function SearchGameDetailModal({ game, onClose, onWishlist, onCollection, librar
                 <div className="search-detail-section">
                   <h3>Bande-annonce</h3>
                   {youtubeEmbedUrl ? (
-                    <iframe
+                    <ExternalVideo
+                      key={youtubeMatch[1]}
                       className="search-detail-video"
-                      src={youtubeEmbedUrl}
+                      videoId={youtubeMatch[1]}
                       title={`Bande-annonce ${details?.name || game.name}`}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
                     />
                   ) : (
                     <video controls className="search-detail-video">
@@ -1665,7 +1667,7 @@ function BadgeVisualIcon({ badge, size = 20 }) {
 
   if (badge?.id?.startsWith("brand_") && BADGE_BRAND_LOGOS[badge.platformFamily]) {
     return (
-      <img
+      <CatalogImage
         src={BADGE_BRAND_LOGOS[badge.platformFamily]}
         alt=""
         className="badge-brand-logo"
@@ -2900,13 +2902,13 @@ function SearchResultCard({ game, games, onAdd, onWishlist, isOwned, onOpenSearc
       >
         {displayImage ? (
           <>
-            <img
+            <CatalogImage
               src={backdropImage}
               alt=""
               className="game-image-backdrop"
               aria-hidden="true"
             />
-            <img
+            <CatalogImage
               src={displayImage}
               alt={game.name}
               className="game-image"
@@ -2994,8 +2996,8 @@ function UpcomingGameCard({ game, onWishlist }) {
     <div className={`upcoming-card ${isIgdbResult ? "igdb-upcoming-card" : ""} ${isFallbackArt ? "fallback-art" : ""}`}>
       {displayImage ? (
         <div className="upcoming-image-frame">
-          <img src={backdropImage} alt="" className="upcoming-image-backdrop" aria-hidden="true" />
-          <img src={displayImage} alt={game.name} className="upcoming-image" />
+          <CatalogImage src={backdropImage} alt="" className="upcoming-image-backdrop" aria-hidden="true" />
+          <CatalogImage src={displayImage} alt={game.name} className="upcoming-image" />
         </div>
       ) : (
         <div className="upcoming-image-frame placeholder">🎮</div>
@@ -3311,7 +3313,7 @@ function Top5Section({ title, games, scoreKey }) {
               <div key={`${title}-${game.id}`} className="top5-item">
                 <div className="top5-rank">#{index + 1}</div>
                 {game.image ? (
-                  <img src={game.image} alt={game.name} className="top5-thumb" />
+                  <CatalogImage src={game.image} alt={game.name} className="top5-thumb" />
                 ) : (
                   <div className="top5-thumb placeholder">🎮</div>
                 )}
@@ -4051,7 +4053,7 @@ function Top5OverviewPanel({ games = [], hardware = [] }) {
         {cards.map((card) => (
           <div key={card.label} className="top5-overview-card">
             {card.image ? (
-              <img src={hardwarePhotoUrl(card.image)} alt={card.value} />
+              <CatalogImage src={hardwarePhotoUrl(card.image)} alt={card.value} />
             ) : (
               <div className="top5-overview-placeholder">{card.label.slice(0, 3)}</div>
             )}
@@ -4136,7 +4138,7 @@ function Top5RankingPanel({
               <div key={`${title}-${game.id}`} className="top5-item">
                 <div className="top5-rank">{index + 1}</div>
                 {game.image ? (
-                  <img src={game.image} alt={game.name} className="top5-thumb" />
+                  <CatalogImage src={game.image} alt={game.name} className="top5-thumb" />
                 ) : (
                   <div className="top5-thumb placeholder">Jeu</div>
                 )}
@@ -4198,7 +4200,7 @@ function Top5HardwarePanel({
             <div key={`${title}-${item.id}`} className="top5-item">
               <div className="top5-rank">{index + 1}</div>
               {item.image ? (
-                <img src={hardwarePhotoUrl(item.image)} alt={item.name} className="top5-thumb" />
+                <CatalogImage src={hardwarePhotoUrl(item.image)} alt={item.name} className="top5-thumb" />
               ) : (
                 <div className="top5-thumb placeholder">Mat</div>
               )}
@@ -4248,7 +4250,7 @@ function Top5OstPanel({ games }) {
               <div key={`ost-${game.id}`} className="top5-item ost-top-item">
                 <div className="top5-rank">{index + 1}</div>
                 {game.image ? (
-                  <img src={game.image} alt={game.name} className="top5-thumb" />
+                  <CatalogImage src={game.image} alt={game.name} className="top5-thumb" />
                 ) : (
                   <div className="top5-thumb placeholder">OST</div>
                 )}
@@ -4275,7 +4277,7 @@ function Top5OstPanel({ games }) {
             <div className="option-value">Ta meilleure OST notée.</div>
           </div>
           {featured.image ? (
-            <img src={featured.image} alt={featured.name} />
+            <CatalogImage src={featured.image} alt={featured.name} />
           ) : (
             <div className="goty-empty-cover">OST</div>
           )}
@@ -4377,7 +4379,7 @@ function GameOfYearPanel({ games, onSetGameOfYear }) {
               )}
             </div>
             {selectedGame?.image ? (
-              <img src={selectedGame.image} alt={selectedGame.name} />
+              <CatalogImage src={selectedGame.image} alt={selectedGame.name} />
             ) : (
               <div className="goty-empty-cover">GOTY</div>
             )}
@@ -4449,7 +4451,7 @@ function GameOfYearPanel({ games, onSetGameOfYear }) {
                   >
                     <div className="top5-rank">{index + 1}</div>
                     {game.image ? (
-                      <img src={game.image} alt={game.name} className="top5-thumb" />
+                      <CatalogImage src={game.image} alt={game.name} className="top5-thumb" />
                     ) : (
                       <div className="top5-thumb placeholder">Jeu</div>
                     )}
@@ -5124,7 +5126,7 @@ export function GameDetailModal({
         >
           <div className="game-detail-premium-cover">
             {game.image ? (
-              <img src={game.image} alt={game.name} />
+              <CatalogImage src={game.image} alt={game.name} />
             ) : (
               <span>🎮</span>
             )}
@@ -5459,7 +5461,7 @@ export function GameDetailModal({
               <div className="modal-block-title">Captures</div>
               <div className="game-detail-capture-grid">
                 {captureImages.map((image, index) => (
-                  <img
+                  <CatalogImage
                     key={`${game.id}-capture-${index}`}
                     src={image}
                     alt={`${game.name} capture ${index + 1}`}
@@ -5490,7 +5492,7 @@ export function GameDetailModal({
                   return (
                     <div key={dlc.id} className="library-dlc-card">
                       {dlc.background_image ? (
-                        <img src={dlc.background_image} alt={dlc.name} />
+                        <CatalogImage src={dlc.background_image} alt={dlc.name} />
                       ) : (
                         <div className="library-dlc-placeholder">🎮</div>
                       )}
@@ -5901,7 +5903,7 @@ function PhysicalCollectionPanel({ games, onOpenDetail, onUpdatePhysicalGame }) 
             <div className="physical-photo-row">
               <div className="physical-photo-preview">
                 {selectedGame.physicalPhoto ? (
-                  <img
+                  <CatalogImage
                     src={selectedGame.physicalPhoto}
                     alt={selectedGame.name}
                   />
@@ -5958,7 +5960,7 @@ function PhysicalCollectionPanel({ games, onOpenDetail, onUpdatePhysicalGame }) 
             >
               <div className="physical-card-image">
                 {game.physicalPhoto || game.image ? (
-                  <img src={game.physicalPhoto || game.image} alt={game.name} />
+                  <CatalogImage src={game.physicalPhoto || game.image} alt={game.name} />
                 ) : (
                   <span>CP</span>
                 )}
@@ -6354,7 +6356,7 @@ function SanctuaryTab({
     >
       <span className="sanctuary-rank">{index + 1}</span>
       <span className="sanctuary-cover">
-        {game.image ? <img src={game.image} alt={game.name} /> : <span>CP</span>}
+        {game.image ? <CatalogImage src={game.image} alt={game.name} /> : <span>CP</span>}
       </span>
       <span className="sanctuary-game-copy">
         <strong>{game.name}</strong>
@@ -6393,7 +6395,7 @@ function SanctuaryTab({
       <section className="sanctuary-feature">
         <div className="sanctuary-feature-media">
           {signatureGame?.image ? (
-            <img src={signatureGame.image} alt={signatureGame.name} />
+            <CatalogImage src={signatureGame.image} alt={signatureGame.name} />
           ) : (
             <span>CP</span>
           )}
@@ -6583,7 +6585,7 @@ function SanctuaryTab({
             {relics.map((item) => (
               <button type="button" key={item.id} onClick={item.onClick}>
                 <span className="sanctuary-relic-image">
-                  {item.image ? <img src={hardwarePhotoUrl(item.image)} alt={item.title} /> : <span>CP</span>}
+                  {item.image ? <CatalogImage src={hardwarePhotoUrl(item.image)} alt={item.title} /> : <span>CP</span>}
                 </span>
                 <span>{item.type}</span>
                 <strong>{item.title}</strong>
@@ -7275,7 +7277,7 @@ function LibrarySmartPanel({
               }}
             >
               {card.game.image ? (
-                <img src={card.game.image} alt={card.title} loading="lazy" decoding="async" />
+                <CatalogImage src={card.game.image} alt={card.title} loading="lazy" decoding="async" />
               ) : (
                 <div className="library-smart-card-art">CP</div>
               )}
@@ -7862,7 +7864,7 @@ function ActivityFeed({
             className={`social-feed-item source-${activity.source || "generic"} ${activity.image ? "" : "no-media"}`}
           >
             {activity.image ? (
-              <img
+              <CatalogImage
                 className="social-feed-media"
                 src={hardwarePhotoUrl(activity.image)}
                 alt={activity.title}
@@ -8023,7 +8025,7 @@ function GamingTimeline({ timeline = [], compact = false }) {
           >
             <div className="gaming-timeline-year">{event.yearLabel}</div>
             <div className="gaming-timeline-node">
-              {event.image ? <img src={hardwarePhotoUrl(event.image)} alt={event.title} /> : <span>{event.icon}</span>}
+              {event.image ? <CatalogImage src={hardwarePhotoUrl(event.image)} alt={event.title} /> : <span>{event.icon}</span>}
             </div>
             <div className="gaming-timeline-card">
               <span>{event.kicker}</span>
@@ -8111,7 +8113,7 @@ export function PublicProfilePreview({
         <div className="public-vitrine-main">
           <div className="public-vitrine-avatar">
             {profile.photoURL ? <SocialAvatar name={profile.displayName} src={profile.photoURL} className="public-profile-photo" zoomable /> : heroGame?.image ? (
-              <img src={heroGame.image} alt={heroGame.name} />
+              <CatalogImage src={heroGame.image} alt={heroGame.name} />
             ) : (
               <span>{getInitials(profile.displayName)}</span>
             )}
@@ -8233,7 +8235,7 @@ export function PublicProfilePreview({
           <strong>Setup</strong>
           <div className="social-photo-gallery">
             {profile.setupPhotos.map((photo) => (
-              <img key={photo.id || photo.src} src={photo.src} alt="Setup" />
+              <CatalogImage key={photo.id || photo.src} src={photo.src} alt="Setup" />
             ))}
           </div>
         </div>
@@ -8244,7 +8246,7 @@ export function PublicProfilePreview({
           <strong>Collection physique</strong>
           <div className="social-photo-gallery">
             {profile.collectionPhotos.map((photo) => (
-              <img
+              <CatalogImage
                 key={photo.id || photo.src}
                 src={photo.src}
                 alt="Collection physique"
@@ -8284,7 +8286,7 @@ export function PublicProfilePreview({
           <div className="public-sanctuary-grid">
             {sanctuaryGames.map((game) => (
               <div key={`sanctuary-game-${game.id || game.name}`} className="public-sanctuary-item">
-                {game.image ? <img src={game.image} alt={game.name} /> : <span>Jeu</span>}
+                {game.image ? <CatalogImage src={game.image} alt={game.name} /> : <span>Jeu</span>}
                 <div>
                   <strong>{game.name}</strong>
                   <small>
@@ -8295,7 +8297,7 @@ export function PublicProfilePreview({
             ))}
             {sanctuaryHardware.map((item) => (
               <div key={`sanctuary-hardware-${item.id || item.name}`} className="public-sanctuary-item hardware">
-                {item.image ? <img src={hardwarePhotoUrl(item.image)} alt={item.name} /> : <span>Set</span>}
+                {item.image ? <CatalogImage src={hardwarePhotoUrl(item.image)} alt={item.name} /> : <span>Set</span>}
                 <div>
                   <strong>{item.name}</strong>
                   <small>{item.type || "Matériel culte"}</small>
@@ -8362,7 +8364,7 @@ export function PublicProfilePreview({
                         }
                       >
                         {item.image ? (
-                          <img src={hardwarePhotoUrl(item.image)} alt={item.name} />
+                          <CatalogImage src={hardwarePhotoUrl(item.image)} alt={item.name} />
                         ) : null}
                         <span>{item.name}</span>
                       </button>
@@ -8464,7 +8466,7 @@ function ProfileShowcase({ showcase, identityTitle = null }) {
                 key={item.key}
                 className={`profile-showcase-card ${item.game.image ? "" : "no-image"}`}
               >
-                {item.game.image ? <img src={item.game.image} alt={item.game.name} /> : null}
+                {item.game.image ? <CatalogImage src={item.game.image} alt={item.game.name} /> : null}
                 <div>
                   <span>{item.label}</span>
                   <strong>{item.game.name}</strong>
@@ -8485,7 +8487,7 @@ function ProfileShowcase({ showcase, identityTitle = null }) {
                 key={`${item.label}-${item.game.id}`}
                 className={`profile-showcase-card ${item.game.image ? "" : "no-image"}`}
               >
-                {item.game.image ? <img src={item.game.image} alt={item.game.name} /> : null}
+                {item.game.image ? <CatalogImage src={item.game.image} alt={item.game.name} /> : null}
                 <div>
                   <span>{item.label}</span>
                   <strong>{item.game.name}</strong>
@@ -8506,7 +8508,7 @@ function ProfileShowcase({ showcase, identityTitle = null }) {
                 key={`${item.year}-${item.game.id}`}
                 className={`profile-showcase-card ${item.game.image ? "" : "no-image"}`}
               >
-                {item.game.image ? <img src={item.game.image} alt={item.game.name} /> : null}
+                {item.game.image ? <CatalogImage src={item.game.image} alt={item.game.name} /> : null}
                 <div>
                   <span>GOTY {item.year}</span>
                   <strong>{item.game.name}</strong>
@@ -8527,7 +8529,7 @@ function ProfileShowcase({ showcase, identityTitle = null }) {
                 key={item.id || item.name}
                 className={`profile-showcase-card hardware ${item.image ? "" : "no-image"}`}
               >
-                {item.image ? <img src={hardwarePhotoUrl(item.image)} alt={item.name} /> : null}
+                {item.image ? <CatalogImage src={hardwarePhotoUrl(item.image)} alt={item.name} /> : null}
                 <div>
                   <span>{item.label}</span>
                   <strong>{item.name}</strong>
@@ -9258,7 +9260,7 @@ export function SocialTab({
                   type="button"
                   onClick={handleUseSanctuaryAsFounders}
                 >
-                  {game.image ? <img src={game.image} alt={game.name} /> : null}
+                  {game.image ? <CatalogImage src={game.image} alt={game.name} /> : null}
                   <span>{game.name}</span>
                 </button>
               ))}
@@ -9302,7 +9304,7 @@ export function SocialTab({
                 <div className="social-photo-gallery editable">
                   {socialProfile[section.field].map((photo, index) => (
                     <div key={photo.id || photo.src} className="social-photo-item">
-                      <img src={photo.src} alt={section.title} />
+                      <CatalogImage src={photo.src} alt={section.title} />
                       <button
                         type="button"
                         onClick={() => onRemoveProfilePhoto(section.field, index)}
@@ -10023,7 +10025,7 @@ export function HomeTab({
           </div>
         </div>
 
-        {nextPlayCandidate?.image && <img className="home-current-cover" src={nextPlayCandidate.image} alt="" />}
+        {nextPlayCandidate?.image && <CatalogImage className="home-current-cover" src={nextPlayCandidate.image} alt="" />}
         <button type="button" className="save-review-btn home-resume-action" onClick={() => dashboardAction.game ? onOpenDetail(dashboardAction.game) : setActiveTab(dashboardAction.tab)}>{dashboardAction.label}</button>
       </div>);
   const collectionSection = (<section className="home-collection-overview home-overview-card" aria-labelledby="home-overview-title">
@@ -10057,7 +10059,7 @@ export function HomeTab({
           <button type="button" className="home-library-open" onClick={()=>setActiveTab("library")}>Tout voir<ArrowLeft className="home-forward-arrow" size={16} aria-hidden="true"/></button>
         </div>
         <div className="home-library-list">{libraryPreviewGames.map(game=><button key={game.id} type="button" className="home-library-game" onClick={()=>onOpenDetail(game)}>
-          {game.image?<img src={game.image} alt="" loading="lazy"/>:<span className="home-library-placeholder" aria-hidden="true"><Gamepad2 size={24}/></span>}
+          {game.image?<CatalogImage src={game.image} alt="" loading="lazy"/>:<span className="home-library-placeholder" aria-hidden="true"><Gamepad2 size={24}/></span>}
           <span className="home-library-game-copy"><strong>{game.name}</strong><span className="home-library-game-meta"><span className={`home-library-status${game.status === "en cours" ? " is-playing" : ""}`}>{game.status === "en cours" ? "En cours" : "À découvrir"}</span><span aria-hidden="true">·</span><span>{formatRating10(getGameRating(game), "Pas encore noté")}</span></span></span>
           <ArrowLeft className="home-forward-arrow" size={16} aria-hidden="true"/>
         </button>)}</div>
@@ -10135,7 +10137,7 @@ export function HomeTab({
               onClick={() => setActiveTab("social")}
             >
               {featuredActivity.image ? (
-                <img src={hardwarePhotoUrl(featuredActivity.image)} alt={featuredActivity.title} loading="lazy" />
+                <CatalogImage src={hardwarePhotoUrl(featuredActivity.image)} alt={featuredActivity.title} loading="lazy" />
               ) : (
                 <div className={`social-feed-placeholder source-${featuredActivity.source || "generic"}`}>
                   {featuredActivity.type === "Badge" ? "B" : "C"}
@@ -10160,7 +10162,7 @@ export function HomeTab({
                   onClick={() => setActiveTab("social")}
                 >
                   {activity.image ? (
-                    <img src={hardwarePhotoUrl(activity.image)} alt={activity.title} loading="lazy" />
+                    <CatalogImage src={hardwarePhotoUrl(activity.image)} alt={activity.title} loading="lazy" />
                   ) : (
                     <div className={`social-feed-placeholder source-${activity.source || "generic"}`}>
                       {activity.type === "Badge" ? "B" : "C"}
@@ -10217,7 +10219,7 @@ export function HomeTab({
               onClick={() => setActiveTab("search")}
             >
               {primaryRecommendation.background_image ? (
-                <img src={primaryRecommendation.background_image} alt={primaryRecommendation.name} />
+                <CatalogImage src={primaryRecommendation.background_image} alt={primaryRecommendation.name} />
               ) : (
                 <div className="home-game-placeholder">CP</div>
               )}
@@ -10242,7 +10244,7 @@ export function HomeTab({
                   onClick={() => setActiveTab("search")}
                 >
                   {game.background_image ? (
-                    <img src={game.background_image} alt={game.name} />
+                    <CatalogImage src={game.background_image} alt={game.name} />
                   ) : (
                     <div className="home-game-placeholder">CP</div>
                   )}
@@ -12480,7 +12482,7 @@ function HardwareDetailModal({
         </button>
 
         {hardwareDisplayImage(item) ? (
-          <img
+          <CatalogImage
             src={hardwareDisplayImage(item)}
             alt={item.name}
             className="modal-image hardware-detail-image"
@@ -13815,7 +13817,7 @@ export function HardwareTab({
               >
                 <div className="hardware-image-wrapper">
                   {catalogItem.variants?.[0]?.versions?.[0]?.image ? (
-                    <img
+                    <CatalogImage
                       src={catalogItem.variants?.[0]?.versions?.[0]?.image}
                       alt={catalogItem.name}
                       className="hardware-catalog-image"
@@ -13875,7 +13877,7 @@ export function HardwareTab({
                       <div className="hardware-all-brand-head">
                         <div className="hardware-brand-line">
                           {getHardwareBrandLogo(group.brand) && (
-                            <img
+                            <CatalogImage
                               src={getHardwareBrandLogo(group.brand)}
                               alt={group.brand}
                               className="brand-logo"
@@ -13939,7 +13941,7 @@ export function HardwareTab({
                                   >
                                     <div className="hardware-image-wrapper">
                                       {version.image ? (
-                                        <img
+                                        <CatalogImage
                                           src={version.image}
                                           alt={version.name}
                                           className="hardware-catalog-image"
@@ -14073,7 +14075,7 @@ export function HardwareTab({
                     }}
                   >
                     {getHardwareBrandLogo(brand) && (
-                      <img
+                      <CatalogImage
                         src={getHardwareBrandLogo(brand)}
                         alt={brand}
                         className="hardware-brand-card-logo"
@@ -14116,7 +14118,7 @@ export function HardwareTab({
                     >
                       <div className="hardware-image-wrapper">
                         {catalogItem.variants?.[0]?.versions?.[0]?.image ? (
-                            <img
+                            <CatalogImage
                               src={catalogItem.variants?.[0]?.versions?.[0]?.image}
                               alt={catalogItem.name}
                               className="hardware-catalog-image"
@@ -14209,7 +14211,7 @@ export function HardwareTab({
                                     });
                                   }}
                                 >
-                                  <img
+                                  <CatalogImage
                                     src={version.image}
                                     alt={version.name}
                                     className="hardware-catalog-image"
@@ -14410,7 +14412,7 @@ export function HardwareTab({
                                 });
                               }}
                             >
-                              <img
+                              <CatalogImage
                                 src={hardwareDisplayImage(item)}
                                 alt={item.name}
                                 className="hardware-collection-image"
@@ -14511,7 +14513,7 @@ export function HardwareTab({
               ✕
             </button>
 
-            <img
+            <CatalogImage
               src={zoomedHardwareImage.image}
               alt={zoomedHardwareImage.name}
               className="hardware-zoom-image"
@@ -15582,7 +15584,7 @@ function OptionsTab({
                   <div className="steam-preview-list">
                     {planGameImport(games,steamLibrary.games,"steam").filter(row=>row.type!=="skip").slice(0,5).map(({item:game,index}) => (
                       <div key={`steamLibrary-${game.steamAppId}-${index}`} className="steam-preview-row">
-                        <img src={game.image} alt="" loading="lazy" />
+                        <CatalogImage src={game.image} alt="" loading="lazy" />
                         <div>
                           <strong>{game.name}</strong>
                           <span>{game.playtimeForever==null?"Temps non communiqué":`${formatSteamPlaytime(game.playtimeForever)} sur Steam`}</span>
@@ -15655,7 +15657,7 @@ function OptionsTab({
                   <div className="steam-preview-list">
                     {planGameImport(games,steamWishlist.games,"steam").filter(row=>row.type!=="skip").slice(0,5).map(({item:game,index}) => (
                       <div key={`steamWishlist-${game.steamAppId}-${index}`} className="steam-preview-row">
-                        <img src={game.image} alt="" loading="lazy" />
+                        <CatalogImage src={game.image} alt="" loading="lazy" />
                         <div>
                           <strong>{game.name}</strong>
                           <span>
@@ -15701,7 +15703,7 @@ function OptionsTab({
               {(xboxSession?.connected || xboxProfile.connected) ? (
                 <div className="xbox-profile-card">
                   {xboxSession?.profile?.avatar || xboxProfile.avatar ? (
-                    <img
+                    <CatalogImage
                       src={xboxSession?.profile?.avatar || xboxProfile.avatar}
                       alt=""
                       className="xbox-avatar"
@@ -15759,7 +15761,7 @@ function OptionsTab({
                   {planGameImport(games,xboxLibrary.games,"xbox").filter(row=>row.type!=="skip").slice(0,5).map(({item:game,index}) => (
                     <div key={`xboxLibrary-${game.xboxTitleId}-${index}`} className="steam-preview-row">
                       {game.image ? (
-                        <img src={game.image} alt="" loading="lazy" />
+                        <CatalogImage src={game.image} alt="" loading="lazy" />
                       ) : (
                         <div className="xbox-preview-fallback">XB</div>
                       )}
@@ -16052,11 +16054,10 @@ function LiveMiniPlayer({ live, collapsed, setCollapsed, onClose }) {
 
       {!collapsed && (
         <div className="live-mini-video">
-          <iframe
-            src={`https://www.youtube.com/embed/${live.youtubeId}`}
+          <ExternalVideo
+            key={live.youtubeId}
+            videoId={live.youtubeId}
             title={live.name}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
           />
         </div>
       )}
@@ -16166,7 +16167,7 @@ function NewsTab({ newsItems }) {
           {sortedNews.map((news) => (
             <article key={news.id} className="news-card">
               {news.image && (
-                <img src={news.image} alt={news.title} className="news-image" />
+                <CatalogImage src={news.image} alt={news.title} className="news-image" />
               )}
 
               <div className="news-content">
@@ -16712,7 +16713,7 @@ function HomeDealsPreview({
               rel="noreferrer"
             >
               {deal.image ? (
-                <img src={deal.image} alt={deal.title} />
+                <CatalogImage src={deal.image} alt={deal.title} />
               ) : (
                 <div className="home-deal-placeholder">{deal.storeLabel}</div>
               )}
@@ -17079,7 +17080,7 @@ function DealsTab({ dealPreferences = DEFAULT_APP_OPTIONS, games = [] }) {
             >
               <div className="deal-image-wrap">
                 {deal.image ? (
-                  <img src={deal.image} alt={deal.title} />
+                  <CatalogImage src={deal.image} alt={deal.title} />
                 ) : (
                   <div className="deal-image-placeholder">{deal.storeLabel}</div>
                 )}
@@ -17583,7 +17584,7 @@ const importNewsFromRSS = async ({ silent = false, force = false } = {}) => {
       if (item.thumbnail) return item.thumbnail;
       if (item.enclosure?.link) return item.enclosure.link;
 
-      const match = item.description?.match(/<img[^>]+src="([^">]+)"/);
+      const match = item.description?.match(/<CatalogImage[^>]+src="([^">]+)"/);
       if (match?.[1]) return match[1];
 
       return "";
@@ -20341,12 +20342,12 @@ useEffect(() => {
 
       {!showSplash && (
 
-        <BottomTabs
+        <><DataSourceCredits/><BottomTabs
         activeTab={activeTab}
         setActiveTab={changeTab}
         soundStyle={soundStyle}
         hiddenTabs={appOptions.hiddenTabs}
-      />
+      /></>
       )}
 
       {couchOpen&&<CouchMode games={games} lists={appOptions.personalLists} onClose={()=>setCouchOpen(false)} onOpenGame={game=>openGameDetail(game,games)}/>}

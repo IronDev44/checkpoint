@@ -1,0 +1,32 @@
+{
+  "checkedOn": "2026-11-11",
+  "editionImages": 603,
+  "trittonReferences": 23,
+  "editionImagesWithLicenseField": 0,
+  "sourceHosts": {
+    "www.playstation.com": 18,
+    "www.nintendo.com": 31,
+    "www.xbox.com": 6,
+    "www.8bitdo.com": 24,
+    "www.turtlebeach.com": 3,
+    "www.nintendo.co.jp": 88,
+    "consolevariations.com": 383,
+    "support.apple.com": 2,
+    "www.apple.com": 2,
+    "stores.horiusa.com": 24,
+    "www.nacongaming.com": 5,
+    "www.razer.com": 2,
+    "jp.nacongaming.com": 3,
+    "www.logitechg.com": 2,
+    "my.nacongaming.com": 2,
+    "hk.turtlebeach.com": 1,
+    "www.thrustmaster.com": 1,
+    "nz.turtlebeach.com": 1,
+    "steelseries.com": 2,
+    "www.gulikit.com": 3
+  },
+  "sonyEntriesWithTermsReview": 18,
+  "sonyTerms": "https://www.playstation.com/en-us/legal/website-terms-of-use/",
+  "scope": "Edition-photo manifest and Tritton source list only; excludes other base images and remote game covers.",
+  "interpretation": "Missing metadata is not proof that no permission exists; do not treat credits or source URLs as licenses. The Sony website terms do not provide blanket permission for republication in this app; review authorizations and exceptions separately."
+}

@@ -1,0 +1,96 @@
+{
+  "checkedOn": "2026-11-11",
+  "interpretation": "Les politiques des éditeurs sont des indices de permission et de restriction. Elles ne prouvent ni la provenance du fichier local ni une qualification juridique définitive de son usage. Les exceptions légales et autorisations distinctes restent à examiner.",
+  "policies": [
+    {
+      "id": "playstation",
+      "name": "PlayStation",
+      "urls": ["https://www.playstation.com/en-us/legal/website-terms-of-use/"],
+      "hosts": ["playstation.com", "gmedia.playstation.com"],
+      "brandFiles": ["sony.png"],
+      "status": "restriction_editeur_republication_a_examiner",
+      "scope": "Photos et éléments du site ; section 3. La publication dans un site tiers n’est pas couverte par l’autorisation générale de consultation et d’usage personnel.",
+      "next": "Documenter une autorisation distincte ou remplacer la photo. Examiner séparément le contexte de référence pour le logo ; ne pas présumer une interdiction légale absolue."
+    },
+    {
+      "id": "microsoft-photos",
+      "name": "Microsoft — photos",
+      "urls": ["https://www.microsoft.com/en-us/legal/intellectualproperty/copyright/permissions"],
+      "hosts": ["xbox.com", "assets.xboxservices.com"],
+      "brandFiles": [],
+      "status": "permission_generale_non_etablie",
+      "scope": "Le document prévoit des permissions spécifiques, notamment pour certains visuels de boîtes. Elles ne couvrent pas automatiquement toutes les photos matérielles.",
+      "next": "Vérifier la règle applicable à chaque type de photo, sans étendre une permission de box shot à une photo de console."
+    },
+    {
+      "id": "xbox-logo",
+      "name": "Xbox — logo",
+      "urls": ["https://www.microsoft.com/en-us/legal/intellectualproperty/trademarks", "https://www.xbox.com/legal/fansiteguidelines"],
+      "hosts": [],
+      "brandFiles": ["xbox.png"],
+      "status": "programme_et_contexte_a_qualifier",
+      "scope": "Le programme fansite est limité aux sites ou forums non commerciaux concernés, avec conditions de lien et d’intégrité du logo. Il ne donne pas une permission générale pour un service tiers.",
+      "next": "Qualifier Checkpoint et son usage précis ; sinon préférer le nom Xbox en texte ordinaire ou obtenir un accord adapté."
+    },
+    {
+      "id": "apple",
+      "name": "Apple",
+      "urls": ["https://www.apple.com/legal/intellectual-property/guidelinesfor3rdparties.html"],
+      "hosts": ["apple.com", "cdsassets.apple.com"],
+      "brandFiles": ["apple.png"],
+      "status": "restriction_editeur_licence_ou_exception_a_examiner",
+      "scope": "Les consignes distinguent la référence textuelle aux produits, le logo et les photographies appartenant à Apple. Les permissions ne sont pas interchangeables.",
+      "next": "Documenter la provenance et les droits du fichier ; examiner le contexte de référence. Le nom textuel n’est pas le logo graphique."
+    },
+    {
+      "id": "logitech",
+      "name": "Logitech",
+      "urls": ["https://www.logitech.com/en-us/tos/terms?id=6286.html"],
+      "hosts": ["logitech.com", "logitechg.com"],
+      "brandFiles": ["logitech.png"],
+      "status": "restriction_editeur_portee_a_confirmer",
+      "scope": "La permission générale consultée est personnelle et non commerciale ; la republication demande un accord applicable. Confirmer la portée pour les sous-sites Logitech G et les fichiers concernés.",
+      "next": "Rechercher une permission ou un kit dont les conditions couvrent réellement Checkpoint ; ne pas déduire une licence de la présence d’un téléchargement."
+    },
+    {
+      "id": "razer",
+      "name": "Razer",
+      "urls": ["https://www.razer.com/legal/trademark-use-guidelines"],
+      "hosts": ["razer.com", "razerzone.com"],
+      "brandFiles": ["razer.png"],
+      "status": "restriction_editeur_licence_ou_exception_a_examiner",
+      "scope": "Les consignes permettent une référence au nom pour identifier les produits, mais encadrent les logos et la reproduction des éléments créatifs.",
+      "next": "Séparer la référence textuelle des visuels ; obtenir ou documenter le droit applicable aux fichiers, ou préparer leur remplacement."
+    },
+    {
+      "id": "corsair",
+      "name": "Corsair et SCUF",
+      "urls": ["https://www.corsair.com/us/en/s/terms-of-use"],
+      "hosts": ["corsair.com", "scufgaming.com"],
+      "brandFiles": ["corsair.png", "scuf.png"],
+      "status": "restriction_editeur_republication_a_examiner",
+      "scope": "La section 8 encadre la republication et l’intégration du contenu dans des applications. Le texte consulté inclut notamment Corsair et SCUF.",
+      "next": "Ne pas considérer l’usage personnel ou gratuit comme une permission de republication ; établir une licence, une exception applicable ou un remplacement."
+    },
+    {
+      "id": "valve-logo",
+      "name": "Valve — fichier nommé Steam",
+      "urls": ["https://www.valvesoftware.com/en/legal", "https://partner.steamgames.com/doc/marketing/branding"],
+      "hosts": [],
+      "brandFiles": ["steam.png"],
+      "status": "identite_visuelle_incorrecte_et_droits_a_etablir",
+      "scope": "L’inspection du PNG révèle le mot-symbole Valve, pas le logo Steam. Les conditions du site Valve ne donnent pas une permission générale de republication. Les consignes partenaires Steam ne régularisent pas ce fichier Valve.",
+      "next": "Corriger la confusion Valve/Steam et documenter le droit applicable ; utiliser provisoirement un libellé Steam en texte ordinaire plutôt qu’un autre logo non vérifié."
+    },
+    {
+      "id": "nintendo-captures",
+      "name": "Nintendo — captures de jeux",
+      "urls": ["https://www.nintendo.co.jp/networkservice_guideline/en/index.html"],
+      "hosts": ["nintendo.com", "nintendo.co.jp"],
+      "brandFiles": ["nintendo.png"],
+      "status": "document_examine_ne_couvre_pas_les_photos_materiel",
+      "scope": "Ces consignes portent sur le partage de vidéos et captures de jeux. Elles ne sont pas une licence générale des photos de matériel ou du logo Nintendo.",
+      "next": "Trouver les droits applicables aux photos et au logo séparément. Ne pas classer ces fichiers comme autorisés sur le fondement de ces seules consignes."
+    }
+  ]
+}

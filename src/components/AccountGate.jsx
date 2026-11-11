@@ -8,6 +8,7 @@ import StartupIntro from "./StartupIntro";
 import { readStartupAppearance } from "../services/startupAppearance";
 import "./AccountWelcome.css";
 import {startUsageTracking} from '../services/appUsage';
+import LegalOptions,{LegalLinks} from './LegalOptions';
 
 const messages = {
   "auth/invalid-credential": "L’adresse ou le mot de passe ne correspond pas.",
@@ -20,7 +21,7 @@ const messages = {
 };
 export default function AccountGate({ children }) {
   const [user, setUser] = useState(undefined);
-  useEffect(()=>{if(accountsEnabled&&user?.uid)return startUsageTracking();},[user?.uid]);
+  useEffect(()=>{if(!accountsEnabled||!user?.uid)return;let stop=startUsageTracking();const refresh=()=>{stop();stop=startUsageTracking();};window.addEventListener('checkpoint-privacy-changed',refresh);return()=>{stop();window.removeEventListener('checkpoint-privacy-changed',refresh);};},[user?.uid]);
   const [mode, setMode] = useState("create");
   const [pseudo, setPseudo] = useState("");
   const [email, setEmail] = useState("");
@@ -100,6 +101,8 @@ export default function AccountGate({ children }) {
       <label>Adresse e-mail<input type="email" required value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" /></label>
       {mode !== "reset" && <><label>Mot de passe<input type="password" minLength={6} required value={password} onChange={e => setPassword(e.target.value)} autoComplete={mode === "create" ? "new-password" : "current-password"} /></label>
       <label className="welcome-remember"><input type="checkbox" checked={remember} disabled={busy} onChange={e => changeRemember(e.target.checked)} /><span>Rester connecté<small>Retrouve ton espace à la prochaine ouverture.</small></span></label></>}
+      <p className="welcome-legal-note">Tes données servent à créer et synchroniser ton espace. La mesure individuelle d’activité est actuellement suspendue. Consulte les informations ci-dessous avant de créer ton compte.</p>
+      <LegalLinks/>
       <button className="checkpoint-primary-action" disabled={busy}>{busy ? "Un instant…" : mode === "reset" ? "Envoyer le lien" : mode === "create" ? "Créer mon compte" : "Se connecter"}</button>
     </form>
     {process.env.REACT_APP_GOOGLE_AUTH_ENABLED === "true" && <div className="welcome-actions"><button disabled={busy} onClick={() => run(async () => { await preparePersistence(); await signInWithPopup(auth, new GoogleAuthProvider()); })}>Continuer avec Google</button></div>}
@@ -111,5 +114,5 @@ export default function AccountGate({ children }) {
   return withStartup(<>{app()}{tour && !startupVisible && <WelcomeTour onClose={finishTour} />}</>);
 }
 export function AccountOptions() {
-  return <section className="search-panel options-panel account-options"><h2 className="panel-title">Prendre ses repères</h2><p>Retrouve la présentation de Checkpoint quand tu veux.</p><button className="option-pill option-wide-action" onClick={() => window.dispatchEvent(new Event("checkpoint-replay-tour"))}>Revoir la découverte</button>{accountsEnabled && <><p>Connecté : {auth.currentUser?.email}</p><button className="option-pill option-wide-action" onClick={() => signOut(auth)}>Se déconnecter</button></>}</section>;
+  return <><section className="search-panel options-panel account-options"><h2 className="panel-title">Prendre ses repères</h2><p>Retrouve la présentation de Checkpoint quand tu veux.</p><button className="option-pill option-wide-action" onClick={() => window.dispatchEvent(new Event("checkpoint-replay-tour"))}>Revoir la découverte</button>{accountsEnabled && <><p>Connecté : {auth.currentUser?.email}</p><button className="option-pill option-wide-action" onClick={() => signOut(auth)}>Se déconnecter</button></>}</section><LegalOptions/></>;
 }

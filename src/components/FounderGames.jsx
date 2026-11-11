@@ -1,3 +1,4 @@
+import CatalogImage from './CatalogImage';
 import { useEffect, useState } from "react";
 import { Gamepad2 } from "lucide-react";
 import { getCoverPlatformNames, getGameCoverKey, getKnownGameCover, resolveGameCover } from "../services/gameCovers";
@@ -26,7 +27,7 @@ function FounderGame({ game, index, resolveCover }) {
     <li className="founder-game">
       <div className="founder-game-cover">
         {cover && cover !== failedUrl
-          ? <img src={cover} alt={`Jaquette de ${game.name}`} loading="lazy" decoding="async" onError={() => setFailedUrl(cover)} />
+          ? <CatalogImage src={cover} alt={`Jaquette de ${game.name}`} loading="lazy" decoding="async" onError={() => setFailedUrl(cover)} />
           : <div className="founder-cover-placeholder"><Gamepad2 size={28} aria-hidden="true" /><small>{loading ? "Recherche de la jaquette…" : "Jaquette indisponible"}</small></div>}
         <span className="founder-game-rank" aria-label={`Jeu fondateur ${index + 1}`}>{index + 1}</span>
       </div>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" fill="none">
+ <rect width="480" height="360" rx="32" fill="#101b24"/>
+ <circle cx="240" cy="173" r="110" stroke="#8fbed0" stroke-opacity=".12"/>
+ <rect x="135" y="87" width="210" height="143" rx="14" stroke="#b9d7e3" stroke-width="6"/>
+ <path d="M153 108h174v102H153z" fill="#203542"/>
+ <path d="M240 230v31m-43 0h86M214 158l18 18 34-38" stroke="#8fdfdc" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+ <text x="240" y="308" text-anchor="middle" fill="#b9d7e3" font-family="sans-serif" font-size="16" letter-spacing="3">CHECKPOINT</text>
+</svg>

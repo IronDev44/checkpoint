@@ -13,7 +13,7 @@ self.addEventListener('install',event=>event.waitUntil((async()=>{
 self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
 self.addEventListener('fetch',event=>{
   const request=event.request,url=new URL(request.url);
-  if(request.method!=='GET'||url.origin!==self.location.origin||url.pathname.startsWith('/api/'))return;
+  if(request.method!=='GET'||url.origin!==self.location.origin||url.pathname.startsWith('/api/')||url.pathname.startsWith('/legal/'))return;
   if(request.mode==='navigate'){
     event.respondWith((async()=>{
       try{const response=await fetch(request);if(!response.ok)throw new Error('Unavailable');event.waitUntil(saveShell(response.clone()).catch(()=>{}));return response;}

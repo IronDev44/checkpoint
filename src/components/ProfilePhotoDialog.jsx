@@ -1,3 +1,4 @@
+import CatalogImage from './CatalogImage';
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Minus, Plus, X } from "lucide-react";
@@ -126,7 +127,7 @@ function PhotoPanZoom({ photo, crop, setCrop, editing = false, disabled = false 
   return <>
     <div className={`checkpoint-photo-frame ${editing ? "checkpoint-photo-frame-editing" : ""}`} tabIndex={disabled ? -1 : 0} role="group" aria-label="Déplacer la photo" aria-describedby={hintId}
       onPointerDown={down} onPointerMove={move} onPointerUp={up} onPointerCancel={up} onLostPointerCapture={up} onKeyDown={keyDown}>
-      <img src={photo.source} alt="Aperçu de la photo de profil" draggable={false} style={{ width: `${photo.width / geometry.side * 100}%`, height: `${photo.height / geometry.side * 100}%`,
+      <CatalogImage src={photo.source} alt="Aperçu de la photo de profil" draggable={false} style={{ width: `${photo.width / geometry.side * 100}%`, height: `${photo.height / geometry.side * 100}%`,
         left: `${50 - geometry.centerX * photo.width / geometry.side * 100}%`, top: `${50 - geometry.centerY * photo.height / geometry.side * 100}%` }} />
       {editing && <span className="checkpoint-photo-crop-guide" aria-hidden="true" />}
     </div>

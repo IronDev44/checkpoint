@@ -28,6 +28,7 @@ export default function TesterFeedback({ onSubmit }) {
       {draft.category!=="idea"&&<label>Ce que tu attendais <span>(facultatif)</span><textarea maxLength={1500} rows={2} value={draft.expected} onChange={e=>change("expected",e.target.value)} /></label>}
       <label>Ton prénom ou pseudo <span>(facultatif)</span><input maxLength={60} value={draft.name} onChange={e=>change("name",e.target.value)} /></label>
       <p className="tester-feedback-context">Le thème, la taille de l’écran et le navigateur accompagnent ton retour pour aider à reproduire le souci.</p>
+      <p className="tester-feedback-context">Ton message est transmis à l’éditeur pour traiter ton retour. Évite les informations sensibles. <a href="/legal/confidentialite.html" target="_blank" rel="noreferrer">Données personnelles et droits</a>.</p>
       <button type="submit" className="checkpoint-primary-action">{sending?"Envoi en cours…":"Envoyer mon retour"}</button>
     </fieldset><p role="status" className="tester-feedback-status">{status}</p></form>}
   </section>;

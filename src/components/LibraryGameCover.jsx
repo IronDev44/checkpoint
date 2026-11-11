@@ -1,3 +1,4 @@
+import CatalogImage from './CatalogImage';
 import ArenaGameCover from './ArenaGameCover';
 import {resolveGameCover} from '../services/gameCovers';
 
@@ -14,5 +15,5 @@ function resolveLibraryCover(game){
  });
 }
 export default function LibraryGameCover({game,fallback='',className='',alt=game.name}){
- return <ArenaGameCover game={game} resolveCover={resolveLibraryCover} className={className} alt={alt} fallback={fallback?<img src={fallback} alt={alt} loading="lazy" decoding="async"/>:null}/>;
+ return <ArenaGameCover game={game} resolveCover={resolveLibraryCover} className={className} alt={alt} fallback={fallback?<CatalogImage src={fallback} alt={alt} loading="lazy" decoding="async"/>:null}/>;
 }

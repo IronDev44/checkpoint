@@ -6,6 +6,7 @@ pages_build_output_dir = "build"
 compatibility_date = "2026-07-09"
 
 [env.production.vars]
+USAGE_TRACKING_ENABLED = "false"
 ACCOUNT_OWNER_UID = "pAcrkmTs1tN8Kfv9C2IdNICKLOi2"
 NEWS_FEED_ENABLED = "true"
 
@@ -19,6 +20,7 @@ database_name = "checkpoint-accounts"
 database_id = "39d1ae1f-8781-4fb4-92e3-16db19671a71"
 
 [env.preview.vars]
+USAGE_TRACKING_ENABLED = "false"
 ACCOUNT_OWNER_UID = "pAcrkmTs1tN8Kfv9C2IdNICKLOi2"
 NEWS_FEED_ENABLED = "true"
 

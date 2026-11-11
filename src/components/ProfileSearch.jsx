@@ -1,3 +1,4 @@
+import CatalogImage from './CatalogImage';
 import {useEffect,useRef,useState,useId} from 'react';
 import {searchPublicProfiles} from '../services/profileSearch';
 import './ProfileSearch.css';
@@ -26,7 +27,7 @@ export default function ProfileSearch({onOpen,onInvite,connections=[],canInvite=
     const relation=connections.find(c=>c.profile.handle===profile.handle),accepted=relation?.status==='accepted',pending=relation?.status==='pending';
     return <li key={profile.handle}>
      <div className="profile-search-identity">
-      {!profile.private&&profile.photoURL&&<img src={profile.photoURL} alt="" loading="lazy"/>}
+      {!profile.private&&profile.photoURL&&<CatalogImage src={profile.photoURL} alt="" loading="lazy"/>}
       <span><strong>{profile.displayName}</strong>{!profile.private&&<small>@{profile.handle}</small>}</span>
      </div>
      <div className="profile-search-actions">{profile.private?<span>Profil privé · Consultation et invitations indisponibles{profile.self?' · Ton profil':''}</span>:<>

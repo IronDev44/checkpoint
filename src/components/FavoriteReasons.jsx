@@ -1,3 +1,4 @@
+import CatalogImage from './CatalogImage';
 import {useEffect,useState} from 'react';
 import {favoriteReason,FAVORITE_REASON_MAX} from '../services/rediscovery';
 import SpoilerText from './SpoilerText';
@@ -11,7 +12,7 @@ export function FavoriteReasonEditor({game,onSave}){
 export function FavoriteReasons({games=[]}){
  const chosen=games.filter(g=>favoriteReason(g.favoriteReason)).slice(0,3);
  if(!chosen.length)return null;
- return <section className="favorite-reasons-public"><h3>Ses coups de cœur, avec ses mots</h3>{chosen.map(game=><article key={game.id||game.name}>{game.image&&<img src={game.image} alt="" loading="lazy"/>}<div><strong>{game.name}</strong><blockquote><SpoilerText text={favoriteReason(game.favoriteReason)}/></blockquote></div></article>)}</section>;
+ return <section className="favorite-reasons-public"><h3>Ses coups de cœur, avec ses mots</h3>{chosen.map(game=><article key={game.id||game.name}>{game.image&&<CatalogImage src={game.image} alt="" loading="lazy"/>}<div><strong>{game.name}</strong><blockquote><SpoilerText text={favoriteReason(game.favoriteReason)}/></blockquote></div></article>)}</section>;
 }
 
 export function FavoriteReasonPicker({games=[],onSave}){
