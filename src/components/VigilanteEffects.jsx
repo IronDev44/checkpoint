@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import "./VigilanteEffects.css";
 
 function Bat() {
@@ -9,7 +10,7 @@ function Skyline() {
 export function VigilanteIntro({ progress }) {
   return <div className="vigilante-boot"><div className="vigilante-clouds" aria-hidden="true" /><div className="vigilante-searchlight" aria-hidden="true" /><Skyline />
     <main className="vigilante-boot-content"><div className="vigilante-signal"><Bat /></div>
-      <span className="vigilante-kicker">LA NUIT T’APPARTIENT</span><h1>Checkpoint</h1><p>Chaque aventure laisse son empreinte.</p>
+      <span className="vigilante-kicker">LA NUIT T’APPARTIENT</span><h1><ThemeWordmark theme="theme-vigilante">Checkpoint</ThemeWordmark></h1><p>Chaque aventure laisse son empreinte.</p>
       <div className="vigilante-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div>
       <small>Veille nocturne <strong>{progress}%</strong></small>
     </main>

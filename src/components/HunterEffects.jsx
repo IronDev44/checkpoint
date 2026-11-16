@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import "./HunterEffects.css";
 
 function Visor({ progress }) {
@@ -21,7 +22,7 @@ export function HunterIntro({ progress }) {
   return <div className="hunter-boot">
     <div className="hunter-boot-grid" aria-hidden="true" /><div className="hunter-boot-scan" aria-hidden="true" />
     <main className="hunter-boot-content"><div className="hunter-boot-target"><ScanFrame /><Visor progress={progress} /></div>
-      <span className="hunter-kicker">INITIALISATION DE LA VISIÈRE</span><h1>Checkpoint</h1><p>Une nouvelle zone à explorer.</p>
+      <span className="hunter-kicker">INITIALISATION DE LA VISIÈRE</span><h1><ThemeWordmark theme="theme-hunter">Checkpoint</ThemeWordmark></h1><p>Une nouvelle zone à explorer.</p>
       <div className="hunter-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width:progress+"%" }} /></div>
       <small>Systèmes en ligne <strong>{progress}%</strong></small>
     </main>

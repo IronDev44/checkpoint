@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import "./PacEffects.css";
 
 function Pac() {
@@ -19,7 +20,7 @@ export function PacIntro({ progress }) {
   return <div className="pac-boot"><main className="pac-boot-content">
     <div className="pac-boot-board"><Maze /><div className="pac-boot-pellets" aria-hidden="true">{Array.from({length:12},(_,i)=><i key={i} />)}</div><div className="pac-boot-runner" aria-hidden="true"><Pac /></div></div>
     <div className="pac-boot-ghosts" aria-hidden="true">{["#ff4b62","#ff9bd9","#45dcef","#ffb05c"].map(color=><Ghost key={color} color={color} />)}</div>
-    <span className="pac-boot-kicker">PRÊT POUR UN NOUVEAU SCORE ?</span><h1>Checkpoint</h1><p>Encore une partie ?</p>
+    <span className="pac-boot-kicker">PRÊT POUR UN NOUVEAU SCORE ?</span><h1><ThemeWordmark theme="theme-ring">Checkpoint</ThemeWordmark></h1><p>Encore une partie ?</p>
     <div className="pac-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div>
     <small>Chargement du labyrinthe <strong>{progress}%</strong></small>
   </main></div>;

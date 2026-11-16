@@ -1,3 +1,5 @@
+import ThemeWordmark from './ThemeWordmark';
+import {themeTypographyClass} from '../data/themeTypography';
 import { useEffect } from "react";
 import { getPopCultureTheme } from "../data/popCultureThemes";
 import "./PopCultureThemes.css";
@@ -41,7 +43,7 @@ export function PopCultureIntro({ theme, progress = 0, light = false, effects = 
   return <section className={`pc-boot pc-${config.motif} ${reduced?"is-light":""} ${value===100?"is-ready":""}`} aria-label={`Introduction ${config.label}`}>
     <RevisedIntroScene motif={config.motif} light={reduced}/><div className="pc-scene-shade"/>
     <header className="pc-boot-header"><span>{config.sceneTitle||config.universe}</span>{onRequestClose&&<button type="button" onClick={onRequestClose}>Passer l’intro <span aria-hidden="true">›</span></button>}</header>
-    <div className="pc-boot-copy"><span>{config.motif==="original"?"SYSTÈME ENCOM":config.motif==="legacy"?"LA GRILLE":config.motif==="future"?"LE TEMPS T’APPARTIENT":"LA VIE TROUVE UN CHEMIN"}</span><h1>CHECKPOINT</h1><p>{config.subtitle}</p></div>
+    <div className="pc-boot-copy"><span>{config.motif==="original"?"SYSTÈME ENCOM":config.motif==="legacy"?"LA GRILLE":config.motif==="future"?"LE TEMPS T’APPARTIENT":"LA VIE TROUVE UN CHEMIN"}</span><h1><ThemeWordmark theme={theme}>CHECKPOINT</ThemeWordmark></h1><p>{config.subtitle}</p></div>
     <footer className="pc-boot-loading"><div><span>{value===100?"Tout est prêt":"Chargement…"}</span><strong>{value} %</strong></div><div className="pc-load-track" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><i style={{width:`${value}%`}}/></div></footer>
   </section>;
 }
@@ -49,7 +51,7 @@ export function PopCultureIntro({ theme, progress = 0, light = false, effects = 
 export function PopCultureTransition({ theme, direction = "right", light = false, effects = "balanced" }) {
   const config = getPopCultureTheme(theme);
   if (!config) return null;
-  return <div className={`pc-tab-transition pc-${config.motif} direction-${direction} ${light||effects==="calm"?"is-light":""}`} aria-hidden="true">
+  return <div className={`pc-tab-transition ${themeTypographyClass(theme)} pc-${config.motif} direction-${direction} ${light||effects==="calm"?"is-light":""}`} aria-hidden="true">
     <div className="pc-transition-stage"><Scene motif={config.motif} light={light||effects==="calm"}/></div>
     <div className="pc-transition-label">{config.motif==="original"?"TRANSFERT ENCOM":config.motif==="legacy"?"GRILLE ACTIVE":config.motif==="future"?"PASSAGE TEMPOREL":"TRAVERSÉE DE LA RÉSERVE"}</div>
   </div>;

@@ -1,0 +1,203 @@
+@font-face{font-family:"CP Harry P";src:url("../assets/fonts/themes/HARRYP__.TTF") format("truetype");font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP cinzeldecorative';src:url('../assets/fonts/themes/CinzelDecorative-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP gfsdidot';src:url('../assets/fonts/themes/GFSDidot-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP pirataone';src:url('../assets/fonts/themes/PirataOne-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP cinzel';src:url('../assets/fonts/themes/Cinzel[wght].ttf') format('truetype');font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:'CP limelight';src:url('../assets/fonts/themes/Limelight-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP caesardressing';src:url('../assets/fonts/themes/CaesarDressing-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP cormorantsc';src:url('../assets/fonts/themes/CormorantSC-SemiBold.ttf') format('truetype');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:'CP forum';src:url('../assets/fonts/themes/Forum-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP skranji';src:url('../assets/fonts/themes/Skranji-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'CP eaglelake';src:url('../assets/fonts/themes/EagleLake-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP almendra';src:url('../assets/fonts/themes/Almendra-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP anton';src:url('../assets/fonts/themes/Anton-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP rowdies';src:url('../assets/fonts/themes/Rowdies-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'CP bungee';src:url('../assets/fonts/themes/Bungee-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP racingsansone';src:url('../assets/fonts/themes/RacingSansOne-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP fugazone';src:url('../assets/fonts/themes/FugazOne-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP lilitaone';src:url('../assets/fonts/themes/LilitaOne-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP rye';src:url('../assets/fonts/themes/Rye-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP rubikwetpaint';src:url('../assets/fonts/themes/RubikWetPaint-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP bangers';src:url('../assets/fonts/themes/Bangers-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP bowlbyonesc';src:url('../assets/fonts/themes/BowlbyOneSC-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP russoone';src:url('../assets/fonts/themes/RussoOne-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP pressstart2p';src:url('../assets/fonts/themes/PressStart2P-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP monoton';src:url('../assets/fonts/themes/Monoton-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP silkscreen';src:url('../assets/fonts/themes/Silkscreen-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP audiowide';src:url('../assets/fonts/themes/Audiowide-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP oswald';src:url('../assets/fonts/themes/Oswald[wght].ttf') format('truetype');font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:'CP blackopsone';src:url('../assets/fonts/themes/BlackOpsOne-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP rajdhani';src:url('../assets/fonts/themes/Rajdhani-Bold.ttf') format('truetype');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'CP michroma';src:url('../assets/fonts/themes/Michroma-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP bebasneue';src:url('../assets/fonts/themes/BebasNeue-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP exo2';src:url('../assets/fonts/themes/Exo2[wght].ttf') format('truetype');font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:'CP sharetechmono';src:url('../assets/fonts/themes/ShareTechMono-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP teko';src:url('../assets/fonts/themes/Teko[wght].ttf') format('truetype');font-weight:100 900;font-style:normal;font-display:swap}
+@font-face{font-family:'CP caveatbrush';src:url('../assets/fonts/themes/CaveatBrush-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP sedgwickavedisplay';src:url('../assets/fonts/themes/SedgwickAveDisplay-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP monofett';src:url('../assets/fonts/themes/Monofett-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'CP oxanium';src:url('../assets/fonts/themes/Oxanium[wght].ttf') format('truetype');font-weight:100 900;font-style:normal;font-display:swap}
+
+.theme-typography--spell{--wordmark-family:'CP Harry P',Georgia,serif;--wordmark-weight:400}
+.theme-typography--legend{--wordmark-family:'CP cinzeldecorative',serif;--wordmark-weight:400}
+.theme-typography--crystal{--wordmark-family:'CP gfsdidot',serif;--wordmark-weight:400}
+.theme-typography--voyage{--wordmark-family:'CP pirataone',serif;--wordmark-weight:400}
+.theme-typography--grace{--wordmark-family:'CP cinzel',serif;--wordmark-weight:500}
+.theme-typography--deco{--wordmark-family:'CP limelight',serif;--wordmark-weight:400}
+.theme-typography--runic{--wordmark-family:'CP caesardressing',serif;--wordmark-weight:400}
+.theme-typography--hollow{--wordmark-family:'CP cormorantsc',serif;--wordmark-weight:600}
+.theme-typography--assassin{--wordmark-family:'CP forum',serif;--wordmark-weight:400}
+.theme-typography--mythic{--wordmark-family:'CP skranji',serif;--wordmark-weight:700}
+.theme-typography--lyrical{--wordmark-family:'CP eaglelake',serif;--wordmark-weight:400}
+.theme-typography--dragon{--wordmark-family:'CP almendra',serif;--wordmark-weight:400}
+.theme-typography--hero{--wordmark-family:'CP anton',serif;--wordmark-weight:400}
+.theme-typography--capture{--wordmark-family:'CP rowdies',serif;--wordmark-weight:700}
+.theme-typography--jump{--wordmark-family:'CP bungee',serif;--wordmark-weight:400}
+.theme-typography--speed{--wordmark-family:'CP racingsansone',serif;--wordmark-weight:400}
+.theme-typography--race{--wordmark-family:'CP fugazone',serif;--wordmark-weight:400}
+.theme-typography--island{--wordmark-family:'CP lilitaone',serif;--wordmark-weight:400}
+.theme-typography--western{--wordmark-family:'CP rye',serif;--wordmark-weight:400}
+.theme-typography--ink{--wordmark-family:'CP rubikwetpaint',serif;--wordmark-weight:400}
+.theme-typography--kinetic{--wordmark-family:'CP bangers',serif;--wordmark-weight:400}
+.theme-typography--fossil{--wordmark-family:'CP bowlbyonesc',serif;--wordmark-weight:400}
+.theme-typography--blocks{--wordmark-family:'CP russoone',serif;--wordmark-weight:400}
+.theme-typography--voxel{--wordmark-family:'CP pressstart2p',serif;--wordmark-weight:400}
+.theme-typography--arcade{--wordmark-family:'CP monoton',serif;--wordmark-weight:400}
+.theme-typography--sunset{--wordmark-family:'CP silkscreen',serif;--wordmark-weight:400}
+.theme-typography--hunter{--wordmark-family:'CP audiowide',serif;--wordmark-weight:400}
+.theme-typography--vault{--wordmark-family:'CP oswald',serif;--wordmark-weight:700}
+.theme-typography--vigilante{--wordmark-family:'CP blackopsone',serif;--wordmark-weight:400}
+.theme-typography--military{--wordmark-family:'CP rajdhani',serif;--wordmark-weight:700}
+.theme-typography--portal{--wordmark-family:'CP michroma',serif;--wordmark-weight:400}
+.theme-typography--horror{--wordmark-family:'CP bebasneue',serif;--wordmark-weight:400}
+.theme-typography--relay{--wordmark-family:'CP exo2',serif;--wordmark-weight:700}
+.theme-typography--terminal{--wordmark-family:'CP sharetechmono',serif;--wordmark-weight:400}
+.theme-typography--codec{--wordmark-family:'CP teko',serif;--wordmark-weight:600}
+.theme-typography--brush{--wordmark-family:'CP caveatbrush',serif;--wordmark-weight:400}
+.theme-typography--fight{--wordmark-family:'CP sedgwickavedisplay',serif;--wordmark-weight:400}
+.theme-typography--galaxy{--wordmark-family:'Orbitron',serif;--wordmark-weight:800}
+.theme-typography--grid{--wordmark-family:'CP monofett',serif;--wordmark-weight:400}
+.theme-typography--legacy{--wordmark-family:'CP oxanium',serif;--wordmark-weight:700}
+
+/* These declarations apply to the signature alone, never to controls or prose. */
+.theme-wordmark{display:inline-block;position:relative;max-width:100%;white-space:nowrap;font-family:var(--wordmark-family)!important;font-weight:var(--wordmark-weight)!important;font-style:normal;font-size:clamp(28px,7.8vw,58px);line-height:1.35;letter-spacing:.015em;text-transform:uppercase;vertical-align:middle;background:none;-webkit-text-fill-color:currentColor;paint-order:stroke fill;isolation:isolate}
+.title.has-theme-wordmark{background:none!important;-webkit-text-fill-color:initial!important;text-shadow:none!important;line-height:1.35!important}
+.title.has-theme-wordmark::after{content:none!important}
+.title.has-theme-wordmark .theme-wordmark{line-height:1.4}
+
+.theme-wordmark.theme-typography--spell{color:#ead7a0;text-shadow:0 2px 0 #684129,0 0 18px #d0aa6545;letter-spacing:-.035em}
+.theme-wordmark.theme-typography--spell::after{content:'';position:absolute;right:9%;bottom:.02em;width:.18em;height:.58em;background:linear-gradient(#f9e6ad,#8e6431);clip-path:polygon(55% 0,100% 0,49% 43%,85% 43%,0 100%,27% 53%,0 53%);transform:rotate(12deg)}
+.theme-wordmark.theme-typography--galaxy{color:#100f18;-webkit-text-stroke:1px #f5d967;text-shadow:0 3px 0 #83692b;letter-spacing:-.035em;font-weight:900!important}
+.theme-wordmark.theme-typography--hero{color:#fff4ed;background:#a62033;padding:.02em .13em;line-height:1.1;letter-spacing:-.035em;box-shadow:0 3px 0 #540c1a}
+.theme-wordmark.theme-typography--legend{color:#f2e1a4;letter-spacing:-.025em;text-shadow:1px 2px 0 #7d592b,0 0 12px #e2bf6530}
+.theme-wordmark.theme-typography--capture{color:#ffdf49;-webkit-text-stroke:3px #24529d;text-shadow:0 4px 0 #102c60;letter-spacing:-.045em}
+.theme-wordmark.theme-typography--jump{color:#f7cb35;background:linear-gradient(90deg,#f05949 0 20%,#71b8ed 20% 40%,#f6d342 40% 60%,#78bb5b 60% 80%,#f07c56 80%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;-webkit-text-stroke:1px #1d2737;filter:drop-shadow(0 3px 0 #121927);letter-spacing:-.035em}
+.theme-wordmark.theme-typography--speed,.theme-wordmark.theme-typography--race{color:#f8f0c3;-webkit-text-stroke:2px #2155a0;text-shadow:0 3px 0 #efb92b;transform:skew(-8deg);letter-spacing:-.04em}
+.theme-wordmark.theme-typography--race{color:#fbfaf0;-webkit-text-stroke:1px #544a67;text-shadow:0 3px 0 #ab5077,2px 4px 0 #629eaf}
+.theme-wordmark.theme-typography--blocks,.theme-wordmark.theme-typography--voxel,.theme-wordmark.theme-typography--arcade{font-size:clamp(19px,5.9vw,36px);letter-spacing:-.015em}
+.theme-wordmark.theme-typography--blocks{color:#70e9ed;text-shadow:2px 2px 0 #6045aa,4px 4px 0 #292047}
+.theme-wordmark.theme-typography--voxel{color:#d0d1c7;-webkit-text-stroke:.7px #282d25;text-shadow:0 3px 0 #75816a,0 6px 0 #303a2e,3px 7px 0 #10160d;letter-spacing:-.03em}
+.theme-wordmark.theme-typography--arcade{color:#ffda48;text-shadow:0 3px 0 #ab4f32,0 0 12px #f9b53030}
+.theme-wordmark.theme-typography--hunter{color:#f2b57b;letter-spacing:.13em;transform:skew(-6deg);text-shadow:0 2px 0 #6c371e}
+.theme-wordmark.theme-typography--crystal{color:#dceff4;letter-spacing:.035em;text-shadow:0 2px 0 #417f9b,0 0 18px #76cef655}
+.theme-wordmark.theme-typography--terminal{color:#91f8b1;letter-spacing:.12em;text-shadow:0 0 12px #22da6d66;font-size:clamp(30px,9vw,70px)}
+.theme-wordmark.theme-typography--vault{color:#f0e6ba;letter-spacing:-.025em;transform:skew(-7deg);text-shadow:0 2px 0 #6c7150;font-size:clamp(36px,10vw,76px)}
+.theme-wordmark.theme-typography--voyage{color:#f5d18b;-webkit-text-stroke:.5px #74472c;letter-spacing:-.025em;text-shadow:0 2px 0 #6e3024}
+.theme-wordmark.theme-typography--brush{color:#f3e9df;letter-spacing:-.025em;text-shadow:2px 3px 0 #9c303c;font-size:clamp(40px,11vw,82px)}
+.theme-wordmark.theme-typography--vigilante{color:#e9d27c;letter-spacing:.18em;text-shadow:0 3px 0 #393125}
+.theme-wordmark.theme-typography--grace{color:#d7bd75;letter-spacing:.045em;text-shadow:0 0 12px #c0a25140}
+.theme-wordmark.theme-typography--military{color:#d2e8ed;letter-spacing:.17em;text-shadow:0 2px 0 #39757e}
+.theme-wordmark.theme-typography--deco{color:#d5b76e;letter-spacing:-.035em;text-shadow:0 2px 0 #5d6d59,0 4px 0 #142d30;border-block:1px solid #c7a96b60;line-height:1.1;padding-block:.08em}
+.theme-wordmark.theme-typography--portal{color:#f2f5f7;letter-spacing:.13em;text-shadow:-1px 0 0 #55bbf0,1px 0 0 #efab63}
+.theme-wordmark.theme-typography--runic{color:#e8e1ce;letter-spacing:.035em;text-shadow:0 2px 0 #555e61,0 4px 0 #20262a}
+.theme-wordmark.theme-typography--island{color:#f2dca4;-webkit-text-stroke:1px #725232;text-shadow:0 3px 0 #6d5435;letter-spacing:-.05em;transform:rotate(-2deg)}
+.theme-wordmark.theme-typography--hollow{color:#ecedf1;letter-spacing:.03em;text-shadow:0 0 15px #b4c7df55}
+.theme-wordmark.theme-typography--western{color:#e8dfcb;letter-spacing:-.04em;text-shadow:0 3px 0 #a42524,0 5px 0 #371e1a}
+.theme-wordmark.theme-typography--assassin{color:#e9e7df;letter-spacing:-.05em;text-shadow:0 2px 0 #746b61}
+.theme-wordmark.theme-typography--mythic{color:#e2ca92;letter-spacing:-.025em;text-shadow:2px 3px 0 #9b384a}
+.theme-wordmark.theme-typography--horror{color:#e5dccc;letter-spacing:.1em;text-shadow:1px 3px 0 #883e35;border-bottom:1px solid #a55a47;line-height:1.1}
+.theme-wordmark.theme-typography--fight{color:#f9ce5b;-webkit-text-stroke:1px #9a301c;text-shadow:2px 3px 0 #d85a29,4px 5px 0 #571a23;transform:skew(-9deg);font-size:clamp(40px,11vw,82px)}
+.theme-wordmark.theme-typography--ink{color:#ee8ccf;-webkit-text-stroke:1px #24162e;text-shadow:2px 3px 0 #8fcd58;letter-spacing:-.05em;transform:rotate(-3deg)}
+.theme-wordmark.theme-typography--lyrical{color:#c9f2ef;letter-spacing:.045em;text-shadow:0 0 18px #80e5e9aa}
+.theme-wordmark.theme-typography--grid{color:#10282f;-webkit-text-stroke:1px #8be8ef;text-shadow:0 0 12px #55dfe270;letter-spacing:-.045em}
+.theme-wordmark.theme-typography--kinetic{color:#f7cb49;-webkit-text-stroke:1px #b34f37;text-shadow:2px 3px 0 #397cb0;transform:skew(-9deg);letter-spacing:-.045em}
+.theme-wordmark.theme-typography--fossil{color:#edd3a5;-webkit-text-stroke:1px #2d2720;text-shadow:0 3px 0 #a34232;letter-spacing:-.035em}
+.pc-tab-transition.theme-typography .pc-transition-label{font-family:var(--wordmark-family);font-weight:var(--wordmark-weight);letter-spacing:.07em;line-height:1.55}
+/* Size intro lettering against its own heading, including narrow landscape layouts. */
+h1:not(.title):has(>.theme-wordmark){container-type:inline-size;inline-size:100%;max-inline-size:100%;box-sizing:border-box;line-height:1.35}
+
+.theme-wordmark.theme-typography--codec{color:#91f8b1;letter-spacing:.12em;text-shadow:0 0 12px #22da6d66;font-size:clamp(30px,9vw,70px)}
+.theme-wordmark.theme-typography--relay{color:#d2e8ed;letter-spacing:.17em;text-shadow:0 2px 0 #39757e}
+.theme-wordmark.theme-typography--dragon{color:#e8e1ce;letter-spacing:.035em;text-shadow:0 2px 0 #555e61,0 4px 0 #20262a}
+.theme-wordmark.theme-typography--legacy{color:#10282f;-webkit-text-stroke:1px #8be8ef;text-shadow:0 0 12px #55dfe270;letter-spacing:-.045em}
+.theme-wordmark.theme-typography--sunset{font-size:clamp(19px,5.9vw,36px);letter-spacing:-.015em}
+/* Individual letterforms, with restrained finishing that preserves their silhouette. */
+.theme-wordmark.theme-typography--spell{letter-spacing:.025em;line-height:1.5;text-shadow:0 1px 0 #fff0b650,0 2px 0 #8d6536,0 4px 6px #180d12aa,0 0 18px #d0aa6533}
+.theme-wordmark.theme-typography--spell::after{content:none}
+.theme-wordmark.theme-typography--crystal{letter-spacing:-.045em;text-shadow:0 1px 0 #417f9b,0 0 16px #76cef640}
+.theme-wordmark.theme-typography--voyage{letter-spacing:.015em;-webkit-text-stroke:0}
+.theme-wordmark.theme-typography--capture{-webkit-text-stroke:1.5px #24529d;letter-spacing:-.025em}
+.theme-wordmark.theme-typography--deco{letter-spacing:0}
+.theme-wordmark.theme-typography--runic{letter-spacing:.015em}
+.theme-wordmark.theme-typography--hollow{letter-spacing:.025em}
+.theme-wordmark.theme-typography--lyrical{letter-spacing:-.04em}
+.theme-wordmark.theme-typography--hunter{letter-spacing:.025em}
+.theme-wordmark.theme-typography--portal{letter-spacing:.025em}
+.theme-wordmark.theme-typography--vigilante{letter-spacing:.01em}
+.theme-wordmark.theme-typography--relay{letter-spacing:.05em}
+.theme-wordmark.theme-typography--codec{color:#bdd2bc;letter-spacing:.13em;text-shadow:0 1px 0 #344b3b}
+.theme-wordmark.theme-typography--legacy{letter-spacing:.08em}
+.theme-wordmark.theme-typography--arcade{letter-spacing:-.035em;text-shadow:0 0 12px #f9b53030}
+.theme-wordmark.theme-typography--sunset{color:#f7aeed;text-shadow:2px 2px 0 #7552a6,0 0 10px #c982f640;letter-spacing:-.03em}
+
+/* Fit measured letterforms to the available brand area, including the bell gutter. */
+.theme-typography--spell{--wordmark-fit:5.25}
+.theme-typography--galaxy{--wordmark-fit:7.4}
+.theme-typography--hero{--wordmark-fit:4.58}
+.theme-typography--legend{--wordmark-fit:7.11}
+.theme-typography--capture{--wordmark-fit:7.04}
+.theme-typography--jump{--wordmark-fit:6.75}
+.theme-typography--speed{--wordmark-fit:5.72}
+.theme-typography--blocks{--wordmark-fit:6.61}
+.theme-typography--voxel{--wordmark-fit:9.97}
+.theme-typography--hunter{--wordmark-fit:7.93}
+.theme-typography--race{--wordmark-fit:6.15}
+.theme-typography--crystal{--wordmark-fit:6.36}
+.theme-typography--arcade{--wordmark-fit:7.61}
+.theme-typography--terminal{--wordmark-fit:6.86}
+.theme-typography--vault{--wordmark-fit:5.22}
+.theme-typography--voyage{--wordmark-fit:4.33}
+.theme-typography--brush{--wordmark-fit:4.65}
+.theme-typography--vigilante{--wordmark-fit:7.08}
+.theme-typography--grace{--wordmark-fit:7.61}
+.theme-typography--military{--wordmark-fit:7}
+.theme-typography--deco{--wordmark-fit:6.97}
+.theme-typography--portal{--wordmark-fit:9.9}
+.theme-typography--runic{--wordmark-fit:5.18}
+.theme-typography--island{--wordmark-fit:5.47}
+.theme-typography--hollow{--wordmark-fit:6.83}
+.theme-typography--western{--wordmark-fit:6.9}
+.theme-typography--assassin{--wordmark-fit:5.18}
+.theme-typography--mythic{--wordmark-fit:6.58}
+.theme-typography--horror{--wordmark-fit:5}
+.theme-typography--codec{--wordmark-fit:5.86}
+.theme-typography--relay{--wordmark-fit:6.75}
+.theme-typography--dragon{--wordmark-fit:6.11}
+.theme-typography--fight{--wordmark-fit:5.18}
+.theme-typography--ink{--wordmark-fit:6.61}
+.theme-typography--lyrical{--wordmark-fit:7.65}
+.theme-typography--grid{--wordmark-fit:5.58}
+.theme-typography--legacy{--wordmark-fit:7.29}
+.theme-typography--kinetic{--wordmark-fit:3.75}
+.theme-typography--fossil{--wordmark-fit:7.11}
+.theme-typography--sunset{--wordmark-fit:6.97}
+.app-brand:has(>.has-theme-wordmark){container-type:inline-size}
+.title.has-theme-wordmark{width:100%!important;overflow:visible;text-overflow:clip}
+.title.has-theme-wordmark>.theme-wordmark{font-size:min(7.4vw,calc(96cqi / var(--wordmark-fit)),40px)}
+.title.has-theme-wordmark>:is(.theme-typography--blocks,.theme-typography--voxel,.theme-typography--arcade){font-size:min(5.8vw,calc(96cqi / var(--wordmark-fit)),32px)}
+h1:not(.title)>.theme-wordmark{font-size:clamp(16px,calc(92cqi / var(--wordmark-fit)),72px)}
+h1:not(.title)>:is(.theme-typography--blocks,.theme-typography--voxel,.theme-typography--arcade){font-size:clamp(16px,calc(92cqi / var(--wordmark-fit)),36px)}
+h1:not(.title)>:is(.theme-typography--brush,.theme-typography--fight){font-size:clamp(20px,calc(92cqi / var(--wordmark-fit)),82px)}
+
+/* Harry P has a smaller cap height: balance it against the other header titles. */
+.title.has-theme-wordmark>.theme-typography--spell{font-size:min(9vw,calc(96cqi / var(--wordmark-fit)),42px)}

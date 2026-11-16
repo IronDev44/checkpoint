@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import { useEffect, useRef } from "react";
 import { getKartSceneBudget, paintKartSky, paintKartRoad } from "../services/kartScene";
 import "./KartEffects.css";
@@ -81,7 +82,7 @@ export function KartIntro({ progress = 0, light = false, effects = "balanced", o
       <span className="kart-grand-prix"><i aria-hidden="true"/> MARIO KART WORLD</span>
       {onRequestClose && <button type="button" className="kart-skip" onClick={onRequestClose}>Passer l’intro <span aria-hidden="true">›</span></button>}
     </header>
-    <div className="kart-boot-title"><h1>CHECKPOINT</h1><p>Route Arc-en-ciel</p></div>
+    <div className="kart-boot-title"><h1><ThemeWordmark theme="theme-kart">CHECKPOINT</ThemeWordmark></h1><p>Route Arc-en-ciel</p></div>
     <div className="kart-loading">
       <div><span>{ready ? "Tout est prêt" : "Chargement…"}</span><strong>{value}%</strong></div>
       <div className="kart-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={value}><span style={{width:`${value}%`}}/></div>

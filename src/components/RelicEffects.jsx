@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import "./RelicEffects.css";
 function RelicEmblem() {
   return <svg className="relic-emblem" viewBox="0 0 180 180" fill="none" aria-hidden="true">
@@ -12,7 +13,7 @@ function ForestMotes({ count }) {
 }
 export function RelicIntro({ progress }) {
   return <div className="relic-boot"><div className="relic-forest-light" aria-hidden="true" /><ForestMotes count={30} />
-    <main className="relic-boot-content"><RelicEmblem /><span className="relic-kicker">L’AVENTURE T’APPELLE</span><h1>Checkpoint</h1><p>Chaque aventure laisse une trace.</p>
+    <main className="relic-boot-content"><RelicEmblem /><span className="relic-kicker">L’AVENTURE T’APPELLE</span><h1><ThemeWordmark theme="theme-relic">Checkpoint</ThemeWordmark></h1><p>Chaque aventure laisse une trace.</p>
       <div className="relic-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div>
       <small>Éveil du sanctuaire <strong>{progress}%</strong></small>
     </main>

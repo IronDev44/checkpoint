@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import "./BlocksEffects.css";
 
 const pieces = [
@@ -27,7 +28,7 @@ export function BlocksIntro({ progress }) {
         <div className="blocks-boot-ghost"><Piece index={4} /></div>
         <Piece index={4} className="blocks-boot-piece" style={{ "--piece-x": 7, "--piece-y": 4, "--piece-delay": "1100ms" }} />
       </div>
-      <span className="blocks-boot-kicker">CHAQUE PIÈCE TROUVE SA PLACE</span><h1>Checkpoint</h1><p>Une partie à la fois.</p>
+      <span className="blocks-boot-kicker">CHAQUE PIÈCE TROUVE SA PLACE</span><h1><ThemeWordmark theme="theme-blocks">Checkpoint</ThemeWordmark></h1><p>Une partie à la fois.</p>
       <div className="blocks-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: progress + "%" }} /></div>
       <small>Assemblage en cours <strong>{progress}%</strong></small>
     </main>

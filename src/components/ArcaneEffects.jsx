@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import IntroVignette from "./IntroVignettes";
 import "./ArcaneEffects.css";
 function Grimoire() {
@@ -14,7 +15,7 @@ function ArcaneSparks({ count = 32 }) {
 export function ArcaneIntro({ progress }) {
   return <div className="arcane-boot"><ArcaneSparks /><main className="arcane-boot-content">
     <IntroVignette kind="arcane"/><span className="arcane-boot-kicker">UN NOUVEAU CHAPITRE</span>
-    <h1>Checkpoint</h1><p>Ton histoire s’écrit, une aventure à la fois.</p>
+    <h1><ThemeWordmark theme="theme-arcane">Checkpoint</ThemeWordmark></h1><p>Ton histoire s’écrit, une aventure à la fois.</p>
     <div className="arcane-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div>
     <small>Chargement <strong>{progress}%</strong></small>
   </main></div>;

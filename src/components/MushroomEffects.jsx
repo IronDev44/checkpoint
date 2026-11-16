@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import "./MushroomEffects.css";
 
 function MushroomMascot({ className }) {
@@ -20,7 +21,7 @@ export function MushroomIntro({ progress }) {
       </div>)}</div>
       <MushroomMascot className="mushroom-boot-mascot" />
       <span className="mushroom-boot-kicker">UNE NOUVELLE PARTIE T’ATTEND</span>
-      <h1>Checkpoint</h1><p>À toi de jouer !</p>
+      <h1><ThemeWordmark theme="theme-mushroom">Checkpoint</ThemeWordmark></h1><p>À toi de jouer !</p>
       <div className="mushroom-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: progress + "%" }} /></div>
       <small>Préparation du niveau <strong>{progress}%</strong></small>
     </main>

@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import "./WastelandEffects.css";
 
 function BunkerSeal() {
@@ -16,7 +17,7 @@ function Dust({ count }) {
 export function WastelandIntro({ progress }) {
   return <div className="wasteland-boot"><div className="wasteland-horizon" aria-hidden="true" /><Dust count={36} />
     <main className="wasteland-boot-content"><BunkerSeal /><div className="wasteland-terminal">
-      <span className="wasteland-kicker">ABRI / SYSTÈME DE SURVIE</span><h1>Checkpoint</h1><p>Les aventures restent. Même après la fin du monde.</p>
+      <span className="wasteland-kicker">ABRI / SYSTÈME DE SURVIE</span><h1><ThemeWordmark theme="theme-wasteland">Checkpoint</ThemeWordmark></h1><p>Les aventures restent. Même après la fin du monde.</p>
       <div className="wasteland-system-readout" aria-hidden="true"><span>ÉNERGIE : STABLE</span><span>{progress>=80?"ACCÈS : AUTORISÉ":"ACCÈS : EN ATTENTE"}</span></div>
       <div className="wasteland-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div>
       <small>Remise en route <strong>{progress}%</strong></small>

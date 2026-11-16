@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import "./TreasureEffects.css";
 
 function StrawHatEmblem() {
@@ -32,7 +33,7 @@ function Ship() {
 }
 export function TreasureIntro({ progress }) {
   return <div className="treasure-boot"><div className="treasure-sun" aria-hidden="true" /><div className="treasure-cloud cloud-one" aria-hidden="true" /><div className="treasure-cloud cloud-two" aria-hidden="true" /><Ship /><Waves />
-    <main className="treasure-boot-content"><div className="treasure-emblem-frame"><StrawHatEmblem /></div><span className="treasure-kicker">ONE PIECE · CAP SUR GRAND LINE</span><h1>Checkpoint</h1><p>Ton équipage. Tes aventures. Tes trésors.</p>
+    <main className="treasure-boot-content"><div className="treasure-emblem-frame"><StrawHatEmblem /></div><span className="treasure-kicker">ONE PIECE · CAP SUR GRAND LINE</span><h1><ThemeWordmark theme="theme-treasure">Checkpoint</ThemeWordmark></h1><p>Ton équipage. Tes aventures. Tes trésors.</p>
       <div className="treasure-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div>
       <small>Prêt à prendre le large <strong>{progress}%</strong></small>
     </main>

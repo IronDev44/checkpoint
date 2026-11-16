@@ -1,3 +1,5 @@
+import ThemeWordmark from './components/ThemeWordmark';
+import {getThemeTypography} from './data/themeTypography';
 import CatalogImage from './components/CatalogImage';
 import DataSourceCredits from './components/DataSourceCredits';
 import ProfileSearch from './components/ProfileSearch';
@@ -2626,7 +2628,7 @@ const APP_TAB_DESCRIPTIONS = {
 
 export function AppHeaderBrand({theme}) {
   return <div className="app-brand">
-    <h1 className="title" data-title={theme === CYBER2077_THEME ? "Checkpoint 2077" : "Checkpoint"}>{theme === CYBER2077_THEME ? <Cyber2077Wordmark/> : <><CheckpointMark className="checkpoint-header-mark" variant={theme === CHECKPOINT_ULTIMATE_THEME ? "diamond" : theme === CHECKPOINT_PREMIUM_THEME ? "platinum" : "gold"}/><span className="checkpoint-wordmark">Checkpoint</span></>}</h1>
+    <h1 className={`title${getThemeTypography(theme) ? " has-theme-wordmark" : ""}`} data-title={theme === CYBER2077_THEME ? "Checkpoint 2077" : "Checkpoint"}>{theme === CYBER2077_THEME ? <Cyber2077Wordmark/> : getThemeTypography(theme) ? <ThemeWordmark theme={theme}/> : <><CheckpointMark className="checkpoint-header-mark" variant={theme === CHECKPOINT_ULTIMATE_THEME ? "diamond" : theme === CHECKPOINT_PREMIUM_THEME ? "platinum" : "gold"}/><span className="checkpoint-wordmark">Checkpoint</span></>}</h1>
   </div>;
 }
 

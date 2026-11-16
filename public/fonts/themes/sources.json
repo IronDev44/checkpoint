@@ -1,0 +1,361 @@
+{
+  "downloadedOn": "2026-11-16",
+  "fonts": [
+    {
+      "family": "cinzeldecorative",
+      "file": "CinzelDecorative-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/cinzeldecorative/CinzelDecorative-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/cinzeldecorative/OFL.txt",
+      "sha256": "5b862be329103ad287a10f0a53e27a40e8cc519999253f1a0223e2dc330b10b8",
+      "bytes": 60408,
+      "localFile": "src/assets/fonts/themes/CinzelDecorative-Regular.ttf"
+    },
+    {
+      "family": "bungee",
+      "file": "Bungee-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/bungee/Bungee-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/bungee/OFL.txt",
+      "sha256": "c4f5361ce120af3e6b9156d0bf379fa19cda2ea0cd18ac01fd99596c6bf66e3f",
+      "bytes": 118996,
+      "localFile": "src/assets/fonts/themes/Bungee-Regular.ttf"
+    },
+    {
+      "family": "pressstart2p",
+      "file": "PressStart2P-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/pressstart2p/PressStart2P-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/pressstart2p/OFL.txt",
+      "sha256": "034c77f1f05ec89421e4a63f0e3a4ca1ecf852cc6d2bf611f126f275728e017d",
+      "bytes": 118204,
+      "localFile": "src/assets/fonts/themes/PressStart2P-Regular.ttf"
+    },
+    {
+      "family": "rajdhani",
+      "file": "Rajdhani-Bold.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/rajdhani/Rajdhani-Bold.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/rajdhani/OFL.txt",
+      "sha256": "691470dd3286a14e9677940d0bf75796179841ba5215cbda1a2c8910a3226afd",
+      "bytes": 400680,
+      "localFile": "src/assets/fonts/themes/Rajdhani-Bold.ttf"
+    },
+    {
+      "family": "sharetechmono",
+      "file": "ShareTechMono-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/sharetechmono/ShareTechMono-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/sharetechmono/OFL.txt",
+      "sha256": "9ceab1f87414829af259c0f537573ae03ef7dd3147c0b27a36a1a0beb6732677",
+      "bytes": 43272,
+      "localFile": "src/assets/fonts/themes/ShareTechMono-Regular.ttf"
+    },
+    {
+      "family": "caveatbrush",
+      "file": "CaveatBrush-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/caveatbrush/CaveatBrush-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/caveatbrush/OFL.txt",
+      "sha256": "e565bd7bffd895ca64f8d1cb77c816b9b38d9c010246386a07c9648592f6f282",
+      "bytes": 295568,
+      "localFile": "src/assets/fonts/themes/CaveatBrush-Regular.ttf"
+    },
+    {
+      "family": "gfsdidot",
+      "file": "GFSDidot-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/gfsdidot/GFSDidot-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/gfsdidot/OFL.txt",
+      "sha256": "4fc784ab824e8866eeef8ad55976b93e7e170fb1b8237fd4f8781b5b4dd297f9",
+      "bytes": 191168,
+      "localFile": "src/assets/fonts/themes/GFSDidot-Regular.ttf"
+    },
+    {
+      "family": "pirataone",
+      "file": "PirataOne-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/pirataone/PirataOne-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/pirataone/OFL.txt",
+      "sha256": "5347a2e155589ecf667d4b766613c8ee003edde9f83717fd24c09599a4b1ecc0",
+      "bytes": 56316,
+      "localFile": "src/assets/fonts/themes/PirataOne-Regular.ttf"
+    },
+    {
+      "family": "cinzel",
+      "file": "Cinzel[wght].ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/cinzel/Cinzel%5Bwght%5D.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/cinzel/OFL.txt",
+      "sha256": "f4d83d34d1f6c741193e4acf4b3dff9531e5a67b6aa65228d00a7db72a4e0f34",
+      "bytes": 125468,
+      "localFile": "src/assets/fonts/themes/Cinzel[wght].ttf"
+    },
+    {
+      "family": "limelight",
+      "file": "Limelight-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/limelight/Limelight-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/limelight/OFL.txt",
+      "sha256": "f5bf8a9159adfc5b9c756c85d812a4fd1299b8916fefdf39ad4b24ade6d8d0cf",
+      "bytes": 132292,
+      "localFile": "src/assets/fonts/themes/Limelight-Regular.ttf"
+    },
+    {
+      "family": "caesardressing",
+      "file": "CaesarDressing-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/caesardressing/CaesarDressing-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/caesardressing/OFL.txt",
+      "sha256": "009dea24a4d4a3a7e02d683087babb1738acc0b949cce38c485fab325c9e9295",
+      "bytes": 89628,
+      "localFile": "src/assets/fonts/themes/CaesarDressing-Regular.ttf"
+    },
+    {
+      "family": "cormorantsc",
+      "file": "CormorantSC-SemiBold.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/cormorantsc/CormorantSC-SemiBold.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/cormorantsc/OFL.txt",
+      "sha256": "648cd1c932871e4e8e1d147b593315409e8ea82282f88e9397e2cceae83d065b",
+      "bytes": 762872,
+      "localFile": "src/assets/fonts/themes/CormorantSC-SemiBold.ttf"
+    },
+    {
+      "family": "forum",
+      "file": "Forum-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/forum/Forum-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/forum/OFL.txt",
+      "sha256": "5c9fbe9c4ce76d0269f5088d921d57e58082fd9c28433eacb6de95baf938adf8",
+      "bytes": 303316,
+      "localFile": "src/assets/fonts/themes/Forum-Regular.ttf"
+    },
+    {
+      "family": "skranji",
+      "file": "Skranji-Bold.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/skranji/Skranji-Bold.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/skranji/OFL.txt",
+      "sha256": "cfe2e3847d4c4d63efb207533539933b1acaaa7ea71e8df86758c01b7de6e9ab",
+      "bytes": 207292,
+      "localFile": "src/assets/fonts/themes/Skranji-Bold.ttf"
+    },
+    {
+      "family": "eaglelake",
+      "file": "EagleLake-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/eaglelake/EagleLake-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/eaglelake/OFL.txt",
+      "sha256": "53a4e929c9ea3584f2432157fd549c7604e6be7e6c4b39873f34fae7f6823928",
+      "bytes": 78000,
+      "localFile": "src/assets/fonts/themes/EagleLake-Regular.ttf"
+    },
+    {
+      "family": "almendra",
+      "file": "Almendra-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/almendra/Almendra-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/almendra/OFL.txt",
+      "sha256": "b127a6121209353b53da9ce73bf9d350f74190d8384c28ede179e4fb9440f946",
+      "bytes": 68684,
+      "localFile": "src/assets/fonts/themes/Almendra-Regular.ttf"
+    },
+    {
+      "family": "anton",
+      "file": "Anton-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/anton/Anton-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/anton/OFL.txt",
+      "sha256": "a4ba3a92350ebb031da0cb47630ac49eb265082ca1bc0450442f4a83ab947cab",
+      "bytes": 170812,
+      "localFile": "src/assets/fonts/themes/Anton-Regular.ttf"
+    },
+    {
+      "family": "rowdies",
+      "file": "Rowdies-Bold.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/rowdies/Rowdies-Bold.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/rowdies/OFL.txt",
+      "sha256": "e56ac3fe30e56243483083a6ba271387e332f77920e850ce7dc1baead4fbede2",
+      "bytes": 76280,
+      "localFile": "src/assets/fonts/themes/Rowdies-Bold.ttf"
+    },
+    {
+      "family": "racingsansone",
+      "file": "RacingSansOne-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/racingsansone/RacingSansOne-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/racingsansone/OFL.txt",
+      "sha256": "8b5cada83e3e4692f624f1b583a069b34e457e07a4210ceddbb1133b3383673e",
+      "bytes": 145796,
+      "localFile": "src/assets/fonts/themes/RacingSansOne-Regular.ttf"
+    },
+    {
+      "family": "fugazone",
+      "file": "FugazOne-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/fugazone/FugazOne-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/fugazone/OFL.txt",
+      "sha256": "14fd5becce8b0ae987e44b3f9fa9e3e6c87463e9585ac15db6c8271462068a62",
+      "bytes": 27868,
+      "localFile": "src/assets/fonts/themes/FugazOne-Regular.ttf"
+    },
+    {
+      "family": "lilitaone",
+      "file": "LilitaOne-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/lilitaone/LilitaOne-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/lilitaone/OFL.txt",
+      "sha256": "f5b641c45c69d772ee4eda687bc9fda411d5cad6b0b45371491da4580cbc8d59",
+      "bytes": 28092,
+      "localFile": "src/assets/fonts/themes/LilitaOne-Regular.ttf"
+    },
+    {
+      "family": "rye",
+      "file": "Rye-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/rye/Rye-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/rye/OFL.txt",
+      "sha256": "b7edee5e615ae1b6b07e9d030c1309152bf3672a0e8a2a46293e273730f5adba",
+      "bytes": 183244,
+      "localFile": "src/assets/fonts/themes/Rye-Regular.ttf"
+    },
+    {
+      "family": "rubikwetpaint",
+      "file": "RubikWetPaint-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/rubikwetpaint/RubikWetPaint-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/rubikwetpaint/OFL.txt",
+      "sha256": "3f35d1c77219c5219826b23c2f0c72dd0eed46425a0d4fff21b8827cdce61693",
+      "bytes": 442628,
+      "localFile": "src/assets/fonts/themes/RubikWetPaint-Regular.ttf"
+    },
+    {
+      "family": "bangers",
+      "file": "Bangers-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/bangers/Bangers-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/bangers/OFL.txt",
+      "sha256": "4160a7311de9342674cce9160cde9fcbb30f48190397d86ff1b70b455af65824",
+      "bytes": 93148,
+      "localFile": "src/assets/fonts/themes/Bangers-Regular.ttf"
+    },
+    {
+      "family": "bowlbyonesc",
+      "file": "BowlbyOneSC-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/bowlbyonesc/BowlbyOneSC-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/bowlbyonesc/OFL.txt",
+      "sha256": "dc9f2325fb6bab327c26619a752b274b8f0f4022756d896450911e885609f071",
+      "bytes": 55200,
+      "localFile": "src/assets/fonts/themes/BowlbyOneSC-Regular.ttf"
+    },
+    {
+      "family": "russoone",
+      "file": "RussoOne-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/russoone/RussoOne-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/russoone/OFL.txt",
+      "sha256": "bc0abcc660bd8b7ad3000ecb2898a27c58a29a50f7ec81652fa12e75148d09df",
+      "bytes": 39124,
+      "localFile": "src/assets/fonts/themes/RussoOne-Regular.ttf"
+    },
+    {
+      "family": "monoton",
+      "file": "Monoton-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/monoton/Monoton-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/monoton/OFL.txt",
+      "sha256": "951c4cea65ffede784a7c9672feec5d329a7e1e12216c42d53ecf36c90d04dea",
+      "bytes": 51604,
+      "localFile": "src/assets/fonts/themes/Monoton-Regular.ttf"
+    },
+    {
+      "family": "silkscreen",
+      "file": "Silkscreen-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/silkscreen/Silkscreen-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/silkscreen/OFL.txt",
+      "sha256": "c845473330b94c2079ce9af01c51ac8ba2d99c24f4d14c039843bbb8e642ebd8",
+      "bytes": 32220,
+      "localFile": "src/assets/fonts/themes/Silkscreen-Regular.ttf"
+    },
+    {
+      "family": "audiowide",
+      "file": "Audiowide-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/audiowide/Audiowide-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/audiowide/OFL.txt",
+      "sha256": "c7c0f2b0f6fad8c623e31772ce79f94a4edb9321ffce9fce978ea892d20ae730",
+      "bytes": 69916,
+      "localFile": "src/assets/fonts/themes/Audiowide-Regular.ttf"
+    },
+    {
+      "family": "oswald",
+      "file": "Oswald[wght].ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/oswald/Oswald%5Bwght%5D.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/oswald/OFL.txt",
+      "sha256": "5b38c246e255a12f5712d640d56bcced0472466fc68983d2d0410ec0457c2817",
+      "bytes": 172088,
+      "localFile": "src/assets/fonts/themes/Oswald[wght].ttf"
+    },
+    {
+      "family": "blackopsone",
+      "file": "BlackOpsOne-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/blackopsone/BlackOpsOne-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/blackopsone/OFL.txt",
+      "sha256": "282a825b5f294377387e3969f765408157dbea8da0f5d0aae68c6bc704b145b3",
+      "bytes": 166532,
+      "localFile": "src/assets/fonts/themes/BlackOpsOne-Regular.ttf"
+    },
+    {
+      "family": "michroma",
+      "file": "Michroma-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/michroma/Michroma-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/michroma/OFL.txt",
+      "sha256": "b62301163788bc5b7f8fcac0b74b184e34e1827e577b499ecb724da065098f87",
+      "bytes": 64344,
+      "localFile": "src/assets/fonts/themes/Michroma-Regular.ttf"
+    },
+    {
+      "family": "bebasneue",
+      "file": "BebasNeue-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/bebasneue/BebasNeue-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/bebasneue/OFL.txt",
+      "sha256": "08e4623805102d819f58601e46e345648846075e363b2ceb23313c2d1c83ec73",
+      "bytes": 61400,
+      "localFile": "src/assets/fonts/themes/BebasNeue-Regular.ttf"
+    },
+    {
+      "family": "exo2",
+      "file": "Exo2[wght].ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/exo2/Exo2%5Bwght%5D.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/exo2/OFL.txt",
+      "sha256": "205a448676a2586f9c57c25f3d5c58ca8db7e6cf5edf7506783a010c6fe2bfb5",
+      "bytes": 303940,
+      "localFile": "src/assets/fonts/themes/Exo2[wght].ttf"
+    },
+    {
+      "family": "teko",
+      "file": "Teko[wght].ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/teko/Teko%5Bwght%5D.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/teko/OFL.txt",
+      "sha256": "d1321889f262bbbff632e7976349853399cd097b6f382d4b19790c915c13c1ae",
+      "bytes": 292108,
+      "localFile": "src/assets/fonts/themes/Teko[wght].ttf"
+    },
+    {
+      "family": "sedgwickavedisplay",
+      "file": "SedgwickAveDisplay-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/sedgwickavedisplay/SedgwickAveDisplay-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/sedgwickavedisplay/OFL.txt",
+      "sha256": "3b9c295a146bafb93c8a12c1dde38a2fe47512777daf1458825e291752469a38",
+      "bytes": 140148,
+      "localFile": "src/assets/fonts/themes/SedgwickAveDisplay-Regular.ttf"
+    },
+    {
+      "family": "monofett",
+      "file": "Monofett-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/monofett/Monofett-Regular.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/monofett/OFL.txt",
+      "sha256": "1483f18841a24238172d6f3462a3ea790b7a3e6ca8bb55d404dede93669238d5",
+      "bytes": 72328,
+      "localFile": "src/assets/fonts/themes/Monofett-Regular.ttf"
+    },
+    {
+      "family": "oxanium",
+      "file": "Oxanium[wght].ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/main/ofl/oxanium/Oxanium%5Bwght%5D.ttf",
+      "license": "https://raw.githubusercontent.com/google/fonts/main/ofl/oxanium/OFL.txt",
+      "sha256": "2ce01d946e1e1ffc8d7eecfffbda8623bedd63eaf811a20488c4b69af45babb0",
+      "bytes": 43536,
+      "localFile": "src/assets/fonts/themes/Oxanium[wght].ttf"
+    },
+    {
+      "family": "Harry P",
+      "author": "Phoenix Phonts & GeM / GemFonts (Graham Meade)",
+      "file": "HARRYP__.TTF",
+      "source": "https://dl.dafont.com/dl/?f=harry_p",
+      "sourcePage": "https://www.dafont.com/harry-p.font",
+      "license": "https://www.dafont.com/harry-p.font",
+      "licenseLabel": "100% Free (author listing on DaFont)",
+      "readme": "public/fonts/themes/harry-p-readme.txt",
+      "licenseNote": "The archive includes a design/readme note, not an OFL license. Preserve the original readme and author attribution; do not describe this font as OFL.",
+      "sha256": "739fe887a7c270ce3d6506a1417c3140e0948e8bf1b6935078b10035a2815a6f",
+      "bytes": 27432,
+      "localFile": "src/assets/fonts/themes/HARRYP__.TTF"
+    }
+  ]
+}

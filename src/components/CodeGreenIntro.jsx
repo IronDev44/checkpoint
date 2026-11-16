@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import "./CodeGreenIntro.css";
 
 const symbols = "012345789アイウエオカキクケコサシスセソタチツテトナニヌネノ<>:=+";
@@ -10,7 +11,7 @@ export default function CodeGreenIntro({ progress }) {
     <main className="codegreen-terminal">
       <div className="codegreen-terminal-status"><span>CP / CONNEXION</span><span className="codegreen-status-dot">● EN LIGNE</span></div>
       <p className="codegreen-command">&gt; ouvrir checkpoint<span className="codegreen-cursor">_</span></p>
-      <h1>CHECKPOINT</h1><p className="codegreen-subtitle">Ta collection prend vie.</p>
+      <h1><ThemeWordmark theme="theme-matrix">CHECKPOINT</ThemeWordmark></h1><p className="codegreen-subtitle">Ta collection prend vie.</p>
       <div className="codegreen-log" aria-hidden="true"><span>[OK] Connexion établie</span><span>{progress>=35?"[OK] Bibliothèque synchronisée":"[..] Lecture de la bibliothèque"}</span><span>{progress>=80?"[OK] Profil prêt":"[..] Préparation du profil"}</span></div>
       <div className="codegreen-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div>
       <small><span>{progress>=100?"ACCÈS OUVERT":"INITIALISATION"}</span><strong>{progress}%</strong></small>

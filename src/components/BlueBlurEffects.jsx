@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import "./BlueBlurEffects.css";
 
 function SpeedLines({ count }) {
@@ -16,7 +17,7 @@ export function BlueBlurIntro({ progress }) {
     <SpeedLines count={14} /><div className="blueblur-boot-track" aria-hidden="true" />
     <main className="blueblur-boot-content"><SpeedEmblem />
       <span className="blueblur-kicker">PRÊT À PASSER LA VITESSE SUPÉRIEURE ?</span>
-      <h1>Checkpoint</h1><p>Ta prochaine aventure démarre ici.</p>
+      <h1><ThemeWordmark theme="theme-blueblur">Checkpoint</ThemeWordmark></h1><p>Ta prochaine aventure démarre ici.</p>
       <div className="blueblur-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: progress + "%" }} /></div>
       <small>Sur la ligne de départ <strong>{progress}%</strong></small>
     </main>

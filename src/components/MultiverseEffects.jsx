@@ -1,3 +1,4 @@
+import ThemeWordmark from './ThemeWordmark';
 import IntroVignette from "./IntroVignettes";
 import "./MultiverseEffects.css";
 function Portal({ count }) {
@@ -5,7 +6,7 @@ function Portal({ count }) {
 }
 export function MultiverseIntro({ progress }) {
   return <div className="hero-boot"><div className="hero-cosmic-clouds" aria-hidden="true" /><main className="hero-boot-content">
-    <IntroVignette kind="multiverse"/><span className="hero-kicker">TES UNIVERS PRENNENT VIE</span><h1>Checkpoint</h1><p>Chaque aventure ouvre une nouvelle réalité.</p>
+    <IntroVignette kind="multiverse"/><span className="hero-kicker">TES UNIVERS PRENNENT VIE</span><h1><ThemeWordmark theme="theme-multiverse">Checkpoint</ThemeWordmark></h1><p>Chaque aventure ouvre une nouvelle réalité.</p>
     <div className="hero-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div>
     <small>Ouverture du multivers <strong>{progress}%</strong></small>
   </main></div>;
