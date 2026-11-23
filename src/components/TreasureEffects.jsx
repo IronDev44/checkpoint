@@ -1,7 +1,7 @@
-import ThemeWordmark from './ThemeWordmark';
+import { useLanguage } from "../i18n/language";import { LocalizedValue, LocalizedMessage, LocalizedElement } from "../i18n/Localized";import ThemeWordmark from './ThemeWordmark';
 import "./TreasureEffects.css";
 
-function StrawHatEmblem() {
+function StrawHatEmblem() {useLanguage();
   return <svg className="treasure-crew-emblem" viewBox="0 0 220 220" fill="none" aria-hidden="true">
     <g stroke="#18263c" strokeWidth="5" strokeLinejoin="round">
       <path d="M36 141L183 200M37 200L184 141" stroke="#fff5de" strokeWidth="15" strokeLinecap="round" />
@@ -17,10 +17,10 @@ function StrawHatEmblem() {
     </g>
   </svg>;
 }
-function Waves() {
-  return <div className="treasure-ocean" aria-hidden="true">{[0,1,2].map(i=><svg key={i} viewBox="0 0 1200 220" preserveAspectRatio="none"><path d="M0 70Q150 0 300 70T600 70T900 70T1200 70V220H0Z" /></svg>)}</div>;
+function Waves() {useLanguage();
+  return <div className="treasure-ocean" aria-hidden="true">{[0, 1, 2].map((i) => <svg key={i} viewBox="0 0 1200 220" preserveAspectRatio="none"><path d="M0 70Q150 0 300 70T600 70T900 70T1200 70V220H0Z" /></svg>)}</div>;
 }
-function Ship() {
+function Ship() {useLanguage();
   return <svg className="treasure-adventure-ship" viewBox="0 0 360 260" fill="none" aria-hidden="true">
     <path d="M65 183H300L267 223H108Z" fill="#9d4d27" stroke="#402519" strokeWidth="5" />
     <path d="M85 184H284M111 207H265" stroke="#f4c36c" strokeWidth="5" />
@@ -31,17 +31,17 @@ function Ship() {
     <circle cx="229" cy="105" r="15" fill="#f5c663" /><path d="M208 105H250" stroke="#ea5148" strokeWidth="5" />
   </svg>;
 }
-export function TreasureIntro({ progress }) {
+export function TreasureIntro({ progress }) {useLanguage();
   return <div className="treasure-boot"><div className="treasure-sun" aria-hidden="true" /><div className="treasure-cloud cloud-one" aria-hidden="true" /><div className="treasure-cloud cloud-two" aria-hidden="true" /><Ship /><Waves />
-    <main className="treasure-boot-content"><div className="treasure-emblem-frame"><StrawHatEmblem /></div><span className="treasure-kicker">ONE PIECE · CAP SUR GRAND LINE</span><h1><ThemeWordmark theme="theme-treasure">Checkpoint</ThemeWordmark></h1><p>Ton équipage. Tes aventures. Tes trésors.</p>
-      <div className="treasure-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{width:progress+"%"}} /></div>
-      <small>Prêt à prendre le large <strong>{progress}%</strong></small>
+    <main className="treasure-boot-content"><div className="treasure-emblem-frame"><StrawHatEmblem /></div><span className="treasure-kicker"><LocalizedMessage source={"ONE PIECE · CAP SUR GRAND LINE"} values={[]} /></span><h1><ThemeWordmark theme="theme-treasure">Checkpoint</ThemeWordmark></h1><p><LocalizedMessage source={"Ton équipage. Tes aventures. Tes trésors."} values={[]} /></p>
+      <LocalizedElement __as={"div"} className="treasure-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: progress + "%" }} /></LocalizedElement>
+      <small><LocalizedMessage source={"Prêt à prendre le large "} values={[]} /><strong><LocalizedValue value={progress} />%</strong></small>
     </main>
   </div>;
 }
-export function TreasureTransition({ effects, direction="right" }) {
+export function TreasureTransition({ effects, direction = "right" }) {useLanguage();
   return <div className={`treasure-tab-transition effects-${effects} direction-${direction}`} aria-hidden="true"><div className="treasure-transition-sea"><Waves /></div>
-    <div className="treasure-pirate-flag"><div className="treasure-flag-seam" /><StrawHatEmblem /><span>CAP SUR L’AVENTURE</span></div>
-    <div className="treasure-spray">{Array.from({length:effects==="calm"?0:effects==="boost"?42:22},(_,i)=><i key={i} style={{"--spray-x":(i*61.8%100)+"%","--spray-y":(15+i%7*10)+"%","--spray-turn":(i%2?1:-1)*20+"deg"}} />)}</div>
+    <div className="treasure-pirate-flag"><div className="treasure-flag-seam" /><StrawHatEmblem /><span><LocalizedMessage source={"CAP SUR L’AVENTURE"} values={[]} /></span></div>
+    <div className="treasure-spray">{Array.from({ length: effects === "calm" ? 0 : effects === "boost" ? 42 : 22 }, (_, i) => <i key={i} style={{ "--spray-x": i * 61.8 % 100 + "%", "--spray-y": 15 + i % 7 * 10 + "%", "--spray-turn": (i % 2 ? 1 : -1) * 20 + "deg" }} />)}</div>
   </div>;
 }

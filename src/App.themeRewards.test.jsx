@@ -1,3 +1,6 @@
+// Full-app interaction paths include remote preference debounce and large accessible trees.
+// Keep their assertions intact while allowing the measured integration-test duration.
+jest.setTimeout(20000);
 import {FEATURE_TUTORIALS} from './data/releaseNotes';
 import {TAB_TUTORIALS} from './data/tabTutorials';
 import { render, waitFor, screen, fireEvent, within } from "@testing-library/react";

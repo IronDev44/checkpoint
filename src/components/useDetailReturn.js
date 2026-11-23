@@ -8,10 +8,11 @@ export default function useDetailReturn(open) {
     if(frame.current!==null)window.cancelAnimationFrame(frame.current);
     const top = window.scrollY, left = window.scrollX;
     const trigger = document.activeElement;
-    const activeTab = document.querySelector('.bottom-tabs .tab-btn.active')?.textContent;
+    const tabKey=()=>{const tab=document.querySelector('.bottom-tabs .tab-btn.active');return tab?.dataset.tab||tab?.textContent;};
+    const activeTab = tabKey();
     return () => {
       frame.current=window.requestAnimationFrame(() => {
-        if(document.querySelector('.bottom-tabs .tab-btn.active')?.textContent!==activeTab)return;
+        if(tabKey()!==activeTab)return;
         if (trigger?.isConnected) trigger.focus?.({preventScroll:true});
         window.scrollTo({top, left, behavior:'instant'});
       });

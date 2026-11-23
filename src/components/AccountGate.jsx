@@ -1,4 +1,4 @@
-import { cloneElement, useCallback, useEffect, useState } from "react";
+import { useLanguage } from "../i18n/language";import { LocalizedValue, LocalizedMessage } from "../i18n/Localized";import { cloneElement, useCallback, useEffect, useState } from "react";
 import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile, signOut, sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 import { auth } from "../firebase";
 import { accountsEnabled, accountStorage } from "../services/accountData";
@@ -7,8 +7,8 @@ import WelcomeTour from "./WelcomeTour";
 import StartupIntro from "./StartupIntro";
 import { readStartupAppearance } from "../services/startupAppearance";
 import "./AccountWelcome.css";
-import {startUsageTracking} from '../services/appUsage';
-import LegalOptions,{LegalLinks} from './LegalOptions';
+import { startUsageTracking } from '../services/appUsage';
+import LegalOptions, { LegalLinks } from './LegalOptions';
 
 const messages = {
   "auth/invalid-credential": "L’adresse ou le mot de passe ne correspond pas.",
@@ -17,17 +17,17 @@ const messages = {
   "auth/invalid-email": "Vérifie ton adresse e-mail.",
   "auth/operation-not-allowed": "La connexion doit encore être activée pour cette application.",
   "auth/unauthorized-domain": "La connexion Google doit encore être autorisée sur cette adresse.",
-  "auth/too-many-requests": "Trop de tentatives. Réessaie dans quelques minutes.",
+  "auth/too-many-requests": "Trop de tentatives. Réessaie dans quelques minutes."
 };
-export default function AccountGate({ children }) {
+export default function AccountGate({ children }) {useLanguage();
   const [user, setUser] = useState(undefined);
-  useEffect(()=>{if(!accountsEnabled||!user?.uid)return;let stop=startUsageTracking();const refresh=()=>{stop();stop=startUsageTracking();};window.addEventListener('checkpoint-privacy-changed',refresh);return()=>{stop();window.removeEventListener('checkpoint-privacy-changed',refresh);};},[user?.uid]);
+  useEffect(() => {if (!accountsEnabled || !user?.uid) return;let stop = startUsageTracking();const refresh = () => {stop();stop = startUsageTracking();};window.addEventListener('checkpoint-privacy-changed', refresh);return () => {stop();window.removeEventListener('checkpoint-privacy-changed', refresh);};}, [user?.uid]);
   const [mode, setMode] = useState("create");
   const [pseudo, setPseudo] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(() => {
-    try { return window.localStorage.getItem("checkpoint-remember-login") !== "false"; } catch { return true; }
+    try {return window.localStorage.getItem("checkpoint-remember-login") !== "false";} catch {return true;}
   });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -37,11 +37,11 @@ export default function AccountGate({ children }) {
   const [startupVisible, setStartupVisible] = useState(true);
   const [startupAppearance] = useState(readStartupAppearance);
   const [appProgress, setAppProgress] = useState(0);
-  const reportAppProgress = useCallback(progress => setAppProgress(previous => Math.max(previous, progress)), []);
+  const reportAppProgress = useCallback((progress) => setAppProgress((previous) => Math.max(previous, progress)), []);
   const finishStartup = useCallback(() => setStartupVisible(false), []);
   const startupReady = !creatingProfile && (accountsEnabled ? user === null || Boolean(user && appProgress >= 1) : appProgress >= 1);
   const app = () => cloneElement(children, { key: user?.uid || "local", startupVisible, tutorialsReady: !startupVisible && !creatingProfile && !tour, onStartupProgress: reportAppProgress });
-  const withStartup = content => <><div style={{display:"contents"}} inert={startupVisible || creatingProfile ? true : undefined} aria-hidden={startupVisible || creatingProfile ? "true" : undefined}>{content}</div><StartupIntro visible={startupVisible || creatingProfile} appearance={startupAppearance} authReady={!accountsEnabled || user !== undefined} appProgress={appProgress} ready={startupReady} onComplete={finishStartup}/></>;
+  const withStartup = (content) => <><div style={{ display: "contents" }} inert={startupVisible || creatingProfile ? true : undefined} aria-hidden={startupVisible || creatingProfile ? "true" : undefined}>{content}</div><StartupIntro visible={startupVisible || creatingProfile} appearance={startupAppearance} authReady={!accountsEnabled || user !== undefined} appProgress={appProgress} ready={startupReady} onComplete={finishStartup} /></>;
   useEffect(() => {
     if (user !== undefined) return;
     document.documentElement.dataset.theme = startupAppearance.theme;
@@ -49,30 +49,30 @@ export default function AccountGate({ children }) {
   }, [user, startupAppearance]);
   useEffect(() => {
     if (!accountsEnabled) return;
-    return onAuthStateChanged(auth, current => {
+    return onAuthStateChanged(auth, (current) => {
       if (current) {
         try {
           if (current.uid === ownerUid && accountStorage.getItem("legacy-imported") !== "true") {
             // Recover this owner's existing device preferences and locally earned progress once.
-            const keys = Object.keys(window.localStorage).filter(key => key.startsWith("checkpoint-") && !key.startsWith("checkpoint-account:"));
-            keys.forEach(key => accountStorage.setItem(key, window.localStorage.getItem(key)));
+            const keys = Object.keys(window.localStorage).filter((key) => key.startsWith("checkpoint-") && !key.startsWith("checkpoint-account:"));
+            keys.forEach((key) => accountStorage.setItem(key, window.localStorage.getItem(key)));
             accountStorage.setItem("legacy-imported", "true");
           }
           setTour(accountStorage.getItem("welcome-complete") !== "true");
-        } catch { setTour(true); }
+        } catch {setTour(true);}
       }
       setUser(current);
     });
   }, []);
-  useEffect(() => { const replay = () => setTour(true); window.addEventListener("checkpoint-replay-tour", replay); return () => window.removeEventListener("checkpoint-replay-tour", replay); }, []);
+  useEffect(() => {const replay = () => setTour(true);window.addEventListener("checkpoint-replay-tour", replay);return () => window.removeEventListener("checkpoint-replay-tour", replay);}, []);
   async function run(action) {
-    setBusy(true); setError(""); setNotice("");
-    try { await action(); } catch (e) { setError(messages[e.code] || "La connexion n’a pas abouti. Réessaie dans un instant."); } finally { setBusy(false); }
+    setBusy(true);setError("");setNotice("");
+    try {await action();} catch (e) {setError(messages[e.code] || "La connexion n’a pas abouti. Réessaie dans un instant.");} finally {setBusy(false);}
   }
-  function finishTour() { try { accountStorage.setItem("welcome-complete", "true"); } catch {} setTour(false); }
+  function finishTour() {try {accountStorage.setItem("welcome-complete", "true");} catch {}setTour(false);}
   function changeRemember(value) {
     setRemember(value);
-    try { window.localStorage.setItem("checkpoint-remember-login", String(value)); } catch {}
+    try {window.localStorage.setItem("checkpoint-remember-login", String(value));} catch {}
   }
   async function preparePersistence() {
     await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
@@ -85,34 +85,34 @@ export default function AccountGate({ children }) {
     }
     await preparePersistence();
     if (mode !== "create") return signInWithEmailAndPassword(auth, email, password);
-    if (!pseudo.trim()) { setError("Choisis un pseudo pour ton profil."); return; }
+    if (!pseudo.trim()) {setError("Choisis un pseudo pour ton profil.");return;}
     setCreatingProfile(true);
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(result.user, { displayName: pseudo.trim() });
-    } finally { setCreatingProfile(false); }
+    } finally {setCreatingProfile(false);}
   }
   if (!accountsEnabled) return withStartup(<>{app()}{tour && !startupVisible && <WelcomeTour onClose={finishTour} />}</>);
   if (user === undefined || creatingProfile) return withStartup(null);
   if (!user) return withStartup(<div className="account-welcome-overlay"><section className="account-welcome">
-    <p className="welcome-counter">CHECKPOINT</p><h1>{mode === "reset" ? "Retrouver ton compte" : mode === "create" ? "Ton aventure commence ici" : "Content de te retrouver"}</h1><p>{mode === "reset" ? "Indique l’adresse e-mail de ton compte pour recevoir un lien et choisir un nouveau mot de passe." : "Un espace à toi pour tes jeux, ton matériel et tes souvenirs."}</p>
-    <form onSubmit={e => { e.preventDefault(); run(submitAccount); }}>
-      {mode === "create" && <label>Ton pseudo<input required maxLength={40} value={pseudo} onChange={e => setPseudo(e.target.value)} autoComplete="nickname" /></label>}
-      <label>Adresse e-mail<input type="email" required value={email} onChange={e => setEmail(e.target.value)} autoComplete="email" /></label>
-      {mode !== "reset" && <><label>Mot de passe<input type="password" minLength={6} required value={password} onChange={e => setPassword(e.target.value)} autoComplete={mode === "create" ? "new-password" : "current-password"} /></label>
-      <label className="welcome-remember"><input type="checkbox" checked={remember} disabled={busy} onChange={e => changeRemember(e.target.checked)} /><span>Rester connecté<small>Retrouve ton espace à la prochaine ouverture.</small></span></label></>}
-      <p className="welcome-legal-note">Tes données servent à créer et synchroniser ton espace. La mesure individuelle d’activité est actuellement suspendue. Consulte les informations ci-dessous avant de créer ton compte.</p>
-      <LegalLinks/>
-      <button className="checkpoint-primary-action" disabled={busy}>{busy ? "Un instant…" : mode === "reset" ? "Envoyer le lien" : mode === "create" ? "Créer mon compte" : "Se connecter"}</button>
+    <p className="welcome-counter">CHECKPOINT</p><h1><LocalizedValue value={mode === "reset" ? "Retrouver ton compte" : mode === "create" ? "Ton aventure commence ici" : "Content de te retrouver"} /></h1><p><LocalizedValue value={mode === "reset" ? "Indique l’adresse e-mail de ton compte pour recevoir un lien et choisir un nouveau mot de passe." : "Un espace à toi pour tes jeux, ton matériel et tes souvenirs."} /></p>
+    <form onSubmit={(e) => {e.preventDefault();run(submitAccount);}}>{
+        mode === "create" && <label><LocalizedMessage source={"Ton pseudo"} values={[]} /><input required maxLength={40} value={pseudo} onChange={(e) => setPseudo(e.target.value)} autoComplete="nickname" /></label>}
+        <label><LocalizedMessage source={"Adresse e-mail"} values={[]} /><input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" /></label>{
+        mode !== "reset" && <><label><LocalizedMessage source={"Mot de passe"} values={[]} /><input type="password" minLength={6} required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete={mode === "create" ? "new-password" : "current-password"} /></label>
+      <label className="welcome-remember"><input type="checkbox" checked={remember} disabled={busy} onChange={(e) => changeRemember(e.target.checked)} /><span><LocalizedMessage source={"Rester connecté"} values={[]} /><small><LocalizedMessage source={"Retrouve ton espace à la prochaine ouverture."} values={[]} /></small></span></label></>}
+        <p className="welcome-legal-note"><LocalizedMessage source={"Tes données servent à créer et synchroniser ton espace. La mesure individuelle d’activité est actuellement suspendue. Consulte les informations ci-dessous avant de créer ton compte."} values={[]} /></p>
+      <LegalLinks />
+      <button className="checkpoint-primary-action" disabled={busy}><LocalizedValue value={busy ? "Un instant…" : mode === "reset" ? "Envoyer le lien" : mode === "create" ? "Créer mon compte" : "Se connecter"} /></button>
     </form>
-    {process.env.REACT_APP_GOOGLE_AUTH_ENABLED === "true" && <div className="welcome-actions"><button disabled={busy} onClick={() => run(async () => { await preparePersistence(); await signInWithPopup(auth, new GoogleAuthProvider()); })}>Continuer avec Google</button></div>}
-    {mode === "login" && <div className="welcome-recovery"><button className="welcome-reset" disabled={busy} onClick={() => { setMode("reset"); setError(""); setNotice(""); }}>Mot de passe oublié</button></div>}
-    {notice && <p className="welcome-notice" role="status">{notice}</p>}
-    <div className="welcome-account-switch">{mode !== "reset" && <p>{mode === "create" ? "Déjà dans l’aventure ?" : "Nouveau sur Checkpoint ?"}</p>}<button disabled={busy} onClick={() => { setMode(mode === "create" || mode === "reset" ? "login" : "create"); setError(""); setNotice(""); }}>{mode === "reset" ? "Retour à la connexion" : mode === "create" ? "J’ai déjà un compte" : "Créer un compte"}</button></div>
-    {error && <p className="welcome-error" role="status">{error}</p>}
-  </section></div>);
+    {process.env.REACT_APP_GOOGLE_AUTH_ENABLED === "true" && <div className="welcome-actions"><button disabled={busy} onClick={() => run(async () => {await preparePersistence();await signInWithPopup(auth, new GoogleAuthProvider());})}><LocalizedMessage source={"Continuer avec Google"} values={[]} /></button></div>}
+    {mode === "login" && <div className="welcome-recovery"><button className="welcome-reset" disabled={busy} onClick={() => {setMode("reset");setError("");setNotice("");}}><LocalizedMessage source={"Mot de passe oublié"} values={[]} /></button></div>}
+    {notice && <p className="welcome-notice" role="status"><LocalizedValue value={notice} /></p>}
+    <div className="welcome-account-switch">{mode !== "reset" && <p><LocalizedValue value={mode === "create" ? "Déjà dans l’aventure ?" : "Nouveau sur Checkpoint ?"} /></p>}<button disabled={busy} onClick={() => {setMode(mode === "create" || mode === "reset" ? "login" : "create");setError("");setNotice("");}}><LocalizedValue value={mode === "reset" ? "Retour à la connexion" : mode === "create" ? "J’ai déjà un compte" : "Créer un compte"} /></button></div>{
+      error && <p className="welcome-error" role="status"><LocalizedValue value={error} /></p>}
+    </section></div>);
   return withStartup(<>{app()}{tour && !startupVisible && <WelcomeTour onClose={finishTour} />}</>);
 }
-export function AccountOptions() {
-  return <><section className="search-panel options-panel account-options"><h2 className="panel-title">Prendre ses repères</h2><p>Retrouve la présentation de Checkpoint quand tu veux.</p><button className="option-pill option-wide-action" onClick={() => window.dispatchEvent(new Event("checkpoint-replay-tour"))}>Revoir la découverte</button>{accountsEnabled && <><p>Connecté : {auth.currentUser?.email}</p><button className="option-pill option-wide-action" onClick={() => signOut(auth)}>Se déconnecter</button></>}</section><LegalOptions/></>;
+export function AccountOptions() {useLanguage();
+  return <><section className="search-panel options-panel account-options"><h2 className="panel-title"><LocalizedMessage source={"Prendre ses repères"} values={[]} /></h2><p><LocalizedMessage source={"Retrouve la présentation de Checkpoint quand tu veux."} values={[]} /></p><button className="option-pill option-wide-action" onClick={() => window.dispatchEvent(new Event("checkpoint-replay-tour"))}><LocalizedMessage source={"Revoir la découverte"} values={[]} /></button>{accountsEnabled && <><p><LocalizedMessage source={"Connecté : {{0}}"} values={[auth.currentUser?.email]} /></p><button className="option-pill option-wide-action" onClick={() => signOut(auth)}><LocalizedMessage source={"Se déconnecter"} values={[]} /></button></>}</section><LegalOptions /></>;
 }

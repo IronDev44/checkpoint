@@ -1,22 +1,22 @@
-import ThemeWordmark from './ThemeWordmark';
+import { useLanguage } from "../i18n/language";import { LocalizedValue, LocalizedMessage, LocalizedElement } from "../i18n/Localized";import ThemeWordmark from './ThemeWordmark';
 import "./BlocksEffects.css";
 
 const pieces = [
-  { color: "#32d6ef", cells: [[0,0],[1,0],[2,0],[3,0]] },
-  { color: "#ffd34a", cells: [[0,0],[1,0],[0,1],[1,1]] },
-  { color: "#b77bff", cells: [[1,0],[0,1],[1,1],[2,1]] },
-  { color: "#5794ff", cells: [[0,0],[0,1],[1,1],[2,1]] },
-  { color: "#ffac4c", cells: [[2,0],[0,1],[1,1],[2,1]] },
-  { color: "#60dc88", cells: [[1,0],[2,0],[0,1],[1,1]] },
-  { color: "#ff667d", cells: [[0,0],[1,0],[1,1],[2,1]] },
-];
-function Piece({ index, className = "", style }) {
+{ color: "#32d6ef", cells: [[0, 0], [1, 0], [2, 0], [3, 0]] },
+{ color: "#ffd34a", cells: [[0, 0], [1, 0], [0, 1], [1, 1]] },
+{ color: "#b77bff", cells: [[1, 0], [0, 1], [1, 1], [2, 1]] },
+{ color: "#5794ff", cells: [[0, 0], [0, 1], [1, 1], [2, 1]] },
+{ color: "#ffac4c", cells: [[2, 0], [0, 1], [1, 1], [2, 1]] },
+{ color: "#60dc88", cells: [[1, 0], [2, 0], [0, 1], [1, 1]] },
+{ color: "#ff667d", cells: [[0, 0], [1, 0], [1, 1], [2, 1]] }];
+
+function Piece({ index, className = "", style }) {useLanguage();
   const piece = pieces[index % pieces.length];
-  return <div className={"blocks-effect-piece " + className} style={{ ...style, "--block-color": piece.color }}>
-    {piece.cells.map(([x,y]) => <i key={x+":"+y} style={{ left: `calc(${x} * var(--cell))`, top: `calc(${y} * var(--cell))` }} />)}
+  return <div className={"blocks-effect-piece " + className} style={{ ...style, "--block-color": piece.color }}>{
+    piece.cells.map(([x, y]) => <i key={x + ":" + y} style={{ left: `calc(${x} * var(--cell))`, top: `calc(${y} * var(--cell))` }} />)}
   </div>;
 }
-export function BlocksIntro({ progress }) {
+export function BlocksIntro({ progress }) {useLanguage();
   return <div className="blocks-boot">
     <main className="blocks-boot-content">
       <div className="blocks-boot-board" aria-hidden="true">
@@ -28,18 +28,18 @@ export function BlocksIntro({ progress }) {
         <div className="blocks-boot-ghost"><Piece index={4} /></div>
         <Piece index={4} className="blocks-boot-piece" style={{ "--piece-x": 7, "--piece-y": 4, "--piece-delay": "1100ms" }} />
       </div>
-      <span className="blocks-boot-kicker">CHAQUE PIÈCE TROUVE SA PLACE</span><h1><ThemeWordmark theme="theme-blocks">Checkpoint</ThemeWordmark></h1><p>Une partie à la fois.</p>
-      <div className="blocks-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: progress + "%" }} /></div>
-      <small>Assemblage en cours <strong>{progress}%</strong></small>
+      <span className="blocks-boot-kicker"><LocalizedMessage source={"CHAQUE PIÈCE TROUVE SA PLACE"} values={[]} /></span><h1><ThemeWordmark theme="theme-blocks">Checkpoint</ThemeWordmark></h1><p><LocalizedMessage source={"Une partie à la fois."} values={[]} /></p>
+      <LocalizedElement __as={"div"} className="blocks-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: progress + "%" }} /></LocalizedElement>
+      <small><LocalizedMessage source={"Assemblage en cours "} values={[]} /><strong><LocalizedValue value={progress} />%</strong></small>
     </main>
   </div>;
 }
-export function BlocksTransition({ effects }) {
+export function BlocksTransition({ effects }) {useLanguage();
   const count = effects === "calm" ? 5 : effects === "boost" ? 21 : 14;
-  return <div className={"blocks-tab-transition effects-"+effects} aria-hidden="true">
-    <div className="blocks-transition-grid" />
-    {Array.from({ length:count }, (_,i) => <Piece key={i} index={i} className="blocks-falling-piece" style={{ "--fall-x": (i * 37 % 90) + "%", "--fall-y": (18 + i * 23 % 58) + "vh", "--piece-delay": i % 7 * 12 + "ms" }} />)}
-    <div className="blocks-complete-line">{Array.from({ length:10 },(_,i)=><i key={i} style={{ "--block-color":pieces[i%7].color }} />)}</div>
+  return <div className={"blocks-tab-transition effects-" + effects} aria-hidden="true">
+    <div className="blocks-transition-grid" />{
+    Array.from({ length: count }, (_, i) => <Piece key={i} index={i} className="blocks-falling-piece" style={{ "--fall-x": i * 37 % 90 + "%", "--fall-y": 18 + i * 23 % 58 + "vh", "--piece-delay": i % 7 * 12 + "ms" }} />)}
+    <div className="blocks-complete-line">{Array.from({ length: 10 }, (_, i) => <i key={i} style={{ "--block-color": pieces[i % 7].color }} />)}</div>
     <div className="blocks-line-flash" />
   </div>;
 }

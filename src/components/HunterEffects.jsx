@@ -1,7 +1,7 @@
-import ThemeWordmark from './ThemeWordmark';
+import { useLanguage } from "../i18n/language";import { LocalizedMessage, LocalizedElement, LocalizedValue } from "../i18n/Localized";import ThemeWordmark from './ThemeWordmark';
 import "./HunterEffects.css";
 
-function Visor({ progress }) {
+function Visor({ progress }) {useLanguage();
   return <svg className="hunter-visor" viewBox="0 0 300 220" fill="none" aria-hidden="true">
     <path d="M61 153V98C61 46 94 19 150 19S239 46 239 98V153L213 189L178 202H122L87 189Z" fill="#ad302a" stroke="#481c21" strokeWidth="5" />
     <path d="M65 92C71 46 103 27 150 27S229 46 235 92L205 71H95Z" fill="#de5140" />
@@ -15,26 +15,26 @@ function Visor({ progress }) {
     <rect x="137" y="137" width={26 * progress / 100} height="3" fill="#e5ffd9" opacity=".8" />
   </svg>;
 }
-function ScanFrame() {
+function ScanFrame() {useLanguage();
   return <div className="hunter-scan-frame" aria-hidden="true"><i /><i /><i /><i /><div className="hunter-scan-cross" /></div>;
 }
-export function HunterIntro({ progress }) {
+export function HunterIntro({ progress }) {useLanguage();
   return <div className="hunter-boot">
     <div className="hunter-boot-grid" aria-hidden="true" /><div className="hunter-boot-scan" aria-hidden="true" />
     <main className="hunter-boot-content"><div className="hunter-boot-target"><ScanFrame /><Visor progress={progress} /></div>
-      <span className="hunter-kicker">INITIALISATION DE LA VISIÈRE</span><h1><ThemeWordmark theme="theme-hunter">Checkpoint</ThemeWordmark></h1><p>Une nouvelle zone à explorer.</p>
-      <div className="hunter-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width:progress+"%" }} /></div>
-      <small>Systèmes en ligne <strong>{progress}%</strong></small>
+      <span className="hunter-kicker"><LocalizedMessage source={"INITIALISATION DE LA VISIÈRE"} values={[]} /></span><h1><ThemeWordmark theme="theme-hunter">Checkpoint</ThemeWordmark></h1><p><LocalizedMessage source={"Une nouvelle zone à explorer."} values={[]} /></p>
+      <LocalizedElement __as={"div"} className="hunter-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: progress + "%" }} /></LocalizedElement>
+      <small><LocalizedMessage source={"Systèmes en ligne "} values={[]} /><strong><LocalizedValue value={progress} />%</strong></small>
     </main>
-    <div className="hunter-boot-readout" aria-hidden="true"><span>SCAN / EXPLORATION</span><span>ÉNERGIE {progress}%</span></div>
+    <div className="hunter-boot-readout" aria-hidden="true"><span><LocalizedMessage source={"SCAN / EXPLORATION"} values={[]} /></span><span><LocalizedMessage source={"ÉNERGIE {{0}}%"} values={[progress]} /></span></div>
   </div>;
 }
-export function HunterTransition({ direction, effects }) {
+export function HunterTransition({ direction, effects }) {useLanguage();
   return <div className={`hunter-tab-transition direction-${direction} effects-${effects}`} aria-hidden="true">
     <div className="hunter-transition-field" /><div className="hunter-transition-scan" />
     <div className="hunter-transition-target"><ScanFrame /><div className="hunter-target-ring" /><div className="hunter-target-ring ring-inner" /></div>
     <div className="hunter-door door-top" /><div className="hunter-door door-bottom" />
     <div className="hunter-door-light" />
-    <div className="hunter-scan-markers">{Array.from({length:effects==="calm"?4:effects==="boost"?24:12},(_,i)=><i key={i} style={{"--marker-x":(8+i*37%84)+"%","--marker-y":(10+i*23%80)+"%","--marker-delay":i%5*12+"ms"}} />)}</div>
+    <div className="hunter-scan-markers">{Array.from({ length: effects === "calm" ? 4 : effects === "boost" ? 24 : 12 }, (_, i) => <i key={i} style={{ "--marker-x": 8 + i * 37 % 84 + "%", "--marker-y": 10 + i * 23 % 80 + "%", "--marker-delay": i % 5 * 12 + "ms" }} />)}</div>
   </div>;
 }

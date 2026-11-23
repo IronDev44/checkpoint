@@ -1,10 +1,10 @@
-import ThemeWordmark from './ThemeWordmark';
+import { useLanguage } from "../i18n/language";import { LocalizedValue, LocalizedMessage, LocalizedElement } from "../i18n/Localized";import ThemeWordmark from './ThemeWordmark';
 import "./BlueBlurEffects.css";
 
-function SpeedLines({ count }) {
-  return <div className="blueblur-speed-lines" aria-hidden="true">{Array.from({ length: count }, (_, i) => <i key={i} style={{ "--speed-y": (i * 37 % 96) + "%", "--speed-delay": (i % 6 * 12) + "ms", "--speed-width": (20 + i % 4 * 12) + "vw" }} />)}</div>;
+function SpeedLines({ count }) {useLanguage();
+  return <div className="blueblur-speed-lines" aria-hidden="true">{Array.from({ length: count }, (_, i) => <i key={i} style={{ "--speed-y": i * 37 % 96 + "%", "--speed-delay": i % 6 * 12 + "ms", "--speed-width": 20 + i % 4 * 12 + "vw" }} />)}</div>;
 }
-function SpeedEmblem() {
+function SpeedEmblem() {useLanguage();
   return <svg className="blueblur-speed-emblem" viewBox="0 0 180 180" fill="none" aria-hidden="true">
     <circle cx="90" cy="90" r="70" stroke="#8e560a" strokeWidth="17" />
     <circle cx="90" cy="90" r="70" stroke="#ffd64a" strokeWidth="11" />
@@ -12,22 +12,22 @@ function SpeedEmblem() {
     <path d="M54 64L107 40L95 65L129 59L111 86L137 83L100 127L103 102L58 124L75 97L44 102L65 79Z" fill="#2781ff" stroke="#a6ddff" strokeWidth="2" />
   </svg>;
 }
-export function BlueBlurIntro({ progress }) {
+export function BlueBlurIntro({ progress }) {useLanguage();
   return <div className="blueblur-boot">
     <SpeedLines count={14} /><div className="blueblur-boot-track" aria-hidden="true" />
     <main className="blueblur-boot-content"><SpeedEmblem />
-      <span className="blueblur-kicker">PRÊT À PASSER LA VITESSE SUPÉRIEURE ?</span>
-      <h1><ThemeWordmark theme="theme-blueblur">Checkpoint</ThemeWordmark></h1><p>Ta prochaine aventure démarre ici.</p>
-      <div className="blueblur-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: progress + "%" }} /></div>
-      <small>Sur la ligne de départ <strong>{progress}%</strong></small>
+      <span className="blueblur-kicker"><LocalizedMessage source={"PRÊT À PASSER LA VITESSE SUPÉRIEURE ?"} values={[]} /></span>
+      <h1><ThemeWordmark theme="theme-blueblur">Checkpoint</ThemeWordmark></h1><p><LocalizedMessage source={"Ta prochaine aventure démarre ici."} values={[]} /></p>
+      <LocalizedElement __as={"div"} className="blueblur-boot-progress" role="progressbar" aria-label="Chargement de Checkpoint" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress}><span style={{ width: progress + "%" }} /></LocalizedElement>
+      <small><LocalizedMessage source={"Sur la ligne de départ "} values={[]} /><strong><LocalizedValue value={progress} />%</strong></small>
     </main>
   </div>;
 }
-export function BlueBlurTransition({ direction, effects }) {
+export function BlueBlurTransition({ direction, effects }) {useLanguage();
   const count = effects === "calm" ? 4 : effects === "boost" ? 36 : 20;
   return <div className={`blueblur-tab-transition direction-${direction} effects-${effects}`} aria-hidden="true">
     <div className="blueblur-speed-wash" /><SpeedLines count={count} />
-    <div className="blueblur-ring-lane">{Array.from({ length: effects === "calm" ? 3 : 7 }, (_, i) => <i key={i} style={{ "--ring-delay": i * 20 + "ms", "--ring-y": (38 + i % 3 * 10) + "%" }} />)}</div>
+    <div className="blueblur-ring-lane">{Array.from({ length: effects === "calm" ? 3 : 7 }, (_, i) => <i key={i} style={{ "--ring-delay": i * 20 + "ms", "--ring-y": 38 + i % 3 * 10 + "%" }} />)}</div>
     <div className="blueblur-runner"><div className="blueblur-runner-tail" /><div className="blueblur-runner-ball" /></div>
   </div>;
 }

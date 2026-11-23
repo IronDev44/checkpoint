@@ -6,9 +6,9 @@ test('collection shortcuts filter the cards and can restore the full library',()
  const games=[{id:'one',name:'Unrated',status:'collection'},{id:'two',name:'Paused',status:'collection',progressStatus:'paused',rating:8},{id:'three',name:'Rated',status:'collection',rating:9}];
  const view=render(<LibrarySection title="Collection" games={games} libraryCardMode="compact" setLibraryCardMode={()=>{}}/>);
  const names=()=>[...view.container.querySelectorAll('.grid-title')].map(el=>el.textContent);
- fireEvent.click(view.getByRole('button',{name:'Sans note 1'}));expect(names()).toEqual(['Unrated']);
- fireEvent.click(view.getByRole('button',{name:'En pause 1'}));expect(names()).toEqual(['Paused']);
- fireEvent.click(view.getByRole('button',{name:'Tous 3'}));expect(names()).toHaveLength(3);
+ fireEvent.click(view.getByText(/Filtrer les jeux/));fireEvent.change(view.getByRole('combobox',{name:'Suivi'}),{target:{value:'unrated'}});expect(names()).toEqual(['Unrated']);
+ fireEvent.change(view.getByRole('combobox',{name:'Suivi'}),{target:{value:'paused'}});expect(names()).toEqual(['Paused']);
+ fireEvent.change(view.getByRole('combobox',{name:'Suivi'}),{target:{value:'all'}});expect(names()).toHaveLength(3);
 });
 test('shelves regroup all games when their available width changes and keep the last row partly filled',()=>{
  const games=Array.from({length:45},(_,i)=>({id:String(i),name:`Game ${i}`,playedPlatforms:['PC']}));

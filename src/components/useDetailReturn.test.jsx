@@ -24,3 +24,10 @@ test('leaving for another tab skips restoring the previous tab scroll',()=>{
  act(()=>{frames.forEach(callback=>callback());frames.clear();});
  expect(window.scrollTo).not.toHaveBeenCalled();
 });
+
+test('changing a translated tab label keeps the same list restoration target',()=>{
+ const view=render(<><div className="bottom-tabs"><button data-tab="library" className="tab-btn active">Bibliothèque</button></div><Detail open/></>);
+ view.rerender(<div className="bottom-tabs"><button data-tab="library" className="tab-btn active">Library</button></div>);
+ act(()=>{frames.forEach(callback=>callback());frames.clear();});
+ expect(window.scrollTo).toHaveBeenCalled();
+});

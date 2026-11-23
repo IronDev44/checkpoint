@@ -1,4 +1,4 @@
-import {ULTIMATE_VAULT_DURATION} from "./UltimateVaultTransition";
+import { useLanguage } from "../i18n/language";import { LocalizedValue } from "../i18n/Localized";import { ULTIMATE_VAULT_DURATION } from "./UltimateVaultTransition";
 import { CYBER2077_THEME, CYBER2077_TRANSITION_DURATION, Cyber2077Transition } from "./Cyber2077Effects";
 import { useEffect, useState } from "react";
 import { createPortal as renderPortal } from "react-dom";
@@ -36,7 +36,7 @@ import { getGameUniverseTheme } from "../data/gameUniverseThemes";
 
 // Each theme has its own motif; motion stays short enough to finish before cleanup.
 export const THEME_TRANSITION_DURATION = 840;
-export const getThemeTransitionDuration=(theme,light=false)=>theme===CYBER2077_THEME?CYBER2077_TRANSITION_DURATION:theme==="theme-matrix"?1320:theme==="theme-checkpointultimate"&&!light?ULTIMATE_VAULT_DURATION:THEME_TRANSITION_DURATION;
+export const getThemeTransitionDuration = (theme, light = false) => theme === CYBER2077_THEME ? CYBER2077_TRANSITION_DURATION : theme === "theme-matrix" ? 1320 : theme === "theme-checkpointultimate" && !light ? ULTIMATE_VAULT_DURATION : THEME_TRANSITION_DURATION;
 
 const identities = {
   "theme-indigo": ["aurora", "#a78bfa", "M2 18 Q7 2 12 12 T22 6 M2 22 Q7 6 12 16 T22 10"],
@@ -64,16 +64,16 @@ const identities = {
   "theme-crimson": ["redline", "#fb7185", "M2 5 L13 12 L2 19 M11 5 L22 12 L11 19"],
   "theme-graphite": ["shutter", "#cbd5e1", "M2 7 H22 M2 12 H16 M2 17 H10"],
   "theme-retro": ["pixels", "#fb923c", "M4 4 H9 V9 H15 V4 H20 V20 H15 V15 H9 V20 H4 Z"],
-  "theme-cyberpunk": ["glitch", "#22d3ee", "M2 8 H10 V3 H22 M2 16 H14 V21 H22 M5 12 H19"],
+  "theme-cyberpunk": ["glitch", "#22d3ee", "M2 8 H10 V3 H22 M2 16 H14 V21 H22 M5 12 H19"]
 };
 
-const tetrisPieces = [[0,1,2,3], [0,1,4,5], [1,4,5,6], [0,4,5,6], [2,4,5,6], [1,2,4,5], [0,1,5,6]];
+const tetrisPieces = [[0, 1, 2, 3], [0, 1, 4, 5], [1, 4, 5, 6], [0, 4, 5, 6], [2, 4, 5, 6], [1, 2, 4, 5], [0, 1, 5, 6]];
 const tetrisColors = ["#22d3ee", "#facc15", "#c084fc", "#60a5fa", "#fb923c", "#4ade80", "#f87171"];
 function renderMotif(theme, path, index) {
   if (theme === "theme-playstation") return <PlayStationSymbol index={index} />;
   if (theme === "theme-cubic") return <b className="dirt-block"><i className="block-crack" /></b>;
-  if (theme === "theme-blocks") return <b className="tetris-piece" style={{ "--piece-color": tetrisColors[index % 7] }}>{Array.from({length: 8}, (_, cell) => <i key={cell} className={tetrisPieces[index % 7].includes(cell) ? "filled" : ""} />)}</b>;
-  if (theme === "theme-matrix") return <b className="matrix-code">{Array.from({length: 16}, (_, row) => <i key={row}>{"01アイウエオカキクケコ789"[(index * 7 + row * 11) % 18]}</i>)}</b>;
+  if (theme === "theme-blocks") return <b className="tetris-piece" style={{ "--piece-color": tetrisColors[index % 7] }}>{Array.from({ length: 8 }, (_, cell) => <i key={cell} className={tetrisPieces[index % 7].includes(cell) ? "filled" : ""} />)}</b>;
+  if (theme === "theme-matrix") return <b className="matrix-code">{Array.from({ length: 16 }, (_, row) => <i key={row}><LocalizedValue value={"01アイウエオカキクケコ789"[(index * 7 + row * 11) % 18]} /></i>)}</b>;
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d={path} /></svg>;
 }
 
@@ -81,14 +81,14 @@ function transitionPortal(content, target, fullMotion, light = false) {
   return renderPortal(<div className={`${fullMotion ? "checkpoint-full-tab-motion" : "checkpoint-tab-motion"}${light ? " checkpoint-tab-light" : ""}`} style={{ display: "contents" }}>{content}</div>, target);
 }
 
-function MatrixScreenTransition({ effects, fullMotion, light }) {
+function MatrixScreenTransition({ effects, fullMotion, light }) {useLanguage();
   const createPortal = (content, target) => transitionPortal(content, target, fullMotion, light);
   const symbols = "012345789アイウエオカキクケコサシスセソタチツテトナニヌネノ<>:=+";
   return createPortal(
     <div className={"matrix-screen-transition effects-" + effects} aria-hidden="true">
-      <div className="matrix-screen-code">
-        {Array.from({length: light ? 24 : 64}, (_, column) => <pre key={column} className="matrix-screen-column" style={{ "--code-speed": (800 + column % 7 * 65) + "ms", "--code-offset": (-column % 9 * 22) + "px", "--code-brightness": .45 + column % 5 * .12 }}>
-          {Array.from({length: 90}, (_, row) => (row + column * 3) % 21 < 4 ? " " : symbols[(column * 17 + row * 13 + row * row) % symbols.length]).join("\n")}
+      <div className="matrix-screen-code">{
+        Array.from({ length: light ? 24 : 64 }, (_, column) => <pre key={column} className="matrix-screen-column" style={{ "--code-speed": 800 + column % 7 * 65 + "ms", "--code-offset": -column % 9 * 22 + "px", "--code-brightness": .45 + column % 5 * .12 }}>
+          {Array.from({ length: 90 }, (_, row) => (row + column * 3) % 21 < 4 ? " " : symbols[(column * 17 + row * 13 + row * row) % symbols.length]).join("\n")}
         </pre>)}
       </div>
       <div className="matrix-screen-grain" />
@@ -98,7 +98,7 @@ function MatrixScreenTransition({ effects, fullMotion, light }) {
 
 function useReducedMotion() {
   const [reduceMotion, setReduceMotion] = useState(() =>
-    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
   );
   useEffect(() => {
     const preference = window.matchMedia?.("(prefers-reduced-motion: reduce)");
@@ -111,18 +111,18 @@ function useReducedMotion() {
   return reduceMotion;
 }
 
-export function TransitionMotionNotice({ fullMotion = false }) {
+export function TransitionMotionNotice({ fullMotion = false }) {useLanguage();
   const reduceMotion = useReducedMotion();
-  return <p className="transition-motion-notice">
-    {fullMotion
-      ? "Les transitions complètes sont activées, même si ton appareil limite les animations."
-      : reduceMotion
-      ? "Ton appareil limite les animations : un repère discret remplace les effets du thème."
-      : "Les animations du thème sont autorisées par ton appareil."}
+  return <p className="transition-motion-notice"><LocalizedValue value={
+    fullMotion ?
+    "Les transitions complètes sont activées, même si ton appareil limite les animations." :
+    reduceMotion ?
+    "Ton appareil limite les animations : un repère discret remplace les effets du thème." :
+    "Les animations du thème sont autorisées par ton appareil."} />
   </p>;
 }
 
-export default function ThemeTransition({ theme, direction, effects, fullMotion = false, light = false }) {
+export default function ThemeTransition({ theme, direction, effects, fullMotion = false, light = false }) {useLanguage();
   const reduceMotion = useReducedMotion();
   const createPortal = (content, target) => transitionPortal(content, target, fullMotion, light);
   // Keep a visible, stationary cue when Android suppresses motion. The
@@ -131,12 +131,12 @@ export default function ThemeTransition({ theme, direction, effects, fullMotion 
     <div className="checkpoint-transition-still" aria-hidden="true" />,
     document.body
   );
-  if (theme === "theme-checkpointultimate") return createPortal(<CheckpointUltimateTransition light={light} direction={direction}/>, document.body);
-  if (theme === CYBER2077_THEME) return createPortal(<Cyber2077Transition light={light} effects={effects} direction={direction}/>, document.body);
-  if (theme === "theme-checkpointpremium") return createPortal(<CheckpointPremiumTransition light={light} direction={direction}/>, document.body);
-  if (theme === "theme-checkpoint") return createPortal(<CheckpointTransition light={light} direction={direction}/>, document.body);
-  if (getGameUniverseTheme(theme)) return createPortal(<GameUniverseTransition theme={theme} direction={direction} light={light} effects={effects}/>, document.body);
-  if (getPopCultureTheme(theme)) return createPortal(<PopCultureTransition theme={theme} direction={direction} light={light} effects={effects}/>, document.body);
+  if (theme === "theme-checkpointultimate") return createPortal(<CheckpointUltimateTransition light={light} direction={direction} />, document.body);
+  if (theme === CYBER2077_THEME) return createPortal(<Cyber2077Transition light={light} effects={effects} direction={direction} />, document.body);
+  if (theme === "theme-checkpointpremium") return createPortal(<CheckpointPremiumTransition light={light} direction={direction} />, document.body);
+  if (theme === "theme-checkpoint") return createPortal(<CheckpointTransition light={light} direction={direction} />, document.body);
+  if (getGameUniverseTheme(theme)) return createPortal(<GameUniverseTransition theme={theme} direction={direction} light={light} effects={effects} />, document.body);
+  if (getPopCultureTheme(theme)) return createPortal(<PopCultureTransition theme={theme} direction={direction} light={light} effects={effects} />, document.body);
   if (theme === "theme-slayer") return createPortal(<SlayerTransition direction={direction} effects={effects} light={light} />, document.body);
   if (theme === "theme-cyberpunk") return createPortal(<TokyoTransition direction={direction} effects={effects} />, document.body);
   if (theme === "theme-retro") return createPortal(<ArcadeTransition effects={effects} />, document.body);
@@ -168,14 +168,14 @@ export default function ThemeTransition({ theme, direction, effects, fullMotion 
   return createPortal(
     <div className={`checkpoint-theme-transition motion-${motion} effects-${effects} direction-${direction}`} aria-hidden="true" style={{ "--travel": direction === "left" ? "calc(-100vw - 80px)" : "calc(100vw + 80px)", "--origin": direction === "left" ? "calc(100% + 32px)" : "-32px", "--motif-color": color }}>
       <i className="transition-veil" />
-      <div className="transition-feature" aria-hidden="true">{(theme === "theme-playstation" ? [0,1,2,3] : [0,1,2]).map((index) => <div key={index} style={{ "--feature-index": index, "--feature-turn": `${index % 2 ? -25 : 25}deg` }}>{renderMotif(theme, path, index)}</div>)}</div>
-      {Array.from({ length: count }, (_, i) => (
-        <span key={i} style={{ "--row": `${4 + ((i * 37) % 92)}vh`, "--column": `${(i * 37) % 100}vw`, "--wait": `${(i % 8) * 16}ms`, "--motif-size": `${22 + (i % 4) * 6}px`, "--debris-x": `${(i % 2 ? 1 : -1) * (50 + i % 80)}px`, "--ray-angle": `${(i / count) * 360}deg`, "--drift": `${(i % 2 ? 1 : -1) * 22}vh`, "--tilt": `${(i % 2 ? 1 : -1) * 30}deg` }}>
-          {renderMotif(theme, path, i)}
-        </span>
-      ))}
-      <div className="transition-spark-field">
-        {Array.from({ length: sparkCount }, (_, i) => <i key={i} style={{ "--spark-x": `${(i * 61.803) % 100}vw`, "--spark-y": `${(i * 37.719) % 100}vh`, "--spark-size": `${2 + (i % 4)}px`, "--spark-delay": `${(i % 9) * 12}ms`, "--spark-drift": `${(i % 2 ? 1 : -1) * (35 + i % 50)}px`, "--ray-angle": `${(i / sparkCount) * 360}deg` }} />)}
+      <div className="transition-feature" aria-hidden="true">{(theme === "theme-playstation" ? [0, 1, 2, 3] : [0, 1, 2]).map((index) => <div key={index} style={{ "--feature-index": index, "--feature-turn": `${index % 2 ? -25 : 25}deg` }}><LocalizedValue value={renderMotif(theme, path, index)} /></div>)}</div>{
+      Array.from({ length: count }, (_, i) =>
+      <span key={i} style={{ "--row": `${4 + i * 37 % 92}vh`, "--column": `${i * 37 % 100}vw`, "--wait": `${i % 8 * 16}ms`, "--motif-size": `${22 + i % 4 * 6}px`, "--debris-x": `${(i % 2 ? 1 : -1) * (50 + i % 80)}px`, "--ray-angle": `${i / count * 360}deg`, "--drift": `${(i % 2 ? 1 : -1) * 22}vh`, "--tilt": `${(i % 2 ? 1 : -1) * 30}deg` }}><LocalizedValue value={
+        renderMotif(theme, path, i)} />
+      </span>
+      )}
+      <div className="transition-spark-field">{
+        Array.from({ length: sparkCount }, (_, i) => <i key={i} style={{ "--spark-x": `${i * 61.803 % 100}vw`, "--spark-y": `${i * 37.719 % 100}vh`, "--spark-size": `${2 + i % 4}px`, "--spark-delay": `${i % 9 * 12}ms`, "--spark-drift": `${(i % 2 ? 1 : -1) * (35 + i % 50)}px`, "--ray-angle": `${i / sparkCount * 360}deg` }} />)}
       </div>
     </div>, document.body
   );

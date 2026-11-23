@@ -1,4 +1,4 @@
-import { accountStorage as localStorage } from "../services/accountData";
+import { useLanguage } from "../i18n/language";import { LocalizedValue, LocalizedElement, LocalizedMessage } from "../i18n/Localized";import { accountStorage as localStorage } from "../services/accountData";
 import { CYBER2077_THEME, Cyber2077Intro } from "./Cyber2077Effects";
 import { useEffect, useMemo } from "react";
 import { CheckpointIntro, CheckpointPremiumIntro, CheckpointUltimateIntro } from "./CheckpointEffects";
@@ -34,7 +34,7 @@ import { getPopCultureTheme } from "../data/popCultureThemes";
 import { GameUniverseIntro } from "./GameUniverseEffects";
 import { getGameUniverseTheme } from "../data/gameUniverseThemes";
 
-export default function SplashScreen({ showSplash, progress = 0, onRequestClose, effects = "balanced", light = false, theme: explicitTheme, managed = false }) {
+export default function SplashScreen({ showSplash, progress = 0, onRequestClose, effects = "balanced", light = false, theme: explicitTheme, managed = false }) {useLanguage();
   const safeProgress = Math.max(0, Math.min(100, Math.round(progress)));
   const storedTheme = useMemo(() => {
     try {
@@ -47,14 +47,14 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
 
   const particles = useMemo(
     () =>
-      Array.from({ length: 44 }).map((_, index) => ({
-        id: index,
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        delay: Math.random() * 3,
-        duration: 4 + Math.random() * 3,
-        size: 1 + Math.random() * 2.2,
-      })),
+    Array.from({ length: 44 }).map((_, index) => ({
+      id: index,
+      x: Math.random() * 100,
+      y: Math.random() * 100,
+      delay: Math.random() * 3,
+      duration: 4 + Math.random() * 3,
+      size: 1 + Math.random() * 2.2
+    })),
     []
   );
 
@@ -68,7 +68,7 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
         endY: 55 + Math.random() * 9,
         size: 2 + Math.random() * 7,
         delay: Math.random() * 2.4,
-        opacity: 0.2 + Math.random() * 0.34,
+        opacity: 0.2 + Math.random() * 0.34
       })),
       right: Array.from({ length: 52 }).map((_, index) => ({
         id: `right-${index}`,
@@ -78,8 +78,8 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
         endY: 55 + Math.random() * 9,
         size: 2 + Math.random() * 7,
         delay: Math.random() * 2.4,
-        opacity: 0.2 + Math.random() * 0.34,
-      })),
+        opacity: 0.2 + Math.random() * 0.34
+      }))
     }),
     []
   );
@@ -96,15 +96,15 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
 
   if (!showSplash) return null;
 
-  if (splashTheme === CYBER2077_THEME) return <Cyber2077Intro progress={safeProgress} light={light} effects={effects} onRequestClose={onRequestClose}/>;
+  if (splashTheme === CYBER2077_THEME) return <Cyber2077Intro progress={safeProgress} light={light} effects={effects} onRequestClose={onRequestClose} />;
 
-  if (splashTheme === "theme-checkpointultimate") return <CheckpointUltimateIntro progress={safeProgress} light={light} onRequestClose={onRequestClose}/>;
-  if (splashTheme === "theme-checkpointpremium") return <CheckpointPremiumIntro progress={safeProgress} light={light} onRequestClose={onRequestClose}/>;
-  if (splashTheme === "theme-checkpoint") return <CheckpointIntro progress={safeProgress} light={light} onRequestClose={onRequestClose}/>;
+  if (splashTheme === "theme-checkpointultimate") return <CheckpointUltimateIntro progress={safeProgress} light={light} onRequestClose={onRequestClose} />;
+  if (splashTheme === "theme-checkpointpremium") return <CheckpointPremiumIntro progress={safeProgress} light={light} onRequestClose={onRequestClose} />;
+  if (splashTheme === "theme-checkpoint") return <CheckpointIntro progress={safeProgress} light={light} onRequestClose={onRequestClose} />;
 
-  if (getGameUniverseTheme(splashTheme)) return <GameUniverseIntro theme={splashTheme} progress={safeProgress} light={light} effects={effects} onRequestClose={onRequestClose}/>;
+  if (getGameUniverseTheme(splashTheme)) return <GameUniverseIntro theme={splashTheme} progress={safeProgress} light={light} effects={effects} onRequestClose={onRequestClose} />;
 
-  if (getPopCultureTheme(splashTheme)) return <PopCultureIntro theme={splashTheme} progress={safeProgress} light={light} effects={effects} onRequestClose={onRequestClose}/>;
+  if (getPopCultureTheme(splashTheme)) return <PopCultureIntro theme={splashTheme} progress={safeProgress} light={light} effects={effects} onRequestClose={onRequestClose} />;
 
   if (splashTheme === "theme-tamer") return <TamerIntro progress={safeProgress} />;
   if (splashTheme === "theme-slayer") return <SlayerIntro progress={safeProgress} />;
@@ -135,70 +135,70 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
 
   return (
     <div className={`checkpoint-splash ${safeProgress >= 100 ? "complete" : ""}`}>
-      <div className="splash-bg" />
-      {splashTheme === "theme-playstation" && <div className="playstation-intro-symbols" aria-hidden="true">{[0,1,2,3].map((index) => <span key={index}><PlayStationSymbol index={index} /></span>)}</div>}
+      <div className="splash-bg" />{
+      splashTheme === "theme-playstation" && <div className="playstation-intro-symbols" aria-hidden="true">{[0, 1, 2, 3].map((index) => <span key={index}><PlayStationSymbol index={index} /></span>)}</div>}
       <div className="splash-vignette" />
 
-      <div className="splash-particles-premium">
-        {particles.map((particle) => (
-          <span
-            key={particle.id}
-            style={{
-              left: `${particle.x}%`,
-              top: `${particle.y}%`,
-              width: `${particle.size}px`,
-              height: `${particle.size}px`,
-              animationDelay: `${particle.delay}s`,
-              animationDuration: `${particle.duration}s`,
-            }}
-          />
-        ))}
+      <div className="splash-particles-premium">{
+        particles.map((particle) =>
+        <span
+          key={particle.id}
+          style={{
+            left: `${particle.x}%`,
+            top: `${particle.y}%`,
+            width: `${particle.size}px`,
+            height: `${particle.size}px`,
+            animationDelay: `${particle.delay}s`,
+            animationDuration: `${particle.duration}s`
+          }} />
+
+        )}
       </div>
 
-      <div className="splash-pixel-wall splash-pixel-wall-left">
-        {pixelWalls.left.map((pixel) => (
-          <span
-            key={pixel.id}
-            style={{
-              left: `${pixel.x}%`,
-              top: `${pixel.y}%`,
-              width: `${pixel.size}px`,
-              height: `${pixel.size}px`,
-              opacity: pixel.opacity,
-              animationDelay: `${pixel.delay}s`,
-              "--end-x": `${pixel.endX - pixel.x}vw`,
-              "--end-y": `${pixel.endY - pixel.y}vh`,
-            }}
-          />
-        ))}
+      <div className="splash-pixel-wall splash-pixel-wall-left">{
+        pixelWalls.left.map((pixel) =>
+        <span
+          key={pixel.id}
+          style={{
+            left: `${pixel.x}%`,
+            top: `${pixel.y}%`,
+            width: `${pixel.size}px`,
+            height: `${pixel.size}px`,
+            opacity: pixel.opacity,
+            animationDelay: `${pixel.delay}s`,
+            "--end-x": `${pixel.endX - pixel.x}vw`,
+            "--end-y": `${pixel.endY - pixel.y}vh`
+          }} />
+
+        )}
       </div>
 
-      <div className="splash-pixel-wall splash-pixel-wall-right">
-        {pixelWalls.right.map((pixel) => (
-          <span
-            key={pixel.id}
-            style={{
-              left: `${pixel.x}%`,
-              top: `${pixel.y}%`,
-              width: `${pixel.size}px`,
-              height: `${pixel.size}px`,
-              opacity: pixel.opacity,
-              animationDelay: `${pixel.delay}s`,
-              "--end-x": `${pixel.endX - pixel.x}vw`,
-              "--end-y": `${pixel.endY - pixel.y}vh`,
-            }}
-          />
-        ))}
+      <div className="splash-pixel-wall splash-pixel-wall-right">{
+        pixelWalls.right.map((pixel) =>
+        <span
+          key={pixel.id}
+          style={{
+            left: `${pixel.x}%`,
+            top: `${pixel.y}%`,
+            width: `${pixel.size}px`,
+            height: `${pixel.size}px`,
+            opacity: pixel.opacity,
+            animationDelay: `${pixel.delay}s`,
+            "--end-x": `${pixel.endX - pixel.x}vw`,
+            "--end-y": `${pixel.endY - pixel.y}vh`
+          }} />
+
+        )}
       </div>
 
       <div className="splash-stage">
         <div className="splash-cube-wrap">
           <div className="splash-cube">
-            <div className="splash-logo-mark" aria-label="Checkpoint">
-              <span className="splash-logo-letter">C</span>
+            <LocalizedElement __as={"div"} className="splash-logo-mark" aria-label="Checkpoint">
+              <span className="splash-logo-letter"><LocalizedMessage source={"C"} values={[]} /></span>
               <span className="splash-logo-divider" />
-              <span className="splash-logo-letter">P</span>
-            </div>
+              <span className="splash-logo-letter"><LocalizedMessage source={"P"} values={[]} /></span>
+            </LocalizedElement>
           </div>
         </div>
 
@@ -207,12 +207,12 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
           <div className="splash-title-reflect">Checkpoint</div>
         </div>
 
-        <p className="splash-subtitle">Votre univers gaming</p>
+        <p className="splash-subtitle"><LocalizedMessage source={"Votre univers gaming"} values={[]} /></p>
 
         <div className="splash-loader">
-          <div className="splash-loading-label">Chargement en cours...</div>
+          <div className="splash-loading-label"><LocalizedMessage source={"Chargement en cours..."} values={[]} /></div>
           <div className="splash-loader-top">
-            <strong>{safeProgress}%</strong>
+            <strong><LocalizedValue value={safeProgress} />%</strong>
           </div>
 
           <div className="loader-bar">
@@ -220,6 +220,6 @@ export default function SplashScreen({ showSplash, progress = 0, onRequestClose,
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }

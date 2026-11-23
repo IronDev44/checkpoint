@@ -1,22 +1,22 @@
-import {useEffect, useId, useRef, useState} from 'react';
-import {createPortal} from 'react-dom';
-import {ArrowLeft, ArrowRight, BookOpen, Check, X} from 'lucide-react';
-import {accountStorage} from '../services/accountData';
-import {TAB_TUTORIALS} from '../data/tabTutorials';
-import {FEATURE_TUTORIALS} from '../data/releaseNotes';
-import {pendingFeatureGuides,markFeatureGuidesSeen} from '../services/releaseProgress';
+import { useLanguage } from "../i18n/language";import { LocalizedMessage, LocalizedElement, LocalizedValue } from "../i18n/Localized";import { useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { ArrowLeft, ArrowRight, BookOpen, Check, X } from 'lucide-react';
+import { accountStorage } from '../services/accountData';
+import { TAB_TUTORIALS } from '../data/tabTutorials';
+import { FEATURE_TUTORIALS } from '../data/releaseNotes';
+import { pendingFeatureGuides, markFeatureGuidesSeen } from '../services/releaseProgress';
 import './TabTutorials.css';
 
 const STORAGE_KEY = 'checkpoint-tab-tutorials-v1';
 function readProgress() {
   try {
     const saved = JSON.parse(accountStorage.getItem(STORAGE_KEY) || '{}');
-    return Object.fromEntries(Object.keys(TAB_TUTORIALS).filter(key => ['completed','dismissed'].includes(saved?.[key])).map(key => [key, saved[key]]));
-  } catch { return {}; }
+    return Object.fromEntries(Object.keys(TAB_TUTORIALS).filter((key) => ['completed', 'dismissed'].includes(saved?.[key])).map((key) => [key, saved[key]]));
+  } catch {return {};}
 }
 function saveProgress(tab, completed) {
-  const next = {...readProgress(), [tab]:completed ? 'completed' : 'dismissed'};
-  try { accountStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch { /* The guide remains usable without storage. */ }
+  const next = { ...readProgress(), [tab]: completed ? 'completed' : 'dismissed' };
+  try {accountStorage.setItem(STORAGE_KEY, JSON.stringify(next));} catch {/* The guide remains usable without storage. */}
   window.dispatchEvent(new Event('checkpoint-tutorial-progress'));
 }
 function useTutorialProgress() {
@@ -29,7 +29,7 @@ function useTutorialProgress() {
   return progress;
 }
 
-export function TutorialDialog({tab, guide:providedGuide, onClose}) {
+export function TutorialDialog({ tab, guide: providedGuide, onClose }) {useLanguage();
   const guide = providedGuide || TAB_TUTORIALS[tab];
   const [index, setIndex] = useState(0);
   const root = useRef(null);
@@ -39,38 +39,38 @@ export function TutorialDialog({tab, guide:providedGuide, onClose}) {
     const previous = document.activeElement;
     const overflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = overflow; if (previous?.isConnected) previous.focus(); };
+    return () => {document.body.style.overflow = overflow;if (previous?.isConnected) previous.focus();};
   }, []);
-  useEffect(() => { heading.current?.focus(); root.current?.querySelector('.tab-tutorial-body')?.scrollTo?.(0, 0); }, [index]);
+  useEffect(() => {heading.current?.focus();root.current?.querySelector('.tab-tutorial-body')?.scrollTo?.(0, 0);}, [index]);
   if (!guide) return null;
   const current = guide.steps[index];
   function keyboard(event) {
-    if (event.key === 'Escape') { event.preventDefault(); onClose(false); }
+    if (event.key === 'Escape') {event.preventDefault();onClose(false);}
     if (event.key !== 'Tab') return;
     const buttons = [...root.current.querySelectorAll('button:not(:disabled)')];
-    const first = buttons[0], last = buttons[buttons.length - 1];
-    if (event.shiftKey && (document.activeElement === first || document.activeElement === heading.current)) {event.preventDefault(); last.focus();}
-    else if (!event.shiftKey && document.activeElement === last) {event.preventDefault(); first.focus();}
+    const first = buttons[0],last = buttons[buttons.length - 1];
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === heading.current)) {event.preventDefault();last.focus();} else
+    if (!event.shiftKey && document.activeElement === last) {event.preventDefault();first.focus();}
   }
   return createPortal(<div className="tab-tutorial-overlay">
     <section className="tab-tutorial-dialog" ref={root} role="dialog" aria-modal="true" aria-labelledby={titleId} onKeyDown={keyboard}>
       <header className="tab-tutorial-head">
-        <span><BookOpen size={18} aria-hidden="true"/> {guide.update?'Nouveautés':'Guide'} · {guide.label}</span>
-        <button type="button" className="back-btn" aria-label="Fermer le tutoriel" onClick={() => onClose(false)}><X size={19}/></button>
+        <span><BookOpen size={18} aria-hidden="true" /><LocalizedMessage source={" " + (guide.update ? 'Nouveautés' : 'Guide') + " · " + "{{0}}"} values={[guide.label]} /></span>
+        <LocalizedElement __as={"button"} type="button" className="back-btn" aria-label="Fermer le tutoriel" onClick={() => onClose(false)}><X size={19} /></LocalizedElement>
       </header>
       <div className="tab-tutorial-body">
-        <p className="tab-tutorial-counter">Étape {index + 1} sur {guide.steps.length}</p>
-        <h2 id={titleId} tabIndex={-1} ref={heading}>{current.title}</h2>
-        <p>{current.text}</p>
-        <ul>{current.points.map(point => <li key={point}>{point}</li>)}</ul>
-        {index === guide.steps.length - 1 && <p className="tab-tutorial-replay">Tu peux revoir ce tutoriel quand tu veux dans Options → Aide et tutoriels.</p>}
+        <p className="tab-tutorial-counter"><LocalizedMessage source={"Étape {{0}} sur {{1}}"} values={[index + 1, guide.steps.length]} /></p>
+        <h2 id={titleId} tabIndex={-1} ref={heading}><LocalizedValue value={current.title} /></h2>
+        <p><LocalizedValue value={current.text} /></p>
+        <ul>{current.points.map((point) => <li key={point}><LocalizedValue value={point} /></li>)}</ul>{
+        index === guide.steps.length - 1 && <p className="tab-tutorial-replay"><LocalizedMessage source={"Tu peux revoir ce tutoriel quand tu veux dans Options → Aide et tutoriels."} values={[]} /></p>}
       </div>
       <footer className="tab-tutorial-footer">
-        <div className="tab-tutorial-dots" aria-hidden="true">{guide.steps.map((_, i) => <span key={i} className={i <= index ? 'active' : ''}/>)}</div>
-        <div className={`tab-tutorial-actions${guide.steps.length === 1 ? ' tab-tutorial-actions-single' : ''}`}>
-          {guide.steps.length > 1 && <button type="button" className="back-btn" disabled={index === 0} onClick={() => setIndex(value => value - 1)}><ArrowLeft size={16}/> Précédent</button>}
-          <button type="button" className="checkpoint-primary-action" onClick={() => index === guide.steps.length - 1 ? onClose(true) : setIndex(value => value + 1)}>
-            {index === guide.steps.length - 1 ? 'J’ai compris' : 'Suivant'}<ArrowRight size={16}/>
+        <div className="tab-tutorial-dots" aria-hidden="true">{guide.steps.map((_, i) => <span key={i} className={i <= index ? 'active' : ''} />)}</div>
+        <div className={`tab-tutorial-actions${guide.steps.length === 1 ? ' tab-tutorial-actions-single' : ''}`}>{
+          guide.steps.length > 1 && <button type="button" className="back-btn" disabled={index === 0} onClick={() => setIndex((value) => value - 1)}><ArrowLeft size={16} /><LocalizedMessage source={" Précédent"} values={[]} /></button>}
+          <button type="button" className="checkpoint-primary-action" onClick={() => index === guide.steps.length - 1 ? onClose(true) : setIndex((value) => value + 1)}><LocalizedValue value={
+            index === guide.steps.length - 1 ? 'J’ai compris' : 'Suivant'} /><ArrowRight size={16} />
           </button>
         </div>
       </footer>
@@ -78,43 +78,43 @@ export function TutorialDialog({tab, guide:providedGuide, onClose}) {
   </div>, document.body);
 }
 
-export function TabTutorialEntry({tab, enabled = true}) {
+export function TabTutorialEntry({ tab, enabled = true }) {useLanguage();
   const [open, setOpen] = useState(null);
   const shown = useRef(false);
   useEffect(() => {
     if (!enabled || !TAB_TUTORIALS[tab] || shown.current) return;
-    const pending=pendingFeatureGuides(tab);
-    if(readProgress()[tab]){
-      if(!pending.length)return;
-      shown.current=true;
-      markFeatureGuidesSeen(pending.map(g=>g.id));
-      setOpen({label:TAB_TUTORIALS[tab].label,update:true,steps:pending.flatMap(g=>g.steps)});
+    const pending = pendingFeatureGuides(tab);
+    if (readProgress()[tab]) {
+      if (!pending.length) return;
+      shown.current = true;
+      markFeatureGuidesSeen(pending.map((g) => g.id));
+      setOpen({ label: TAB_TUTORIALS[tab].label, update: true, steps: pending.flatMap((g) => g.steps) });
       return;
     }
     shown.current = true;
     saveProgress(tab, false);
     // First-time visitors get the full, current guide. No second update tour.
-    markFeatureGuidesSeen(FEATURE_TUTORIALS.filter(g=>g.tab===tab).map(g=>g.id));
+    markFeatureGuidesSeen(FEATURE_TUTORIALS.filter((g) => g.tab === tab).map((g) => g.id));
     setOpen(TAB_TUTORIALS[tab]);
   }, [tab, enabled]);
-  return open ? <TutorialDialog guide={open} onClose={completed => {if (completed&&!open.update) saveProgress(tab, true); setOpen(null);}}/> : null;
+  return open ? <TutorialDialog guide={open} onClose={(completed) => {if (completed && !open.update) saveProgress(tab, true);setOpen(null);}} /> : null;
 }
 
-export function TutorialLibrary() {
+export function TutorialLibrary() {useLanguage();
   const [tab, setTab] = useState(null);
-  const [feature,setFeature]=useState(null);
+  const [feature, setFeature] = useState(null);
   const progress = useTutorialProgress();
   return <div className="tab-tutorial-library">
-    <p>Choisis un onglet pour revoir ses fonctions, à ton rythme. Les guides sont toujours disponibles, même après les avoir terminés.</p>
-    <div className="tab-tutorial-grid">
-      {Object.entries(TAB_TUTORIALS).map(([key, guide]) => <button type="button" className="tab-tutorial-choice" key={key} onClick={() => setTab(key)}>
-        <span className="tab-tutorial-choice-head"><strong>{guide.label}</strong>{progress[key] === 'completed' ? <Check size={17} aria-label="Guide terminé"/> : <BookOpen size={17} aria-hidden="true"/>}</span>
-        <span>{guide.summary}</span>
-        <small>{guide.steps.length} {guide.steps.length === 1 ? 'étape' : 'étapes'} · {progress[key] === 'completed' ? 'Revoir le guide' : 'Ouvrir le guide'}</small>
+    <p><LocalizedMessage source={"Choisis un onglet pour revoir ses fonctions, à ton rythme. Les guides sont toujours disponibles, même après les avoir terminés."} values={[]} /></p>
+    <div className="tab-tutorial-grid">{
+      Object.entries(TAB_TUTORIALS).map(([key, guide]) => <button type="button" className="tab-tutorial-choice" key={key} onClick={() => setTab(key)}>
+        <span className="tab-tutorial-choice-head"><strong><LocalizedValue value={guide.label} /></strong>{progress[key] === 'completed' ? <Check size={17} aria-label="Guide terminé" /> : <BookOpen size={17} aria-hidden="true" />}</span>
+        <span><LocalizedValue value={guide.summary} /></span>
+        <small><LocalizedMessage source={"{{0}} " + (guide.steps.length === 1 ? 'étape' : 'étapes') + " · " + (progress[key] === 'completed' ? 'Revoir le guide' : 'Ouvrir le guide')} values={[guide.steps.length]} /></small>
       </button>)}
     </div>
-    <section className="tab-tutorial-feature-library" aria-label="Guides des nouveautés"><h3>Les nouvelles fonctionnalités</h3><p>Des guides courts pour découvrir seulement les ajouts récents.</p><div className="tab-tutorial-grid">{FEATURE_TUTORIALS.map(guide=><button key={guide.id} type="button" className="tab-tutorial-choice" onClick={()=>setFeature(guide)}><strong>{guide.label}</strong><span>{TAB_TUTORIALS[guide.tab].label}</span><small>{guide.steps.length} étapes · Revoir les nouveautés</small></button>)}</div></section>
-    {tab && <TutorialDialog key={tab} tab={tab} onClose={completed => {saveProgress(tab, completed || progress[tab] === 'completed'); markFeatureGuidesSeen(FEATURE_TUTORIALS.filter(g=>g.tab===tab).map(g=>g.id)); setTab(null);}}/>}
-    {feature&&<TutorialDialog key={feature.id} guide={{...feature,label:TAB_TUTORIALS[feature.tab].label,update:true}} onClose={()=>{markFeatureGuidesSeen([feature.id]);setFeature(null);}}/>}
+    <LocalizedElement __as={"section"} className="tab-tutorial-feature-library" aria-label="Guides des nouveautés"><h3><LocalizedMessage source={"Les nouvelles fonctionnalités"} values={[]} /></h3><p><LocalizedMessage source={"Des guides courts pour découvrir seulement les ajouts récents."} values={[]} /></p><div className="tab-tutorial-grid">{FEATURE_TUTORIALS.map((guide) => <button key={guide.id} type="button" className="tab-tutorial-choice" onClick={() => setFeature(guide)}><strong><LocalizedValue value={guide.label} /></strong><span><LocalizedValue value={TAB_TUTORIALS[guide.tab].label} /></span><small><LocalizedMessage source={"{{0}} étapes · Revoir les nouveautés"} values={[guide.steps.length]} /></small></button>)}</div></LocalizedElement>
+    {tab && <TutorialDialog key={tab} tab={tab} onClose={(completed) => {saveProgress(tab, completed || progress[tab] === 'completed');markFeatureGuidesSeen(FEATURE_TUTORIALS.filter((g) => g.tab === tab).map((g) => g.id));setTab(null);}} />}
+    {feature && <TutorialDialog key={feature.id} guide={{ ...feature, label: TAB_TUTORIALS[feature.tab].label, update: true }} onClose={() => {markFeatureGuidesSeen([feature.id]);setFeature(null);}} />}
   </div>;
 }

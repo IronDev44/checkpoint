@@ -3,11 +3,12 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import AccountGate from './components/AccountGate';
+import {LanguageGate} from './i18n/LanguageSettings';
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <AccountGate><App /></AccountGate>
+  <LanguageGate><AccountGate><App /></AccountGate></LanguageGate>
 );
 
 // If you want to start measuring performance in your app, pass a function
